@@ -1177,6 +1177,7 @@
     .info-note strong {
     color: #0369a1;
     }
+    
 }
 
   </style>
@@ -1397,13 +1398,19 @@
           </div>
 
         <div class="additional-results">
- 
+            <!-- In the results screen HTML -->
+            <div class="results-section">
+                <h4>Other Possible Diagnoses</h4>
+                <div class="diagnoses-list" id="diagnosesList">
+                    <!-- Other diagnoses will be dynamically inserted here -->
+                </div>
+            </div>
 
             <!-- NEW: Questions & Answers Section -->
             <div class="results-section" id="questionsAnswersSection" style="display: none;">
                 <h4>Assessment Questions & Answers</h4>
                 <div class="responses-list" id="historicalResponsesList">
-                <!-- Historical responses will be dynamically inserted here -->
+                    <!-- Historical responses will be dynamically inserted here -->
                 </div>
             </div>
 
@@ -1705,6 +1712,22 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
       ]
     };
 
+    function getUserTimezone() {
+    try {
+        // Method 1: Use Intl API (most reliable)
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch (e) {
+        try {
+            // Method 2: Get timezone offset
+            const offset = -new Date().getTimezoneOffset() / 60;
+            return `UTC${offset >= 0 ? '+' : ''}${offset}`;
+        } catch (e) {
+            // Method 3: Fallback
+            return 'UTC';
+        }
+    }
+}
+
     class MentalHealthAssessment {
       constructor() {
         this.currentQuestionIndex = 0;
@@ -1723,8 +1746,28 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.initializeElements();
         this.attachEventListeners();
         this.attachKeyboardListeners();
+        this.assessmentStartTime = null; // Track when assessment starts
+
       }
 
+      
+      startAssessment() {
+        // Record assessment start time
+        this.assessmentStartTime = new Date().toISOString();
+        
+        this.showScreen(this.questionsScreen);
+        this.updateProgress();
+        this.displayCurrentQuestion();
+        
+        // Focus on first option for keyboard navigation
+        setTimeout(() => {
+          const firstOption = this.optionsContainer.querySelector('.option-btn');
+          if (firstOption) {
+            firstOption.focus();
+          }
+        }, 100);
+      }
+    
       initializeElements() {
         // New login elements
         this.loginSection = document.getElementById('loginSection');
@@ -1961,52 +2004,71 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.displayPatientHistory(assessments);
       }
 
+      displayPatientHistory(assessments) {
+          this.patientHistoryList.innerHTML = '';
 
-    displayPatientHistory(assessments) {
-        this.patientHistoryList.innerHTML = '';
+          assessments.forEach((assessment) => {
+              const historyItem = document.createElement('div');
+              historyItem.className = 'history-item';
+              
+              // Get primary diagnosis - handle both old and new CSV formats
+              let primaryDiagnosis = assessment.primary_diagnosis;
+              let confidencePercentage = assessment.confidence_percentage;
+              
+              // If primary_diagnosis is empty but we have all_diagnoses, use the first one
+              if ((!primaryDiagnosis || primaryDiagnosis === '') && 
+                  assessment.all_diagnoses && assessment.all_diagnoses.length > 0) {
+                  primaryDiagnosis = assessment.all_diagnoses[0].diagnosis;
+                  confidencePercentage = assessment.all_diagnoses[0].confidence_percentage;
+              }
+              
+              // Create safe class name for diagnosis
+              const diagnosisClass = primaryDiagnosis 
+                  ? primaryDiagnosis.toLowerCase().replace(/\s+/g, '-')
+                  : 'unknown';
+              
+              // Format date and time safely
+              const formatDateTimeSafely = (dateString) => {
+                  if (!dateString) return 'Unknown';
+                  try {
+                      const date = new Date(dateString);
+                      return isNaN(date.getTime()) ? 'Unknown' : 
+                          `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                  } catch {
+                      return 'Unknown';
+                  }
+              };
 
-        assessments.forEach((assessment) => {
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-item';
-            
-            // Create safe class name for diagnosis
-            const diagnosisClass = assessment.primary_diagnosis 
-                ? assessment.primary_diagnosis.toLowerCase().replace(/\s+/g, '-')
-                : 'unknown';
-            
-            historyItem.innerHTML = `
-                <div class="history-header">
-                    <div class="history-patient">
-                        <strong>Assessment ID: ${assessment.id}</strong>
-                        <span class="history-id">Completed: ${new Date(assessment.timestamp).toLocaleDateString()}</span>
-                    </div>
-                    <div class="history-diagnosis ${diagnosisClass}">
-                        ${assessment.primary_diagnosis || 'Unknown'}
-                        <span class="history-confidence">${Math.round(assessment.confidence_percentage || assessment.confidence * 100)}%</span>
-                    </div>
-                </div>
-                <div class="history-details">
-                    <div class="history-meta">
-                        <span class="history-date">${new Date(assessment.timestamp).toLocaleDateString()}</span>
-                        <span class="history-time">${new Date(assessment.timestamp).toLocaleTimeString()}</span>
-                    </div>
-                    <div class="history-actions">
-                        <button class="btn-view" onclick="mentalHealthAssessment.viewPatientAssessment('${assessment.id}', event)">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="btn-download" onclick="mentalHealthAssessment.downloadAssessmentFromData('${assessment.id}', event)">
-                            <i class="fas fa-download"></i> Download
-                        </button>
-                        <button class="btn-delete" onclick="mentalHealthAssessment.deletePatientAssessment('${assessment.id}', event)">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            `;
-            this.patientHistoryList.appendChild(historyItem);
-        });
-    }
-
+              historyItem.innerHTML = `
+                  <div class="history-header">
+                      <div class="history-patient">
+                          <strong>Assessment ID: ${assessment.id}</strong>
+                          <span class="history-id">Started: ${formatDateTimeSafely(assessment.assessment_timestamp)}</span>
+                          <span class="history-id">Submitted: ${formatDateTimeSafely(assessment.timestamp)}</span>
+                      </div>
+                      <div class="history-diagnosis ${diagnosisClass}">
+                          ${primaryDiagnosis || 'Unknown'}
+                          <span class="history-confidence">${Math.round(confidencePercentage || assessment.confidence * 100)}%</span>
+                      </div>
+                  </div>
+                  <div class="history-details" style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                      <div></div> <!-- Empty spacer div for left side -->
+                      <div class="history-actions">
+                          <button class="btn-view" onclick="mentalHealthAssessment.viewPatientAssessment('${assessment.id}', event)">
+                              <i class="fas fa-eye"></i> View
+                          </button>
+                          <button class="btn-download" onclick="mentalHealthAssessment.downloadAssessmentFromData('${assessment.id}', event)">
+                              <i class="fas fa-download"></i> Download
+                          </button>
+                          <button class="btn-delete" onclick="mentalHealthAssessment.deletePatientAssessment('${assessment.id}', event)">
+                              <i class="fas fa-trash"></i>
+                          </button>
+                      </div>
+                  </div>
+              `;
+              this.patientHistoryList.appendChild(historyItem);
+          });
+      }
     // Enhanced method to view assessment from CSV data
     async viewPatientAssessment(assessmentId, event = null) {
         try {
@@ -2579,50 +2641,58 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.displayCurrentQuestion();
       }
 
+
+
+      // Update your submitFinalAssessment method to include timezone
       async submitFinalAssessment() {
-        // Validate patient info
-        if (!this.patientInfo.name.trim()) {
-          alert('Please enter patient name before submitting.');
-          return;
-        }
-
-        this.showScreen(this.loadingScreen);
-        this.isSubmitting = true;
-
-        try {
-          await this.simulateProcessing();
-          
-          console.log('Submitting final assessment:', {
-            responses: this.responses,
-            patientInfo: this.patientInfo
-          });
-          
-          const response = await fetch(`${API_BASE_URL}/api/predict`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              responses: this.responses,
-              patientInfo: this.patientInfo
-            })
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+          // Validate patient info
+          if (!this.patientInfo.name.trim()) {
+              alert('Please enter patient name before submitting.');
+              return;
           }
 
-          const result = await response.json();
-          result.patientInfo = this.patientInfo;
-          this.displayResults(result);
+          this.showScreen(this.loadingScreen);
+          this.isSubmitting = true;
 
-        } catch (error) {
-          console.error('Error submitting assessment:', error);
-          this.showError(`Failed to process assessment: ${error.message}`);
-        } finally {
-          this.isSubmitting = false;
-        }
+          try {
+              await this.simulateProcessing();
+              
+              console.log('Submitting final assessment:', {
+                  responses: this.responses,
+                  patientInfo: this.patientInfo
+              });
+              
+              // Get user's timezone
+              const userTimezone = getUserTimezone();
+              console.log('Detected timezone:', userTimezone);
+              
+              const response = await fetch(`${API_BASE_URL}/api/predict`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-Client-Timezone': userTimezone  // Send timezone in header
+                  },
+                  body: JSON.stringify({
+                      responses: this.responses,
+                      patientInfo: this.patientInfo
+                  })
+              });
+
+              if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+              }
+
+              const result = await response.json();
+              result.patientInfo = this.patientInfo;
+              this.displayResults(result);
+
+          } catch (error) {
+              console.error('Error submitting assessment:', error);
+              this.showError(`Failed to process assessment: ${error.message}`);
+          } finally {
+              this.isSubmitting = false;
+          }
       }
 
       async simulateProcessing() {
@@ -2636,74 +2706,78 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      // Fixed displayResults method
       async displayResults(result) {
-        // Show results screen first
-        this.showScreen(this.resultsScreen);
-        
-        // Clear any existing patient info first
-        const existingSavedInfo = document.querySelector('.saved-info');
-        if (existingSavedInfo) {
-          existingSavedInfo.remove();
-        }
-        
-        // Set results display
-        this.primaryDiagnosis.textContent = result.primary_diagnosis;
-        this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
-        
-        const confidencePercent = Math.round(result.confidence_percentage);
-        let confidenceColor = '#10b981';
-        if (confidencePercent < 50) confidenceColor = '#f59e0b';
-        if (confidencePercent < 30) confidenceColor = '#ef4444';
-        
-        this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
-        this.confidenceBadge.style.background = confidenceColor;
-        
-        this.resultsDate.textContent = new Date().toLocaleDateString();
-        this.assessmentId.textContent = `ID: ${result.assessment_id}`;
-        
-        // Create assessment data object FIRST
-        const assessmentData = {
-          id: result.assessment_id,
-          timestamp: new Date().toISOString(),
-          patient_info: this.patientInfo,
-          primary_diagnosis: result.primary_diagnosis,
-          confidence: result.confidence_percentage,
-          confidence_percentage: result.confidence_percentage,
-          all_diagnoses: result.all_diagnoses,
-          responses: this.responses,
-          processing_details: result.processing_details,
-          technical_details: result.technical_details,
-          clinical_insights: result.clinical_insights || null
-        };
+          // Show results screen first
+          this.showScreen(this.resultsScreen);
+          
+          // Clear any existing patient info first
+          const existingSavedInfo = document.querySelector('.saved-info');
+          if (existingSavedInfo) {
+              existingSavedInfo.remove();
+          }
+          
+          // Set results display
+          this.primaryDiagnosis.textContent = result.primary_diagnosis;
+          this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
+          
+          const confidencePercent = Math.round(result.confidence_percentage);
+          let confidenceColor = '#10b981';
+          if (confidencePercent < 50) confidenceColor = '#f59e0b';
+          if (confidencePercent < 30) confidenceColor = '#ef4444';
+          
+          this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
+          this.confidenceBadge.style.background = confidenceColor;
+          
+          this.resultsDate.textContent = new Date().toLocaleDateString();
+          this.assessmentId.textContent = `ID: ${result.assessment_id}`;
+          
+          // Create assessment data object with ALL diagnoses with BOTH timestamps
+            const assessmentData = {
+                id: result.assessment_id,
+                timestamp: result.timestamp,  // Report generated time (when submitted)
+                assessment_timestamp: this.assessmentStartTime,  // Assessment start time
+                timezone: result.timezone,
+                patient_info: this.patientInfo,
+                primary_diagnosis: result.primary_diagnosis,
+                confidence: result.confidence_percentage,
+                confidence_percentage: result.confidence_percentage,
+                all_diagnoses: result.all_diagnoses,
+                responses: this.responses,
+                processing_details: result.processing_details,
+                technical_details: result.technical_details,
+                clinical_insights: result.clinical_insights || null
+            };
 
-        // Save assessment to backend AND store locally
-        try {
-          const saveResult = await this.saveAssessmentToBackend(assessmentData);
-          console.log('✅ Assessment saved successfully:', saveResult);
+        // Save assessment to backend
+          try {
+                const saveResult = await this.saveAssessmentToBackend(assessmentData);
+                console.log('✅ Assessment saved with both timestamps:', {
+                    assessment_start: this.assessmentStartTime,
+                    report_generated: result.timestamp
+                });
+              
+              // Store in assessmentHistory for current session
+              this.assessmentHistory.unshift(assessmentData);
+              console.log('✅ Assessment added to session history with all diagnoses');
+              
+          } catch (error) {
+              console.error('❌ Failed to save assessment:', error);
+              // Continue to show results even if save fails
+              this.assessmentHistory.unshift(assessmentData); // Still store locally
+          }
           
-          // Store in assessmentHistory for current session
-          this.assessmentHistory.unshift(assessmentData);
-          console.log('✅ Assessment added to session history');
+          // Display all the UI components
+          this.displayPatientInfo(this.patientInfo);
+          this.displayAllDiagnoses(result.all_diagnoses); // Updated to show ALL diagnoses
+          this.displaySafetyWarnings(result.processing_details?.clinical_safety_warnings || []);
+          this.displayTechnicalDetails(result);
           
-        } catch (error) {
-          console.error('❌ Failed to save assessment:', error);
-          // Continue to show results even if save fails
-          this.assessmentHistory.unshift(assessmentData); // Still store locally
-        }
-        
-        // Display all the UI components
-        this.displayPatientInfo(this.patientInfo);
-        this.displayOtherDiagnoses(result.all_diagnoses);
-        this.displaySafetyWarnings(result.processing_details?.clinical_safety_warnings || []);
-        this.displayTechnicalDetails(result);
-        
-        // Remove the save button since it's now automatic
-        this.removeSaveButton();
-        
-        // Debug: Log current assessment state
-        console.log('Current assessment history:', this.assessmentHistory);
-        console.log('Most recent assessment:', this.assessmentHistory[0]);
+          // Remove the save button since it's now automatic
+          this.removeSaveButton();
+          
+          // Debug: Log current assessment state
+          console.log('Current assessment history:', this.assessmentHistory);
+          console.log('Most recent assessment with all diagnoses:', this.assessmentHistory[0]);
       }
 
     displayPatientInfo(patientInfo) {
@@ -2953,91 +3027,144 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         }
       }
 
-    displayAssessmentDetails(assessment) {
-        try {
-            console.log('📊 Displaying assessment details:', assessment);
-            
-            // First, show the results screen
-            this.showScreen(this.resultsScreen);
-            
-            // Clear any existing patient info first
-            const existingSavedInfo = document.querySelector('.saved-info');
-            if (existingSavedInfo) {
-                existingSavedInfo.remove();
-            }
+      displayAllDiagnoses(allDiagnoses) {
+          if (!this.diagnosesList) {
+              console.error('Diagnoses list element not found');
+              return;
+          }
+          
+          this.diagnosesList.innerHTML = '';
+          
+          if (!allDiagnoses || !Array.isArray(allDiagnoses)) {
+              console.warn('No diagnoses data available');
+              const noDataItem = document.createElement('div');
+              noDataItem.className = 'diagnosis-item';
+              noDataItem.innerHTML = `
+                  <span class="diagnosis-name">No additional diagnoses available</span>
+                  <span class="diagnosis-probability">-</span>
+              `;
+              this.diagnosesList.appendChild(noDataItem);
+              return;
+          }
+          
+          // Display only TOP 4 diagnoses (excluding primary which is already shown)
+          const otherDiagnoses = allDiagnoses.slice(1, 4); // Get diagnoses 2, 3, 4
+          
+          if (otherDiagnoses.length === 0) {
+              const noDataItem = document.createElement('div');
+              noDataItem.className = 'diagnosis-item';
+              noDataItem.innerHTML = `
+                  <span class="diagnosis-name">No other diagnoses considered</span>
+                  <span class="diagnosis-probability">-</span>
+              `;
+              this.diagnosesList.appendChild(noDataItem);
+              return;
+          }
+          
+          otherDiagnoses.forEach(diagnosis => {
+              const diagnosisItem = document.createElement('div');
+              diagnosisItem.className = 'diagnosis-item';
+              
+              const diagnosisName = diagnosis.diagnosis || 'Unknown';
+              const confidence = diagnosis.confidence_percentage !== undefined ? 
+                  Math.round(diagnosis.confidence_percentage) : 
+                  (diagnosis.probability !== undefined ? Math.round(diagnosis.probability * 100) : 0);
+              
+              diagnosisItem.innerHTML = `
+                  <span class="diagnosis-name">${diagnosisName}</span>
+                  <span class="diagnosis-probability">${confidence}%</span>
+              `;
+              
+              this.diagnosesList.appendChild(diagnosisItem);
+          });
+          
+          console.log('✅ Other diagnoses displayed (top 3 after primary):', otherDiagnoses.length);
+      }
 
-            // Populate results screen with historical data
-            this.primaryDiagnosis.textContent = assessment.primary_diagnosis || 'Unknown';
-            
-            // Use the diagnosis description from assessment or generate one
-            const diagnosisDesc = assessment.diagnosis_description || this.getDiagnosisDescription(assessment.primary_diagnosis);
-            this.diagnosisDescription.textContent = diagnosisDesc;
-            
-            // Calculate confidence percentage
-            let confidencePercent;
-            if (assessment.confidence_percentage !== undefined) {
-                confidencePercent = Math.round(assessment.confidence_percentage);
-            } else if (assessment.confidence !== undefined) {
-                confidencePercent = Math.round(assessment.confidence * 100);
-            } else {
-                confidencePercent = 0;
-            }
-            
-            // Set confidence badge color
-            let confidenceColor = '#10b981';
-            if (confidencePercent < 70) confidenceColor = '#f59e0b';
-            if (confidencePercent < 50) confidenceColor = '#ef4444';
-            
-            this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
-            this.confidenceBadge.style.background = confidenceColor;
-            
-            // Set dates and IDs
-            if (assessment.timestamp) {
-                this.resultsDate.textContent = new Date(assessment.timestamp).toLocaleDateString();
-            } else {
-                this.resultsDate.textContent = new Date().toLocaleDateString();
-            }
-            
-            this.assessmentId.textContent = `ID: ${assessment.id || 'Unknown'}`;
-            
-            // Display patient information
-            if (assessment.patient_info) {
-                this.displayPatientInfo(assessment.patient_info);
-            }
-            
-            // Display other diagnoses
-            if (assessment.all_diagnoses && Array.isArray(assessment.all_diagnoses)) {
-                this.displayOtherDiagnoses(assessment.all_diagnoses);
-            } else {
-                // Create a default diagnosis list if none exists
-                this.displayOtherDiagnoses([{
-                    diagnosis: assessment.primary_diagnosis || 'Unknown',
-                    probability: assessment.confidence || 0,
-                    confidence_percentage: confidencePercent
-                }]);
-            }
-            
-            // NEW: Display historical questions and answers
-            this.displayHistoricalQuestionsAndAnswers(assessment);
-            
-            // Display technical details if available
-            if (assessment.processing_details || assessment.technical_details) {
-                this.displayTechnicalDetails(assessment);
-            }
-            
-            // Update current state for potential report generation
-            this.responses = assessment.responses || {};
-            this.patientInfo = assessment.patient_info || {};
-            
-            console.log('✅ Assessment details displayed successfully');
-            
-        } catch (error) {
-            console.error('❌ Error displaying assessment details:', error);
-            alert('Error displaying assessment details. Please try again.');
-        }
-    }
+      displayAssessmentDetails(assessment) {
+          try {
+              console.log('📊 Displaying assessment details with ALL diagnoses:', assessment);
+              
+              // First, show the results screen
+              this.showScreen(this.resultsScreen);
+              
+              // Clear any existing patient info first
+              const existingSavedInfo = document.querySelector('.saved-info');
+              if (existingSavedInfo) {
+                  existingSavedInfo.remove();
+              }
 
-}
+              // Populate results screen with historical data
+              this.primaryDiagnosis.textContent = assessment.primary_diagnosis || 'Unknown';
+              
+              // Use the diagnosis description from assessment or generate one
+              const diagnosisDesc = assessment.diagnosis_description || this.getDiagnosisDescription(assessment.primary_diagnosis);
+              this.diagnosisDescription.textContent = diagnosisDesc;
+              
+              // Calculate confidence percentage
+              let confidencePercent;
+              if (assessment.confidence_percentage !== undefined) {
+                  confidencePercent = Math.round(assessment.confidence_percentage);
+              } else if (assessment.confidence !== undefined) {
+                  confidencePercent = Math.round(assessment.confidence * 100);
+              } else {
+                  confidencePercent = 0;
+              }
+              
+              // Set confidence badge color
+              let confidenceColor = '#10b981';
+              if (confidencePercent < 70) confidenceColor = '#f59e0b';
+              if (confidencePercent < 50) confidenceColor = '#ef4444';
+              
+              this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
+              this.confidenceBadge.style.background = confidenceColor;
+              
+              // Set dates and IDs
+              if (assessment.timestamp) {
+                  this.resultsDate.textContent = new Date(assessment.timestamp).toLocaleDateString();
+              } else {
+                  this.resultsDate.textContent = new Date().toLocaleDateString();
+              }
+              
+              this.assessmentId.textContent = `ID: ${assessment.id || 'Unknown'}`;
+              
+              // Display patient information
+              if (assessment.patient_info) {
+                  this.displayPatientInfo(assessment.patient_info);
+              }
+              
+              // Display ALL diagnoses (not just primary)
+              if (assessment.all_diagnoses && Array.isArray(assessment.all_diagnoses)) {
+                  this.displayAllDiagnoses(assessment.all_diagnoses);
+              } else {
+                  // Create a default diagnosis list if none exists
+                  this.displayAllDiagnoses([{
+                      diagnosis: assessment.primary_diagnosis || 'Unknown',
+                      probability: assessment.confidence || 0,
+                      confidence_percentage: confidencePercent
+                  }]);
+              }
+              
+              // Display historical questions and answers
+              this.displayHistoricalQuestionsAndAnswers(assessment);
+              
+              // Display technical details if available
+              if (assessment.processing_details || assessment.technical_details) {
+                  this.displayTechnicalDetails(assessment);
+              }
+              
+              // Update current state for potential report generation
+              this.responses = assessment.responses || {};
+              this.patientInfo = assessment.patient_info || {};
+              
+              console.log('✅ Assessment details displayed successfully with ALL diagnoses');
+              
+          } catch (error) {
+              console.error('❌ Error displaying assessment details:', error);
+              alert('Error displaying assessment details. Please try again.');
+          }
+      }
+  }
 
     // Initialize the assessment when the page loads
     let mentalHealthAssessment;

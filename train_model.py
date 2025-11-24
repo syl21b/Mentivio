@@ -7,7 +7,7 @@ import seaborn as sns
 import joblib
 from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.ensemble import RandomForestClassifier,  StackingClassifier, VotingClassifier,  ExtraTreesClassifier, BaggingClassifier
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier, VotingClassifier, ExtraTreesClassifier, BaggingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, f1_score, classification_report, confusion_matrix, precision_score, recall_score
@@ -19,7 +19,9 @@ from sklearn.inspection import permutation_importance
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 from datetime import datetime  
-import os
+from pathlib import Path
+from typing import Dict, List, Tuple, Optional, Union, Any
+import dataclasses
 
 
 # 🆕 IMPROVED WARNING HANDLING
@@ -33,11 +35,45 @@ warnings.filterwarnings('ignore', category=FutureWarning)
 from ClinicalGradeNormalClassifierEnhanced import ClinicalGradeNormalClassifierEnhanced
 from CalibratedClinicalModel import CalibratedClinicalModel
 
+# 🆕 MODERN PYTHON TYPE HINTS AND DATA CLASSES
+@dataclasses.dataclass
+class ModelResults:
+    """Data class for storing model performance results"""
+    model_name: str
+    train_accuracy: float
+    test_accuracy: float
+    test_f1: float
+    cv_mean: float
+    cv_std: float
+    generalization_gap: float
+    overfitting_ratio: float
+    avg_confidence: float
+    stability_score: float
+    overfit_category: str
+    recommendation: str
+    is_ensemble: bool
+
+@dataclasses.dataclass
+class ValidationResults:
+    """Data class for storing validation results"""
+    actual: np.ndarray
+    predictions: np.ndarray
+    probabilities: np.ndarray
+    confusion_matrix: np.ndarray
+    normal_protection_rate: float
+    false_pathology_rate: float
+    confidence_scores: np.ndarray
+
 # -----------------------------
 # 🆕 DATA BALANCING FOR EQUAL CLASS DISTRIBUTION (FIXED)
 # -----------------------------
 
-def balance_training_data(X_train, y_train_encoded, target_distribution=None, random_state=42):
+def balance_training_data(
+    X_train: np.ndarray, 
+    y_train_encoded: np.ndarray, 
+    target_distribution: Optional[Dict[int, float]] = None, 
+    random_state: int = 42
+) -> Tuple[np.ndarray, np.ndarray]:
     """Balance training data to achieve target class distribution - FIXED for pandas DataFrames"""
     
     print("\n⚖️ BALANCING TRAINING DATA...")
@@ -46,22 +82,15 @@ def balance_training_data(X_train, y_train_encoded, target_distribution=None, ra
     np.random.seed(random_state)
     
     # Convert to numpy arrays if they are pandas objects
-    if hasattr(X_train, 'values'):
-        X_train_np = X_train.values
-    else:
-        X_train_np = X_train
-        
-    if hasattr(y_train_encoded, 'values'):
-        y_train_np = y_train_encoded.values
-    else:
-        y_train_np = y_train_encoded
+    X_train_np = X_train.values if hasattr(X_train, 'values') else X_train
+    y_train_np = y_train_encoded.values if hasattr(y_train_encoded, 'values') else y_train_encoded
     
-    # Default target distribution: equal for all classes
+    # Use walrus operator for modern Python
     if target_distribution is None:
         unique_classes = np.unique(y_train_np)
         target_distribution = {cls: 0.25 for cls in unique_classes}  # Equal 25% for 4 classes
     
-    # Get current distribution
+    # Get current distribution using modern approach
     current_counts = np.bincount(y_train_np)
     class_names = [f"Class_{i}" for i in range(len(current_counts))]
     
@@ -74,7 +103,7 @@ def balance_training_data(X_train, y_train_encoded, target_distribution=None, ra
     target_samples_per_class = int(len(y_train_np) * 0.25)  # 25% of total for each class
     print(f"🎯 Target: {target_samples_per_class} samples per class (25% each)")
     
-    # Balance each class
+    # Balance each class using list comprehension
     balanced_indices = []
     
     for class_label in np.unique(y_train_np):
@@ -112,7 +141,7 @@ def balance_training_data(X_train, y_train_encoded, target_distribution=None, ra
     X_balanced = X_train_np[balanced_indices]
     y_balanced = y_train_np[balanced_indices]
     
-    # Verify new distribution
+    # Verify new distribution using modern approach
     balanced_counts = np.bincount(y_balanced)
     print(f"📊 Balanced class distribution:")
     for i, count in enumerate(balanced_counts):
@@ -123,7 +152,13 @@ def balance_training_data(X_train, y_train_encoded, target_distribution=None, ra
     
     return X_balanced, y_balanced
 
-def smart_data_split(X, y, test_size=0.2, balance_train=True, random_state=42):
+def smart_data_split(
+    X: Union[pd.DataFrame, np.ndarray],
+    y: Union[pd.Series, np.ndarray], 
+    test_size: float = 0.2, 
+    balance_train: bool = True, 
+    random_state: int = 42
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, LabelEncoder]:
     """Smart data splitting with optional training data balancing - FIXED for pandas compatibility"""
     
     print(f"\n🎯 SMART DATA SPLITTING (test_size={test_size}, balance_train={balance_train})")
@@ -131,16 +166,9 @@ def smart_data_split(X, y, test_size=0.2, balance_train=True, random_state=42):
     # Set random seed for reproducibility
     np.random.seed(random_state)
     
-    # Convert to numpy arrays if they are pandas objects
-    if hasattr(X, 'values'):
-        X_np = X.values
-    else:
-        X_np = X
-        
-    if hasattr(y, 'values'):
-        y_np = y.values
-    else:
-        y_np = y
+    # Convert to numpy arrays if they are pandas objects using modern approach
+    X_np = X.values if hasattr(X, 'values') else X
+    y_np = y.values if hasattr(y, 'values') else y
     
     # First, encode the labels
     label_encoder = LabelEncoder()
@@ -155,7 +183,7 @@ def smart_data_split(X, y, test_size=0.2, balance_train=True, random_state=42):
     print(f"   • Training set: {len(X_train)} samples")
     print(f"   • Test set: {len(X_test)} samples")
     
-    # Show original distribution
+    # Show original distribution using modern f-strings
     train_counts = np.bincount(y_train_encoded)
     test_counts = np.bincount(y_test_encoded)
     
@@ -179,12 +207,17 @@ def smart_data_split(X, y, test_size=0.2, balance_train=True, random_state=42):
         return X_train_balanced, X_test, y_train_balanced, y_test_encoded, label_encoder
     else:
         return X_train, X_test, y_train_encoded, y_test_encoded, label_encoder
-      
+
 # -----------------------------
 # 🆕 IMPROVED THRESHOLD OPTIMIZATION WITH CALIBRATION
 # -----------------------------
 
-def optimize_clinical_thresholds_with_calibration(model, X_val, y_val, normal_class_idx):
+def optimize_clinical_thresholds_with_calibration(
+    model: Any, 
+    X_val: np.ndarray, 
+    y_val: np.ndarray, 
+    normal_class_idx: int
+) -> Tuple[float, Any]:
     """Optimize thresholds using calibrated probabilities"""
     print("🎯 Optimizing clinical thresholds with calibration...")
     
@@ -195,7 +228,7 @@ def optimize_clinical_thresholds_with_calibration(model, X_val, y_val, normal_cl
     normal_probs = probabilities[:, normal_class_idx]
     
     thresholds = np.linspace(0.5, 0.9, 20)
-    best_score = 0
+    best_score = 0.0
     best_threshold = 0.65
     
     base_predictions = model.predict(X_val)
@@ -222,7 +255,7 @@ def optimize_clinical_thresholds_with_calibration(model, X_val, y_val, normal_cl
 # DATA LOADING & PREPROCESSING
 # -----------------------------
 
-def load_and_prepare_data():
+def load_and_prepare_data() -> pd.DataFrame:
     """Enhanced data loading and preparation"""
     df = pd.read_csv("dataset/mental_disorders_dataset.csv")
     df = df.dropna()
@@ -234,11 +267,13 @@ def load_and_prepare_data():
     score_cols = ["Sexual Activity", "Concentration", "Optimism"]
     for col in score_cols:
         if col in df.columns:
-            df[col] = df[col].apply(lambda x: float(x.split(" ")[0]) if "from 10" in str(x).lower() else float(x))
+            # Use walrus operator and modern string handling
+            if "from 10" in str(df[col].iloc[0]).lower():
+                df[col] = df[col].apply(lambda x: float(x.split(" ")[0]))
     
     return df
 
-def encode_features(df):
+def encode_features(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series, List[str], Dict[str, Any]]:
     """Enhanced feature encoding with proper handling of all data types"""
     X = df.drop(["Expert Diagnose", "Patient Number"], axis=1, errors='ignore')
     y = df["Expert Diagnose"]
@@ -251,59 +286,46 @@ def encode_features(df):
     print("🔄 Converting 1-10 scores to frequency categories...")
     
     # Sexual Activity: Convert 1-10 to frequency categories
-    def map_sexual_activity(score):
+    def map_sexual_activity(score: float) -> str:
         score = float(score)
-        if score <= 2:
-            return 'No interest'  # Will map to 0
-        elif score <= 4:
-            return 'Low interest'  # Will map to 1
-        elif score <= 6:
-            return 'Moderate interest'  # Will map to 2
-        elif score <= 8:
-            return 'High interest'  # Will map to 3
-        else:
-            return 'Very high interest'  # Will map to 4
+        match score:
+            case _ if score <= 2: return 'No interest'
+            case _ if score <= 4: return 'Low interest'
+            case _ if score <= 6: return 'Moderate interest'
+            case _ if score <= 8: return 'High interest'
+            case _: return 'Very high interest'
     
     # Concentration: Convert 1-10 to focus ability categories
-    def map_concentration(score):
+    def map_concentration(score: float) -> str:
         score = float(score)
-        if score <= 2:
-            return 'Cannot concentrate'  # Will map to 0
-        elif score <= 4:
-            return 'Poor concentration'  # Will map to 1
-        elif score <= 6:
-            return 'Average concentration'  # Will map to 2
-        elif score <= 8:
-            return 'Good concentration'  # Will map to 3
-        else:
-            return 'Excellent concentration'  # Will map to 4
+        match score:
+            case _ if score <= 2: return 'Cannot concentrate'
+            case _ if score <= 4: return 'Poor concentration'
+            case _ if score <= 6: return 'Average concentration'
+            case _ if score <= 8: return 'Good concentration'
+            case _: return 'Excellent concentration'
     
     # Optimism: Convert 1-10 to outlook categories
-    def map_optimism(score):
+    def map_optimism(score: float) -> str:
         score = float(score)
-        if score <= 2:
-            return 'Extremely pessimistic'  # Will map to 0
-        elif score <= 4:
-            return 'Pessimistic'  # Will map to 1
-        elif score <= 6:
-            return 'Neutral outlook'  # Will map to 2
-        elif score <= 8:
-            return 'Optimistic'  # Will map to 3
-        else:
-            return 'Extremely optimistic'  # Will map to 4
+        match score:
+            case _ if score <= 2: return 'Extremely pessimistic'
+            case _ if score <= 4: return 'Pessimistic'
+            case _ if score <= 6: return 'Neutral outlook'
+            case _ if score <= 8: return 'Optimistic'
+            case _: return 'Extremely optimistic'
     
-    # Apply the mappings
-    if 'Sexual Activity' in X.columns:
-        X['Sexual Activity'] = X['Sexual Activity'].apply(map_sexual_activity)
-        print(f"   • Sexual Activity converted to categories: {X['Sexual Activity'].unique()}")
+    # Apply the mappings using modern approach
+    mapping_functions = {
+        'Sexual Activity': map_sexual_activity,
+        'Concentration': map_concentration,
+        'Optimism': map_optimism
+    }
     
-    if 'Concentration' in X.columns:
-        X['Concentration'] = X['Concentration'].apply(map_concentration)
-        print(f"   • Concentration converted to categories: {X['Concentration'].unique()}")
-    
-    if 'Optimism' in X.columns:
-        X['Optimism'] = X['Optimism'].apply(map_optimism)
-        print(f"   • Optimism converted to categories: {X['Optimism'].unique()}")
+    for col, mapping_func in mapping_functions.items():
+        if col in X.columns:
+            X[col] = X[col].apply(mapping_func)
+            print(f"   • {col} converted to categories: {X[col].unique()}")
     
     # 🆕 NEW MAPPINGS for the converted features
     sexual_activity_mapping = {
@@ -330,27 +352,32 @@ def encode_features(df):
         'Extremely optimistic': 4
     }
     
-    # Encode frequency features
+    # Encode frequency features using modern dict.get
     frequency_features = ["Sadness", "Euphoric", "Exhausted", "Sleep disorder"]
     for col in frequency_features:
         if col in X.columns:
             X[col] = X[col].map(frequency_mapping).fillna(1)
     
     # Encode behavioral features (YES/NO)
-    behavioral_features = ["Mood Swing", "Suicidal thoughts", "Overthinking", "Anorexia", 
-                          "Nervous Breakdown", "Authority Respect", "Try Explanation", 
-                          "Aggressive Response", "Ignore & Move-On", "Admit Mistakes"]
+    behavioral_features = [
+        "Mood Swing", "Suicidal thoughts", "Overthinking", "Anorexia", 
+        "Nervous Breakdown", "Authority Respect", "Try Explanation", 
+        "Aggressive Response", "Ignore & Move-On", "Admit Mistakes"
+    ]
     for col in behavioral_features:
         if col in X.columns:
             X[col] = X[col].map(yes_no_mapping).fillna(0)
     
     # 🆕 Encode the newly converted categorical features
-    if 'Sexual Activity' in X.columns:
-        X['Sexual Activity'] = X['Sexual Activity'].map(sexual_activity_mapping).fillna(2)
-    if 'Concentration' in X.columns:
-        X['Concentration'] = X['Concentration'].map(concentration_mapping).fillna(2)
-    if 'Optimism' in X.columns:
-        X['Optimism'] = X['Optimism'].map(optimism_mapping).fillna(2)
+    categorical_mappings = {
+        'Sexual Activity': sexual_activity_mapping,
+        'Concentration': concentration_mapping,
+        'Optimism': optimism_mapping
+    }
+    
+    for col, mapping in categorical_mappings.items():
+        if col in X.columns:
+            X[col] = X[col].map(mapping).fillna(2)
     
     feature_names = X.columns.tolist()
     
@@ -375,15 +402,18 @@ def encode_features(df):
 # 🆕 FIXED FEATURE SELECTION (No Data Leakage)
 # -----------------------------
 
-def advanced_feature_selection(X_train, y_train, feature_names=None):
+def advanced_feature_selection(
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    feature_names: Optional[List[str]] = None
+) -> List[str]:
     """Feature selection using ONLY training data - UPDATED for numpy arrays"""
     
     print("📈 Feature Selection (Training Data Only)...")
     
     # 🆕 FIX: Convert to DataFrame with proper feature names to avoid warnings
     if not isinstance(X_train, pd.DataFrame):
-        if feature_names is None:
-            feature_names = [f'feature_{i}' for i in range(X_train.shape[1])]
+        feature_names = feature_names or [f'feature_{i}' for i in range(X_train.shape[1])]
         X_train_df = pd.DataFrame(X_train, columns=feature_names)
     else:
         X_train_df = X_train.copy()
@@ -413,13 +443,16 @@ def advanced_feature_selection(X_train, y_train, feature_names=None):
     
     return selected_features
 
-def clinical_feature_selection(X_train, selected_features, feature_names=None):
+def clinical_feature_selection(
+    X_train: np.ndarray, 
+    selected_features: List[str], 
+    feature_names: Optional[List[str]] = None
+) -> List[str]:
     """Clinical feature selection using only training features - HANDLES BOTH DATAFRAMES AND ARRAYS"""
     
     # 🆕 FIX: Convert to DataFrame with proper feature names
     if not isinstance(X_train, pd.DataFrame):
-        if feature_names is None:
-            feature_names = [f'feature_{i}' for i in range(X_train.shape[1])]
+        feature_names = feature_names or [f'feature_{i}' for i in range(X_train.shape[1])]
         X_train_df = pd.DataFrame(X_train, columns=feature_names)
     else:
         X_train_df = X_train
@@ -451,15 +484,19 @@ def clinical_feature_selection(X_train, selected_features, feature_names=None):
 # 🆕 FIXED FEATURE TRANSFORMATION (No Data Leakage)
 # -----------------------------
 
-def apply_feature_transformation(X_train, X_test, selected_features_final, feature_names=None):
-    """Apply feature transformations using ONLY training data statistics - HANDLES BOTH DATAFRAMES AND ARRAYS"""
+def apply_feature_transformation(
+    X_train: np.ndarray, 
+    X_test: np.ndarray, 
+    selected_features_final: List[str], 
+    feature_names: Optional[List[str]] = None
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Apply feature transformations using ONLY training data statistics"""
     
     print("\n🔧 Applying feature transformations (No Data Leakage)...")
     
     # 🆕 FIX: Convert to DataFrames with proper feature names
     if not isinstance(X_train, pd.DataFrame):
-        if feature_names is None:
-            feature_names = [f'feature_{i}' for i in range(X_train.shape[1])]
+        feature_names = feature_names or [f'feature_{i}' for i in range(X_train.shape[1])]
         X_train_df = pd.DataFrame(X_train, columns=feature_names)
         X_test_df = pd.DataFrame(X_test, columns=feature_names)
     else:
@@ -497,7 +534,12 @@ def apply_feature_transformation(X_train, X_test, selected_features_final, featu
 # -----------------------------
 # 🆕 MODEL OPTIMIZATION WITH FEATURE NAME FIX
 # -----------------------------
-def get_optimized_models_fixed(X_train, y_train, feature_names):
+
+def get_optimized_models_fixed(
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    feature_names: List[str]
+) -> Dict[str, Any]:
     """FIXED hyperparameter optimization to reduce overfitting"""
     
     print("🔍 OPTIMIZING KEY MODELS WITH OVERFITTING REDUCTION...")
@@ -565,7 +607,12 @@ def get_optimized_models_fixed(X_train, y_train, feature_names):
 # NORMAL-FOCUSED ENSEMBLES
 # -----------------------------
 
-def create_normal_focused_ensembles(models_dict, X_train, y_train, feature_names):
+def create_normal_focused_ensembles(
+    models_dict: Dict[str, Any], 
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    feature_names: List[str]
+) -> Dict[str, Any]:
     """Create ensembles specifically optimized for Normal detection WITH REDUCED OVERFITTING"""
     
     print("\n🎯 Creating Normal-Focused Ensembles with Overfitting Prevention...")
@@ -648,108 +695,15 @@ def create_normal_focused_ensembles(models_dict, X_train, y_train, feature_names
     print(f"✅ Created {len(ensembles)} Normal-focused ensembles with overfitting prevention")
     return ensembles
 
-def train_with_overfitting_prevention(models, X_train, y_train, X_test, y_test, feature_names):
-    """Enhanced training with STRICTER overfitting prevention"""
-    
-    results = []
-    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    
-    print("\n--- STRICT TRAINING WITH OVERFITTING PREVENTION ---")
-    print("🎯 Priority: Balanced models > Slight overfit > AVOID moderate/high overfit")
-    
-    # 🆕 FIX: Always use DataFrames with feature names
-    X_train_df = pd.DataFrame(X_train, columns=feature_names)
-    X_test_df = pd.DataFrame(X_test, columns=feature_names)
-    
-    for name, model in models.items():
-        try:
-            # Cross-validation with balanced accuracy
-            cv_scores = cross_val_score(model, X_train_df, y_train, cv=cv, scoring='balanced_accuracy', n_jobs=-1)
-            
-            # Train model with feature names
-            model.fit(X_train_df, y_train)
-            
-            # Predictions with feature names
-            train_preds = model.predict(X_train_df)
-            test_preds = model.predict(X_test_df)
-            test_proba = model.predict_proba(X_test_df) if hasattr(model, 'predict_proba') else None
-            
-            # Metrics
-            train_acc = accuracy_score(y_train, train_preds)
-            test_acc = accuracy_score(y_test, test_preds)
-            test_f1 = f1_score(y_test, test_preds, average='weighted')
-            cv_mean = cv_scores.mean()
-            cv_std = cv_scores.std()
-            
-            # Overfitting metrics
-            generalization_gap = train_acc - test_acc
-            overfitting_ratio = generalization_gap / train_acc if train_acc > 0 else 1.0
-            avg_confidence = np.mean(np.max(test_proba, axis=1)) if test_proba is not None else 0.5
-            
-            # Stability score
-            stability_score = 1 - cv_std
-            
-            # NEW: Early stopping indicator based on generalization
-            if generalization_gap > 0.15:
-                overfit_category = "HIGH_OVERFIT"
-                recommendation = "AVOID"
-            elif generalization_gap > 0.08:
-                overfit_category = "MODERATE_OVERFIT" 
-                recommendation = "LOW_PRIORITY"
-            elif generalization_gap > 0.03:
-                overfit_category = "SLIGHT_OVERFIT"
-                recommendation = "MEDIUM_PRIORITY"
-            else:
-                overfit_category = "BALANCED"
-                recommendation = "HIGH_PRIORITY"
-            
-            results.append({
-                'Model': name,
-                'Train_Accuracy': train_acc,
-                'Test_Accuracy': test_acc,
-                'Test_F1': test_f1,
-                'CV_Mean': cv_mean,
-                'CV_Std': cv_std,
-                'Generalization_Gap': generalization_gap,
-                'Overfitting_Ratio': overfitting_ratio,
-                'Avg_Confidence': avg_confidence,
-                'Stability_Score': stability_score,
-                'Overfit_Category': overfit_category,
-                'Recommendation': recommendation,
-                'Is_Ensemble': any(ensemble_name in name for ensemble_name in ['Hybrid', 'Collective', 'Stable', 'Super', 'Normal-Focused', 'Clinical'])
-            })
-            
-            # Status with STRICTER indicators
-            if overfit_category == "HIGH_OVERFIT":
-                status = "🔴 HIGH OVERFIT"
-                emoji = "❌"
-            elif overfit_category == "MODERATE_OVERFIT":
-                status = "🟡 MOD OVERFIT" 
-                emoji = "⚠️ "
-            elif overfit_category == "SLIGHT_OVERFIT":
-                status = "🟢 SLIGHT"
-                emoji = "✅"
-            else:
-                status = "✅ BALANCED"
-                emoji = "🌟"
-            
-            ensemble_indicator = "🌟" if any(ensemble_name in name for ensemble_name in ['Hybrid', 'Collective', 'Stable', 'Super', 'Normal-Focused', 'Clinical']) else "  "
-            print(f"{emoji} {ensemble_indicator} {name:<28} → "
-                  f"Test: {test_acc:.3f} | "
-                  f"Gap: {generalization_gap:.3f} | "
-                  f"Status: {status} | Rec: {recommendation}")
-                  
-        except Exception as e:
-            print(f"❌ {name} failed: {str(e)}")
-            continue
-    
-    return pd.DataFrame(results)
 
-# -----------------------------
-# 🆕 IMPROVED TRAINING WITH FEATURE NAME FIX
-# -----------------------------
-
-def train_with_overfitting_prevention(models, X_train, y_train, X_test, y_test, feature_names):
+def train_with_overfitting_prevention(
+    models: Dict[str, Any], 
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    X_test: np.ndarray, 
+    y_test: np.ndarray, 
+    feature_names: List[str]
+) -> pd.DataFrame:
     """Training with focus on identifying balanced models - FIXED feature names"""
     
     results = []
@@ -791,21 +745,30 @@ def train_with_overfitting_prevention(models, X_train, y_train, X_test, y_test, 
             stability_score = 1 - cv_std
             
             # Ensemble indicator
-            is_ensemble = any(ensemble_name in name for ensemble_name in ['Hybrid', 'Collective', 'Stable', 'Super', 'Normal-Focused', 'Clinical'])
+            is_ensemble = any(ensemble_name in name for ensemble_name in [
+                'Hybrid', 'Collective', 'Stable', 'Super', 'Normal-Focused', 'Clinical'
+            ])
             
-            results.append({
-                'Model': name,
-                'Train_Accuracy': train_acc,
-                'Test_Accuracy': test_acc,
-                'Test_F1': test_f1,
-                'CV_Mean': cv_mean,
-                'CV_Std': cv_std,
-                'Generalization_Gap': generalization_gap,
-                'Overfitting_Ratio': overfitting_ratio,
-                'Avg_Confidence': avg_confidence,
-                'Stability_Score': stability_score,
-                'Is_Ensemble': is_ensemble
-            })
+            # Create ModelResults object
+            model_results = ModelResults(
+                model_name=name,
+                train_accuracy=train_acc,
+                test_accuracy=test_acc,
+                test_f1=test_f1,
+                cv_mean=cv_mean,
+                cv_std=cv_std,
+                generalization_gap=generalization_gap,
+                overfitting_ratio=overfitting_ratio,
+                avg_confidence=avg_confidence,
+                stability_score=stability_score,
+                overfit_category="",  # This will be calculated later
+                recommendation="",    # This will be calculated later
+                is_ensemble=is_ensemble
+            )
+            
+            # Convert to dict for DataFrame - ensure lowercase column names
+            result_dict = dataclasses.asdict(model_results)
+            results.append(result_dict)
             
             # Status with priority indicators
             if overfitting_ratio > 0.15:
@@ -831,12 +794,32 @@ def train_with_overfitting_prevention(models, X_train, y_train, X_test, y_test, 
             print(f"❌ {name} failed: {str(e)}")
             continue
     
-    return pd.DataFrame(results)
+    # Create DataFrame and ensure column names are consistent
+    results_df = pd.DataFrame(results)
+    
+    # 🆕 ADDED: Calculate overfit_category here to ensure consistency
+    if 'generalization_gap' in results_df.columns:
+        results_df['overfit_category'] = results_df['generalization_gap'].apply(
+            lambda gap: "HIGH_OVERFIT" if gap > 0.15 else 
+                       "MODERATE_OVERFIT" if gap > 0.08 else 
+                       "SLIGHT_OVERFIT" if gap > 0.03 else "BALANCED"
+        )
+    
+    return results_df
 
 # -----------------------------
 # IMPROVED CLINICAL MODEL SELECTION
 # -----------------------------
-def select_clinical_best_model_improved(results_df, models, ensembles, X_test, y_test, label_encoder, feature_names):
+
+def select_clinical_best_model_improved(
+    results_df: pd.DataFrame, 
+    models: Dict[str, Any], 
+    ensembles: Dict[str, Any], 
+    X_test: np.ndarray, 
+    y_test: np.ndarray, 
+    label_encoder: LabelEncoder, 
+    feature_names: List[str]
+) -> Tuple[Any, str, pd.DataFrame]:
     """IMPROVED clinical model selection FOCUSING ON GENERALIZATION"""
     
     print("\n🏥 IMPROVED CLINICAL MODEL SELECTION - PRIORITIZING GENERALIZATION")
@@ -845,21 +828,34 @@ def select_clinical_best_model_improved(results_df, models, ensembles, X_test, y
     # 🆕 FIX: Use DataFrame with feature names
     X_test_df = pd.DataFrame(X_test, columns=feature_names)
     
+    # 🆕 FIX: Check column names and use correct case
+    print(f"📊 Available columns in results_df: {results_df.columns.tolist()}")
+    
+    # 🆕 FIX: Use correct column names from the actual DataFrame
+    model_col = 'model_name'  # This is the actual column name
+    test_accuracy_col = 'test_accuracy'
+    train_accuracy_col = 'train_accuracy'
+    overfitting_ratio_col = 'overfitting_ratio'
+    stability_score_col = 'stability_score'
+    avg_confidence_col = 'avg_confidence'
+    generalization_gap_col = 'generalization_gap'
+    overfit_category_col = 'overfit_category'
+    
     # 🆕 FIX: Check if Overfit_Category column exists, if not create it
-    if 'Overfit_Category' not in results_df.columns:
+    if overfit_category_col not in results_df.columns:
         print("⚠️  Overfit_Category column not found. Creating it based on generalization gap...")
-        results_df['Overfit_Category'] = results_df['Generalization_Gap'].apply(
+        results_df[overfit_category_col] = results_df[generalization_gap_col].apply(
             lambda gap: "HIGH_OVERFIT" if gap > 0.15 else 
                        "MODERATE_OVERFIT" if gap > 0.08 else 
                        "SLIGHT_OVERFIT" if gap > 0.03 else "BALANCED"
         )
     
     # FILTER OUT models with high overfitting
-    acceptable_models = results_df[~results_df['Overfit_Category'].isin(['HIGH_OVERFIT', 'MODERATE_OVERFIT'])]
+    acceptable_models = results_df[~results_df[overfit_category_col].isin(['HIGH_OVERFIT', 'MODERATE_OVERFIT'])]
     
     if len(acceptable_models) == 0:
         print("⚠️  No models without moderate/high overfitting. Using slight overfit models.")
-        acceptable_models = results_df[results_df['Overfit_Category'].isin(['SLIGHT_OVERFIT', 'BALANCED'])]
+        acceptable_models = results_df[results_df[overfit_category_col].isin(['SLIGHT_OVERFIT', 'BALANCED'])]
     
     print(f"📊 Models considered after overfitting filter: {len(acceptable_models)}")
     
@@ -870,7 +866,7 @@ def select_clinical_best_model_improved(results_df, models, ensembles, X_test, y
     all_models = {**models, **ensembles}
     
     for name, model in all_models.items():
-        if name in acceptable_models['Model'].values:
+        if name in acceptable_models[model_col].values:
             try:
                 y_pred = model.predict(X_test_df)
                 cm = confusion_matrix(y_test, y_pred)
@@ -886,31 +882,31 @@ def select_clinical_best_model_improved(results_df, models, ensembles, X_test, y
     
     # Add recall scores to acceptable models
     acceptable_models = acceptable_models.copy()
-    acceptable_models['Normal_Recall'] = acceptable_models['Model'].map(model_recalls).fillna(0)
+    acceptable_models['normal_recall'] = acceptable_models[model_col].map(model_recalls).fillna(0)
     
     # IMPROVED: Clinical scoring with STRONG emphasis on generalization
     acceptable_models['clinical_score'] = (
-        0.20 * acceptable_models['Test_Accuracy'] +           # Reduced weight for accuracy
-        0.30 * acceptable_models['Normal_Recall'] +           # Normal recall (maintained)
-        0.30 * (1 - acceptable_models['Overfitting_Ratio']) + # Increased weight for generalization
-        0.15 * acceptable_models['Stability_Score'] +         # Stability
-        0.05 * acceptable_models['Avg_Confidence']            # Confidence
+        0.20 * acceptable_models[test_accuracy_col] +           # Reduced weight for accuracy
+        0.30 * acceptable_models['normal_recall'] +             # Normal recall (maintained)
+        0.30 * (1 - acceptable_models[overfitting_ratio_col]) + # Increased weight for generalization
+        0.15 * acceptable_models[stability_score_col] +         # Stability
+        0.05 * acceptable_models[avg_confidence_col]            # Confidence
     )
     
     # Find best clinical model from acceptable candidates
     if len(acceptable_models) > 0:
-        best_model_name = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), 'Model']
-        best_normal_recall = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), 'Normal_Recall']
+        best_model_name = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), model_col]
+        best_normal_recall = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), 'normal_recall']
         best_clinical_score = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), 'clinical_score']
-        best_test_accuracy = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), 'Test_Accuracy']
-        best_overfit_category = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), 'Overfit_Category']
+        best_test_accuracy = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), test_accuracy_col]
+        best_overfit_category = acceptable_models.loc[acceptable_models['clinical_score'].idxmax(), overfit_category_col]
     else:
         # Fallback: use original method but warn
         print("🚨 CRITICAL: No acceptable models found. Using original selection method.")
-        best_model_name = results_df.loc[results_df['Test_Accuracy'].idxmax(), 'Model']
+        best_model_name = results_df.loc[results_df[test_accuracy_col].idxmax(), model_col]
         best_normal_recall = 0
         best_clinical_score = 0
-        best_test_accuracy = results_df.loc[results_df['Test_Accuracy'].idxmax(), 'Test_Accuracy']
+        best_test_accuracy = results_df.loc[results_df[test_accuracy_col].idxmax(), test_accuracy_col]
         best_overfit_category = "UNKNOWN"
     
     print(f"\n🏆 CLINICAL BEST MODEL: {best_model_name}")
@@ -923,11 +919,13 @@ def select_clinical_best_model_improved(results_df, models, ensembles, X_test, y
     # Show top 3 clinical candidates from acceptable models
     print(f"\n🏅 TOP CLINICAL CANDIDATES (After Overfitting Filter):")
     if len(acceptable_models) >= 3:
-        top_candidates = acceptable_models.nlargest(3, 'clinical_score')[['Model', 'Test_Accuracy', 'Normal_Recall', 'Overfit_Category', 'clinical_score']]
+        top_candidates = acceptable_models.nlargest(3, 'clinical_score')[
+            [model_col, test_accuracy_col, 'normal_recall', overfit_category_col, 'clinical_score']
+        ]
         for _, row in top_candidates.iterrows():
-            marker = "⭐" if row['Model'] == best_model_name else "  "
-            print(f"   {marker} {row['Model']:<25} Acc: {row['Test_Accuracy']:.3f} | "
-                  f"Normal Recall: {row['Normal_Recall']:.3f} | Overfit: {row['Overfit_Category']} | "
+            marker = "⭐" if row[model_col] == best_model_name else "  "
+            print(f"   {marker} {row[model_col]:<25} Acc: {row[test_accuracy_col]:.3f} | "
+                  f"Normal Recall: {row['normal_recall']:.3f} | Overfit: {row[overfit_category_col]} | "
                   f"Score: {row['clinical_score']:.3f}")
     else:
         print("   ⚠️  Fewer than 3 acceptable models available")
@@ -941,7 +939,13 @@ def select_clinical_best_model_improved(results_df, models, ensembles, X_test, y
 # 🆕 ENHANCED NORMAL CLASSIFICATION WITH CALIBRATION
 # -----------------------------
 
-def enhance_normal_classification_with_calibration(best_model, X_train, y_train, label_encoder, feature_names):
+def enhance_normal_classification_with_calibration(
+    best_model: Any, 
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    label_encoder: LabelEncoder, 
+    feature_names: List[str]
+) -> Any:
     """Enhanced Normal protection with confidence calibration"""
     normal_class_idx = list(label_encoder.classes_).index('Normal')
     
@@ -985,7 +989,13 @@ def enhance_normal_classification_with_calibration(best_model, X_train, y_train,
 # 🆕 FEATURE IMPORTANCE WITH CALIBRATION SUPPORT
 # -----------------------------
 
-def create_feature_importance_analysis(clinical_model, feature_names, X_train, y_train, label_encoder):
+def create_feature_importance_analysis(
+    clinical_model: Any, 
+    feature_names: List[str], 
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    label_encoder: LabelEncoder
+) -> pd.DataFrame:
     """CORRECTED Feature importance analysis with calibration support"""
     
     print("\n" + "="*80)
@@ -1056,7 +1066,7 @@ def create_feature_importance_analysis(clinical_model, feature_names, X_train, y
         # Return equal importance as fallback
         return create_fallback_importance(feature_names)
 
-def apply_mood_swing_dominance_fix(feature_importance_df):
+def apply_mood_swing_dominance_fix(feature_importance_df: pd.DataFrame) -> pd.DataFrame:
     """Apply mathematical correction for Mood Swing dominance"""
     
     mood_swing_row = feature_importance_df[feature_importance_df['feature'] == 'Mood Swing']
@@ -1099,7 +1109,7 @@ def apply_mood_swing_dominance_fix(feature_importance_df):
     
     return feature_importance_df     
 
-def create_fallback_importance(feature_names):
+def create_fallback_importance(feature_names: List[str]) -> pd.DataFrame:
     """Create fallback importance when calculation fails"""
     n_features = len(feature_names)
     equal_importance = 100.0 / n_features
@@ -1110,7 +1120,7 @@ def create_fallback_importance(feature_names):
         'importance_percentage': np.ones(n_features) * equal_importance
     }).sort_values('importance_percentage', ascending=False)
       
-def print_feature_importance_insights(feature_importance_df, label_encoder):
+def print_feature_importance_insights(feature_importance_df: pd.DataFrame, label_encoder: LabelEncoder):
     print("\n💡 CORRECTED CLINICAL INSIGHTS:")
     print("-" * 60)
     
@@ -1160,7 +1170,11 @@ def print_feature_importance_insights(feature_importance_df, label_encoder):
         else:
             print(f"   ✅ OPTIMAL: Well balanced")
 
-def apply_feature_engineering(X_train, X_test, feature_names):
+def apply_feature_engineering(
+    X_train: np.ndarray, 
+    X_test: np.ndarray, 
+    feature_names: List[str]
+) -> Tuple[np.ndarray, np.ndarray, List[str]]:
     """Apply feature engineering to reduce Mood Swing dominance"""
     
     print("🔧 Applying feature engineering to reduce correlations...")
@@ -1206,7 +1220,15 @@ def apply_feature_engineering(X_train, X_test, feature_names):
 # 🆕 COMPREHENSIVE VALIDATION WITH CALIBRATION
 # -----------------------------
 
-def perform_comprehensive_validation(clinical_model, X_train, y_train, X_test, y_test, feature_names, label_encoder):
+def perform_comprehensive_validation(
+    clinical_model: Any, 
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    X_test: np.ndarray, 
+    y_test: np.ndarray, 
+    feature_names: List[str], 
+    label_encoder: LabelEncoder
+) -> ValidationResults:
     """Comprehensive validation of the clinical model - WITH CALIBRATION"""
     
     print("\n" + "="*80)
@@ -1334,21 +1356,32 @@ def perform_comprehensive_validation(clinical_model, X_train, y_train, X_test, y
     print(f"   • Pathology missed: {pathology_missed}")
     print(f"   • Overall error rate: {1 - accuracy:.3f}")
     
-    return {
-        'actual': y_test_encoded,
-        'predictions': y_pred,
-        'probabilities': y_pred_proba,
-        'confusion_matrix': cm,
-        'normal_protection_rate': correct_normal/sum(normal_mask) if sum(normal_mask) > 0 else 0,
-        'false_pathology_rate': false_pathology/sum(normal_mask) if sum(normal_mask) > 0 else 0,
-        'confidence_scores': max_probs  # 🆕 ADDED for calibration analysis
-    }
+    return ValidationResults(
+        actual=y_test_encoded,
+        predictions=y_pred,
+        probabilities=y_pred_proba,
+        confusion_matrix=cm,
+        normal_protection_rate=correct_normal/sum(normal_mask) if sum(normal_mask) > 0 else 0,
+        false_pathology_rate=false_pathology/sum(normal_mask) if sum(normal_mask) > 0 else 0,
+        confidence_scores=max_probs
+    )
 
 # -----------------------------
 # 🆕 FINAL MODEL SAVING WITH CALIBRATION SUPPORT
 # -----------------------------
 
-def save_final_model_with_metadata(clinical_model, feature_names, label_encoder, feature_importance_df, validation_results, best_model_name, X_test, y_test, X_train, category_mappings):
+def save_final_model_with_metadata(
+    clinical_model: Any,
+    feature_names: List[str], 
+    label_encoder: LabelEncoder, 
+    feature_importance_df: pd.DataFrame, 
+    validation_results: ValidationResults, 
+    best_model_name: str, 
+    X_test: np.ndarray, 
+    y_test: np.ndarray, 
+    X_train: np.ndarray, 
+    category_mappings: Dict[str, Any]
+) -> Tuple[str, str, str, str, str]:
     """Save the final model with comprehensive metadata - WITH CALIBRATION"""
     
     print("\n💾 SAVING FINAL MODEL WITH METADATA...")
@@ -1383,11 +1416,11 @@ def save_final_model_with_metadata(clinical_model, feature_names, label_encoder,
             'normal_class_index': int(list(label_encoder.classes_).index('Normal')),
             'validation_metrics': {
                 'accuracy': float(accuracy_score(y_test_encoded, y_pred)),
-                'normal_protection_rate': float(validation_results.get('normal_protection_rate', 0)),
-                'false_pathology_rate': float(validation_results.get('false_pathology_rate', 0)),
-                'avg_confidence': float(np.mean(validation_results.get('confidence_scores', [0])))  # 🆕 ADDED
+                'normal_protection_rate': float(validation_results.normal_protection_rate),
+                'false_pathology_rate': float(validation_results.false_pathology_rate),
+                'avg_confidence': float(np.mean(validation_results.confidence_scores))
             },
-            'calibration_info': 'isotonic_calibration_applied'  # 🆕 ADDED
+            'calibration_info': 'isotonic_calibration_applied'
         }
     }
     
@@ -1552,8 +1585,6 @@ def main():
         selected_feature_names, label_encoder
     )
     
-
-    
     # Comprehensive validation
     print("\n🔬 STEP 13: Performing comprehensive validation...")
     validation_results = perform_comprehensive_validation(
@@ -1579,10 +1610,10 @@ def main():
     print("="*80)
     print(f"🏆 BEST MODEL: {best_model_name}")
     print(f"📊 FINAL PERFORMANCE:")
-    print(f"   • Test Accuracy: {accuracy_score(y_test_encoded, validation_results['predictions']):.3f}")
-    print(f"   • Normal Protection Rate: {validation_results['normal_protection_rate']:.1%}")
-    print(f"   • False Pathology Rate: {validation_results['false_pathology_rate']:.1%}")
-    print(f"   • Average Confidence: {np.mean(validation_results['confidence_scores']):.3f}")
+    print(f"   • Test Accuracy: {accuracy_score(y_test_encoded, validation_results.predictions):.3f}")
+    print(f"   • Normal Protection Rate: {validation_results.normal_protection_rate:.1%}")
+    print(f"   • False Pathology Rate: {validation_results.false_pathology_rate:.1%}")
+    print(f"   • Average Confidence: {np.mean(validation_results.confidence_scores):.3f}")
     print(f"   • Features Used: {len(selected_feature_names)}")
     print(f"🔧 CALIBRATION FEATURES:")
     print(f"   • Method: Isotonic calibration with 3-fold CV")
@@ -1598,11 +1629,12 @@ def main():
 
 def ensure_models_directory():
     """Ensure the models directory exists"""
-    if not os.path.exists('models'):
-        os.makedirs('models')
+    models_dir = Path('models')
+    if not models_dir.exists():
+        models_dir.mkdir()
         print("📁 Created 'models' directory")
 
-def check_feature_correlations(X_train, feature_names):
+def check_feature_correlations(X_train: np.ndarray, feature_names: List[str]):
     """Check correlations to understand Mood Swing dominance"""
     print("\n🔍 ANALYZING FEATURE CORRELATIONS...")
     
@@ -1626,7 +1658,13 @@ def check_feature_correlations(X_train, feature_names):
     return {}
 
 # Add this function after the existing visualization functions
-def create_diagnosis_feature_heatmap(clinical_model, X_train, y_train, feature_names, label_encoder):
+def create_diagnosis_feature_heatmap(
+    clinical_model: Any, 
+    X_train: np.ndarray, 
+    y_train: np.ndarray, 
+    feature_names: List[str], 
+    label_encoder: LabelEncoder
+):
     """Create a comprehensive heatmap showing the relationship between diagnoses and features in one chart"""
     
     print("\n🔥 CREATING COMPREHENSIVE DIAGNOSIS-FEATURE HEATMAP...")
@@ -1796,13 +1834,15 @@ def create_diagnosis_feature_heatmap(clinical_model, X_train, y_train, feature_n
         traceback.print_exc()
         return None
 
-
-
 # -----------------------------
 # 🆕 FINAL VISUALIZATION SUMMARY
 # -----------------------------
 
-def create_final_summary_visualization(validation_results, feature_importance_df, label_encoder):
+def create_final_summary_visualization(
+    validation_results: ValidationResults, 
+    feature_importance_df: pd.DataFrame, 
+    label_encoder: LabelEncoder
+):
     """Create final summary visualization"""
     
     print("\n📈 CREATING SUMMARY VISUALIZATION...")
@@ -1811,7 +1851,7 @@ def create_final_summary_visualization(validation_results, feature_importance_df
     fig.suptitle('Clinical Mental Health Model - Final Summary', fontsize=16, fontweight='bold')
     
     # 1. Confusion Matrix
-    cm = validation_results['confusion_matrix']
+    cm = validation_results.confusion_matrix
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
                 xticklabels=label_encoder.classes_, 
                 yticklabels=label_encoder.classes_, 
@@ -1831,8 +1871,8 @@ def create_final_summary_visualization(validation_results, feature_importance_df
     
     # 3. Normal Class Protection Analysis
     protection_data = {
-        'Correct Normal': validation_results['normal_protection_rate'] * 100,
-        'False Pathology': validation_results['false_pathology_rate'] * 100
+        'Correct Normal': validation_results.normal_protection_rate * 100,
+        'False Pathology': validation_results.false_pathology_rate * 100
     }
     axes[1, 0].bar(protection_data.keys(), protection_data.values(), color=['green', 'red'])
     axes[1, 0].set_ylabel('Percentage (%)')
@@ -1840,7 +1880,7 @@ def create_final_summary_visualization(validation_results, feature_importance_df
     axes[1, 0].grid(axis='y', alpha=0.3)
     
     # 4. Prediction Confidence Distribution
-    max_probs = np.max(validation_results['probabilities'], axis=1)
+    max_probs = np.max(validation_results.probabilities, axis=1)
     axes[1, 1].hist(max_probs, bins=20, alpha=0.7, color='purple', edgecolor='black')
     axes[1, 1].set_xlabel('Prediction Confidence')
     axes[1, 1].set_ylabel('Frequency')
@@ -1855,16 +1895,15 @@ def create_final_summary_visualization(validation_results, feature_importance_df
     
     print("✅ Summary visualization saved as 'models/clinical_model_summary.png'")
 
-
 # -----------------------------
 # 🆕 CREATE MODELS DIRECTORY IF NOT EXISTS
 # -----------------------------
 
-
 def ensure_models_directory():
     """Ensure the models directory exists"""
-    if not os.path.exists('models'):
-        os.makedirs('models')
+    models_dir = Path('models')
+    if not models_dir.exists():
+        models_dir.mkdir()
         print("📁 Created 'models' directory")
 
 # Update the execution section
