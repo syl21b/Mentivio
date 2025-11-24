@@ -1,0 +1,22 @@
+feature,importance,importance_percentage
+Mood Swing,0.2760416666666667,20.0
+Sexual Activity,0.02916666666666671,20.5504587155963
+Optimism,0.02395833333333336,16.880733944954095
+Sleep disorder,0.016666666666666698,11.743119266055032
+Suicidal thoughts,0.013541666666666707,9.541284403669724
+Sadness,0.012500000000000034,8.807339449541281
+Aggressive Response,0.011458333333333381,8.073394495412854
+Euphoric,0.00520833333333337,3.6697247706422162
+Exhausted,0.0010416666666666964,0.7339449541284591
+Risk_Assessment_Score,2.2204460492503132e-17,1.564497766811225e-14
+Concentration,0.0,0.0
+Ignore & Move-On,0.0,0.0
+Anorexia,0.0,0.0
+Nervous Breakdown,0.0,0.0
+Mood_Emotion_Composite,0.0,0.0
+Cognitive_Function_Score,0.0,0.0
+Overthinking,0.0,0.0
+Admit Mistakes,0.0,0.0
+Try Explanation,0.0,0.0
+Authority Respect,0.0,0.0
+Mood_Stability_Score,0.0,0.0

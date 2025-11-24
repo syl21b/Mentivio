@@ -1,0 +1,3027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mental Health Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fa;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Card and Layout */
+    .survey-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.05"><polygon points="0,0 1000,50 1000,100 0,100"></polygon></svg>');
+      background-size: cover;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero h1 {
+      font-size: 2.75rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+
+    /* Crisis Alert */
+    .crisis-alert {
+      background-color: #dc2626;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      margin: 40px 0;
+      border-radius: 10px;
+    }
+    
+    .crisis-alert p {
+      margin-bottom: 10px;
+    }
+    
+    .crisis-alert a {
+      color: white;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    .crisis-alert .note {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 10px;
+    }
+
+    /* Progress Bar */
+    .progress-text {
+      text-align: center;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      padding: 1.5rem 2rem 0;
+      font-size: 1.05rem;
+    }
+
+    .progress-container {
+      height: 10px;
+      background: #f1f5f9;
+      border-radius: 10px;
+      margin: 0 2rem 2.5rem;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    #progressFill {
+      height: 100%;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    /* Screens */
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Welcome Screen */
+    .welcome-content {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+
+    .welcome-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .welcome-content h2 {
+      font-size: 2rem;
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .welcome-content p {
+      font-size: 1.15rem;
+      color: #64748b;
+      line-height: 1.7;
+      margin-bottom: 2.5rem;
+    }
+
+    .features-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin: 2.5rem 0;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.25rem;
+      background: #f8fafc;
+      border-radius: 12px;
+      font-weight: 500;
+      color: #475569;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      border-color: #e2e8f0;
+    }
+
+    .feature-icon {
+      font-size: 1.4rem;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f8fafc;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-large {
+      padding: 1.25rem 2.5rem;
+      font-size: 1.15rem;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Question Box */
+    .question-box {
+      padding: 2.5rem 2rem;
+    }
+
+    .question {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid #f1f5f9;
+    }
+
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .question-number {
+      font-weight: 600;
+      color: #4f46e5;
+      font-size: 1.05rem;
+    }
+
+    .question-text {
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      color: #1e293b;
+      line-height: 1.5;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .option-btn {
+      padding: 1.25rem 1.5rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      background: white;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #475569;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #4f46e5;
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+
+    .option-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border-color: #c7d2fe;
+    }
+
+    .option-btn:hover::before {
+      transform: scaleY(1);
+    }
+
+    .option-btn.selected {
+      border-color: #4f46e5;
+      background: #f8faff;
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    .option-btn.selected::before {
+      transform: scaleY(1);
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2.5rem;
+    }
+
+    /* Loading Screen */
+    .loading-state {
+      text-align: center;
+      padding: 5rem 2rem;
+    }
+
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #4f46e5;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 1.5rem auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-details {
+      margin-top: 2.5rem;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .loading-step {
+      margin: 1rem 0;
+      color: #64748b;
+      padding: 0.75rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .loading-step.active {
+      color: #4f46e5;
+      font-weight: 600;
+      background: #f8faff;
+    }
+
+    /* Results Screen */
+    .result-box {
+      padding: 2.5rem 2rem;
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .results-header h2 {
+      font-size: 2rem;
+      color: #1e293b;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+
+    .results-meta {
+      color: #64748b;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .primary-result {
+      margin-bottom: 2.5rem;
+    }
+
+    .diagnosis-result {
+      background: white;
+      border-radius: 12px;
+      padding: 2.5rem;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+      border: 1px solid #f1f5f9;
+      transition: all 0.3s ease;
+    }
+
+    .diagnosis-result:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .diagnosis-normal {
+      border-left: 6px solid #10b981;
+    }
+
+    .diagnosis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .diagnosis-header h3 {
+      color: #64748b;
+      font-size: 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .confidence-badge {
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .diagnosis-main h1 {
+      font-size: 1.75rem;
+      color: #1e293b;
+      margin-bottom: 1.25rem;
+      font-weight: 700;
+    }
+
+    .diagnosis-description {
+      color: #64748b;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .additional-results {
+      display: grid;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .results-section h4 {
+      color: #1e293b;
+      margin-bottom: 1.25rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .diagnoses-list {
+      display: grid;
+      gap: 0.875rem;
+    }
+
+    .diagnosis-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border-left: 4px solid #4f46e5;
+      transition: all 0.3s ease;
+    }
+
+    .diagnosis-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .diagnosis-name {
+      font-weight: 500;
+      color: #1e293b;
+    }
+
+    .diagnosis-probability {
+      background: #e2e8f0;
+      padding: 0.4rem 1rem;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .technical-details {
+      background: #f8fafc;
+      padding: 1.5rem;
+      border-radius: 10px;
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+      font-size: 0.85rem;
+      color: #475569;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #e2e8f0;
+    }
+
+    .info-note {
+      background: #fffbeb;
+      padding: 1.25rem;
+      border-radius: 10px;
+      margin: 1.5rem 0;
+      border-left: 4px solid #f59e0b;
+      font-size: 0.95rem;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    /* Review Screen Styles */
+    .review-content {
+      display: grid;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .patient-info-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .patient-info-section h3 {
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+
+    .patient-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-weight: 500;
+      color: #475569;
+      font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select {
+      padding: 0.75rem 1rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .responses-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    }
+
+    .responses-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .response-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border-left: 4px solid #4f46e5;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .response-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      background: #f1f5f9;
+    }
+
+    .response-question {
+      flex: 1;
+    }
+
+    .response-category {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .response-text {
+      font-weight: 500;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    .response-answer {
+      color: #4f46e5;
+      font-weight: 600;
+    }
+
+    .response-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .edit-btn {
+      background: #4f46e5;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .edit-btn:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+    }
+
+    .review-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    /* Enhanced Results Screen for Saved Data */
+    .saved-info {
+      background: #f0f9ff;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      border-left: 4px solid #0ea5e9;
+    }
+
+    .saved-info h4 {
+      color: #0369a1;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .saved-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .saved-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .saved-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .saved-value {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    /* History Screen Styles */
+    .history-content {
+      margin-bottom: 2rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .history-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      border: 1px solid #f1f5f9;
+      transition: all 0.3s ease;
+    }
+
+    .history-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .history-patient {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .history-patient strong {
+      color: #1e293b;
+      font-size: 1.1rem;
+    }
+
+    .history-id {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+    }
+
+    .history-diagnosis {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .history-diagnosis.normal {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .history-diagnosis.depression,
+    .history-diagnosis.anxiety {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .history-diagnosis.bipolar-type-1,
+    .history-diagnosis.bipolar-type-2 {
+      background: #fce7f3;
+      color: #9d174d;
+    }
+
+    .history-confidence {
+      background: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+
+    .history-details {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .history-meta {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .history-date,
+    .history-time,
+    .history-number {
+      font-size: 0.85rem;
+      color: #64748b;
+      padding: 0.25rem 0.5rem;
+      background: #f8fafc;
+      border-radius: 6px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-view,
+    .btn-download,
+    .btn-delete {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-view {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .btn-view:hover {
+      background: #4338ca;
+    }
+
+    .btn-download {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-download:hover {
+      background: #059669;
+    }
+
+    .btn-delete {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-delete:hover {
+      background: #dc2626;
+    }
+
+    .no-history {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: #64748b;
+    }
+
+    .no-history h3 {
+      margin-bottom: 0.5rem;
+      color: #475569;
+    }
+
+    .welcome-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 2rem 0;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Login Section Styles */
+    .login-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      margin-bottom: 2rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .login-section h3 {
+      color: #1e293b;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-size: 1.3rem;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .login-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .login-actions .btn {
+      flex: 1;
+    }
+
+    .patient-history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .patient-welcome {
+      background: #f0f9ff;
+      padding: 1rem 1.5rem;
+      border-radius: 10px;
+      border-left: 4px solid #0ea5e9;
+      margin-bottom: 1.5rem;
+    }
+
+    .patient-welcome h4 {
+      color: #0369a1;
+      margin-bottom: 0.5rem;
+    }
+
+    .logout-btn {
+      background: #64748b;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      background: #475569;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .hero {
+        padding: 2.5rem 1.5rem;
+      }
+      
+      .hero h1 {
+        font-size: 2.25rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      .features-list {
+        grid-template-columns: 1fr;
+      }
+      
+      .question-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .question-text {
+        font-size: 1.2rem;
+      }
+      
+      .option-btn {
+        padding: 1rem 1.25rem;
+      }
+      
+      .diagnosis-main h1 {
+        font-size: 1.5rem;
+      }
+      
+      .results-actions {
+        flex-direction: column;
+      }
+      
+      .nav-buttons {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .nav-buttons button {
+        width: 100%;
+      }
+      
+      .welcome-content {
+        padding: 2rem 1.5rem;
+      }
+      
+      .question-box, .result-box {
+        padding: 1.5rem;
+      }
+      
+      .progress-container, .progress-text {
+        margin-left: 1.5rem;
+        margin-right: 1.5rem;
+      }
+      
+      .history-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .history-details {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .history-actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      
+      .welcome-actions {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 1.9rem;
+      }
+      
+      .welcome-content h2 {
+        font-size: 1.7rem;
+      }
+      
+      .diagnosis-result {
+        padding: 1.75rem;
+      }
+      
+      .diagnosis-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+    }
+    .response-value {
+    background: #e2e8f0;
+    color: #475569;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: 8px;
+}
+
+/* Ensure the response items look good in the results screen */
+#historicalResponsesList .response-item {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 1.25rem;
+    border-left: 4px solid #4f46e5;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+#historicalResponsesList .response-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: #f1f5f9;
+}
+
+#historicalResponsesList .response-category {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+#historicalResponsesList .response-text {
+    font-weight: 500;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+#historicalResponsesList .response-answer {
+    color: #4f46e5;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+}
+
+.response-value {
+    background: #e2e8f0;
+    color: #64748b;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-left: 8px;
+    opacity: 0.7;
+}
+
+  </style>
+</head>
+<body>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Mental Health Condition Visualizer</h1>
+      <p>Accurate clinical visualization of Bipolar I, Bipolar II, Depression, and normal mood states</p>
+    </div>
+  </section>
+
+  <!-- Crisis Alert -->
+  <div class="crisis-alert">
+    <p><i class="fas fa-exclamation-triangle"></i> 
+      <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
+      Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
+      or text <strong>HOME</strong> to <strong>741741</strong>.  
+      You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
+    </p>
+    <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
+    <p class="note">This assessment is not a substitute for professional or emergency care.</p>
+  </div>
+
+  <div class="container">
+    <div class="survey-card">
+      <!-- Welcome Screen -->
+      <div id="welcomeScreen" class="screen active">
+        <div class="welcome-content">
+          <div class="welcome-icon">🧠</div>
+          <h2>Welcome to Your Mental Health Assessment</h2>
+          <p>
+            This comprehensive assessment evaluates multiple domains of mental health 
+            including mood, anxiety, sleep patterns, cognitive function, and behavioral 
+            patterns. Your responses will help provide insights into your mental well-being.
+          </p>
+
+          <div class="features-list">
+            <div class="feature-item">
+              <span class="feature-icon">🔒</span>
+              <span>Completely Confidential</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">⚡</span>
+              <span>15-20 Minute Assessment</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">📊</span>
+              <span>Evidence-Based Analysis</span>
+            </div>
+            <div class="feature-item">
+              <span class="feature-icon">💡</span>
+              <span>Personalized Insights</span>
+            </div>
+          </div>
+
+          <div class="welcome-actions">
+            <button id="startBtn" class="btn btn-primary btn-large">
+              Start New Assessment
+              <span>→</span>
+            </button>
+            <button id="viewHistoryBtn" class="btn btn-secondary">
+              <i class="fas fa-history"></i>
+              View Assessment History
+            </button>
+          </div>
+
+          <div class="info-note">
+            <strong>Note:</strong> This assessment is for informational purposes only and 
+            is not a substitute for professional medical advice, diagnosis, or treatment.
+            All data is stored securely on our servers for your privacy.
+          </div>
+        </div>
+      </div>
+
+      <!-- Questions Screen -->
+      <div id="questionsScreen" class="screen">
+        <div class="progress-text" id="progressText">Question 1 of 20</div>
+        <div class="progress-container">
+          <div id="progressFill"></div>
+        </div>
+
+        <div class="question-box">
+          <div class="question">
+            <div class="question-header">
+              <div class="question-number" id="questionCategory">Mood & Emotions</div>
+            </div>
+            
+            <div class="question-text" id="questionText">
+              How often do you experience mood swings?
+            </div>
+
+            <div class="options" id="optionsContainer">
+              <!-- Options will be dynamically inserted here -->
+            </div>
+
+            <div class="nav-buttons">
+              <button id="prevBtn" class="btn btn-secondary" disabled>
+                ← Previous
+              </button>
+              <button id="nextBtn" class="btn btn-primary" disabled>
+                Next →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Screen -->
+      <div id="loadingScreen" class="screen">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <h2>Processing Your Assessment</h2>
+          <p>Analyzing your responses with our clinical assessment model...</p>
+          
+          <div class="loading-details">
+            <div class="loading-step">✓ Validating responses</div>
+            <div class="loading-step">✓ Calculating domain scores</div>
+            <div class="loading-step">✓ Analyzing patterns</div>
+            <div class="loading-step">✓ Generating insights</div>
+            <div class="loading-step">✓ Finalizing results</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Review Screen -->
+      <div id="reviewScreen" class="screen">
+        <div class="result-box">
+          <div class="results-header">
+            <h2>Review Your Answers</h2>
+            <p>Please review your responses before submitting. You can edit any answer by clicking on it.</p>
+          </div>
+
+          <div class="review-content">
+            <div class="patient-info-section">
+              <h3>Patient Information</h3>
+              <div class="patient-form">
+                <div class="form-group">
+                  <label for="patientName">Patient Name:</label>
+                  <input type="text" id="patientName" placeholder="Enter patient name">
+                </div>
+                <div class="form-group">
+                  <label for="patientNumber">Patient Number:</label>
+                  <input type="text" id="patientNumber" placeholder="Enter patient number">
+                </div>
+                <div class="form-group">
+                  <label for="patientAge">Age:</label>
+                  <input type="number" id="patientAge" placeholder="Enter age" min="1" max="120">
+                </div>
+                <div class="form-group">
+                  <label for="patientGender">Gender:</label>
+                  <select id="patientGender">
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="responses-section">
+              <h3>Your Responses</h3>
+              <div class="responses-list" id="responsesList">
+                <!-- Responses will be dynamically inserted here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="review-actions">
+            <button id="backToQuestionsBtn" class="btn btn-secondary">
+              ← Back to Questions
+            </button>
+            <button id="submitFinalBtn" class="btn btn-primary">
+              Submit Assessment ✓
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Screen -->
+      <div id="resultsScreen" class="screen">
+        <div class="result-box">
+          <div class="results-header">
+            <h2>Assessment Complete</h2>
+            <div class="results-meta">
+              <span id="resultsDate">November 19, 2024</span>
+              <span>•</span>
+              <span id="assessmentId">ID: MH-2024-001</span>
+            </div>
+          </div>
+
+          <div class="primary-result">
+            <div class="diagnosis-result diagnosis-normal">
+              <div class="diagnosis-header">
+                <h3>Primary Assessment Result</h3>
+                <div class="confidence-badge" id="confidenceBadge">
+                  85% Confidence
+                </div>
+              </div>
+              <div class="diagnosis-main">
+                <h1 id="primaryDiagnosis">Normal</h1>
+                <p class="diagnosis-description" id="diagnosisDescription">
+                  Your responses indicate typical mental well-being patterns with no 
+                  significant clinical concerns detected across the assessed domains.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        <div class="additional-results">
+ 
+
+            <!-- NEW: Questions & Answers Section -->
+            <div class="results-section" id="questionsAnswersSection" style="display: none;">
+                <h4>Assessment Questions & Answers</h4>
+                <div class="responses-list" id="historicalResponsesList">
+                <!-- Historical responses will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!--div class="results-section">
+              <h4>Technical Details</h4>
+              <div class="technical-details" id="technicalDetails">
+                < Technical details will be dynamically inserted here >
+              </div>
+            </div-->
+          </div>
+
+          <div class="info-note">
+            <strong>Important Disclaimer:</strong> This assessment is for informational 
+            purposes only and is not a substitute for professional medical advice, 
+            diagnosis, or treatment. Always seek the advice of qualified health 
+            providers with any questions about medical conditions.
+          </div>
+
+          <div class="results-actions">
+            <button id="newAssessmentBtn" class="btn btn-secondary">
+              ↻ New Assessment
+            </button>
+            <button id="downloadBtn" class="btn btn-primary">
+              📥 Download Report
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- History Screen -->
+      <div id="historyScreen" class="screen">
+        <div class="result-box">
+          <div class="results-header">
+            <h2>Assessment History</h2>
+            <p>View and manage your previous assessments</p>
+          </div>
+
+          <!-- Login Section -->
+          <div class="login-section" id="loginSection">
+            <h3>Access Your Assessment History</h3>
+            <div class="login-form">
+              <div class="form-group">
+                <label for="loginPatientName">Patient Name:</label>
+                <input type="text" id="loginPatientName" placeholder="Enter your name">
+              </div>
+              <div class="form-group">
+                <label for="loginPatientNumber">Patient Number:</label>
+                <input type="text" id="loginPatientNumber" placeholder="Enter your patient number">
+              </div>
+              <div class="login-actions">
+                <button class="btn btn-secondary" id="backToWelcomeFromLoginBtn">
+                  ← Back
+                </button>
+                <button class="btn btn-primary" id="loginBtn">
+                  <i class="fas fa-sign-in-alt"></i> Access History
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient History Section (initially hidden) -->
+          <div id="patientHistorySection" style="display: none;">
+            <div class="patient-history-header">
+              <div class="patient-welcome">
+                <h4>Welcome, <span id="loggedInPatientName"></span></h4>
+                <p>Patient Number: <strong id="loggedInPatientNumber"></strong></p>
+              </div>
+              <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </div>
+
+            <div class="history-content">
+              <div class="history-list" id="patientHistoryList">
+                <!-- Patient's assessments will be dynamically inserted here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="history-actions">
+            <button id="backToWelcomeBtn" class="btn btn-secondary">
+              ← Back to Welcome
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Assessment questions and configuration
+    const ASSESSMENT_CONFIG = {
+      questions: [
+        // ===== CORE MOOD & EMOTIONS =====
+        {
+          category: "Mood & Emotions",
+          question: "How often do you experience mood swings?",
+          feature: "Mood Swing",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+        {
+          category: "Mood & Emotions", 
+          question: "How frequently do you feel sad or down?",
+          feature: "Sadness",
+          type: "frequency",
+          options: [
+            { value: "Seldom", label: "Seldom", score: 0 },
+            { value: "Sometimes", label: "Sometimes", score: 1 },
+            { value: "Usually", label: "Usually", score: 2 },
+            { value: "Most-Often", label: "Most Often", score: 3 }
+          ]
+        },
+        {
+          category: "Mood & Emotions",
+          question: "Do you experience periods of extreme happiness or euphoria?",
+          feature: "Euphoric",
+          type: "frequency",
+          options: [
+            { value: "Seldom", label: "Seldom", score: 0 },
+            { value: "Sometimes", label: "Sometimes", score: 1 },
+            { value: "Usually", label: "Usually", score: 2 },
+            { value: "Most-Often", label: "Most Often", score: 3 }
+          ]
+        },
+
+        // ===== SLEEP & ENERGY =====
+        {
+          category: "Sleep & Energy",
+          question: "How often do you experience sleep issues?",
+          feature: "Sleep disorder",
+          type: "frequency",
+          options: [
+            { value: "Seldom", label: "Seldom", score: 0 },
+            { value: "Sometimes", label: "Sometimes", score: 1 },
+            { value: "Usually", label: "Usually", score: 2 },
+            { value: "Most-Often", label: "Most Often", score: 3 }
+          ]
+        },
+        {
+          category: "Sleep & Energy",
+          question: "How often do you feel exhausted or fatigued?",
+          feature: "Exhausted",
+          type: "frequency",
+          options: [
+            { value: "Seldom", label: "Seldom", score: 0 },
+            { value: "Sometimes", label: "Sometimes", score: 1 },
+            { value: "Usually", label: "Usually", score: 2 },
+            { value: "Most-Often", label: "Most Often", score: 3 }
+          ]
+        },
+
+        // ===== CRITICAL SAFETY QUESTIONS =====
+        {
+          category: "Safety Assessment",
+          question: "Have you experienced suicidal thoughts?",
+          feature: "Suicidal thoughts",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+        {
+          category: "Behavioral Patterns",
+          question: "Do you tend to respond aggressively in conflicts?",
+          feature: "Aggressive Response",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+        {
+          category: "Behavioral Patterns",
+          question: "Have you experienced a nervous breakdown?",
+          feature: "Nervous Breakdown",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+
+        // ===== ANXIETY & THINKING PATTERNS =====
+        {
+          category: "Anxiety & Worry",
+          question: "Do you find yourself overthinking or worrying excessively?",
+          feature: "Overthinking",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+
+        // ===== EATING PATTERNS =====
+        {
+          category: "Physical Health",
+          question: "Have you experienced significant changes in eating patterns or appetite?",
+          feature: "Anorexia",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+
+        // ===== SOCIAL & BEHAVIORAL PATTERNS =====
+        {
+          category: "Social Behavior",
+          question: "Do you generally respect authority figures?",
+          feature: "Authority Respect",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+        {
+          category: "Conflict Resolution",
+          question: "When faced with conflict, do you try to explain your perspective?",
+          feature: "Try Explanation",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+        {
+          category: "Conflict Resolution",
+          question: "Do you tend to ignore problems and move on?",
+          feature: "Ignore & Move-On",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+        {
+          category: "Self-Reflection",
+          question: "Are you able to admit your mistakes?",
+          feature: "Admit Mistakes",
+          type: "yes_no",
+          options: [
+            { value: "NO", label: "No", score: 0 },
+            { value: "YES", label: "Yes", score: 1 }
+          ]
+        },
+
+        // ===== COGNITIVE FUNCTION =====
+        {
+          category: "Cognitive Function",
+          question: "How would you rate your ability to concentrate?",
+          feature: "Concentration",
+          type: "concentration",
+          options: [
+            { value: "Cannot concentrate", label: "Cannot concentrate", score: 0 },
+            { value: "Poor concentration", label: "Poor concentration", score: 1 },
+            { value: "Average concentration", label: "Average concentration", score: 2 },
+            { value: "Good concentration", label: "Good concentration", score: 3 },
+            { value: "Excellent concentration", label: "Excellent concentration", score: 4 }
+          ]
+        },
+        {
+          category: "Cognitive Function",
+          question: "How would you describe your general outlook on life?",
+          feature: "Optimism",
+          type: "optimism",
+          options: [
+            { value: "Extremely pessimistic", label: "Extremely pessimistic", score: 0 },
+            { value: "Pessimistic", label: "Pessimistic", score: 1 },
+            { value: "Neutral outlook", label: "Neutral outlook", score: 2 },
+            { value: "Optimistic", label: "Optimistic", score: 3 },
+            { value: "Extremely optimistic", label: "Extremely optimistic", score: 4 }
+          ]
+        },
+
+        // ===== SEXUAL HEALTH =====
+        {
+          category: "Sexual Health",
+          question: "How would you describe your interest in sexual activity?",
+          feature: "Sexual Activity",
+          type: "sexual_activity",
+          options: [
+            { value: "No interest", label: "No interest", score: 0 },
+            { value: "Low interest", label: "Low interest", score: 1 },
+            { value: "Moderate interest", label: "Moderate interest", score: 2 },
+            { value: "High interest", label: "High interest", score: 3 },
+            { value: "Very high interest", label: "Very high interest", score: 4 }
+          ]
+        }
+      ]
+    };
+
+    class MentalHealthAssessment {
+      constructor() {
+        this.currentQuestionIndex = 0;
+        this.responses = {};
+        this.isSubmitting = false;
+        this.patientInfo = {
+          name: '',
+          number: '',
+          age: '',
+          gender: ''
+        };
+        
+        this.assessmentHistory = [];
+        this.currentPatient = null;
+        
+        this.initializeElements();
+        this.attachEventListeners();
+        this.attachKeyboardListeners();
+      }
+
+      initializeElements() {
+        // New login elements
+        this.loginSection = document.getElementById('loginSection');
+        this.patientHistorySection = document.getElementById('patientHistorySection');
+        this.loginPatientName = document.getElementById('loginPatientName');
+        this.loginPatientNumber = document.getElementById('loginPatientNumber');
+        this.loginBtn = document.getElementById('loginBtn');
+        this.logoutBtn = document.getElementById('logoutBtn');
+        this.backToWelcomeFromLoginBtn = document.getElementById('backToWelcomeFromLoginBtn');
+        this.loggedInPatientName = document.getElementById('loggedInPatientName');
+        this.loggedInPatientNumber = document.getElementById('loggedInPatientNumber');
+        this.patientHistoryList = document.getElementById('patientHistoryList');
+
+        // Existing screens
+        this.welcomeScreen = document.getElementById('welcomeScreen');
+        this.questionsScreen = document.getElementById('questionsScreen');
+        this.loadingScreen = document.getElementById('loadingScreen');
+        this.resultsScreen = document.getElementById('resultsScreen');
+        this.reviewScreen = document.getElementById('reviewScreen');
+        
+        // New history screen elements
+        this.historyScreen = document.getElementById('historyScreen');
+        this.viewHistoryBtn = document.getElementById('viewHistoryBtn');
+        this.backToWelcomeBtn = document.getElementById('backToWelcomeBtn');
+        
+        // Existing elements
+        this.responsesList = document.getElementById('responsesList');
+        this.backToQuestionsBtn = document.getElementById('backToQuestionsBtn');
+        this.submitFinalBtn = document.getElementById('submitFinalBtn');
+        this.patientName = document.getElementById('patientName');
+        this.patientNumber = document.getElementById('patientNumber');
+        this.patientAge = document.getElementById('patientAge');
+        this.patientGender = document.getElementById('patientGender');
+        this.progressFill = document.getElementById('progressFill');
+        this.progressText = document.getElementById('progressText');
+        this.questionCategory = document.getElementById('questionCategory');
+        this.questionText = document.getElementById('questionText');
+        this.optionsContainer = document.getElementById('optionsContainer');
+        this.startBtn = document.getElementById('startBtn');
+        this.prevBtn = document.getElementById('prevBtn');
+        this.nextBtn = document.getElementById('nextBtn');
+        this.newAssessmentBtn = document.getElementById('newAssessmentBtn');
+        this.downloadBtn = document.getElementById('downloadBtn');
+        this.primaryDiagnosis = document.getElementById('primaryDiagnosis');
+        this.diagnosisDescription = document.getElementById('diagnosisDescription');
+        this.confidenceBadge = document.getElementById('confidenceBadge');
+        this.diagnosesList = document.getElementById('diagnosesList');
+        this.technicalDetails = document.getElementById('technicalDetails');
+        this.resultsDate = document.getElementById('resultsDate');
+        this.assessmentId = document.getElementById('assessmentId');
+      }
+
+      attachEventListeners() {
+        // New login listeners
+        this.loginBtn.addEventListener('click', () => this.handleLogin());
+        this.logoutBtn.addEventListener('click', () => this.handleLogout());
+        this.backToWelcomeFromLoginBtn.addEventListener('click', () => this.showScreen(this.welcomeScreen));
+        
+        // Allow Enter key to submit login form
+        this.loginPatientName.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.handleLogin();
+        });
+        this.loginPatientNumber.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.handleLogin();
+        });
+
+        this.startBtn.addEventListener('click', () => this.startAssessment());
+        this.prevBtn.addEventListener('click', () => this.previousQuestion());
+        this.nextBtn.addEventListener('click', () => this.nextQuestion());
+        this.newAssessmentBtn.addEventListener('click', () => this.resetAssessment());
+        this.downloadBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.downloadReport();
+        });
+        
+        // New history screen listeners
+        this.viewHistoryBtn.addEventListener('click', () => this.showHistoryScreen());
+        this.backToWelcomeBtn.addEventListener('click', () => this.showScreen(this.welcomeScreen));
+        
+        // Existing review screen listeners
+        this.backToQuestionsBtn.addEventListener('click', () => this.backToQuestions());
+        this.submitFinalBtn.addEventListener('click', () => this.submitFinalAssessment());
+        
+        // Patient info change listeners
+        this.patientName.addEventListener('input', (e) => this.patientInfo.name = e.target.value);
+        this.patientNumber.addEventListener('input', (e) => this.patientInfo.number = e.target.value);
+        this.patientAge.addEventListener('input', (e) => this.patientInfo.age = e.target.value);
+        this.patientGender.addEventListener('change', (e) => this.patientInfo.gender = e.target.value);
+      }
+
+      // Backend API methods
+      async saveAssessmentToBackend(assessmentData) {
+        try {
+          console.log('💾 Saving assessment to backend (CSV):', assessmentData.id);
+          
+          //const response = await fetch('http://localhost:5001/api/save-assessment', {
+          const API_BASE_URL = window.location.origin; // Automatically uses current domain
+          const response = await fetch(`${API_BASE_URL}/api/predict`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              assessment_data: assessmentData
+            })
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+          }
+
+          const result = await response.json();
+          console.log('✅ Assessment saved to CSV successfully:', result);
+          return result;
+          
+        } catch (error) {
+          console.error('❌ Error saving assessment to backend:', error);
+          return { success: false, error: error.message, fallback: true };
+        }
+      }
+
+      async loadPatientAssessmentsFromBackend(patientName, patientNumber) {
+        try {
+          const response = await fetch('http://localhost:5001/api/get-patient-assessments', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              name: patientName,
+              number: patientNumber
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log('✅ Assessments loaded from CSV backend:', result.assessments.length);
+          return result.assessments;
+          
+        } catch (error) {
+          console.error('❌ Error loading assessments from backend:', error);
+          alert('Error loading assessment history. Please check your connection and try again.');
+          return [];
+        }
+      }
+
+      async deleteAssessmentFromBackend(patientNumber, assessmentId) {
+        try {
+          const response = await fetch('http://localhost:5001/api/delete-assessment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              patient_number: patientNumber,
+              assessment_id: assessmentId
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log('✅ Assessment deleted from CSV backend:', result);
+          return result;
+          
+        } catch (error) {
+          console.error('❌ Error deleting assessment from backend:', error);
+          alert('Error deleting assessment. Please try again.');
+          throw error;
+        }
+      }
+
+      showHistoryScreen() {
+        this.showScreen(this.historyScreen);
+        
+        // Reset login state when showing history screen
+        this.currentPatient = null;
+        this.loginSection.style.display = 'block';
+        this.patientHistorySection.style.display = 'none';
+        
+        // Clear login fields
+        this.loginPatientName.value = '';
+        this.loginPatientNumber.value = '';
+      }
+
+      async handleLogin() {
+        const name = this.loginPatientName.value.trim();
+        const number = this.loginPatientNumber.value.trim();
+        
+        if (!name || !number) {
+          alert('Please enter both your name and patient number.');
+          return;
+        }
+
+        try {
+          // Show loading state
+          this.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+          this.loginBtn.disabled = true;
+
+          // Load assessments from backend
+          const patientAssessments = await this.loadPatientAssessmentsFromBackend(name, number);
+
+          if (patientAssessments.length === 0) {
+            alert('No assessment history found for the provided name and patient number.');
+            return;
+          }
+
+          // Set current patient and show their history
+          this.currentPatient = { name, number };
+          this.showPatientHistory(patientAssessments);
+
+        } catch (error) {
+          console.error('Login error:', error);
+        } finally {
+          // Reset button state
+          this.loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access History';
+          this.loginBtn.disabled = false;
+        }
+      }
+
+      showPatientHistory(assessments) {
+        // Update UI to show patient history
+        this.loggedInPatientName.textContent = this.currentPatient.name;
+        this.loggedInPatientNumber.textContent = this.currentPatient.number;
+        
+        this.loginSection.style.display = 'none';
+        this.patientHistorySection.style.display = 'block';
+        
+        this.displayPatientHistory(assessments);
+      }
+
+
+    displayPatientHistory(assessments) {
+        this.patientHistoryList.innerHTML = '';
+
+        assessments.forEach((assessment) => {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-item';
+            
+            // Create safe class name for diagnosis
+            const diagnosisClass = assessment.primary_diagnosis 
+                ? assessment.primary_diagnosis.toLowerCase().replace(/\s+/g, '-')
+                : 'unknown';
+            
+            historyItem.innerHTML = `
+                <div class="history-header">
+                    <div class="history-patient">
+                        <strong>Assessment ID: ${assessment.id}</strong>
+                        <span class="history-id">Completed: ${new Date(assessment.timestamp).toLocaleDateString()}</span>
+                    </div>
+                    <div class="history-diagnosis ${diagnosisClass}">
+                        ${assessment.primary_diagnosis || 'Unknown'}
+                        <span class="history-confidence">${Math.round(assessment.confidence_percentage || assessment.confidence * 100)}%</span>
+                    </div>
+                </div>
+                <div class="history-details">
+                    <div class="history-meta">
+                        <span class="history-date">${new Date(assessment.timestamp).toLocaleDateString()}</span>
+                        <span class="history-time">${new Date(assessment.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn-view" onclick="mentalHealthAssessment.viewPatientAssessment('${assessment.id}', event)">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn-download" onclick="mentalHealthAssessment.downloadAssessmentFromData('${assessment.id}', event)">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                        <button class="btn-delete" onclick="mentalHealthAssessment.deletePatientAssessment('${assessment.id}', event)">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            this.patientHistoryList.appendChild(historyItem);
+        });
+    }
+
+    // Enhanced method to view assessment from CSV data
+    async viewPatientAssessment(assessmentId, event = null) {
+        try {
+            if (!this.currentPatient) {
+                alert('No patient logged in.');
+                return;
+            }
+
+            // Show loading state
+            let viewBtn;
+            if (event) {
+                viewBtn = event.target.closest('.btn-view');
+            } else {
+                // Fallback: find the button by assessment ID
+                viewBtn = document.querySelector(`button[onclick*="viewPatientAssessment('${assessmentId}'"]`);
+            }
+            
+            if (viewBtn) {
+                const originalText = viewBtn.innerHTML;
+                viewBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                viewBtn.disabled = true;
+            }
+
+            console.log('👀 Viewing assessment:', {
+                patient: this.currentPatient,
+                assessmentId: assessmentId
+            });
+
+            // Load the specific assessment from backend
+            const assessment = await this.loadSingleAssessmentFromBackend(
+                this.currentPatient.name, 
+                this.currentPatient.number, 
+                assessmentId
+            );
+
+            if (assessment) {
+                console.log('✅ Assessment loaded successfully:', assessment);
+                this.displayAssessmentDetails(assessment);
+            } else {
+                console.error('❌ Assessment not found');
+                alert('Assessment not found. Please try reloading your history.');
+            }
+
+        } catch (error) {
+            console.error('❌ Error viewing assessment:', error);
+            alert('Error loading assessment. Please try again.');
+        } finally {
+            // Reset button state
+            const viewBtns = document.querySelectorAll('.btn-view');
+            viewBtns.forEach(btn => {
+                btn.innerHTML = '<i class="fas fa-eye"></i> View';
+                btn.disabled = false;
+            });
+        }
+    }
+
+    // New method to load single assessment from backend
+    async loadSingleAssessmentFromBackend(patientName, patientNumber, assessmentId) {
+        try {
+            console.log('🔍 Loading single assessment:', {
+                patientName,
+                patientNumber, 
+                assessmentId
+            });
+
+            const response = await fetch('http://localhost:5001/api/get-single-assessment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: patientName,
+                    number: patientNumber,
+                    assessment_id: assessmentId
+                })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Backend error:', errorText);
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Failed to load assessment');
+            }
+            
+            console.log('✅ Single assessment loaded:', result.assessment);
+            return result.assessment;
+            
+        } catch (error) {
+            console.error('❌ Error loading single assessment:', error);
+            throw error; // Re-throw to handle in calling function
+        }
+    }
+
+    // New method to display historical questions and answers
+    displayHistoricalQuestionsAndAnswers(assessment) {
+        try {
+            const responsesList = document.getElementById('historicalResponsesList');
+            const questionsSection = document.getElementById('questionsAnswersSection');
+            
+            if (!responsesList || !questionsSection) {
+                console.error('Questions and answers section elements not found');
+                return;
+            }
+
+            responsesList.innerHTML = '';
+            
+            // Show the section
+            questionsSection.style.display = 'block';
+
+            // Get the responses from the assessment
+            const responses = assessment.responses || {};
+            
+            // Create response items for each question
+            ASSESSMENT_CONFIG.questions.forEach((question, index) => {
+                const responseItem = document.createElement('div');
+                responseItem.className = 'response-item';
+                
+                // Get the user's response for this question
+                const responseValue = responses[question.feature];
+                const selectedOption = question.options.find(opt => opt.value === responseValue);
+                
+                responseItem.innerHTML = `
+                    <div class="response-question">
+                        <div class="response-category">${question.category}</div>
+                        <div class="response-text">${question.question}</div>
+                        <div class="response-answer">
+                            <strong>Answer:</strong> ${selectedOption ? selectedOption.label : 'Not answered'}
+                        </div>
+                    </div>
+                `;
+                
+                responsesList.appendChild(responseItem);
+            });
+
+            console.log('✅ Historical questions and answers displayed');
+
+        } catch (error) {
+            console.error('❌ Error displaying historical questions and answers:', error);
+        }
+    }
+
+    async deletePatientAssessment(assessmentId, event = null) {
+        if (!this.currentPatient) {
+            alert('No patient logged in.');
+            return;
+        }
+
+        if (confirm('Are you sure you want to delete this assessment? This action cannot be undone.')) {
+            try {
+                let deleteBtn;
+                if (event) {
+                    deleteBtn = event.target.closest('.btn-delete');
+                    if (deleteBtn) {
+                        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        deleteBtn.disabled = true;
+                    }
+                }
+
+                await this.deleteAssessmentFromBackend(this.currentPatient.number, assessmentId);
+                
+                // Remove from local display
+                this.assessmentHistory = this.assessmentHistory.filter(a => a.id !== assessmentId);
+                
+                // Reload history
+                const updatedAssessments = await this.loadPatientAssessmentsFromBackend(
+                    this.currentPatient.name, 
+                    this.currentPatient.number
+                );
+                this.showPatientHistory(updatedAssessments);
+                
+            } catch (error) {
+                console.error('Error deleting assessment:', error);
+            } finally {
+                // Reset button state
+                const deleteBtns = document.querySelectorAll('.btn-delete');
+                deleteBtns.forEach(btn => {
+                    btn.innerHTML = '<i class="fas fa-trash"></i>';
+                    btn.disabled = false;
+                });
+            }
+        }
+    }
+
+      // Fixed downloadReport method - PDF only
+      async downloadReport() {
+        try {
+          console.log('📥 Download PDF report triggered');
+          
+          // Get current assessment data
+          let currentAssessment = null;
+          
+          // Try to get from assessment history
+          if (this.assessmentHistory && this.assessmentHistory.length > 0) {
+            currentAssessment = this.assessmentHistory[0];
+            console.log('✅ Found assessment in history:', currentAssessment);
+          } 
+          // Try to load from backend if we have a logged-in patient
+          else if (this.currentPatient) {
+            console.log('🔄 Loading assessments from backend for PDF...');
+            const assessments = await this.loadPatientAssessmentsFromBackend(
+              this.currentPatient.name, 
+              this.currentPatient.number
+            );
+            if (assessments.length > 0) {
+              currentAssessment = assessments[0];
+              console.log('✅ Loaded assessment from backend:', currentAssessment);
+            }
+          }
+          
+          if (!currentAssessment) {
+            alert('No assessment data available to download. Please complete an assessment first.');
+            return;
+          }
+
+          // Show loading state
+          const originalText = this.downloadBtn.innerHTML;
+          this.downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+          this.downloadBtn.disabled = true;
+
+          // Generate the PDF report using the backend
+          await this.generatePDFReport(currentAssessment);
+
+        } catch (error) {
+          console.error('❌ Error generating PDF report:', error);
+          alert('Failed to generate PDF report. Please try again. Error: ' + error.message);
+        } finally {
+          // Reset button state
+          this.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF Report';
+          this.downloadBtn.disabled = false;
+        }
+      }
+
+      // Enhanced method to generate the PDF report using backend
+      async generatePDFReport(assessment) {
+        try {
+          console.log('📄 Generating PDF for assessment:', assessment.id);
+          
+          // Ensure we have all necessary data
+          if (!assessment.patient_info) {
+            assessment.patient_info = this.patientInfo;
+          }
+          
+          if (!assessment.diagnosis_description) {
+            assessment.diagnosis_description = this.getDiagnosisDescription(assessment.primary_diagnosis);
+          }
+
+          // Send assessment data to backend for PDF generation
+          const response = await fetch('http://localhost:5001/api/generate-pdf-report', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              assessment_data: assessment
+            })
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
+          }
+
+          // Get the PDF blob
+          const pdfBlob = await response.blob();
+          
+          if (!pdfBlob || pdfBlob.size === 0) {
+            throw new Error('Received empty PDF file from server');
+          }
+          
+          // Create download link
+          const url = window.URL.createObjectURL(pdfBlob);
+          const a = document.createElement('a');
+          a.style.display = 'none';
+          a.href = url;
+          
+          // Set filename
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const patientName = assessment.patient_info?.name?.replace(/\s+/g, '_') || 'patient';
+          a.download = `Mental_Health_Report_${patientName}_${timestamp}.pdf`;
+          
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          
+          console.log('✅ PDF report generated successfully');
+          
+        } catch (error) {
+          console.error('❌ PDF generation failed:', error);
+          throw new Error(`PDF generation failed: ${error.message}`);
+        }
+      }
+
+// Enhanced download method that uses CSV data
+    async downloadAssessmentFromData(assessmentId, event = null) {
+        try {
+            if (!this.currentPatient) {
+                alert('No patient logged in.');
+                return;
+            }
+
+            // Show loading state
+            let downloadBtn;
+            if (event) {
+                downloadBtn = event.target.closest('.btn-download');
+            } else {
+                // Fallback: find the button by assessment ID
+                downloadBtn = document.querySelector(`[onclick*="${assessmentId}"]`);
+            }
+
+            if (downloadBtn) {
+                const originalText = downloadBtn.innerHTML;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                downloadBtn.disabled = true;
+            }
+
+            console.log('📥 Downloading assessment:', {
+                patient: this.currentPatient,
+                assessmentId: assessmentId
+            });
+
+            // Load the specific assessment from backend
+            const assessment = await this.loadSingleAssessmentFromBackend(
+                this.currentPatient.name, 
+                this.currentPatient.number, 
+                assessmentId
+            );
+
+            if (assessment) {
+                await this.generatePDFReport(assessment);
+            } else {
+                alert('Assessment not found. Please try reloading your history.');
+            }
+
+        } catch (error) {
+            console.error('Error downloading assessment:', error);
+            alert('Error downloading assessment. Please try again.');
+        } finally {
+            // Reset button state
+            const downloadBtns = document.querySelectorAll('.btn-download');
+            downloadBtns.forEach(btn => {
+                btn.innerHTML = '<i class="fas fa-download"></i> Download';
+                btn.disabled = false;
+            });
+        }
+    }
+
+      handleLogout() {
+        this.currentPatient = null;
+        this.assessmentHistory = [];
+        this.loginSection.style.display = 'block';
+        this.patientHistorySection.style.display = 'none';
+        this.loginPatientName.value = '';
+        this.loginPatientNumber.value = '';
+      }
+
+      // Core Assessment Methods
+      startAssessment() {
+        this.showScreen(this.questionsScreen);
+        this.updateProgress();
+        this.displayCurrentQuestion();
+        
+        // Focus on first option for keyboard navigation
+        setTimeout(() => {
+          const firstOption = this.optionsContainer.querySelector('.option-btn');
+          if (firstOption) {
+            firstOption.focus();
+          }
+        }, 100);
+      }
+
+      showScreen(screen) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        
+        // Show target screen
+        screen.classList.add('active');
+      }
+
+      updateProgress() {
+        const progress = ((this.currentQuestionIndex + 1) / ASSESSMENT_CONFIG.questions.length) * 100;
+        this.progressFill.style.width = `${progress}%`;
+        this.progressText.textContent = `Question ${this.currentQuestionIndex + 1} of ${ASSESSMENT_CONFIG.questions.length}`;
+      }
+
+      displayCurrentQuestion() {
+        const question = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+        
+        this.questionCategory.textContent = question.category;
+        this.questionText.textContent = question.question;
+        
+        this.renderOptions(question.options);
+        this.updateNavigationButtons();
+        
+        // Focus management for accessibility
+        setTimeout(() => {
+          const selectedOption = this.optionsContainer.querySelector('.option-btn.selected');
+          if (selectedOption) {
+            selectedOption.focus();
+          } else {
+            const firstOption = this.optionsContainer.querySelector('.option-btn');
+            if (firstOption) {
+              firstOption.focus();
+            }
+          }
+        }, 100);
+      }
+
+      renderOptions(options) {
+        this.optionsContainer.innerHTML = '';
+        
+        options.forEach((option, index) => {
+          const optionBtn = document.createElement('button');
+          optionBtn.className = 'option-btn';
+          optionBtn.textContent = option.label;
+          optionBtn.dataset.value = option.value;
+          optionBtn.dataset.score = option.score;
+          optionBtn.setAttribute('tabindex', '0');
+          optionBtn.setAttribute('aria-posinset', index + 1);
+          optionBtn.setAttribute('aria-setsize', options.length);
+          
+          // Add keyboard number indicator
+          const numberIndicator = document.createElement('span');
+          numberIndicator.className = 'keyboard-shortcut';
+          numberIndicator.textContent = `${index + 1}`;
+          numberIndicator.style.cssText = `
+            background: #4f46e5;
+            color: white;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+          `;
+          optionBtn.prepend(numberIndicator);
+          
+          // Check if this option is already selected
+          const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+          if (this.responses[currentQuestion.feature] === option.value) {
+            optionBtn.classList.add('selected');
+          }
+          
+          optionBtn.addEventListener('click', () => this.selectOption(optionBtn, option));
+          
+          // Add keyboard event for individual options
+          optionBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              this.selectOption(optionBtn, option);
+            }
+          });
+          
+          this.optionsContainer.appendChild(optionBtn);
+        });
+      }
+
+      selectOption(optionBtn, option) {
+        // Remove selected class from all options
+        this.optionsContainer.querySelectorAll('.option-btn').forEach(btn => {
+          btn.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        optionBtn.classList.add('selected');
+        
+        // Store response
+        const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+        this.responses[currentQuestion.feature] = option.value;
+        
+        // Enable next button
+        this.nextBtn.disabled = false;
+        
+        // Auto-advance after short delay if this is not the last question
+        if (this.currentQuestionIndex < ASSESSMENT_CONFIG.questions.length - 1) {
+          setTimeout(() => {
+            if (this.questionsScreen.classList.contains('active')) {
+              this.nextQuestion();
+            }
+          }, 500); // 0.5 second delay before auto-advance
+        }
+      }
+
+      updateNavigationButtons() {
+        this.prevBtn.disabled = this.currentQuestionIndex === 0;
+        
+        const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+        const hasResponse = this.responses[currentQuestion.feature] !== undefined;
+        this.nextBtn.disabled = !hasResponse;
+        
+        // Update next button text for last question
+        this.nextBtn.textContent = this.currentQuestionIndex === ASSESSMENT_CONFIG.questions.length - 1 
+          ? 'Review Answers' 
+          : 'Next';
+      }
+
+      previousQuestion() {
+        if (this.currentQuestionIndex > 0) {
+          this.currentQuestionIndex--;
+          this.updateProgress();
+          this.displayCurrentQuestion();
+        }
+      }
+
+      nextQuestion() {
+        const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+        
+        if (!this.responses[currentQuestion.feature]) {
+          alert('Please select an option before continuing.');
+          return;
+        }
+
+        if (this.currentQuestionIndex < ASSESSMENT_CONFIG.questions.length - 1) {
+          this.currentQuestionIndex++;
+          this.updateProgress();
+          this.displayCurrentQuestion();
+        } else {
+          this.showReviewScreen();
+        }
+      }
+
+      showReviewScreen() {
+        this.showScreen(this.reviewScreen);
+        this.displayReviewResponses();
+      }
+
+      displayReviewResponses() {
+        this.responsesList.innerHTML = '';
+        
+        ASSESSMENT_CONFIG.questions.forEach((question, index) => {
+          const responseItem = document.createElement('div');
+          responseItem.className = 'response-item';
+          responseItem.dataset.questionIndex = index;
+          
+          const response = this.responses[question.feature];
+          const selectedOption = question.options.find(opt => opt.value === response);
+          
+          responseItem.innerHTML = `
+            <div class="response-question">
+              <div class="response-category">${question.category}</div>
+              <div class="response-text">${question.question}</div>
+              <div class="response-answer">${selectedOption ? selectedOption.label : 'Not answered'}</div>
+            </div>
+            <div class="response-actions">
+              <button class="edit-btn" onclick="mentalHealthAssessment.editResponse(${index})">
+                Edit
+              </button>
+            </div>
+          `;
+          
+          this.responsesList.appendChild(responseItem);
+        });
+      }
+
+      editResponse(questionIndex) {
+        this.currentQuestionIndex = questionIndex;
+        this.showScreen(this.questionsScreen);
+        this.updateProgress();
+        this.displayCurrentQuestion();
+      }
+
+      backToQuestions() {
+        this.currentQuestionIndex = ASSESSMENT_CONFIG.questions.length - 1;
+        this.showScreen(this.questionsScreen);
+        this.updateProgress();
+        this.displayCurrentQuestion();
+      }
+
+      async submitFinalAssessment() {
+        // Validate patient info
+        if (!this.patientInfo.name.trim()) {
+          alert('Please enter patient name before submitting.');
+          return;
+        }
+
+        this.showScreen(this.loadingScreen);
+        this.isSubmitting = true;
+
+        try {
+          await this.simulateProcessing();
+          
+          console.log('Submitting final assessment:', {
+            responses: this.responses,
+            patientInfo: this.patientInfo
+          });
+          
+          const response = await fetch('http://localhost:5001/api/predict', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              responses: this.responses,
+              patientInfo: this.patientInfo
+            })
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          result.patientInfo = this.patientInfo;
+          this.displayResults(result);
+
+        } catch (error) {
+          console.error('Error submitting assessment:', error);
+          this.showError(`Failed to process assessment: ${error.message}`);
+        } finally {
+          this.isSubmitting = false;
+        }
+      }
+
+      async simulateProcessing() {
+        const steps = document.querySelectorAll('.loading-step');
+        
+        for (let i = 0; i < steps.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          steps[i].classList.add('active');
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      // Fixed displayResults method
+      async displayResults(result) {
+        // Show results screen first
+        this.showScreen(this.resultsScreen);
+        
+        // Clear any existing patient info first
+        const existingSavedInfo = document.querySelector('.saved-info');
+        if (existingSavedInfo) {
+          existingSavedInfo.remove();
+        }
+        
+        // Set results display
+        this.primaryDiagnosis.textContent = result.primary_diagnosis;
+        this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
+        
+        const confidencePercent = Math.round(result.confidence_percentage);
+        let confidenceColor = '#10b981';
+        if (confidencePercent < 50) confidenceColor = '#f59e0b';
+        if (confidencePercent < 30) confidenceColor = '#ef4444';
+        
+        this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
+        this.confidenceBadge.style.background = confidenceColor;
+        
+        this.resultsDate.textContent = new Date().toLocaleDateString();
+        this.assessmentId.textContent = `ID: ${result.assessment_id}`;
+        
+        // Create assessment data object FIRST
+        const assessmentData = {
+          id: result.assessment_id,
+          timestamp: new Date().toISOString(),
+          patient_info: this.patientInfo,
+          primary_diagnosis: result.primary_diagnosis,
+          confidence: result.confidence_percentage,
+          confidence_percentage: result.confidence_percentage,
+          all_diagnoses: result.all_diagnoses,
+          responses: this.responses,
+          processing_details: result.processing_details,
+          technical_details: result.technical_details,
+          clinical_insights: result.clinical_insights || null
+        };
+
+        // Save assessment to backend AND store locally
+        try {
+          const saveResult = await this.saveAssessmentToBackend(assessmentData);
+          console.log('✅ Assessment saved successfully:', saveResult);
+          
+          // Store in assessmentHistory for current session
+          this.assessmentHistory.unshift(assessmentData);
+          console.log('✅ Assessment added to session history');
+          
+        } catch (error) {
+          console.error('❌ Failed to save assessment:', error);
+          // Continue to show results even if save fails
+          this.assessmentHistory.unshift(assessmentData); // Still store locally
+        }
+        
+        // Display all the UI components
+        this.displayPatientInfo(this.patientInfo);
+        this.displayOtherDiagnoses(result.all_diagnoses);
+        this.displaySafetyWarnings(result.processing_details?.clinical_safety_warnings || []);
+        this.displayTechnicalDetails(result);
+        
+        // Remove the save button since it's now automatic
+        this.removeSaveButton();
+        
+        // Debug: Log current assessment state
+        console.log('Current assessment history:', this.assessmentHistory);
+        console.log('Most recent assessment:', this.assessmentHistory[0]);
+      }
+
+    displayPatientInfo(patientInfo) {
+        if (!patientInfo) {
+            console.warn('No patient info provided');
+            return;
+        }
+
+        const savedInfoHTML = `
+            <div class="saved-info">
+                <h4>Patient Information</h4>
+                <div class="saved-details">
+                    <div class="saved-detail">
+                        <span class="saved-label">Name</span>
+                        <span class="saved-value">${patientInfo.name || 'Not provided'}</span>
+                    </div>
+                    <div class="saved-detail">
+                    <span class="saved-label">Patient Number</span>
+                    <span class="saved-value">${patientInfo.number || 'Not provided'}</span>
+                </div>
+                <div class="saved-detail">
+                    <span class="saved-label">Age</span>
+                    <span class="saved-value">${patientInfo.age || 'Not provided'}</span>
+                </div>
+                <div class="saved-detail">
+                    <span class="saved-label">Gender</span>
+                    <span class="saved-value">${patientInfo.gender || 'Not provided'}</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const primaryResult = document.querySelector('.primary-result');
+    if (primaryResult) {
+        primaryResult.insertAdjacentHTML('beforebegin', savedInfoHTML);
+    }
+}
+
+      getDiagnosisDescription(diagnosis) {
+        const descriptions = {
+          'Normal': 'Your responses indicate typical mental well-being patterns with no significant clinical concerns detected.',
+          'Bipolar Type-1': 'Your responses show patterns that may indicate Bipolar Type-1 disorder. This is characterized by manic episodes that last at least 7 days.',
+          'Bipolar Type-2': 'Your responses suggest patterns consistent with Bipolar Type-2 disorder, characterized by hypomanic and depressive episodes.',
+          'Depression': 'Your responses align with patterns commonly seen in depressive disorders, including persistent sadness and loss of interest.'
+        };
+        
+        return descriptions[diagnosis] || 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.';
+      }
+
+    displayOtherDiagnoses(diagnoses) {
+        if (!this.diagnosesList) {
+            console.error('Diagnoses list element not found');
+            return;
+        }
+        
+        this.diagnosesList.innerHTML = '';
+        
+        if (!diagnoses || !Array.isArray(diagnoses)) {
+            console.warn('No diagnoses data available');
+            const noDataItem = document.createElement('div');
+            noDataItem.className = 'diagnosis-item';
+            noDataItem.innerHTML = `
+                <span class="diagnosis-name">No additional diagnoses available</span>
+                <span class="diagnosis-probability">-</span>
+            `;
+            this.diagnosesList.appendChild(noDataItem);
+            return;
+        }
+        
+        diagnoses.forEach(diagnosis => {
+            const diagnosisItem = document.createElement('div');
+            diagnosisItem.className = 'diagnosis-item';
+            
+            const diagnosisName = diagnosis.diagnosis || 'Unknown';
+            const confidence = diagnosis.confidence_percentage !== undefined ? 
+                Math.round(diagnosis.confidence_percentage) : 
+                (diagnosis.probability !== undefined ? Math.round(diagnosis.probability * 100) : 0);
+            
+            diagnosisItem.innerHTML = `
+                <span class="diagnosis-name">${diagnosisName}</span>
+                <span class="diagnosis-probability">${confidence}%</span>
+            `;
+            
+            this.diagnosesList.appendChild(diagnosisItem);
+        });
+    }
+
+
+      displaySafetyWarnings(warnings) {
+        if (warnings && warnings.length > 0) {
+          const warningsContainer = document.createElement('div');
+          warningsContainer.className = 'safety-warnings';
+          warningsContainer.innerHTML = `
+            <div class="warning-header">
+              <span style="color: #ef4444; font-weight: bold;">⚠️ Important Safety Notes</span>
+            </div>
+            ${warnings.map(warning => 
+              `<div class="warning-item">• ${warning}</div>`
+            ).join('')}
+          `;
+          
+          const primaryResult = document.querySelector('.primary-result');
+          primaryResult.parentNode.insertBefore(warningsContainer, primaryResult.nextSibling);
+          
+          const style = document.createElement('style');
+          style.textContent = `
+            .safety-warnings {
+              background: #fef2f2;
+              border: 1px solid #fecaca;
+              border-radius: 10px;
+              padding: 20px;
+              margin: 20px 0;
+              color: #dc2626;
+            }
+            .warning-header {
+              margin-bottom: 10px;
+              font-size: 1.1rem;
+            }
+            .warning-item {
+              margin: 5px 0;
+              line-height: 1.4;
+            }
+          `;
+          document.head.appendChild(style);
+        }
+      }
+
+    displayTechnicalDetails(result) {
+        if (!this.technicalDetails) {
+            console.warn('Technical details element not found');
+            return;
+        }
+        
+        const details = result.processing_details || {};
+        const technical = result.technical_details || {};
+        
+        let detailsHTML = `
+            <div><strong>Assessment ID:</strong> ${result.id || 'N/A'}</div>
+            <div><strong>Assessment Date:</strong> ${new Date(result.timestamp || new Date()).toLocaleDateString()}</div>
+            <div><strong>Processing Steps:</strong> ${details.preprocessing_steps || 'N/A'}</div>
+            <div><strong>Features Processed:</strong> ${details.total_features_processed || 'N/A'}</div>
+            <div><strong>Safety Checks:</strong> ${details.safety_checks_passed ? 'PASSED' : details.safety_check_status || 'N/A'}</div>
+        `;
+        
+        if (details.clinical_safety_warnings && details.clinical_safety_warnings.length > 0) {
+            detailsHTML += `<div><strong>Safety Warnings:</strong> ${details.clinical_safety_warnings.length}</div>`;
+        }
+        
+        if (technical.processing_log && technical.processing_log.length > 0) {
+            detailsHTML += `<div style="margin-top: 10px;"><strong>Processing Log:</strong></div>`;
+            technical.processing_log.forEach(log => {
+                detailsHTML += `<div style="margin-left: 10px; color: #64748b; font-size: 0.8rem;">• ${log}</div>`;
+            });
+        }
+        
+        this.technicalDetails.innerHTML = detailsHTML;
+    }
+
+      showError(message) {
+        alert(`Error: ${message}`);
+        this.showScreen(this.questionsScreen);
+      }
+
+      resetAssessment() {
+        this.currentQuestionIndex = 0;
+        this.responses = {};
+        this.isSubmitting = false;
+        this.patientInfo = {
+          name: '',
+          number: '',
+          age: '',
+          gender: ''
+        };
+        
+        this.patientName.value = '';
+        this.patientNumber.value = '';
+        this.patientAge.value = '';
+        this.patientGender.value = '';
+        
+        this.showScreen(this.welcomeScreen);
+        this.updateProgress();
+      }
+
+      // Keyboard navigation methods
+      attachKeyboardListeners() {
+        document.addEventListener('keydown', (e) => {
+          // Only handle keyboard events when on questions screen
+          if (!this.questionsScreen.classList.contains('active')) return;
+
+          switch(e.key) {
+            case 'Enter':
+              e.preventDefault();
+              this.handleEnterKey();
+              break;
+            case 'ArrowLeft':
+              e.preventDefault();
+              this.previousQuestion();
+              break;
+            case 'ArrowRight':
+              e.preventDefault();
+              this.nextQuestion();
+              break;
+            case 'Backspace':
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                this.previousQuestion();
+              }
+              break;
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+              e.preventDefault();
+              this.selectOptionByNumber(parseInt(e.key));
+              break;
+          }
+        });
+      }
+
+      handleEnterKey() {
+        const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+        
+        if (this.responses[currentQuestion.feature]) {
+          this.nextQuestion();
+        } else {
+          const firstOption = this.optionsContainer.querySelector('.option-btn');
+          if (firstOption) {
+            firstOption.focus();
+          }
+        }
+      }
+
+      selectOptionByNumber(number) {
+        const options = this.optionsContainer.querySelectorAll('.option-btn');
+        if (number >= 1 && number <= options.length) {
+          const option = options[number - 1];
+          const optionData = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex].options[number - 1];
+          this.selectOption(option, optionData);
+        }
+      }
+
+      removeSaveButton() {
+        const saveButton = document.querySelector('.save-results-btn');
+        if (saveButton) {
+          saveButton.remove();
+        }
+      }
+
+    displayAssessmentDetails(assessment) {
+        try {
+            console.log('📊 Displaying assessment details:', assessment);
+            
+            // First, show the results screen
+            this.showScreen(this.resultsScreen);
+            
+            // Clear any existing patient info first
+            const existingSavedInfo = document.querySelector('.saved-info');
+            if (existingSavedInfo) {
+                existingSavedInfo.remove();
+            }
+
+            // Populate results screen with historical data
+            this.primaryDiagnosis.textContent = assessment.primary_diagnosis || 'Unknown';
+            
+            // Use the diagnosis description from assessment or generate one
+            const diagnosisDesc = assessment.diagnosis_description || this.getDiagnosisDescription(assessment.primary_diagnosis);
+            this.diagnosisDescription.textContent = diagnosisDesc;
+            
+            // Calculate confidence percentage
+            let confidencePercent;
+            if (assessment.confidence_percentage !== undefined) {
+                confidencePercent = Math.round(assessment.confidence_percentage);
+            } else if (assessment.confidence !== undefined) {
+                confidencePercent = Math.round(assessment.confidence * 100);
+            } else {
+                confidencePercent = 0;
+            }
+            
+            // Set confidence badge color
+            let confidenceColor = '#10b981';
+            if (confidencePercent < 70) confidenceColor = '#f59e0b';
+            if (confidencePercent < 50) confidenceColor = '#ef4444';
+            
+            this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
+            this.confidenceBadge.style.background = confidenceColor;
+            
+            // Set dates and IDs
+            if (assessment.timestamp) {
+                this.resultsDate.textContent = new Date(assessment.timestamp).toLocaleDateString();
+            } else {
+                this.resultsDate.textContent = new Date().toLocaleDateString();
+            }
+            
+            this.assessmentId.textContent = `ID: ${assessment.id || 'Unknown'}`;
+            
+            // Display patient information
+            if (assessment.patient_info) {
+                this.displayPatientInfo(assessment.patient_info);
+            }
+            
+            // Display other diagnoses
+            if (assessment.all_diagnoses && Array.isArray(assessment.all_diagnoses)) {
+                this.displayOtherDiagnoses(assessment.all_diagnoses);
+            } else {
+                // Create a default diagnosis list if none exists
+                this.displayOtherDiagnoses([{
+                    diagnosis: assessment.primary_diagnosis || 'Unknown',
+                    probability: assessment.confidence || 0,
+                    confidence_percentage: confidencePercent
+                }]);
+            }
+            
+            // NEW: Display historical questions and answers
+            this.displayHistoricalQuestionsAndAnswers(assessment);
+            
+            // Display technical details if available
+            if (assessment.processing_details || assessment.technical_details) {
+                this.displayTechnicalDetails(assessment);
+            }
+            
+            // Update current state for potential report generation
+            this.responses = assessment.responses || {};
+            this.patientInfo = assessment.patient_info || {};
+            
+            console.log('✅ Assessment details displayed successfully');
+            
+        } catch (error) {
+            console.error('❌ Error displaying assessment details:', error);
+            alert('Error displaying assessment details. Please try again.');
+        }
+    }
+
+}
+
+    // Initialize the assessment when the page loads
+    let mentalHealthAssessment;
+    document.addEventListener('DOMContentLoaded', () => {
+      mentalHealthAssessment = new MentalHealthAssessment();
+    });
+  </script>
+  <script src="../js/components.js"></script>
+</body>
+</html>

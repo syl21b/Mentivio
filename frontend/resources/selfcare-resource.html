@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Self-Care Strategies - Mentivio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Resource Detail Styles */
+    .resource-detail-container {
+      padding: 40px 0;
+    }
+    
+    .resource-header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 30px;
+      background: linear-gradient(135deg, #48bb78 0%, #5c9e06 100%);
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .resource-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    
+    .resource-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .resource-subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .content-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .content-section h2 {
+      color: #4a5568;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .content-section h2 i {
+      color: #48bb78;
+    }
+    
+    .content-section p {
+      margin-bottom: 15px;
+      font-size: 1.05rem;
+    }
+    
+    /* Self-care specific styles */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .pillar-card {
+      padding: 25px;
+      background: #fff5f5;
+      border-radius: 10px;
+      border-left: 4px solid #48bb78;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .pillar-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .pillar-icon {
+      font-size: 2rem;
+      color: #48bb78;
+      margin-bottom: 15px;
+    }
+    
+    .pillar-card h3 {
+      color: #742a2a;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .pillar-card ul {
+      list-style-type: none;
+      margin-top: 10px;
+    }
+    
+    .pillar-card li {
+      padding: 6px 0;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .pillar-card li:before {
+      content: "•";
+      color: #48bb78;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .plan-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .plan-step {
+      padding: 25px;
+      background: #fff5f5;
+      border-radius: 10px;
+      border-top: 4px solid #48bb78;
+      transition: transform 0.3s;
+    }
+    
+    .plan-step:hover {
+      transform: translateY(-5px);
+    }
+    
+    .plan-step h3 {
+      color: #742a2a;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .toolkit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .toolkit-item {
+      padding: 25px;
+      background: #fff5f5;
+      border-radius: 10px;
+      border-left: 4px solid #48bb78;
+      transition: transform 0.3s;
+    }
+    
+    .toolkit-item:hover {
+      transform: translateY(-5px);
+    }
+    
+    .toolkit-item h3 {
+      color: #742a2a;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    
+    .toolkit-item ul {
+      list-style-type: none;
+    }
+    
+    .toolkit-item li {
+      padding: 8px 0;
+      position: relative;
+      padding-left: 25px;
+    }
+    
+    .toolkit-item li:before {
+      content: "✓";
+      color: #48bb78;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .barriers-solutions {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .barrier-item {
+      padding: 25px;
+      background: #fff5f5;
+      border-radius: 10px;
+      border-top: 4px solid #48bb78;
+      transition: transform 0.3s;
+    }
+    
+    .barrier-item:hover {
+      transform: translateY(-5px);
+    }
+    
+    .barrier-item h3 {
+      color: #742a2a;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      font-style: italic;
+    }
+    
+    .barrier-item strong {
+      color: #48bb78;
+    }
+    
+    .source-info {
+      margin-top: 40px;
+      padding: 20px;
+      background: #edf2f7;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #4a5568;
+    }
+    
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 30px 0;
+      justify-content: center;
+    }
+    
+    .nav-btn {
+      padding: 10px 20px;
+      background: #48bb78;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    
+    .nav-btn:hover {
+      background: #5c9e06;
+    }
+    
+    .stat-highlight {
+      background: #fed7d7;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #48bb78;
+    }
+    
+    .stat-highlight p {
+      color: #742a2a;
+      font-weight: 500;
+    }
+    
+    .dimensions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .dimension-item {
+      padding: 15px;
+      background: #fff5f5;
+      border-radius: 8px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    
+    .dimension-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .dimension-item h4 {
+      color: #742a2a;
+      margin-bottom: 5px;
+      font-size: 1rem;
+    }
+    
+    @media (max-width: 768px) {
+      .resource-header h1 {
+        font-size: 2rem;
+      }
+      
+      .pillars-grid, .plan-steps, .toolkit-grid, .barriers-solutions, .dimensions-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .quick-nav {
+        justify-content: center;
+      }
+    }
+
+
+.emergency-alert {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border-left: 6px solid #48bb78;
+  padding: 30px;
+  border-radius: 12px;
+  margin-top: 40px;
+  box-shadow: 0 8px 25px rgba(229, 62, 62, 0.15);
+}
+
+.emergency-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(229, 62, 62, 0.2);
+}
+
+.emergency-icon {
+  background: #48bb78;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.emergency-header h3 {
+  color: #5c9e06;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.alert-intro {
+  color: #742a2a;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.symptoms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 35px;
+}
+
+.symptom-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.symptom-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  border-color: #fed7d7;
+}
+
+.symptom-card.critical {
+  border-color: #48bb78;
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 50%);
+}
+
+.symptom-card.critical:hover {
+  border-color: #5c9e06;
+  box-shadow: 0 6px 20px rgba(229, 62, 62, 0.2);
+}
+
+.symptom-icon {
+  background: #fed7d7;
+  color: #48bb78;
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.symptom-card.critical .symptom-icon {
+  background: #48bb78;
+  color: white;
+}
+
+.symptom-text h4 {
+  color: #742a2a;
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.symptom-text p {
+  color: #742a2a;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.crisis-contact {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  border: 2px solid #fed7d7;
+}
+
+.crisis-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.crisis-header i {
+  color: #48bb78;
+  font-size: 1.5rem;
+}
+
+.crisis-header h4 {
+  color: #5c9e06;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.contact-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.contact-method {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: #fff5f5;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.contact-method:hover {
+  background: #fed7d7;
+  transform: translateX(5px);
+}
+
+.contact-icon {
+  background: #48bb78;
+  color: white;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-info strong {
+  color: #742a2a;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.contact-info span {
+  color: #48bb78;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .emergency-alert {
+    padding: 20px;
+    margin-top: 30px;
+  }
+  
+  .emergency-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .symptoms-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .contact-methods {
+    grid-template-columns: 1fr;
+  }
+  
+  .symptom-card {
+    padding: 15px;
+  }
+  
+  .crisis-contact {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .emergency-alert {
+    padding: 15px;
+  }
+  
+  .symptom-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .contact-method {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="resource-detail-container">
+      <div class="resource-header">
+        <div class="resource-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <h1>Self-Care Strategies</h1>
+        <p class="resource-subtitle">Comprehensive guide to developing sustainable self-care practices for mental and emotional wellbeing</p>
+      </div>
+
+      <div class="quick-nav">
+        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Self-Care?</button>
+        <button class="nav-btn" onclick="scrollToSection('dimensions')">Wellness Dimensions</button>
+        <button class="nav-btn" onclick="scrollToSection('pillars')">Self-Care Pillars</button>
+        <button class="nav-btn" onclick="scrollToSection('plan')">Create Your Plan</button>
+        <button class="nav-btn" onclick="scrollToSection('toolkit')">Practical Toolkit</button>
+        <button class="nav-btn" onclick="scrollToSection('barriers')">Overcoming Barriers</button>
+
+      </div>
+
+      <div class="resource-content">
+        <div class="content-section" id="what-is">
+          <h2><i class="fas fa-info-circle"></i> What is Self-Care?</h2>
+          <p>Self-care means taking the time to do things that help you live well and improve both your physical health and mental health. It's about actively preserving or improving your own health through intentional practices.</p>
+          
+          <div class="stat-highlight">
+            <p><i class="fas fa-chart-line"></i> 64% of Americans report engaging in self-care, and most wish they did more or want to start practicing self-care regularly.</p>
+          </div>
+          
+          <p>Self-care is not selfish—it's essential maintenance that helps you manage stress, lower your risk of illness, and increase your energy. Even small acts of self-care in your daily life can have a big impact on your overall wellbeing.</p>
+          
+          <p><strong>Remember:</strong> Self-care should not be something you force yourself to do. It's meant to refuel you, not deplete you further.</p>
+        </div>
+
+        <div class="content-section" id="dimensions">
+          <h2><i class="fas fa-cube"></i> The 8 Dimensions of Wellness</h2>
+          <p>Self-care should help you achieve balance across different areas of your life. SAMHSA identifies eight dimensions of wellness to focus on:</p>
+          
+          <div class="dimensions-grid">
+            <div class="dimension-item">
+              <h4>Emotional</h4>
+              <p>Coping effectively with life</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Spiritual</h4>
+              <p>Finding meaning and purpose</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Intellectual</h4>
+              <p>Recognizing creative abilities</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Physical</h4>
+              <p>Caring for your body</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Environmental</h4>
+              <p>Creating pleasant surroundings</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Financial</h4>
+              <p>Satisfaction with finances</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Occupational</h4>
+              <p>Personal satisfaction from work</p>
+            </div>
+            <div class="dimension-item">
+              <h4>Social</h4>
+              <p>Developing a support system</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section" id="pillars">
+          <h2><i class="fas fa-layer-group"></i> The 7 Pillars of Self-Care</h2>
+          <p>A comprehensive self-care practice addresses multiple aspects of your wellbeing. Here are key areas to focus on:</p>
+          
+          <div class="pillars-grid">
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-brain"></i>
+              </div>
+              <h3>Mental Self-Care</h3>
+              <p>Activities that stimulate your mind and support mental fitness</p>
+              <ul>
+                <li>Reading and learning new things</li>
+                <li>Puzzles and brain games</li>
+                <li>Mindfulness and meditation</li>
+                <li>Creative hobbies</li>
+                <li>Setting personal goals</li>
+              </ul>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-heartbeat"></i>
+              </div>
+              <h3>Physical Self-Care</h3>
+              <p>Taking care of your body through healthy habits</p>
+              <ul>
+                <li>Regular exercise (30 min daily)</li>
+                <li>Balanced nutrition and hydration</li>
+                <li>Adequate sleep (7-9 hours)</li>
+                <li>Regular health check-ups</li>
+                <li>Movement breaks throughout day</li>
+              </ul>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <h3>Social Self-Care</h3>
+              <p>Nurturing relationships and building community</p>
+              <ul>
+                <li>Quality time with loved ones</li>
+                <li>Setting healthy boundaries</li>
+                <li>Joining community groups</li>
+                <li>Regular social activities</li>
+                <li>Asking for help when needed</li>
+              </ul>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-spa"></i>
+              </div>
+              <h3>Emotional Self-Care</h3>
+              <p>Understanding and processing your feelings</p>
+              <ul>
+                <li>Journaling and reflection</li>
+                <li>Therapy or counseling</li>
+                <li>Emotional awareness practice</li>
+                <li>Creative expression</li>
+                <li>Positive self-talk</li>
+              </ul>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-briefcase"></i>
+              </div>
+              <h3>Professional Self-Care</h3>
+              <p>Creating balance and satisfaction in work life</p>
+              <ul>
+                <li>Setting work-life boundaries</li>
+                <li>Taking regular breaks</li>
+                <li>Professional development</li>
+                <li>Workplace stress management</li>
+                <li>Finding meaning in work</li>
+              </ul>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-tree"></i>
+              </div>
+              <h3>Environmental Self-Care</h3>
+              <p>Creating spaces that promote peace</p>
+              <ul>
+                <li>Organizing living spaces</li>
+                <li>Spending time in nature</li>
+                <li>Creating calming environments</li>
+                <li>Digital detox practices</li>
+                <li>Surrounding with positive stimuli</li>
+              </ul>
+            </div>
+            <div class="pillar-card">
+              <div class="pillar-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <h3>Spiritual Self-Care</h3>
+              <p>Nurturing your sense of purpose</p>
+              <ul>
+                <li>Meditation and prayer</li>
+                <li>Nature connection</li>
+                <li>Volunteer work</li>
+                <li>Values clarification</li>
+                <li>Mindfulness practices</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section" id="plan">
+          <h2><i class="fas fa-calendar-alt"></i> Creating Your Self-Care Plan</h2>
+          <p>Building a sustainable self-care routine takes planning and commitment. Follow these steps to create a personalized plan:</p>
+          
+          <div class="plan-steps">
+            <div class="plan-step">
+              <h3>Step 1: Self-Assessment</h3>
+              <p>Identify which areas of your life need more attention. Consider the 8 dimensions of wellness and rate your satisfaction in each area. Be honest about where you're struggling.</p>
+            </div>
+            <div class="plan-step">
+              <h3>Step 2: Set Realistic Goals</h3>
+              <p>Choose 2-3 specific, achievable self-care practices to start with. Remember that small, consistent actions are more sustainable than drastic changes. Focus on what brings you joy.</p>
+            </div>
+            <div class="plan-step">
+              <h3>Step 3: Schedule Your Self-Care</h3>
+              <p>Treat self-care activities as non-negotiable appointments. Block time in your calendar and protect this time from other commitments. Start with just 10-15 minutes daily.</p>
+            </div>
+            <div class="plan-step">
+              <h3>Step 4: Implement and Adjust</h3>
+              <p>Start your plan and regularly evaluate what's working. Be flexible and adjust your approach based on what feels most beneficial. Remember that needs change over time.</p>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px; padding: 15px; background: #fed7d7; border-radius: 8px;">
+            <p><strong>Create Your "No List":</strong> Identify things you'll stop doing to protect your wellbeing. This might include not checking emails after work, not overcommitting, or not engaging with negative media.</p>
+          </div>
+        </div>
+
+        <div class="content-section" id="toolkit">
+          <h2><i class="fas fa-tools"></i> Practical Self-Care Toolkit</h2>
+          <p>Here are specific self-care practices you can incorporate at different time intervals:</p>
+          
+          <div class="toolkit-grid">
+            <div class="toolkit-item">
+              <h3>Daily Quick Practices (5-10 minutes)</h3>
+              <ul>
+                <li>Deep breathing exercises (4-7-8 technique)</li>
+                <li>Gratitude journaling (3 things you're thankful for)</li>
+                <li>Stretching or short walk around the block</li>
+                <li>Mindful tea or coffee break</li>
+                <li>Positive affirmation practice</li>
+                <li>Hydration check and water break</li>
+                <li>Quick tidy of one small space</li>
+              </ul>
+            </div>
+            <div class="toolkit-item">
+              <h3>Weekly Maintenance (30-60 minutes)</h3>
+              <ul>
+                <li>Longer nature walk or hike</li>
+                <li>Creative hobby time (art, music, writing)</li>
+                <li>Social connection activity with friends</li>
+                <li>Digital detox period (no screens)</li>
+                <li>Home organization session</li>
+                <li>Meal planning and preparation</li>
+                <li>Longer meditation or yoga session</li>
+              </ul>
+            </div>
+            <div class="toolkit-item">
+              <h3>Monthly Reset (2+ hours)</h3>
+              <ul>
+                <li>Self-care retreat day or half-day</li>
+                <li>Professional development activity</li>
+                <li>Relationship check-in with partner/family</li>
+                <li>Life goal review and planning session</li>
+                <li>Personal pampering session</li>
+                <li>Volunteer work in community</li>
+                <li>Financial review and planning</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section" id="barriers">
+          <h2><i class="fas fa-exclamation-circle"></i> Overcoming Self-Care Barriers</h2>
+          <p>Many people struggle to maintain consistent self-care practices. Here are common barriers and how to overcome them:</p>
+          
+          <div class="barriers-solutions">
+            <div class="barrier-item">
+              <h3>"I don't have time for self-care"</h3>
+              <p><strong>Solution:</strong> Start with micro-self-care (1-5 minute practices). Remember that self-care actually saves time by preventing burnout and improving efficiency. Schedule it like any other important appointment.</p>
+            </div>
+            <div class="barrier-item">
+              <h3>"Self-care feels selfish"</h3>
+              <p><strong>Solution:</strong> Reframe self-care as necessary maintenance, not indulgence. You can't pour from an empty cup—caring for yourself enables you to better care for others. It's like putting on your oxygen mask first on an airplane.</p>
+            </div>
+            <div class="barrier-item">
+              <h3>"I don't know where to start"</h3>
+              <p><strong>Solution:</strong> Begin with basic physical needs (sleep, nutrition, movement) and build from there. Use the self-assessment to identify your most urgent needs. Start small and celebrate every step.</p>
+            </div>
+            <div class="barrier-item">
+              <h3>"Self-care costs too much"</h3>
+              <p><strong>Solution:</strong> Most effective self-care practices are free! Walking, meditation, journaling, deep breathing, and connecting with nature cost nothing. Focus on accessible practices that don't require spending money.</p>
+            </div>
+            <div class="barrier-item">
+              <h3>"I feel guilty taking time for myself"</h3>
+              <p><strong>Solution:</strong> Recognize that self-care makes you more present and effective in all areas of life. It's an investment in your ability to show up fully for others. Start with small, guilt-free time blocks.</p>
+            </div>
+            <div class="barrier-item">
+              <h3>"I'm too tired for self-care"</h3>
+              <p><strong>Solution:</strong> Choose restorative, low-energy self-care practices. Gentle stretching, listening to calming music, or taking a warm bath can be rejuvenating when you're exhausted.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="emergency-alert">
+  <div class="emergency-header">
+    <div class="emergency-icon">
+      <i class="fas fa-heartbeat"></i>
+    </div>
+    <h3>When to Seek Professional Help</h3>
+  </div>
+  
+  <div class="alert-content">
+    <p class="alert-intro">While self-care is important for maintaining mental health, it's not a substitute for professional treatment when needed. Seek professional help if you experience any of these symptoms for 2 weeks or more:</p>
+    
+    <div class="symptoms-grid">
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-bed"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Sleep Changes</h4>
+          <p>Difficulty sleeping or significant changes in sleep patterns</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-utensils"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Appetite Changes</h4>
+          <p>Changes in appetite or unplanned weight changes</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-sun"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Morning Struggles</h4>
+          <p>Difficulty getting out of bed because of mood</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-brain"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Concentration Issues</h4>
+          <p>Difficulty concentrating or making decisions</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Loss of Interest</h4>
+          <p>Loss of interest in activities you usually enjoy</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-tasks"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Task Completion</h4>
+          <p>Inability to complete usual tasks and activities</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card">
+        <div class="symptom-icon">
+          <i class="fas fa-wind"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Emotional Changes</h4>
+          <p>Feelings of irritability, frustration, or restlessness</p>
+        </div>
+      </div>
+      
+      <div class="symptom-card critical">
+        <div class="symptom-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="symptom-text">
+          <h4>Safety Concerns</h4>
+          <p>Thoughts of harming yourself or others</p>
+        </div>
+      </div>
+    </div>
+  
+  </div>
+</div>
+
+ 
+
+        
+        <div class="source-info">
+          <p><strong>Source Information:</strong> This content is based on information from the National Institute of Mental Health (NIMH) and Mental Health First Aid. For more detailed information, visit <a href="https://www.nimh.nih.gov/health/topics/caring-for-your-mental-health" target="_blank">NIMH Mental Health Care</a> and <a href="https://mentalhealthfirstaid.org/news/how-and-why-to-practice-self-care/" target="_blank">Mental Health First Aid Self-Care Guide</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+  </script>
+
+
+
+
+  <script src="/js/components.js" ></script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bipolar Disorder - Mentivio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Resource Detail Styles */
+    .resource-detail-container {
+      padding: 40px 0;
+    }
+    
+    .resource-header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 30px;
+      background: linear-gradient(135deg, #28b2f1 0%, #48bb78 100%);
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .resource-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    
+    .resource-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .resource-subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .content-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .content-section h2 {
+      color: #4a5568;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .content-section h2 i {
+      color: #28b2f1;
+    }
+    
+    .content-section p {
+      margin-bottom: 15px;
+      font-size: 1.05rem;
+    }
+    
+    /* Bipolar-specific styles */
+    .disorder-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .disorder-card {
+      padding: 25px;
+      background: #faf5ff;
+      border-radius: 10px;
+      border-left: 4px solid #28b2f1;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .disorder-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .disorder-card h3 {
+      color: #553c9a;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+    }
+    
+    .symptoms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .symptom-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      padding: 20px;
+      background: #faf5ff;
+      border-radius: 8px;
+      transition: transform 0.3s;
+    }
+    
+    .symptom-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .symptom-item i {
+      font-size: 1.5rem;
+      color: #28b2f1;
+      width: 30px;
+      text-align: center;
+      margin-top: 3px;
+    }
+    
+    .treatment-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .treatment-card {
+      padding: 25px;
+      background: #faf5ff;
+      border-radius: 10px;
+      border-top: 4px solid #28b2f1;
+      transition: transform 0.3s;
+    }
+    
+    .treatment-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .treatment-card h3 {
+      color: #553c9a;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    
+    .treatment-card ul {
+      list-style-type: none;
+    }
+    
+    .treatment-card li {
+      padding: 8px 0;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .treatment-card li:before {
+      content: "•";
+      color: #28b2f1;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .crisis-prevention {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .prevention-item {
+      padding: 20px;
+      background: #faf5ff;
+      border-radius: 8px;
+    }
+    
+    .prevention-item h3 {
+      color: #553c9a;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    
+    .prevention-item ul {
+      list-style-type: none;
+    }
+    
+    .prevention-item li {
+      padding: 8px 0;
+      position: relative;
+      padding-left: 25px;
+    }
+    
+    .prevention-item li:before {
+      content: "✓";
+      color: #28b2f1;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .emergency-alert {
+      background: #fff5f5;
+      border-left: 4px solid #e53e3e;
+      padding: 25px;
+      border-radius: 10px;
+      margin-top: 30px;
+    }
+    
+    
+    .source-info {
+      margin-top: 40px;
+      padding: 20px;
+      background: #edf2f7;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #4a5568;
+    }
+    
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 30px 0;
+      justify-content: center;
+    }
+    
+    .nav-btn {
+      padding: 10px 20px;
+      background: #28b2f1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    
+    .nav-btn:hover {
+      background: #48bb78;
+    }
+    
+    .episode-comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .episode-card {
+      padding: 25px;
+      border-radius: 10px;
+    }
+    
+    .episode-card.manic {
+      background: #fef5e7;
+      border-left: 4px solid #ed8936;
+    }
+    
+    .episode-card.depressive {
+      background: #ebf8ff;
+      border-left: 4px solid #4299e1;
+    }
+    
+    .episode-card h3 {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .episode-card.manic h3 {
+      color: #c05621;
+    }
+    
+    .episode-card.depressive h3 {
+      color: #2b6cb0;
+    }
+    
+    .episode-card ul {
+      list-style-type: none;
+    }
+    
+    .episode-card li {
+      padding: 8px 0;
+      position: relative;
+      padding-left: 20px;
+    }
+    
+    .episode-card li:before {
+      content: "•";
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    .episode-card.manic li:before {
+      color: #ed8936;
+    }
+    
+    .episode-card.depressive li:before {
+      color: #4299e1;
+    }
+    
+    .stat-highlight {
+      background: #faf5ff;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #28b2f1;
+    }
+    
+    .stat-highlight p {
+      color: #553c9a;
+      font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+      .resource-header h1 {
+        font-size: 2rem;
+      }
+      
+      .disorder-types, .symptoms-grid, .treatment-options, .crisis-prevention, .episode-comparison {
+        grid-template-columns: 1fr;
+      }
+      
+      .quick-nav {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="resource-detail-container">
+      <div class="resource-header">
+        <div class="resource-icon">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+        <h1>Bipolar Disorder</h1>
+        <p class="resource-subtitle">Understanding mood disorders, stabilization strategies, and comprehensive treatment approaches</p>
+      </div>
+
+      <div class="quick-nav">
+        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Bipolar?</button>
+        <button class="nav-btn" onclick="scrollToSection('types')">Types</button>
+        <button class="nav-btn" onclick="scrollToSection('symptoms')">Symptoms</button>
+        <button class="nav-btn" onclick="scrollToSection('treatment')">Treatment</button>
+        <button class="nav-btn" onclick="scrollToSection('crisis')">Crisis Prevention</button>
+      </div>
+
+      <div class="resource-content">
+        <div class="content-section" id="what-is">
+          <h2><i class="fas fa-info-circle"></i> What is Bipolar Disorder?</h2>
+          <p>Bipolar disorder is a mental health condition characterized by extreme mood swings that include emotional highs (mania or hypomania) and lows (depression). These mood changes go beyond normal ups and downs and can significantly impact daily functioning.</p>
+          
+          <div class="stat-highlight">
+            <p><i class="fas fa-chart-line"></i> Bipolar disorder affects approximately 5.7 million adult Americans, or about 2.6% of the U.S. population.</p>
+          </div>
+          
+          <p>While everyone experiences mood changes, people with bipolar disorder have shifts that are more severe, last longer, and interfere with their ability to work, maintain relationships, and function in daily life.</p>
+        </div>
+
+        <div class="content-section" id="types">
+          <h2><i class="fas fa-layer-group"></i> Types of Bipolar Disorder</h2>
+          <p>There are several types of bipolar disorder, each with distinct patterns of mood episodes:</p>
+          
+          <div class="disorder-types">
+            <div class="disorder-card">
+              <h3>Bipolar I Disorder</h3>
+              <p><strong>Characteristics:</strong> Defined by manic episodes that last at least 7 days, or by manic symptoms so severe that immediate hospital care is needed. Depressive episodes typically last at least 2 weeks.</p>
+              <p><strong>Key feature:</strong> At least one manic episode is required for diagnosis.</p>
+            </div>
+            <div class="disorder-card">
+              <h3>Bipolar II Disorder</h3>
+              <p><strong>Characteristics:</strong> Defined by a pattern of depressive episodes and hypomanic episodes, but not the full-blown manic episodes of Bipolar I.</p>
+              <p><strong>Key feature:</strong> Hypomanic episodes are less severe than manic episodes but still noticeable changes from normal behavior.</p>
+            </div>
+            <div class="disorder-card">
+              <h3>Cyclothymic Disorder</h3>
+              <p><strong>Characteristics:</strong> Defined by periods of hypomanic symptoms and depressive symptoms lasting for at least 2 years in adults (1 year in children).</p>
+              <p><strong>Key feature:</strong> Symptoms are less severe but more chronic than other types.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section" id="symptoms">
+          <h2><i class="fas fa-exclamation-triangle"></i> Symptoms and Mood Episodes</h2>
+          <p>Bipolar disorder involves distinct episodes of mood changes. Understanding these episodes is key to recognizing the condition:</p>
+          
+          <div class="episode-comparison">
+            <div class="episode-card manic">
+              <h3><i class="fas fa-rocket"></i> Manic/Hypomanic Episodes</h3>
+              <ul>
+                <li>Feeling unusually "high," euphoric, or irritable</li>
+                <li>Decreased need for sleep without feeling tired</li>
+                <li>Racing thoughts and rapid speech</li>
+                <li>Increased energy and activity levels</li>
+                <li>Impulsive or risky behavior (spending, sex, business decisions)</li>
+                <li>Inflated self-esteem or grandiosity</li>
+                <li>Difficulty concentrating</li>
+              </ul>
+              <p style="margin-top: 15px; font-style: italic;"><strong>Note:</strong> Hypomania is a less severe form of mania that doesn't cause major problems in daily functioning.</p>
+            </div>
+            
+            <div class="episode-card depressive">
+              <h3><i class="fas fa-cloud-rain"></i> Depressive Episodes</h3>
+              <ul>
+                <li>Intense sadness, hopelessness, or emptiness</li>
+                <li>Loss of interest in activities once enjoyed</li>
+                <li>Significant changes in appetite or weight</li>
+                <li>Sleeping too much or too little</li>
+                <li>Fatigue or loss of energy</li>
+                <li>Feelings of worthlessness or excessive guilt</li>
+                <li>Difficulty concentrating or making decisions</li>
+                <li>Thoughts of death or suicide</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="symptoms-grid" style="margin-top: 30px;">
+            <div class="symptom-item">
+              <i class="fas fa-bolt"></i>
+              <span><strong>Mixed Features:</strong> Symptoms of both mania and depression occurring simultaneously - often described as the most difficult part of bipolar disorder</span>
+            </div>
+            <div class="symptom-item">
+              <i class="fas fa-tachometer-alt"></i>
+              <span><strong>Rapid Cycling:</strong> Experiencing four or more mood episodes within a single year</span>
+            </div>
+            <div class="symptom-item">
+              <i class="fas fa-brain"></i>
+              <span><strong>Psychotic Symptoms:</strong> In severe episodes, may include hallucinations or delusions that match the mood state</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section" id="treatment">
+          <h2><i class="fas fa-stethoscope"></i> Comprehensive Treatment Approaches</h2>
+          <p>Bipolar disorder is a lifelong condition, but effective treatment can help manage symptoms and enable people to live healthy, productive lives. Treatment typically involves a combination of approaches:</p>
+          
+          <div class="treatment-options">
+            <div class="treatment-card">
+              <h3><i class="fas fa-pills"></i> Medication Management</h3>
+              <ul>
+                <li><strong>Mood Stabilizers:</strong> Lithium, Valproate, Lamotrigine - help prevent mood episodes</li>
+                <li><strong>Atypical Antipsychotics:</strong> Olanzapine, Quetiapine, Risperidone - manage manic and depressive symptoms</li>
+                <li><strong>Antidepressants:</strong> Used cautiously with mood stabilizers to avoid triggering mania</li>
+                <li><strong>Anti-anxiety medications:</strong> For managing anxiety symptoms</li>
+              </ul>
+              <p style="margin-top: 10px; font-size: 0.9rem;"><em>Medication must be taken consistently and monitored regularly by a healthcare provider.</em></p>
+            </div>
+            <div class="treatment-card">
+              <h3><i class="fas fa-comments"></i> Psychotherapy</h3>
+              <ul>
+                <li><strong>Cognitive Behavioral Therapy (CBT):</strong> Identify and change negative thought patterns</li>
+                <li><strong>Interpersonal and Social Rhythm Therapy (IPSRT):</strong> Stabilize daily rhythms and routines</li>
+                <li><strong>Family-Focused Therapy:</strong> Involve family in treatment and education</li>
+                <li><strong>Psychoeducation:</strong> Learn about the illness and management strategies</li>
+              </ul>
+            </div>
+            <div class="treatment-card">
+              <h3><i class="fas fa-heartbeat"></i> Lifestyle Management</h3>
+              <ul>
+                <li><strong>Sleep Regulation:</strong> Maintain consistent sleep schedule</li>
+                <li><strong>Stress Management:</strong> Regular exercise, meditation, relaxation techniques</li>
+                <li><strong>Mood Tracking:</strong> Use journals or apps to monitor symptoms</li>
+                <li><strong>Substance Avoidance:</strong> Avoid alcohol and recreational drugs</li>
+                <li><strong>Healthy Routine:</strong> Consistent daily schedule for meals, activities, sleep</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px; padding: 15px; background: #f0fff4; border-radius: 8px;">
+            <p><strong>Treatment Success:</strong> With proper treatment, most people with bipolar disorder can achieve significant symptom reduction and improved quality of life. However, it often takes time to find the right combination of treatments.</p>
+          </div>
+        </div>
+
+        <div class="content-section" id="crisis">
+          <h2><i class="fas fa-user-shield"></i> Crisis Prevention and Management</h2>
+          <p>Recognizing early warning signs and having a crisis plan can help prevent severe episodes and ensure prompt treatment:</p>
+          
+          <div class="crisis-prevention">
+            <div class="prevention-item">
+              <h3><i class="fas fa-binoculars"></i> Early Warning Signs</h3>
+              <ul>
+                <li>Decreased need for sleep without feeling tired</li>
+                <li>Racing thoughts and rapid speech</li>
+                <li>Increased energy and activity levels</li>
+                <li>Impulsive or risky behavior</li>
+                <li>Withdrawal from social activities</li>
+                <li>Changes in appetite or sleep patterns</li>
+                <li>Difficulty concentrating</li>
+                <li>Increased irritability or agitation</li>
+              </ul>
+            </div>
+            <div class="prevention-item">
+              <h3><i class="fas fa-clipboard-list"></i> Emergency Planning</h3>
+              <ul>
+                <li>Create a crisis plan with your treatment team</li>
+                <li>Share warning signs with trusted family/friends</li>
+                <li>Keep emergency contact numbers accessible</li>
+                <li>Know when to seek immediate medical help</li>
+                <li>Have hospital information readily available</li>
+                <li>Prepare advance directives when well</li>
+              </ul>
+            </div>
+          </div>
+          
+        
+
+        </div>
+
+      
+
+        <div class="source-info">
+          <p><strong>Source Information:</strong> This content is based on information from the National Institute of Mental Health (NIMH) and Cleveland Clinic. For more detailed information, visit <a href="https://www.nimh.nih.gov/health/publications/bipolar-disorder" target="_blank">NIMH Bipolar Disorder Information</a> and <a href="https://my.clevelandclinic.org/health/diseases/9294-bipolar-disorder" target="_blank">Cleveland Clinic Bipolar Disorder</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+  </script>
+
+
+
+
+  <script src="/js/components.js"></script>
+</body>
+</html>

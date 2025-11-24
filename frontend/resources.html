@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resources - Mentivio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fa;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      color: #ffffff;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    /* Resources Container */
+    .resources-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    
+    /* Content Sections */
+    .content-section {
+      background: white;
+      border-radius: 12px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .section-header h2 {
+      font-size: 2.2rem;
+      color: #1e293b;
+      margin-bottom: 1rem;
+    }
+    
+    .section-header p {
+      font-size: 1.1rem;
+      color: #64748b;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    /* Resource Categories */
+    .categories {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .category-btn {
+      padding: 0.75rem 1.5rem;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .category-btn.active, .category-btn:hover {
+      background: #4f46e5;
+      color: white;
+      border-color: #4f46e5;
+    }
+    
+    /* Resource Cards Grid */
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .resource-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .resource-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .resource-icon {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.5rem;
+    }
+    
+    /* Different colors for each resource icon background */
+  /* Smooth chained gradient colors */
+.resource-card:nth-child(1) .resource-icon { 
+    background: linear-gradient(135deg, #667eea, #764ba2); 
+}
+
+.resource-card:nth-child(2) .resource-icon { 
+    background: linear-gradient(135deg, #764ba2, #4facfe); 
+}
+
+.resource-card:nth-child(3) .resource-icon { 
+    background: linear-gradient(135deg, #4facfe, #00f2fe); 
+}
+
+.resource-card:nth-child(4) .resource-icon { 
+    background: linear-gradient(135deg, #00f2fe, #28b2f1); 
+}
+
+.resource-card:nth-child(5) .resource-icon { 
+    background: linear-gradient(135deg, #28b2f1, #48bb78); 
+}
+
+.resource-card:nth-child(6) .resource-icon { 
+    background: linear-gradient(135deg, #48bb78, #5c9e06); 
+}
+
+.resource-card:nth-child(7) .resource-icon { 
+    background: linear-gradient(135deg, #5c9e06, #c7c41b); 
+}
+
+.resource-card:nth-child(8) .resource-icon { 
+    background: linear-gradient(135deg, #c7c41b, #f7b017); 
+}
+    
+    .resource-content {
+      padding: 1.5rem;
+    }
+    
+    .resource-content h3 {
+      font-size: 1.3rem;
+      color: #1e293b;
+      margin-bottom: 0.75rem;
+    }
+    
+    .resource-content p {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    .resource-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4f46e5;
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s;
+    }
+    
+    .resource-link:hover {
+      color: #3730a3;
+      gap: 0.75rem;
+    }
+    
+    /* FAQ Section */
+    .faq-section {
+      margin: 3rem 0;
+      background: white;
+      border-radius: 12px;
+      padding: 3rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .faq-section h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #1e293b;
+      font-size: 2.2rem;
+    }
+    
+    .faq-grid {
+      display: grid;
+      gap: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .faq-item {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s ease;
+    }
+    
+    .faq-item:hover {
+      transform: translateY(-2px);
+    }
+    
+    .faq-question {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    .faq-question i {
+      color: #4f46e5;
+    }
+    
+    .faq-answer {
+      color: #64748b;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+    
+    /* Newsletter Section */
+    .newsletter-section {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      border-radius: 12px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin: 3rem 0;
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);
+    }
+    
+    .newsletter-section h2 {
+      margin-bottom: 1rem;
+      font-size: 2rem;
+    }
+    
+    .newsletter-section p {
+      margin-bottom: 1.5rem;
+      opacity: 0.9;
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .newsletter-form {
+      display: flex;
+      max-width: 400px;
+      margin: 0 auto;
+      gap: 0.5rem;
+    }
+    
+    .newsletter-form input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .newsletter-form input:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+    }
+    
+    .newsletter-form button {
+      background: #1e293b;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: background 0.3s;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .newsletter-form button:hover {
+      background: #0f172a;
+    }
+    
+    /* Support Resources Section */
+    .support-resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .support-resource-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border: 1px solid #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+    }
+    
+    .support-resource-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      background: white;
+    }
+    
+    .support-resource-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
+    }
+    
+    /* Different colors for support resource icons */
+    .support-resource-card:nth-child(1) .support-resource-icon { background: linear-gradient(135deg, #ef4444, #f87171); }
+    .support-resource-card:nth-child(2) .support-resource-icon { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+    .support-resource-card:nth-child(3) .support-resource-icon { background: linear-gradient(135deg, #10b981, #34d399); }
+    
+    .support-resource-card h3 {
+      color: #1e293b;
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      line-height: 1.3;
+    }
+    
+    .support-resource-card p {
+      color: #64748b;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      flex-grow: 1;
+    }
+    
+    .support-resource-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4f46e5;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      background: white;
+      border: 2px solid #e2e8f0;
+      margin-top: auto;
+    }
+    
+    .support-resource-link:hover {
+      gap: 0.75rem;
+      background: #4f46e5;
+      color: white;
+      border-color: #4f46e5;
+      transform: translateY(-2px);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .resources-container {
+        padding: 0 1rem;
+      }
+      
+      .content-section,
+      .faq-section {
+        padding: 2rem 1.5rem;
+      }
+      
+      .resources-grid,
+      .support-resources-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .support-resource-card {
+        padding: 2rem 1.5rem;
+      }
+      
+      .categories {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+      
+      .category-btn {
+        white-space: nowrap;
+      }
+      
+      .newsletter-form {
+        flex-direction: column;
+      }
+      
+      .section-header h2 {
+        font-size: 1.8rem;
+      }
+      
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .content-section,
+      .faq-section {
+        padding: 1.5rem 1rem;
+      }
+      
+      .support-resource-card {
+        padding: 1.5rem 1rem;
+      }
+      
+      .resource-icon {
+        height: 100px;
+        font-size: 2rem;
+      }
+      
+      .newsletter-section {
+        padding: 2rem 1rem;
+      }
+    }
+    
+    /* Animation for resource cards */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .resource-card,
+    .support-resource-card {
+      animation: fadeIn 0.5s ease-out;
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Educational Resources</h1>
+      <p>Access reliable information about mental health conditions, treatments, and coping strategies</p>
+    </div>
+  </section>
+
+  <div class="resources-container">
+
+    <!-- Resource Categories -->
+    <div class="categories">
+      <button class="category-btn active" data-category="all">All Resources</button>
+      <button class="category-btn" data-category="conditions">Mental Health Conditions</button>
+      <button class="category-btn" data-category="treatment">Treatment Options</button>
+      <button class="category-btn" data-category="coping">Coping Strategies</button>
+      <button class="category-btn" data-category="self-help">Self-Help Tools</button>
+    </div>
+
+    <!-- Resources Grid -->
+    <div class="resources-grid">
+      <!-- Depression -->
+      <div class="resource-card" data-category="conditions">
+        <div class="resource-icon">
+          <i class="fas fa-cloud"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Understanding Depression</h3>
+          <p>Learn about symptoms, causes, and evidence-based treatments for depression. Includes information on major depressive disorder and persistent depressive disorder.</p>
+          <a href="resources/depression-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Anxiety -->
+      <div class="resource-card" data-category="conditions">
+        <div class="resource-icon">
+          <i class="fas fa-wind"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Anxiety Disorders Guide</h3>
+          <p>Comprehensive information about different types of anxiety disorders including generalized anxiety, panic disorder, and social anxiety.</p>
+          <a href="resources/anxiety-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Therapy -->
+      <div class="resource-card" data-category="treatment">
+        <div class="resource-icon">
+          <i class="fas fa-hand-holding-heart"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Types of Therapy</h3>
+          <p>Explore different therapeutic approaches including CBT, DBT, psychodynamic therapy, and how to choose what's right for you.</p>
+          <a href="resources/therapy-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Mindfulness -->
+      <div class="resource-card" data-category="coping">
+        <div class="resource-icon">
+          <i class="fas fa-spa"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Mindfulness & Meditation</h3>
+          <p>Practical techniques for mindfulness, meditation, and grounding exercises to manage stress and improve mental wellbeing.</p>
+         <a href="resources/mindfulness-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Bipolar -->
+      <div class="resource-card" data-category="conditions">
+        <div class="resource-icon">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Bipolar Disorder</h3>
+          <p>Information about bipolar I, bipolar II, and cyclothymic disorder. Learn about mood stabilization and management strategies.</p>
+          <a href="resources/bipolar-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Self-Care -->
+      <div class="resource-card" data-category="self-help">
+        <div class="resource-icon">
+          <i class="fas fa-heart"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Self-Care Strategies</h3>
+          <p>Develop a personalized self-care routine with practical tips for physical, emotional, and mental wellbeing.</p>
+          <a href="resources/selfcare-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- PTSD -->
+      <div class="resource-card" data-category="conditions">
+        <div class="resource-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Trauma & PTSD</h3>
+          <p>Understanding trauma responses, PTSD symptoms, and effective treatments for trauma-related disorders.</p>
+          <a href="resources/ptsd-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Medication -->
+      <div class="resource-card" data-category="treatment">
+        <div class="resource-icon">
+          <i class="fas fa-pills"></i>
+        </div>
+        <div class="resource-content">
+          <h3>Mental Health Medications</h3>
+          <p>Information about common psychiatric medications, how they work, side effects, and what to discuss with your doctor.</p>
+          <a href="resources/medication-resource.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <div class="faq-question"><i class="fas fa-question-circle"></i> How do I know if I need professional help?</div>
+          <div class="faq-answer">If your symptoms are causing significant distress, impacting your daily functioning, or if you're having thoughts of harming yourself or others, it's important to seek professional help.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><i class="fas fa-question-circle"></i> What's the difference between a psychiatrist and a psychologist?</div>
+          <div class="faq-answer">Psychiatrists are medical doctors who can prescribe medication, while psychologists focus on psychotherapy and psychological testing. Both can provide therapy.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><i class="fas fa-question-circle"></i> How long does therapy typically take?</div>
+          <div class="faq-answer">The duration varies depending on individual needs, the type of therapy, and the issues being addressed. Some people benefit from short-term therapy (8-12 sessions), while others may engage in longer-term treatment.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><i class="fas fa-question-circle"></i> Are online therapy services effective?</div>
+          <div class="faq-answer">Research shows that online therapy can be as effective as in-person therapy for many conditions, particularly when provided by licensed professionals using evidence-based approaches.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Newsletter Section -->
+    <div class="newsletter-section">
+      <h2>Stay Informed</h2>
+      <p>Subscribe to our newsletter for mental health tips, new resources, and updates</p>
+      <form class="newsletter-form">
+        <input type="email" placeholder="Enter your email address" required>
+        <button type="submit">Subscribe</button>
+      </form>
+    </div>
+
+    <!-- Support Resources Section -->
+    <div class="content-section">
+      <div class="section-header">
+        <h2>Additional Support Resources</h2>
+        <p>Comprehensive mental health resources available 24/7 for ongoing support</p>
+      </div>
+      
+      <div class="support-resources-grid">
+        <div class="support-resource-card">
+          <div class="support-resource-icon">
+            <i class="fas fa-hands-helping"></i>
+          </div>
+          <h3>NAMI Helpline</h3>
+          <p>Free nationwide peer-support service providing information, resource referrals and support.</p>
+          <a href="https://www.nami.org" target="_blank" class="support-resource-link">
+            Visit NAMI <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="support-resource-card">
+          <div class="support-resource-icon">
+            <i class="fas fa-globe-americas"></i>
+          </div>
+          <h3>MentalHealth.gov</h3>
+          <p>U.S. government resource for mental health information, services and treatment options.</p>
+          <a href="https://www.mentalhealth.gov" target="_blank" class="support-resource-link">
+            Explore Resources <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+        
+        <div class="support-resource-card">
+          <div class="support-resource-icon">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <h3>Therapy Directories</h3>
+          <p>Find licensed therapists, psychologists, and counselors in your area for ongoing support.</p>
+          <a href="#" class="support-resource-link">
+            Find Therapists <i class="fas fa-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Category filtering
+      const categoryButtons = document.querySelectorAll('.category-btn');
+      const resourceCards = document.querySelectorAll('.resource-card');
+      
+      categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons
+          categoryButtons.forEach(btn => btn.classList.remove('active'));
+          // Add active class to clicked button
+          this.classList.add('active');
+          
+          const category = this.getAttribute('data-category');
+          
+          // Filter resources
+          resourceCards.forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+              card.style.display = '';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Newsletter form submission
+      const newsletterForm = document.querySelector('.newsletter-form');
+      if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const email = this.querySelector('input[type="email"]').value;
+          alert(`Thank you for subscribing with ${email}! You'll receive our next newsletter.`);
+          this.reset();
+        });
+      }
+    });
+  </script>
+<script src="../js/components.js"></script>
+
+</body>
+</html>

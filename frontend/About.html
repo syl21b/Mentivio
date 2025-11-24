@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - Mentivio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #7c3aed;
+      --primary-dark: #3730a3;
+      --secondary: #6366f1;
+      --accent: #a78bfa;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #16a34a;
+      --warning: #facc15;
+      --danger: #ef4444;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fa;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+      position: relative;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      color: #ffffff;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      opacity: 0.9;
+    }
+    
+    .mission-statement {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      font-size: 1.1rem;
+      font-style: italic;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    /* About Container */
+    .about-container {
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    
+    /* Content Sections */
+    .content-section {
+      background: white;
+      border-radius: 12px;
+      padding: 3rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .section-header h2 {
+      font-size: 2.2rem;
+      color: #1e293b;
+      margin-bottom: 1rem;
+    }
+    
+    .section-header p {
+      font-size: 1.1rem;
+      color: #64748b;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    /* Story Timeline */
+    .story-timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .story-timeline::before {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    }
+    
+    .timeline-item {
+      display: flex;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    
+    .timeline-year {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-right: 2rem;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .timeline-content {
+      flex: 1;
+      background: var(--light);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .timeline-content h3 {
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      font-size: 1.3rem;
+    }
+    
+    .timeline-content p {
+      color: var(--gray);
+      line-height: 1.6;
+    }
+    
+    /* Values Grid */
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .value-card {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid var(--gray-light);
+    }
+    
+    .value-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .value-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2rem;
+    }
+    
+    .value-card h3 {
+      color: var(--dark);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    
+    .value-card p {
+      color: var(--gray);
+      line-height: 1.6;
+    }
+    
+    /* Team Grid */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .team-member {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: transform 0.3s ease;
+      border: 1px solid var(--gray-light);
+    }
+    
+    .team-member:hover {
+      transform: translateY(-5px);
+    }
+    
+    .member-photo {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 2.5rem;
+    }
+    
+    .team-member h3 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-size: 1.4rem;
+    }
+    
+    .member-role {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    
+    .member-bio {
+      color: var(--gray);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-radius: 16px;
+      padding: 4rem 2rem;
+      text-align: center;
+      margin: 4rem 0;
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);
+    }
+    
+    .cta-section h2 {
+      margin-bottom: 1rem;
+      font-size: 2.2rem;
+    }
+    
+    .cta-section p {
+      margin-bottom: 2rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .cta-btn {
+      padding: 0.75rem 1.5rem;
+      border: 2px solid white;
+      border-radius: 8px;
+      background: transparent;
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+    }
+    
+    .cta-btn.primary {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero {
+        padding: 60px 20px;
+      }
+      
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .about-container {
+        padding: 0 1rem;
+      }
+      
+      .content-section {
+        padding: 2rem 1.5rem;
+      }
+      
+      .story-timeline::before {
+        left: 25px;
+      }
+      
+      .timeline-item {
+        flex-direction: column;
+      }
+      
+      .timeline-year {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        width: 50px;
+        height: 50px;
+        font-size: 0.8rem;
+      }
+      
+      .values-grid,
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .cta-section {
+        padding: 3rem 1.5rem;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .cta-btn {
+        width: 100%;
+        max-width: 250px;
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .content-section {
+        padding: 1.5rem 1rem;
+      }
+      
+      .section-header h2 {
+        font-size: 1.8rem;
+      }
+      
+      .cta-section {
+        padding: 2rem 1rem;
+      }
+      
+      .cta-section h2 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>About Mentivio</h1>
+      <p>Creating a compassionate approach to mental health awareness and education</p>
+      <div class="mission-statement">
+        "Our mission is to empower individuals with knowledge, tools, and resources to better understand their mental health and take proactive steps toward wellbeing."
+      </div>
+    </div>
+  </section>
+
+  <div class="about-container">
+
+    <!-- Our Story Section -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2>Our Story</h2>
+        <p>How Mentivio began and our journey toward making mental health resources more accessible</p>
+      </div>
+      
+      <div class="story-timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">2024</div>
+          <div class="timeline-content">
+            <h3>The Turning Point</h3>
+            <p>After my own battle with depression and loss, I realized how many people struggle silently. I witnessed friends and loved ones facing similar challenges, often feeling alone and unsure where to turn for help.</p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-year">2025</div>
+          <div class="timeline-content">
+            <h3>Building With Purpose</h3>
+            <p>I began collaborating with mental health professionals to create tools that bridge the gap between clinical care and everyday struggles. Our goal was simple: make mental health support accessible to everyone, regardless of their circumstances.</p>
+          </div>
+        </div>
+        
+        <div class="timeline-item">
+          <div class="timeline-year">Now</div>
+          <div class="timeline-content">
+            <h3>A Community of Hope</h3>
+            <p>Mentivio is my promise that no one should face their mental health journey alone. Born from personal experience, it's a platform built with compassion and understanding for anyone seeking support.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Our Values Section -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2>Our Values</h2>
+        <p>The principles that guide everything we do at Mentivio</p>
+      </div>
+      
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <h3>Privacy First</h3>
+          <p>Your mental health journey is personal. We ensure complete confidentiality and data security.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-graduation-cap"></i>
+          </div>
+          <h3>Empowerment</h3>
+          <p>We provide knowledge and tools to help you make informed decisions about your wellbeing.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-hands-helping"></i>
+          </div>
+          <h3>Compassion</h3>
+          <p>Every interaction is guided by empathy and understanding. We meet you where you are.</p>
+        </div>
+        
+        <div class="value-card">
+          <div class="value-icon">
+            <i class="fas fa-search"></i>
+          </div>
+          <h3>Evidence-Based</h3>
+          <p>Our resources are developed with mental health professionals using current research.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2>Our Team</h2>
+        <p>The people behind Mentivio</p>
+      </div>
+      
+      <div class="team-grid">
+        <div class="team-member">
+          <div class="member-photo">
+            <i class="fas fa-user"></i>
+          </div>
+          <h3>Shin Le</h3>
+          <div class="member-role">Founder</div>
+          <p class="member-bio">Created Mentivio after personal experience with mental health challenges. Believes everyone deserves access to compassionate support.</p>
+        </div>
+        
+        <div class="team-member">
+          <div class="member-photo">
+            <i class="fas fa-user-md"></i>
+          </div>
+          <h3>Mental Health Experts</h3>
+          <div class="member-role">Professional Advisors</div>
+          <p class="member-bio">Licensed professionals who ensure our content is accurate, sensitive, and truly helpful for those seeking support.</p>
+        </div>
+        
+        <div class="team-member">
+          <div class="member-photo">
+            <i class="fas fa-users"></i>
+          </div>
+          <h3>Our Community</h3>
+          <div class="member-role">Our Inspiration</div>
+          <p class="member-bio">Every person who shares their story and takes steps toward understanding their mental health fuels our mission.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+      <h2>Start Your Journey</h2>
+      <p>Take the first step toward understanding your mental health with our free, confidential tools</p>
+      <div class="cta-buttons">
+        <button class="cta-btn primary" onclick="location.href='MenHel_prediction.html'">Take Assessment</button>
+        <button class="cta-btn" onclick="location.href='resources.html'">Learn More</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+          });
+        });
+      });
+    });
+  </script>
+  <script src="../js/components.js"></script>
+
+</body>
+</html>

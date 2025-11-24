@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mindfulness & Meditation - Mentivio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Resource Detail Styles */
+    .resource-detail-container {
+      padding: 40px 0;
+    }
+    
+    .resource-header {
+      text-align: center;
+      margin-bottom: 50px;
+      padding: 30px;
+      background: linear-gradient(135deg, #00f2fe 0%, #28b2f1 100%);
+      color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .resource-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+    
+    .resource-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    .resource-subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    
+    .content-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .content-section h2 {
+      color: #4a5568;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .content-section h2 i {
+      color: #00f2fe;
+    }
+    
+    .content-section p {
+      margin-bottom: 15px;
+      font-size: 1.05rem;
+    }
+    
+    /* Mindfulness-specific styles */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 20px;
+      background: #f0fff4;
+      border-radius: 8px;
+      border-left: 4px solid #00f2fe;
+      transition: transform 0.3s;
+    }
+    
+    .benefit-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .benefit-item i {
+      font-size: 1.5rem;
+      color: #00f2fe;
+      width: 30px;
+      text-align: center;
+    }
+    
+    .meditation-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .step {
+      padding: 25px;
+      background: #f0fff4;
+      border-radius: 10px;
+      border-top: 4px solid #00f2fe;
+      transition: transform 0.3s;
+    }
+    
+    .step:hover {
+      transform: translateY(-5px);
+    }
+    
+    .step h3 {
+      color: #2d3748;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .exercises-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .exercise-card {
+      padding: 25px;
+      background: #f0fff4;
+      border-radius: 10px;
+      border-left: 4px solid #00f2fe;
+      transition: transform 0.3s;
+    }
+    
+    .exercise-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .exercise-card h3 {
+      color: #2d3748;
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+    }
+    
+    .try-exercise {
+      background: #00f2fe;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.3s;
+    }
+    
+    .try-exercise:hover {
+      background: #28b2f1;
+    }
+    
+    .mindfulness-tips {
+      list-style-type: none;
+      margin-top: 15px;
+    }
+    
+    .mindfulness-tips li {
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .mindfulness-tips li:last-child {
+      border-bottom: none;
+    }
+    
+    .mindfulness-tips li:before {
+      content: "🌱";
+      position: absolute;
+      left: 0;
+    }
+    
+    .source-info {
+      margin-top: 40px;
+      padding: 20px;
+      background: #edf2f7;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #4a5568;
+    }
+    
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 30px 0;
+      justify-content: center;
+    }
+    
+    .nav-btn {
+      padding: 10px 20px;
+      background: #00f2fe;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+    
+    .nav-btn:hover {
+      background: #28b2f1;
+    }
+    
+    .research-highlight {
+      background: #ebf8ff;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #4299e1;
+    }
+    
+    .research-highlight p {
+      color: #2b6cb0;
+      font-weight: 500;
+    }
+    
+    .practice-tip {
+      background: #fffaf0;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #ed8936;
+    }
+    
+    .practice-tip p {
+      color: #c05621;
+      font-weight: 500;
+    }
+    
+    .breathing-exercise {
+      background: #f0fff4;
+      padding: 25px;
+      border-radius: 10px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .breathing-exercise h3 {
+      color: #2d3748;
+      margin-bottom: 15px;
+    }
+    
+    .breathing-steps {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .breathing-step {
+      padding: 15px;
+      background: white;
+      border-radius: 8px;
+      min-width: 120px;
+    }
+    
+    .breathing-step .number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #00f2fe;
+      margin-bottom: 5px;
+    }
+    
+    @media (max-width: 768px) {
+      .resource-header h1 {
+        font-size: 2rem;
+      }
+      
+      .benefits-grid, .meditation-steps, .exercises-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .quick-nav {
+        justify-content: center;
+      }
+      
+      .breathing-steps {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="resource-detail-container">
+      <div class="resource-header">
+        <div class="resource-icon">
+          <i class="fas fa-spa"></i>
+        </div>
+        <h1>Mindfulness & Meditation</h1>
+        <p class="resource-subtitle">Practical techniques for stress management and improving mental wellbeing</p>
+      </div>
+
+      <div class="quick-nav">
+        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Mindfulness?</button>
+        <button class="nav-btn" onclick="scrollToSection('benefits')">Benefits</button>
+        <button class="nav-btn" onclick="scrollToSection('getting-started')">Getting Started</button>
+        <button class="nav-btn" onclick="scrollToSection('exercises')">Mindfulness Exercises</button>
+        <button class="nav-btn" onclick="scrollToSection('daily-tips')">Daily Tips</button>
+      </div>
+
+      <div class="resource-content">
+        <div class="content-section" id="what-is">
+          <h2><i class="fas fa-info-circle"></i> What is Mindfulness?</h2>
+          <p>Mindfulness is the practice of purposely focusing your attention on the present moment—and accepting it without judgment. It's about being fully aware of what's happening right now, both inside you and around you.</p>
+          
+          <div class="practice-tip">
+            <p><i class="fas fa-lightbulb"></i> <strong>Simple but not easy:</strong> While mindfulness seems simple, it takes practice to develop this skill. The goal isn't to empty your mind, but to observe your thoughts and feelings without getting carried away by them.</p>
+          </div>
+          
+          <p>You can practice mindfulness during meditation by focusing on your breath, or you can bring mindfulness to everyday activities like walking, eating, or even talking with others.</p>
+        </div>
+
+        <div class="content-section" id="benefits">
+          <h2><i class="fas fa-medal"></i> Health Benefits of Mindfulness</h2>
+          <p>Research shows that practicing mindfulness regularly can have significant positive effects on both mental and physical health:</p>
+          
+          <div class="benefits-grid">
+            <div class="benefit-item">
+              <i class="fas fa-heartbeat"></i>
+              <span>Reduces stress, anxiety, and depression symptoms</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-tint"></i>
+              <span>Lowers blood pressure and improves heart health</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-bed"></i>
+              <span>Improves sleep quality and reduces insomnia</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-brain"></i>
+              <span>Enhances focus, concentration, and memory</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-heart"></i>
+              <span>Helps manage chronic pain conditions</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-utensils"></i>
+              <span>Supports healthier eating habits and weight management</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-users"></i>
+              <span>Improves relationships and communication skills</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-shield-alt"></i>
+              <span>Strengthens immune system function</span>
+            </div>
+          </div>
+          
+          <div class="research-highlight">
+            <p><i class="fas fa-search"></i> <strong>Research shows:</strong> Mindfulness-based treatments have been proven effective for reducing anxiety and depression. Studies also show it can help prevent relapse of depression by helping people "de-center" from negative thoughts.</p>
+          </div>
+        </div>
+
+        <div class="content-section" id="getting-started">
+          <h2><i class="fas fa-play-circle"></i> Getting Started with Meditation</h2>
+          <p>Beginning a meditation practice is simpler than you might think. Here's a step-by-step guide to help you start:</p>
+          
+          <div class="meditation-steps">
+            <div class="step">
+              <h3>1. Find a Quiet Space</h3>
+              <p>Choose a comfortable place where you won't be interrupted. You can sit on a chair, cushion, or even lie down.</p>
+            </div>
+            <div class="step">
+              <h3>2. Set a Time Limit</h3>
+              <p>Start with just 5-10 minutes daily. Even short, consistent practice can make a difference.</p>
+            </div>
+            <div class="step">
+              <h3>3. Focus on Your Breath</h3>
+              <p>Notice the sensation of breathing in and out. Don't try to change your breathing—just observe it.</p>
+            </div>
+            <div class="step">
+              <h3>4. Notice When Your Mind Wanders</h3>
+              <p>When thoughts arise (and they will!), gently acknowledge them and return your attention to your breath.</p>
+            </div>
+            <div class="step">
+              <h3>5. Be Kind to Yourself</h3>
+              <p>Don't judge your experience. There's no "right" way to meditate. The practice is in returning your attention.</p>
+            </div>
+          </div>
+          
+          <div class="breathing-exercise">
+            <h3><i class="fas fa-wind"></i> Simple Breathing Exercise</h3>
+            <p>Try this 4-7-8 breathing technique to calm your nervous system:</p>
+            <div class="breathing-steps">
+              <div class="breathing-step">
+                <div class="number">4</div>
+                <div>Breathe in through your nose</div>
+              </div>
+              <div class="breathing-step">
+                <div class="number">7</div>
+                <div>Hold your breath</div>
+              </div>
+              <div class="breathing-step">
+                <div class="number">8</div>
+                <div>Exhale through your mouth</div>
+              </div>
+            </div>
+            <p>Repeat this cycle 4-5 times whenever you feel stressed or anxious.</p>
+          </div>
+        </div>
+
+        <div class="content-section" id="exercises">
+          <h2><i class="fas fa-tools"></i> Mindfulness Exercises</h2>
+          <p>You can practice mindfulness in many different ways. Here are some effective exercises to try:</p>
+          
+          <div class="exercises-grid">
+            <div class="exercise-card">
+              <h3>Body Scan Meditation</h3>
+              <p>Systematically focus attention on different parts of your body from head to toe, noticing any sensations without judgment.</p>
+              <button class="try-exercise" onclick="showExercise('body-scan')">Try This Exercise</button>
+            </div>
+            <div class="exercise-card">
+              <h3>Walking Meditation</h3>
+              <p>Focus on the physical sensations of walking—the movement of your feet, the air on your skin, the sights and sounds around you.</p>
+              <button class="try-exercise" onclick="showExercise('walking')">Try This Exercise</button>
+            </div>
+            <div class="exercise-card">
+              <h3>Loving-Kindness Meditation</h3>
+              <p>Develop feelings of goodwill and kindness toward yourself and others by repeating positive phrases and wishes.</p>
+              <button class="try-exercise" onclick="showExercise('loving-kindness')">Try This Exercise</button>
+            </div>
+            <div class="exercise-card">
+              <h3>Mindful Eating</h3>
+              <p>Pay close attention to the taste, texture, and smell of your food. Notice when you feel hungry and when you feel full.</p>
+              <button class="try-exercise" onclick="showExercise('eating')">Try This Exercise</button>
+            </div>
+            <div class="exercise-card">
+              <h3>Five Senses Exercise</h3>
+              <p>Notice one thing you can see, hear, smell, taste, and feel. This quickly brings you into the present moment.</p>
+              <button class="try-exercise" onclick="showExercise('senses')">Try This Exercise</button>
+            </div>
+            <div class="exercise-card">
+              <h3>RAIN Technique</h3>
+              <p>Recognize, Allow, Investigate, and Nurture difficult emotions as they arise without getting overwhelmed by them.</p>
+              <button class="try-exercise" onclick="showExercise('rain')">Try This Exercise</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="content-section" id="daily-tips">
+          <h2><i class="fas fa-lightbulb"></i> Daily Mindfulness Tips</h2>
+          <p>Incorporate mindfulness into your daily routine with these simple practices:</p>
+          
+          <ul class="mindfulness-tips">
+            <li><strong>Practice mindful eating</strong> - pay attention to taste, texture, and smell of your food without distractions</li>
+            <li><strong>Take mindful breaks</strong> during your workday - just 60 seconds of focused breathing can reset your mind</li>
+            <li><strong>Use mindfulness apps</strong> for guided practice - look for evidence-based programs from reputable sources</li>
+            <li><strong>Incorporate mindfulness into routine activities</strong> like brushing teeth, showering, or washing dishes</li>
+            <li><strong>Notice your body</strong> throughout the day - check in with physical sensations and tension</li>
+            <li><strong>Practice single-tasking</strong> instead of multitasking - give your full attention to one thing at a time</li>
+            <li><strong>Keep a mindfulness journal</strong> to track your practice and notice patterns</li>
+            <li><strong>Join a mindfulness group or class</strong> for support and guidance from experienced practitioners</li>
+          </ul>
+          
+          <div class="practice-tip">
+            <p><i class="fas fa-graduation-cap"></i> <strong>Learning resources:</strong> Look for mindfulness programs from medical schools and universities. If you struggle with apps or self-guided practice, consider finding a qualified teacher to guide you.</p>
+          </div>
+        </div>
+
+        
+        <div class="source-info">
+          <p><strong>Source Information:</strong> This content is based on information from the National Institutes of Health (NIH). For more detailed information, visit <a href="https://newsinhealth.nih.gov/2021/06/mindfulness-your-health" target="_blank">NIH Mindfulness for Your Health</a>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+    
+    function showExercise(exerciseType) {
+      const exercises = {
+        'body-scan': 'Body Scan: Lie down comfortably. Slowly bring attention to each part of your body from toes to head, noticing sensations without judgment.',
+        'walking': 'Walking Meditation: Walk slowly, noticing the sensation of your feet touching ground, the movement of your body, and your surroundings.',
+        'loving-kindness': 'Loving-Kindness: Repeat phrases like "May I be happy, may I be healthy" for yourself, then for others.',
+        'eating': 'Mindful Eating: Choose one piece of food. Examine it closely, smell it, taste it slowly, noticing all sensations.',
+        'senses': 'Five Senses: Notice 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, 1 thing you taste.',
+        'rain': 'RAIN: Recognize the emotion, Allow it to be there, Investigate it with curiosity, Nurture yourself with kindness.'
+      };
+      
+      alert(exercises[exerciseType]);
+    }
+  </script>
+
+
+    <script src="/js/components.js"></script>
+
+</body>
+</html>

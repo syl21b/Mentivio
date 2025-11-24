@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condition Visualizer - Mentivio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Your external stylesheet -->
+  <link rel="stylesheet" href="../css/MenHel_analogy.css">
+
+
+
+</head>
+<body>
+    
+
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Mental Health Condition Visualizer</h1>
+      <p>Accurate clinical visualization of Bipolar I, Bipolar II, Depression, and normal mood states</p>
+   </div>
+  </section>
+
+    <!-- Crisis Alert -->
+
+<div class="crisis-alert">
+  <p><i class="fas fa-exclamation-triangle"></i> 
+    <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
+    Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
+    or text <strong>HOME</strong> to <strong>741741</strong>.  
+    You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
+  </p>
+  
+  <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
+  
+  <p class="note">This assessment is not a substitute for professional or emergency care.</p>
+</div>
+      
+  <div class="container">
+
+    <div class="disclaimer-alert">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <h3>Important Disclaimer</h3>
+        <p>
+          This visualization is for <strong>educational purposes only</strong> and is <strong>not a diagnostic tool</strong>.
+          Mental health conditions are complex and vary between individuals.  
+        </p>
+      </div>
+    </div>
+
+    <div class="global-controls">
+      <button class="global-btn" onclick="startAllDemos()">
+        <i class="fas fa-play"></i> Start All Demos
+      </button>
+      <button class="global-btn stop" onclick="stopAllDemos()">
+        <i class="fas fa-stop"></i> Stop All Demos
+      </button>
+      <button class="global-btn" onclick="resetAllDemos()">
+        <i class="fas fa-redo"></i> Reset All
+      </button>
+    </div>
+
+    <div class="comparison-grid">
+      <!-- Bipolar I Card -->
+      <div class="visualization-card bipolar1-card">
+        <!-- Part 1: Title and Status -->
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-bolt"></i>
+            Bipolar I Disorder
+          </div>
+          <div class="condition-indicator bipolar1-indicator" id="bipolar1-indicator">EXTREME ROLLERCOASTER</div>
+        </div>
+
+        <!-- Part 2: Human and Mood Timeline -->
+        <div class="human-timeline-section">
+        <div class="human-container">
+            <div class="conversation-box" id="bipolar1-conversation">
+            "I can do anything! I don't need sleep for days!"
+            </div>
+            <!-- Walking human with emoji -->
+            <div class="walking-human" id="bipolar1-walking-human">
+              <div class="walker" id="bipolar1-walker">🚶‍➡️</div>
+            </div>
+            <div class="walking-path"></div>
+        </div>
+
+        <div class="timeline-section">
+            <div class="timeline-title">Mood Timeline</div>
+            <div class="timeline-container">
+            <div class="timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-path" id="bipolar1-timeline-path" style="background: #e74c3c; width: 90%"></div>
+                <div class="timeline-marker" id="bipolar1-timeline-marker" style="background: #e74c3c; left: 90%; top: 50%"></div>
+                <div class="timeline-labels">
+                <div class="timeline-label">Severe Depression</div>
+                <div class="timeline-label">Normal</div>
+                <div class="timeline-label">Mania</div>
+                </div>
+            </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Part 3: Key Metrics -->
+        <div class="metrics-container">
+          <div class="metrics-title">Key Metrics</div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-name">ENERGY LEVEL</div>
+              <div class="donut-chart" id="bipolar1-energy-chart">
+                <div class="donut-segment" id="bipolar1-energy-segment" style="--segment-color: #f39c12; --segment-rotation: 342deg;"></div>
+                <div class="donut-inner" id="bipolar1-energy-value">95%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">SLEEP NEED</div>
+              <div class="donut-chart" id="bipolar1-sleep-chart">
+                <div class="donut-segment" id="bipolar1-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 36deg;"></div>
+                <div class="donut-inner" id="bipolar1-sleep-value">10%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">FUNCTIONALITY</div>
+              <div class="donut-chart" id="bipolar1-function-chart">
+                <div class="donut-segment" id="bipolar1-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 72deg;"></div>
+                <div class="donut-inner" id="bipolar1-function-value">30%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">HOSPITALIZATION RISK</div>
+              <div class="donut-chart" id="bipolar1-hospital-chart">
+                <div class="donut-segment" id="bipolar1-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 288deg;"></div>
+                <div class="donut-inner" id="bipolar1-hospital-value">High</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 4: Controls -->
+        <div class="controls">
+          <button class="control-btn" onclick="startBipolar1Demo()">
+            <i class="fas fa-play"></i> Start
+          </button>
+          <button class="control-btn" onclick="stopBipolar1Demo()">
+            <i class="fas fa-stop"></i> Stop
+          </button>
+          <button class="control-btn" onclick="resetBipolar1Demo()">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Bipolar II Card -->
+      <div class="visualization-card bipolar2-card">
+        <!-- Part 1: Title and Status -->
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-wave-square"></i>
+            Bipolar II Disorder
+          </div>
+          <div class="condition-indicator bipolar2-indicator" id="bipolar2-indicator">MILD HIGHS, DEEP LOWS</div>
+        </div>
+
+        <!-- Part 2: Human and Mood Timeline -->
+        <div class="human-timeline-section">
+          <div class="human-container">
+            <div class="conversation-box" id="bipolar2-conversation">
+              "I'm so productive! But I know this won't last..."
+            </div>
+            <div class="walking-human" id="bipolar2-walking-human">
+              <div class="walker" id="bipolar2-walker">🚶‍➡️</div>
+            </div>
+          </div>
+
+          <div class="timeline-section">
+            <div class="timeline-title">Mood Timeline</div>
+            <div class="timeline-container">
+              <div class="timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-path" id="bipolar2-timeline-path" style="background: #f39c12; width: 70%"></div>
+                <div class="timeline-marker" id="bipolar2-timeline-marker" style="background: #f39c12; left: 70%; top: 50%"></div>
+                <div class="timeline-labels">
+                  <div class="timeline-label">Severe Depression</div>
+                  <div class="timeline-label">Normal</div>
+                  <div class="timeline-label">Hypomania</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 3: Key Metrics -->
+        <div class="metrics-container">
+          <div class="metrics-title">Key Metrics</div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-name">ENERGY LEVEL</div>
+              <div class="donut-chart" id="bipolar2-energy-chart">
+                <div class="donut-segment" id="bipolar2-energy-segment" style="--segment-color: #f39c12; --segment-rotation: 270deg;"></div>
+                <div class="donut-inner" id="bipolar2-energy-value">75%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">SLEEP NEED</div>
+              <div class="donut-chart" id="bipolar2-sleep-chart">
+                <div class="donut-segment" id="bipolar2-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 144deg;"></div>
+                <div class="donut-inner" id="bipolar2-sleep-value">40%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">FUNCTIONALITY</div>
+              <div class="donut-chart" id="bipolar2-function-chart">
+                <div class="donut-segment" id="bipolar2-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 216deg;"></div>
+                <div class="donut-inner" id="bipolar2-function-value">60%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">HOSPITALIZATION RISK</div>
+              <div class="donut-chart" id="bipolar2-hospital-chart">
+                <div class="donut-segment" id="bipolar2-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 108deg;"></div>
+                <div class="donut-inner" id="bipolar2-hospital-value">Low</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 4: Controls -->
+        <div class="controls">
+          <button class="control-btn" onclick="startBipolar2Demo()">
+            <i class="fas fa-play"></i> Start
+          </button>
+          <button class="control-btn" onclick="stopBipolar2Demo()">
+            <i class="fas fa-stop"></i> Stop
+          </button>
+          <button class="control-btn" onclick="resetBipolar2Demo()">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Depression Card -->
+      <div class="visualization-card depression-card">
+        <!-- Part 1: Title and Status -->
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-cloud"></i>
+            Major Depressive Disorder
+          </div>
+          <div class="condition-indicator depression-indicator" id="depression-indicator">ONLY DEEP LOWS</div>
+        </div>
+
+        <!-- Part 2: Human and Mood Timeline -->
+        <div class="human-timeline-section">
+          <div class="human-container">
+            <div class="conversation-box" id="depression-conversation">
+              "Everything feels heavy. I can't get out of bed."
+            </div>
+            <div class="walking-human" id="depression-walking-human">
+              <div class="walker" id="depression-walker">🚶‍➡️</div>
+            </div>
+          </div>
+
+          <div class="timeline-section">
+            <div class="timeline-title">Mood Timeline</div>
+            <div class="timeline-container">
+              <div class="timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-path" id="depression-timeline-path" style="background: #3498db; width: 15%"></div>
+                <div class="timeline-marker" id="depression-timeline-marker" style="background: #3498db; left: 15%; top: 50%"></div>
+                <div class="timeline-labels">
+                  <div class="timeline-label">Severe Depression</div>
+                  <div class="timeline-label">Normal</div>
+                  <div class="timeline-label">No Highs</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 3: Key Metrics -->
+        <div class="metrics-container">
+          <div class="metrics-title">Key Metrics</div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-name">ENERGY LEVEL</div>
+              <div class="donut-chart" id="depression-energy-chart">
+                <div class="donut-segment" id="depression-energy-segment" style="--segment-color: #2980b9; --segment-rotation: 36deg;"></div>
+                <div class="donut-inner" id="depression-energy-value">10%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">SLEEP NEED</div>
+              <div class="donut-chart" id="depression-sleep-chart">
+                <div class="donut-segment" id="depression-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 324deg;"></div>
+                <div class="donut-inner" id="depression-sleep-value">90%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">FUNCTIONALITY</div>
+              <div class="donut-chart" id="depression-function-chart">
+                <div class="donut-segment" id="depression-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 72deg;"></div>
+                <div class="donut-inner" id="depression-function-value">20%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">HOSPITALIZATION RISK</div>
+              <div class="donut-chart" id="depression-hospital-chart">
+                <div class="donut-segment" id="depression-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 180deg;"></div>
+                <div class="donut-inner" id="depression-hospital-value">Medium</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 4: Controls -->
+        <div class="controls">
+          <button class="control-btn" onclick="startDepressionDemo()">
+            <i class="fas fa-play"></i> Start
+          </button>
+          <button class="control-btn" onclick="stopDepressionDemo()">
+            <i class="fas fa-stop"></i> Stop
+          </button>
+          <button class="control-btn" onclick="resetDepressionDemo()">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Normal Card -->
+      <div class="visualization-card normal-card">
+        <!-- Part 1: Title and Status -->
+        <div class="card-header">
+          <div class="card-title">
+            <i class="fas fa-balance-scale"></i>
+            Normal Mood State
+          </div>
+          <div class="condition-indicator normal-indicator" id="normal-indicator">EVERYDAY UPS AND DOWNS</div>
+        </div>
+
+        <!-- Part 2: Human and Mood Timeline -->
+        <div class="human-timeline-section">
+          <div class="human-container">
+            <div class="conversation-box" id="normal-conversation">
+              "Today was okay. Some ups, some downs, but manageable."
+            </div>
+            <div class="walking-human" id="normal-walking-human">
+              <div class="walker" id="normal-walker">🚶‍➡️</div>
+            </div>
+          </div>
+
+          <div class="timeline-section">
+            <div class="timeline-title">Mood Timeline</div>
+            <div class="timeline-container">
+              <div class="timeline">
+                <div class="timeline-line"></div>
+                <div class="timeline-path" id="normal-timeline-path" style="background: #27ae60; width: 50%"></div>
+                <div class="timeline-marker" id="normal-timeline-marker" style="background: #27ae60; left: 50%; top: 50%"></div>
+                <div class="timeline-labels">
+                  <div class="timeline-label">Sad Moments</div>
+                  <div class="timeline-label">Normal</div>
+                  <div class="timeline-label">Happy Moments</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 3: Key Metrics -->
+        <div class="metrics-container">
+          <div class="metrics-title">Key Metrics</div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <div class="metric-name">ENERGY LEVEL</div>
+              <div class="donut-chart" id="normal-energy-chart">
+                <div class="donut-segment" id="normal-energy-segment" style="--segment-color: #27ae60; --segment-rotation: 198deg;"></div>
+                <div class="donut-inner" id="normal-energy-value">55%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">SLEEP NEED</div>
+              <div class="donut-chart" id="normal-sleep-chart">
+                <div class="donut-segment" id="normal-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 252deg;"></div>
+                <div class="donut-inner" id="normal-sleep-value">70%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">FUNCTIONALITY</div>
+              <div class="donut-chart" id="normal-function-chart">
+                <div class="donut-segment" id="normal-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 324deg;"></div>
+                <div class="donut-inner" id="normal-function-value">90%</div>
+              </div>
+            </div>
+            <div class="metric-item">
+              <div class="metric-name">HOSPITALIZATION RISK</div>
+              <div class="donut-chart" id="normal-hospital-chart">
+                <div class="donut-segment" id="normal-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 18deg;"></div>
+                <div class="donut-inner" id="normal-hospital-value">None</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Part 4: Controls -->
+        <div class="controls">
+          <button class="control-btn" onclick="startNormalDemo()">
+            <i class="fas fa-play"></i> Start
+          </button>
+          <button class="control-btn" onclick="stopNormalDemo()">
+            <i class="fas fa-stop"></i> Stop
+          </button>
+          <button class="control-btn" onclick="resetNormalDemo()">
+            <i class="fas fa-redo"></i> Reset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rest of the content remains the same -->
+    <div class="comparison-summary">
+      <div class="summary-card summary-bipolar1">
+        <div class="summary-title">
+          <i class="fas fa-bolt"></i> Bipolar I
+        </div>
+        <p><strong>Extreme Rollercoaster</strong> - Characterized by manic episodes that may require hospitalization. The most severe form of bipolar disorder.</p>
+      </div>
+      <div class="summary-card summary-bipolar2">
+        <div class="summary-title">
+          <i class="fas fa-wave-square"></i> Bipolar II
+        </div>
+        <p><strong>Mild Highs, Deep Lows</strong> - Defined by hypomanic episodes (less severe than mania) and major depressive episodes.</p>
+      </div>
+      <div class="summary-card summary-depression">
+        <div class="summary-title">
+          <i class="fas fa-cloud"></i> Depression
+        </div>
+        <p><strong>Only Deep Lows</strong> - Characterized by depressive episodes only, with no history of manic or hypomanic episodes.</p>
+      </div>
+      <div class="summary-card summary-normal">
+        <div class="summary-title">
+          <i class="fas fa-balance-scale"></i> Normal Mood
+        </div>
+        <p><strong>Everyday Ups and Downs</strong> - Normal emotional variations that don't significantly impair functioning.</p>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div class="info-header">
+        <div class="info-icon bipolar1-icon">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h2 class="info-title">Key Differences Between Conditions</h2>
+        <div class="info-icon depression-icon">
+          <i class="fas fa-cloud"></i>
+        </div>
+      </div>
+
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>
+              <div class="condition-header bipolar1-header">
+                <i class="fas fa-bolt"></i> Bipolar I
+              </div>
+            </th>
+            <th>
+              <div class="condition-header bipolar2-header">
+                <i class="fas fa-wave-square"></i> Bipolar II
+              </div>
+            </th>
+            <th>
+              <div class="condition-header depression-header">
+                <i class="fas fa-cloud"></i> Depression (MDD)
+              </div>
+            </th>
+            <th>
+              <div class="condition-header normal-header">
+                <i class="fas fa-balance-scale"></i> Normal Mood
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="high-mood-row">
+            <td class="feature-name">High Mood Episodes</td>
+            <td>
+              <span class="critical-difference">Mania</span>
+              <span class="key-point">Very high energy, risky behavior</span>
+              <span class="key-point">Possible hospitalization</span>
+              <span class="key-point">Psychosis possible</span>
+            </td>
+            <td>
+              <span class="critical-difference">Hypomania</span>
+              <span class="key-point">Milder, productive</span>
+              <span class="key-point">Not psychotic</span>
+              <span class="key-point">No hospitalization needed</span>
+            </td>
+            <td>
+              <span class="critical-difference">None</span>
+              <span class="key-point">No elevated mood episodes</span>
+            </td>
+            <td>
+              Normal mood variations
+              <span class="key-point">Temporary happiness</span>
+              <span class="key-point">Context-appropriate</span>
+            </td>
+          </tr>
+          <tr class="low-mood-row">
+            <td class="feature-name">Low Mood Episodes</td>
+            <td>
+              Major Depression
+              <span class="key-point">Severe, debilitating</span>
+              <span class="key-point">Often follows mania</span>
+            </td>
+            <td>
+              Major Depression
+              <span class="key-point">Often more frequent/longer</span>
+              <span class="key-point">Primary complaint</span>
+            </td>
+            <td>
+              <span class="critical-difference">Major Depression</span>
+              <span class="key-point">Only mood state (no highs)</span>
+              <span class="key-point">Can be severe, long-lasting</span>
+            </td>
+            <td>
+              Sadness sometimes
+              <span class="key-point">Short-term</span>
+              <span class="key-point">Proportional to events</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Energy Levels</td>
+            <td>
+              <span class="critical-difference">Extreme highs + extreme lows</span>
+              <span class="key-point">Mania: excessive energy</span>
+              <span class="key-point">Depression: very low energy</span>
+            </td>
+            <td>
+              High (hypomania) + low
+              <span class="key-point">Hypomania: increased energy</span>
+              <span class="key-point">Depression: low energy</span>
+            </td>
+            <td>
+              Mostly low
+              <span class="key-point">Consistently low energy</span>
+              <span class="key-point">Fatigue common</span>
+            </td>
+            <td>
+              Balanced, manageable
+              <span class="key-point">Normal daily fluctuations</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Sleep Patterns</td>
+            <td>
+              <span class="critical-difference">Little/no sleep during mania</span>
+              <span class="key-point">Feels rested despite little sleep</span>
+              <span class="key-point">Excessive sleep during depression</span>
+            </td>
+            <td>
+              Reduced sleep during hypomania
+              <span class="key-point">Less need for sleep</span>
+              <span class="key-point">Oversleeping during depression</span>
+            </td>
+            <td>
+              Trouble sleeping or oversleeping
+              <span class="key-point">Insomnia or hypersomnia</span>
+            </td>
+            <td>
+              Normal variations
+              <span class="key-point">Regular sleep-wake cycle</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="feature-name">Impact on Life</td>
+            <td>
+              <span class="critical-difference">Severe, disruptive</span>
+              <span class="key-point">Can't work during episodes</span>
+              <span class="key-point">Relationship damage</span>
+            </td>
+            <td>
+              Moderate but still disruptive
+              <span class="key-point">Struggle to maintain function</span>
+              <span class="key-point">Relationships strained</span>
+            </td>
+            <td>
+              Can be severe, long-lasting
+              <span class="key-point">Work/school performance suffers</span>
+              <span class="key-point">Social withdrawal</span>
+            </td>
+            <td>
+              Manageable
+              <span class="key-point">Doesn't disrupt daily functioning</span>
+            </td>
+          </tr>
+          <tr class="diagnosis-key">
+            <td class="feature-name">Diagnosis Key</td>
+            <td>
+              <span class="critical-difference">Mania defines Bipolar I</span>
+              <br> </br>
+              <div class="highlight-box">
+                <strong>Key Differentiator:</strong> Presence of at least one manic episode
+              </div>
+            </td>
+            <td>
+              <span class="critical-difference">Hypomania + Depression define Bipolar II</span>
+              <div class="highlight-box">
+                <strong>Key Differentiator:</strong> Hypomania (not mania) + major depression
+              </div>
+            </td>
+            <td>
+              <span class="critical-difference">Only Depression (no mania/hypomania)</span>
+              <div class="highlight-box">
+                <strong>Key Differentiator:</strong> No history of elevated mood episodes
+              </div>
+            </td>
+            <td>
+              Not a disorder
+              <br> </br>
+              <div class="highlight-box">
+                <strong>Key Differentiator:</strong> Normal range of human emotion
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Animation intervals
+    let bipolar1Interval, bipolar2Interval, depressionInterval, normalInterval;
+    
+    // Conversation messages for each condition
+    const bipolar1Messages = {
+      manic: [
+        "I can do anything! I don't need sleep for days!",
+        "My thoughts are racing at 100mph!",
+        "Why is everyone so slow? I need to do everything NOW!",
+        "I'm starting three businesses today! Nothing can stop me!",
+        "I feel invincible! Let's take risks!"
+      ],
+      depressive: [
+        "I can't get out of bed. Everything is pointless.",
+        "Why did I do all those things? I'm such a failure.",
+        "I wish I could just disappear forever.",
+        "I can't concentrate on anything. What's the point?",
+        "Everyone would be better off without me."
+      ]
+    };
+    
+    const bipolar2Messages = [
+      "I'm so productive! But I know this won't last...",
+      "I feel great, but something feels off...",
+      "I've accomplished so much in just a few hours!",
+      "I can't stop talking, I have so much to say!",
+      "This energy is amazing, but the crash is coming."
+    ];
+    
+    const depressionMessages = [
+      "Everything feels heavy. I can't get out of bed.",
+      "Why does everything feel so pointless?",
+      "I wish I could just disappear.",
+      "I can't concentrate on anything. What's the point?",
+      "Everyone would be better off without me."
+    ];
+    
+    const normalMessages = [
+      "Today was okay. Some ups, some downs, but manageable.",
+      "I feel balanced and in control of my emotions.",
+      "Some things are challenging, but I can handle them.",
+      "I appreciate the small joys in my daily life.",
+      "I have energy for my work and personal life."
+    ];
+    
+    // Emoji walkers for each condition
+    const bipolar1Walkers = {
+      manic: ["🏃‍♂️‍➡️", "💨", "⚡", "🚀", "🎯"],
+      depressive: ["🚶‍➡️", "🐌", "💤", "😴", "🛌"]
+    };
+    const bipolar2Walkers = ["🚶‍➡️", "🏃‍♂️‍➡️", "🚶‍➡️", "🏃‍♂️‍➡️", "🚶‍➡️"];
+    const depressionWalkers = ["🚶‍➡️", "🐌", "💤", "😴", "🛌"];
+    const normalWalkers = ["🚶‍➡️", "🚶‍➡️", "🚶‍➡️", "🚶‍➡️", "🚶‍➡️"];
+    
+    // Bipolar I Disorder Demo - Enhanced to show extreme highs and lows
+    function startBipolar1Demo() {
+      stopBipolar1Demo();
+      const indicator = document.getElementById('bipolar1-indicator');
+      const walker = document.getElementById('bipolar1-walker');
+      const walkingHuman = document.getElementById('bipolar1-walking-human');
+      
+      let currentEpisode = 'manic';
+      let moodValue = 90;
+      let messageIndex = 0;
+      let walkerIndex = 0;
+      
+      bipolar1Interval = setInterval(() => {
+        // Simulate extreme mood swings between manic and depressive episodes
+        if (currentEpisode === 'manic' && Math.random() > 0.7) {
+          currentEpisode = 'depressive';
+          indicator.textContent = 'DEPRESSIVE EPISODE';
+          indicator.classList.remove('bipolar1-extreme-high');
+          indicator.classList.add('bipolar1-extreme-low');
+          walker.classList.remove('running');
+          walker.classList.add('slow');
+        } else if (currentEpisode === 'depressive' && Math.random() > 0.8) {
+          currentEpisode = 'manic';
+          indicator.textContent = 'MANIC EPISODE';
+          indicator.classList.remove('bipolar1-extreme-low');
+          indicator.classList.add('bipolar1-extreme-high');
+          walker.classList.remove('slow');
+          walker.classList.add('running');
+        }
+        
+        // Update mood value based on episode
+        if (currentEpisode === 'manic') {
+          moodValue = 85 + Math.random() * 10;
+          updateMetrics('bipolar1', 90 + Math.random() * 10, 10 + Math.random() * 5, 25 + Math.random() * 10, 70 + Math.random() * 20);
+          updateConversation('bipolar1', bipolar1Messages.manic[messageIndex]);
+          updateWalker('bipolar1', bipolar1Walkers.manic[walkerIndex]);
+        } else {
+          moodValue = 10 + Math.random() * 10;
+          updateMetrics('bipolar1', 10 + Math.random() * 5, 90 + Math.random() * 5, 20 + Math.random() * 5, 45 + Math.random() * 10);
+          updateConversation('bipolar1', bipolar1Messages.depressive[messageIndex]);
+          updateWalker('bipolar1', bipolar1Walkers.depressive[walkerIndex]);
+        }
+        
+        messageIndex = (messageIndex + 1) % bipolar1Messages.manic.length;
+        walkerIndex = (walkerIndex + 1) % bipolar1Walkers.manic.length;
+        
+        // Update timeline and walking human position
+        updateTimeline('bipolar1', moodValue);
+        updateWalkingHuman('bipolar1', moodValue);
+        
+      }, 2000);
+    }
+
+    function stopBipolar1Demo() {
+      clearInterval(bipolar1Interval);
+      const indicator = document.getElementById('bipolar1-indicator');
+      const walker = document.getElementById('bipolar1-walker');
+      indicator.classList.remove('pulse', 'bipolar1-extreme-high', 'bipolar1-extreme-low');
+      walker.classList.remove('running', 'slow');
+    }
+
+    function resetBipolar1Demo() {
+      stopBipolar1Demo();
+      const indicator = document.getElementById('bipolar1-indicator');
+      const walker = document.getElementById('bipolar1-walker');
+      
+      indicator.textContent = 'EXTREME ROLLERCOASTER';
+      indicator.classList.remove('pulse', 'bipolar1-extreme-high', 'bipolar1-extreme-low');
+      walker.classList.remove('running', 'walking', 'slow', 'still');
+      walker.classList.add('running');
+      
+      // Reset timeline and walking human
+      updateTimeline('bipolar1', 90);
+      updateWalkingHuman('bipolar1', 90);
+      
+      // Reset metrics
+      updateMetrics('bipolar1', 95, 10, 30, 80);
+      
+      // Reset conversation
+      updateConversation('bipolar1', bipolar1Messages.manic[0]);
+      
+      // Reset walker
+      updateWalker('bipolar1', bipolar1Walkers.manic[0]);
+    }
+
+    // Bipolar II Disorder Demo
+    function startBipolar2Demo() {
+      stopBipolar2Demo();
+      const indicator = document.getElementById('bipolar2-indicator');
+      const walker = document.getElementById('bipolar2-walker');
+      const walkingHuman = document.getElementById('bipolar2-walking-human');
+      
+      let moodValue = 70;
+      let episode = 'hypomanic';
+      let messageIndex = 0;
+      let walkerIndex = 0;
+      bipolar2Interval = setInterval(() => {
+        // Simulate cycling between hypomanic and depressive episodes
+        if (episode === 'hypomanic' && Math.random() > 0.8) {
+          episode = 'depressive';
+          indicator.textContent = 'DEPRESSIVE EPISODE';
+          walker.classList.remove('walking');
+          walker.classList.add('slow');
+        } else if (episode === 'depressive' && Math.random() > 0.9) {
+          episode = 'hypomanic';
+          indicator.textContent = 'HYPOMANIC EPISODE';
+          walker.classList.remove('slow');
+          walker.classList.add('walking');
+        }
+        
+        // Update mood value based on episode
+        if (episode === 'hypomanic') {
+          moodValue = 65 + Math.random() * 10;
+          updateMetrics('bipolar2', 70 + Math.random() * 10, 40 + Math.random() * 10, 55 + Math.random() * 10, 25 + Math.random() * 10);
+          updateConversation('bipolar2', bipolar2Messages[messageIndex]);
+          updateWalker('bipolar2', bipolar2Walkers[0]);
+        } else {
+          moodValue = 15 + Math.random() * 10;
+          updateMetrics('bipolar2', 15 + Math.random() * 10, 80 + Math.random() * 10, 20 + Math.random() * 10, 40 + Math.random() * 10);
+          updateConversation('bipolar2', depressionMessages[messageIndex]);
+          updateWalker('bipolar2', bipolar2Walkers[4]);
+        }
+        
+        messageIndex = (messageIndex + 1) % bipolar2Messages.length;
+        walkerIndex = (walkerIndex + 1) % bipolar2Walkers.length;
+        
+        // Update timeline and walking human position
+        updateTimeline('bipolar2', moodValue);
+        updateWalkingHuman('bipolar2', moodValue);
+        
+      }, 1800);
+    }
+
+    function stopBipolar2Demo() {
+      clearInterval(bipolar2Interval);
+      const indicator = document.getElementById('bipolar2-indicator');
+      const walker = document.getElementById('bipolar2-walker');
+      indicator.classList.remove('pulse');
+      walker.classList.remove('walking', 'slow');
+    }
+
+    function resetBipolar2Demo() {
+      stopBipolar2Demo();
+      const indicator = document.getElementById('bipolar2-indicator');
+      const walker = document.getElementById('bipolar2-walker');
+      
+      indicator.textContent = 'MILD HIGHS, DEEP LOWS';
+      indicator.classList.remove('pulse');
+      walker.classList.remove('running', 'walking', 'slow', 'still');
+      walker.classList.add('walking');
+      
+      // Reset timeline and walking human
+      updateTimeline('bipolar2', 70);
+      updateWalkingHuman('bipolar2', 70);
+      
+      updateMetrics('bipolar2', 75, 40, 60, 30);
+      
+      // Reset conversation
+      updateConversation('bipolar2', bipolar2Messages[0]);
+      
+      // Reset walker
+      updateWalker('bipolar2', bipolar2Walkers[0]);
+    }
+
+    // Depression Demo
+    function startDepressionDemo() {
+      stopDepressionDemo();
+      const indicator = document.getElementById('depression-indicator');
+      const walker = document.getElementById('depression-walker');
+      const walkingHuman = document.getElementById('depression-walking-human');
+      
+      let moodValue = 15;
+      let messageIndex = 0;
+      let walkerIndex = 0;
+      depressionInterval = setInterval(() => {
+        // Simulate stable low mood with minor fluctuations
+        moodValue = 10 + Math.random() * 10;
+        
+        // Update timeline and walking human position
+        updateTimeline('depression', moodValue);
+        updateWalkingHuman('depression', moodValue);
+        
+        // Update metrics with low values
+        updateMetrics('depression', 10 + Math.random() * 5, 90 + Math.random() * 5, 20 + Math.random() * 5, 45 + Math.random() * 10);
+        
+        // Update conversation
+        updateConversation('depression', depressionMessages[messageIndex]);
+        messageIndex = (messageIndex + 1) % depressionMessages.length;
+        
+        // Update walker
+        updateWalker('depression', depressionWalkers[walkerIndex]);
+        walkerIndex = (walkerIndex + 1) % depressionWalkers.length;
+        
+      }, 2000);
+    }
+
+    function stopDepressionDemo() {
+      clearInterval(depressionInterval);
+      const indicator = document.getElementById('depression-indicator');
+      const walker = document.getElementById('depression-walker');
+      indicator.classList.remove('pulse');
+      walker.classList.remove('slow');
+    }
+
+    function resetDepressionDemo() {
+      stopDepressionDemo();
+      const indicator = document.getElementById('depression-indicator');
+      const walker = document.getElementById('depression-walker');
+      
+      indicator.textContent = 'ONLY DEEP LOWS';
+      indicator.classList.remove('pulse');
+      walker.classList.remove('running', 'walking', 'slow', 'still');
+      walker.classList.add('slow');
+      
+      // Reset timeline and walking human
+      updateTimeline('depression', 15);
+      updateWalkingHuman('depression', 15);
+      
+      updateMetrics('depression', 10, 90, 20, 50);
+      
+      // Reset conversation
+      updateConversation('depression', depressionMessages[0]);
+      
+      // Reset walker
+      updateWalker('depression', depressionWalkers[0]);
+    }
+
+    // Normal Mood Demo
+    function startNormalDemo() {
+      stopNormalDemo();
+      const indicator = document.getElementById('normal-indicator');
+      const walker = document.getElementById('normal-walker');
+      const walkingHuman = document.getElementById('normal-walking-human');
+      
+      let moodValue = 50;
+      let messageIndex = 0;
+      let walkerIndex = 0;
+      normalInterval = setInterval(() => {
+        // Simulate normal mood fluctuations
+        moodValue = 45 + Math.random() * 10;
+        
+        // Update timeline and walking human position
+        updateTimeline('normal', moodValue);
+        updateWalkingHuman('normal', moodValue);
+        
+        // Update metrics with stable values
+        updateMetrics('normal', 50 + Math.random() * 10, 70 + Math.random() * 10, 85 + Math.random() * 10, 5 + Math.random() * 5);
+        
+        // Update conversation
+        updateConversation('normal', normalMessages[messageIndex]);
+        messageIndex = (messageIndex + 1) % normalMessages.length;
+        
+        // Update walker
+        updateWalker('normal', normalWalkers[walkerIndex]);
+        walkerIndex = (walkerIndex + 1) % normalWalkers.length;
+        
+      }, 1600);
+    }
+
+    function stopNormalDemo() {
+      clearInterval(normalInterval);
+      const indicator = document.getElementById('normal-indicator');
+      const walker = document.getElementById('normal-walker');
+      indicator.classList.remove('pulse');
+      walker.classList.remove('walking');
+    }
+
+    function resetNormalDemo() {
+      stopNormalDemo();
+      const indicator = document.getElementById('normal-indicator');
+      const walker = document.getElementById('normal-walker');
+      
+      indicator.textContent = 'EVERYDAY UPS AND DOWNS';
+      indicator.classList.remove('pulse');
+      walker.classList.remove('running', 'walking', 'slow', 'still');
+      walker.classList.add('walking');
+      
+      // Reset timeline and walking human
+      updateTimeline('normal', 50);
+      updateWalkingHuman('normal', 50);
+      
+      updateMetrics('normal', 55, 70, 90, 5);
+      
+      // Reset conversation
+      updateConversation('normal', normalMessages[0]);
+      
+      // Reset walker
+      updateWalker('normal', normalWalkers[0]);
+    }
+
+    // Enhanced helper functions
+    function updateTimeline(condition, moodValue) {
+      const timelinePath = document.getElementById(`${condition}-timeline-path`);
+      const timelineMarker = document.getElementById(`${condition}-timeline-marker`);
+      
+      // Update the path width based on current mood
+      timelinePath.style.width = `${moodValue}%`;
+      timelineMarker.style.left = `${moodValue}%`;
+    }
+
+    function updateWalkingHuman(condition, moodValue) {
+      const walkingHuman = document.getElementById(`${condition}-walking-human`);
+      
+      // Calculate position based on mood value (0-100% of container width)
+      const containerWidth = walkingHuman.parentElement.offsetWidth;
+      const humanWidth = walkingHuman.offsetWidth;
+      const position = (moodValue / 100) * (containerWidth - humanWidth);
+      
+      // Move the walking human to the calculated position
+      walkingHuman.style.left = `${position}px`;
+    }
+
+    function updateConversation(condition, message) {
+      const conversationBox = document.getElementById(`${condition}-conversation`);
+      conversationBox.textContent = message;
+      
+      // Add a subtle pulse animation when message changes
+      conversationBox.classList.remove('pulse');
+      void conversationBox.offsetWidth; // Trigger reflow
+      conversationBox.classList.add('pulse');
+    }
+
+    function updateWalker(condition, emoji) {
+      const walker = document.getElementById(`${condition}-walker`);
+      walker.textContent = emoji;
+      
+      // Add a subtle scale animation when walker changes
+      walker.classList.remove('pulse');
+      void walker.offsetWidth; // Trigger reflow
+      walker.classList.add('pulse');
+    }
+
+    function updateMetrics(condition, energy, sleep, functionality, hospitalization) {
+      // Update donut charts
+      updateDonutChart(`${condition}-energy-chart`, `${condition}-energy-segment`, energy, `${condition}-energy-value`);
+      updateDonutChart(`${condition}-sleep-chart`, `${condition}-sleep-segment`, sleep, `${condition}-sleep-value`);
+      updateDonutChart(`${condition}-function-chart`, `${condition}-function-segment`, functionality, `${condition}-function-value`);
+      
+      // Update hospitalization risk text
+      let hospitalText = 'None';
+      if (hospitalization > 60) hospitalText = 'High';
+      else if (hospitalization > 30) hospitalText = 'Medium';
+      else if (hospitalization > 10) hospitalText = 'Low';
+      
+      document.getElementById(`${condition}-hospital-value`).textContent = hospitalText;
+      
+      // Update hospitalization donut
+      let hospitalPercentage = 5;
+      if (hospitalText === 'High') hospitalPercentage = 80;
+      else if (hospitalText === 'Medium') hospitalPercentage = 50;
+      else if (hospitalText === 'Low') hospitalPercentage = 30;
+      
+      updateDonutChart(`${condition}-hospital-chart`, `${condition}-hospital-segment`, hospitalPercentage, `${condition}-hospital-value`);
+    }
+    
+    function updateDonutChart(chartId, segmentId, percentage, valueId) {
+      const segment = document.getElementById(segmentId);
+      const valueElement = document.getElementById(valueId);
+      const rotation = (percentage / 100) * 360;
+      
+      // Update the CSS custom property
+      segment.style.setProperty('--segment-rotation', `${rotation}deg`);
+      
+      // Update the inner text
+      if (valueId.includes('hospital')) {
+        let hospitalText = 'None';
+        if (percentage > 60) hospitalText = 'High';
+        else if (percentage > 30) hospitalText = 'Medium';
+        else if (percentage > 10) hospitalText = 'Low';
+        valueElement.textContent = hospitalText;
+      } else {
+        valueElement.textContent = `${Math.round(percentage)}%`;
+      }
+    }
+
+    // Global control functions
+    function startAllDemos() {
+      startBipolar1Demo();
+      startBipolar2Demo();
+      startDepressionDemo();
+      startNormalDemo();
+    }
+
+    function stopAllDemos() {
+      stopBipolar1Demo();
+      stopBipolar2Demo();
+      stopDepressionDemo();
+      stopNormalDemo();
+    }
+
+    function resetAllDemos() {
+      resetBipolar1Demo();
+      resetBipolar2Demo();
+      resetDepressionDemo();
+      resetNormalDemo();
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', function() {
+      resetAllDemos();
+    });
+  </script>
+
+ 
+    <script src="../js/components.js"></script>
+
+
+</html>

@@ -1,0 +1,912 @@
+/* Resource Detail Page Styles */
+.resource-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.resource-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
+}
+
+.resource-header .resource-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.resource-header h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.resource-subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+.content-section {
+  background: white;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.content-section h2 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.5rem;
+}
+
+.content-section h2 i {
+  margin-right: 0.5rem;
+  color: #667eea;
+}
+
+/* Symptoms Grid */
+.symptoms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.symptom-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s ease;
+}
+
+.symptom-item:hover {
+  transform: translateY(-2px);
+}
+
+.symptom-item i {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  color: #667eea;
+  margin-top: 0.25rem;
+}
+
+.symptom-item span {
+  line-height: 1.5;
+}
+
+/* Treatment Options */
+.treatment-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.treatment-card {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  transition: transform 0.3s ease;
+}
+
+.treatment-card:hover {
+  transform: translateY(-5px);
+  border-color: #667eea;
+}
+
+.treatment-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.treatment-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.treatment-card li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #dee2e6;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.treatment-card li:before {
+  content: "•";
+  color: #667eea;
+  font-weight: bold;
+  position: absolute;
+  left: 0.5rem;
+}
+
+.treatment-card li:last-child {
+  border-bottom: none;
+}
+
+/* Emergency Alert */
+.emergency-alert {
+  background: #fff3cd;
+  border: 2px solid #ffeaa7;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.emergency-alert h3 {
+  color: #856404;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+}
+
+.emergency-alert ul {
+  color: #856404;
+  margin-top: 1rem;
+  list-style: none;
+  padding: 0;
+}
+
+.emergency-alert li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #ffeaa7;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.emergency-alert li:before {
+  content: "⚠️";
+  position: absolute;
+  left: 0;
+}
+
+.emergency-alert li:last-child {
+  border-bottom: none;
+}
+
+/* Disorder Types */
+.disorder-types {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.disorder-card {
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.disorder-card:hover {
+  transform: translateY(-5px);
+  border-color: #667eea;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.disorder-card h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.disorder-card p {
+  color: #666;
+  line-height: 1.5;
+}
+
+/* Coping Strategies */
+.coping-strategies {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.strategy-card {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+  transition: transform 0.3s ease;
+}
+
+.strategy-card:hover {
+  transform: translateY(-3px);
+}
+
+.strategy-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Choosing Tips */
+.choosing-tips {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.tip-card {
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.tip-card:hover {
+  transform: translateY(-3px);
+  border-color: #667eea;
+}
+
+.tip-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+/* Benefits Grid */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #e8f5e8;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+}
+
+.benefit-item i {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+  color: #28a745;
+}
+
+/* Meditation Steps */
+.meditation-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.step {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s ease;
+}
+
+.step:hover {
+  transform: translateX(5px);
+}
+
+.step h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Exercises Grid */
+.exercises-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.exercise-card {
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.exercise-card:hover {
+  transform: translateY(-5px);
+  border-color: #667eea;
+}
+
+.exercise-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.try-exercise {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+  font-weight: 500;
+}
+
+.try-exercise:hover {
+  background: #5a6fd8;
+  transform: translateY(-2px);
+}
+
+/* Mindfulness Tips */
+.mindfulness-tips {
+  list-style: none;
+  padding: 0;
+}
+
+.mindfulness-tips li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e9ecef;
+  position: relative;
+  padding-left: 2rem;
+}
+
+.mindfulness-tips li:before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: #28a745;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.mindfulness-tips li:last-child {
+  border-bottom: none;
+}
+
+/* NEW STYLES FOR ADDITIONAL RESOURCE PAGES */
+
+/* Crisis Prevention */
+.crisis-prevention {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.prevention-item {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.prevention-item h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.prevention-item ul {
+  list-style: none;
+  padding: 0;
+}
+
+.prevention-item li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #dee2e6;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.prevention-item li:before {
+  content: "•";
+  color: #667eea;
+  font-weight: bold;
+  position: absolute;
+  left: 0.5rem;
+}
+
+.prevention-item li:last-child {
+  border-bottom: none;
+}
+
+/* Pillars Grid for Self-Care */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.pillar-card {
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.pillar-card:hover {
+  transform: translateY(-5px);
+  border-color: #667eea;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.pillar-icon {
+  font-size: 2.5rem;
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.pillar-card h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.pillar-card p {
+  color: #666;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.pillar-card ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.pillar-card li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #f8f9fa;
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.pillar-card li:before {
+  content: "→";
+  color: #667eea;
+  position: absolute;
+  left: 0;
+}
+
+.pillar-card li:last-child {
+  border-bottom: none;
+}
+
+/* Plan Steps */
+.plan-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.plan-step {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s ease;
+}
+
+.plan-step:hover {
+  transform: translateX(5px);
+}
+
+.plan-step h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Toolkit Grid */
+.toolkit-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.toolkit-item {
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.toolkit-item:hover {
+  transform: translateY(-3px);
+  border-color: #667eea;
+}
+
+.toolkit-item h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.toolkit-item ul {
+  list-style: none;
+  padding: 0;
+}
+
+.toolkit-item li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f8f9fa;
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.toolkit-item li:before {
+  content: "•";
+  color: #667eea;
+  font-weight: bold;
+  position: absolute;
+  left: 0.5rem;
+}
+
+.toolkit-item li:last-child {
+  border-bottom: none;
+}
+
+/* Barriers and Solutions */
+.barriers-solutions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.barrier-item {
+  padding: 1.5rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 10px;
+}
+
+.barrier-item h3 {
+  color: #856404;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.barrier-item p {
+  color: #856404;
+}
+
+/* Symptoms Cluster for PTSD */
+.symptoms-cluster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.symptom-cluster {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.symptom-cluster h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.symptom-cluster ul {
+  list-style: none;
+  padding: 0;
+}
+
+.symptom-cluster li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.symptom-cluster li:last-child {
+  border-bottom: none;
+}
+
+/* Coping Techniques */
+.coping-techniques {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.technique-category h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.technique-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.technique-item {
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.technique-item:hover {
+  transform: translateY(-2px);
+  border-color: #667eea;
+}
+
+.technique-item h4 {
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Medication Classes */
+.medication-classes {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.med-class {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+}
+
+.med-class h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.5rem;
+}
+
+.med-details h4 {
+  color: #555;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.med-details ul {
+  list-style: none;
+  padding: 0;
+}
+
+.med-details li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.med-details li:last-child {
+  border-bottom: none;
+}
+
+/* Management Guide */
+.management-guide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.guide-step {
+  padding: 1.5rem;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.guide-step:hover {
+  transform: translateY(-3px);
+  border-color: #667eea;
+}
+
+.guide-step h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.guide-step ul {
+  list-style: none;
+  padding: 0;
+}
+
+.guide-step li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #f8f9fa;
+  position: relative;
+  padding-left: 1.2rem;
+}
+
+.guide-step li:before {
+  content: "✓";
+  color: #28a745;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.guide-step li:last-child {
+  border-bottom: none;
+}
+
+/* Safety Information */
+.safety-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.safety-item {
+  padding: 1.5rem;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 10px;
+}
+
+.safety-item h3 {
+  color: #856404;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.safety-item ul {
+  list-style: none;
+  padding: 0;
+  color: #856404;
+}
+
+.safety-item li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #ffeaa7;
+}
+
+.safety-item li:last-child {
+  border-bottom: none;
+}
+
+/* Questions List */
+.questions-list ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.questions-list li {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s ease;
+}
+
+.questions-list li:hover {
+  transform: translateX(5px);
+  background: #e9ecef;
+}
+
+/* Disclaimer */
+.disclaimer {
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 10px;
+}
+
+.disclaimer h3 {
+  color: #0c5460;
+  border-bottom-color: #bee5eb;
+}
+
+.disclaimer p {
+  color: #0c5460;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .resource-detail-container {
+    padding: 1rem;
+  }
+  
+  .resource-header h1 {
+    font-size: 2rem;
+  }
+  
+  .resource-header .resource-icon {
+    font-size: 3rem;
+  }
+  
+  .symptoms-grid,
+  .treatment-options,
+  .disorder-types,
+  .coping-strategies,
+  .choosing-tips,
+  .benefits-grid,
+  .exercises-grid,
+  .pillars-grid,
+  .toolkit-grid,
+  .barriers-solutions,
+  .symptoms-cluster,
+  .technique-grid,
+  .management-guide,
+  .safety-info,
+  .crisis-prevention {
+    grid-template-columns: 1fr;
+  }
+  
+  .questions-list ul {
+    grid-template-columns: 1fr;
+  }
+  
+  .content-section {
+    padding: 1rem;
+  }
+  
+  .meditation-steps,
+  .plan-steps {
+    gap: 1rem;
+  }
+  
+  .step,
+  .plan-step {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .resource-header {
+    padding: 1rem;
+  }
+  
+  .resource-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .resource-subtitle {
+    font-size: 1rem;
+  }
+}

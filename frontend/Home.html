@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Mentivio</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #7c3aed;
+      --primary-dark: #3730a3;
+      --secondary: #6366f1;
+      --accent: #a78bfa;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #16a34a;
+      --warning: #facc15;
+      --danger: #ef4444;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fa;
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 80px 20px;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero h1 {
+      font-size: 2.5rem;
+      color: #ffffff;
+      margin-bottom: 1rem;
+    }
+    
+    .hero p {
+      font-size: 1.2rem;
+      color: #ffffff;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+      font-size: 1rem;
+    }
+    
+    .btn-primary {
+      background-color: white;
+      color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--gray-light);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(255,255,255,0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Crisis Alert */
+    .crisis-alert {
+      background-color: var(--danger);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      margin: 40px 0;
+    }
+    
+    .crisis-alert p {
+      margin-bottom: 10px;
+    }
+    
+    .crisis-alert a {
+      color: white;
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    .crisis-alert .note {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 10px;
+    }
+    
+    /* Features Section */
+    .features {
+      padding: 80px 20px;
+      background-color: white;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    
+    .section-title h2 {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    
+    .section-title p {
+      font-size: 1.1rem;
+      color: var(--gray);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .feature-card {
+      background-color: var(--light);
+      border-radius: 10px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    
+    .feature-icon {
+      width: 70px;
+      height: 70px;
+      background-color: var(--primary-light);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 1.8rem;
+    }
+    
+    .feature-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+    
+    .feature-card p {
+      color: var(--gray);
+      margin-bottom: 20px;
+    }
+    
+    .feature-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: gap 0.3s;
+    }
+    
+    .feature-link:hover {
+      gap: 10px;
+    }
+    
+    /* Resources Section */
+    .resources {
+      padding: 80px 20px;
+      background-color: var(--light);
+    }
+    
+    .resources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .resource-card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform 0.3s;
+    }
+    
+    .resource-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .resource-icon {
+      font-size: 2rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+    }
+    
+    .resource-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+    
+    .resource-card p {
+      color: var(--gray);
+      margin-bottom: 15px;
+    }
+    
+    .resource-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: gap 0.3s;
+    }
+    
+    .resource-link:hover {
+      gap: 10px;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+      }
+      
+      .features-grid,
+      .resources-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Your Mental Health Matters</h1>
+      <p>Mentivio provides tools and resources to help you understand and navigate your mental health journey with compassion and clarity.</p>
+      <div class="cta-buttons">
+        <a href="MenHel_prediction.html" class="btn btn-primary">
+          <i class="fas fa-clipboard-check"></i> Take Self-Assessment
+        </a>
+        <a href="MenHel_analogy.html" class="btn btn-secondary">
+          <i class="fas fa-chart-line"></i> Explore Conditions
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Crisis Alert -->
+  <div class="crisis-alert">
+    <p><i class="fas fa-exclamation-triangle"></i> 
+      <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
+      Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
+      or text <strong>HOME</strong> to <strong>741741</strong>.  
+      You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
+    </p>
+    
+    <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
+    
+    <p class="note">This assessment is not a substitute for professional or emergency care.</p>
+  </div>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="section-title">
+      <h2>Our Mental Health Tools</h2>
+      <p>Explore our comprehensive resources designed to support your mental wellness journey</p>
+    </div>
+    
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-clipboard-check"></i>
+        </div>
+        <h3>Self-Assessment Tool</h3>
+        <p>Take our confidential mental health screening to better understand your current emotional state and identify patterns.</p>
+        <a href="MenHel_prediction.html" class="feature-link">
+          Try Assessment <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Condition Visualizer</h3>
+        <p>Understand the differences between mental health conditions through interactive visualizations and comparisons.</p>
+        <a href="MenHel_analogy.html" class="feature-link">
+          Explore Visualizer <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-book-medical"></i>
+        </div>
+        <h3>Educational Resources</h3>
+        <p>Access reliable information about mental health conditions, treatments, and coping strategies.</p>
+        <a href="resources.html" class="feature-link">
+          Learn More <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resources Section -->
+  <section class="resources">
+    <div class="section-title">
+      <h2>Mental Health Resources</h2>
+      <p>Trusted organizations and information to support your mental wellness</p>
+    </div>
+    
+    <div class="resources-grid">
+      <div class="resource-card">
+        <div class="resource-icon">
+          <i class="fas fa-life-ring"></i>
+        </div>
+        <h3>Crisis Support</h3>
+        <p>Immediate help for mental health crises and suicidal thoughts.</p>
+        <a href="https://988lifeline.org" target="_blank" class="resource-link">
+          988 Suicide & Crisis Lifeline <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+      
+      <div class="resource-card">
+        <div class="resource-icon">
+          <i class="fas fa-hands-helping"></i>
+        </div>
+        <h3>NAMI Helpline</h3>
+        <p>Free nationwide peer-support service providing information and resources.</p>
+        <a href="https://www.nami.org" target="_blank" class="resource-link">
+          Visit NAMI <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+      
+      <div class="resource-card">
+        <div class="resource-icon">
+          <i class="fas fa-comment-medical"></i>
+        </div>
+        <h3>Crisis Text Line</h3>
+        <p>Free, 24/7 support for those in crisis via text message.</p>
+        <a href="https://www.crisistextline.org" target="_blank" class="resource-link">
+          Text HOME to 741741 <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+      
+      <div class="resource-card">
+        <div class="resource-icon">
+          <i class="fas fa-globe-americas"></i>
+        </div>
+        <h3>MentalHealth.gov</h3>
+        <p>U.S. government resource for mental health information and services.</p>
+        <a href="https://www.mentalhealth.gov" target="_blank" class="resource-link">
+          Explore Resources <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+<script src="../js/components.js"></script>
+</body>
+</html>
