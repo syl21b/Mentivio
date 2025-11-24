@@ -4,9 +4,9 @@ services:
     env: python
     plan: free
     buildCommand: |
-      pip install -r backend/requirements.txt
-      python backend/train_model.py
-    startCommand: gunicorn backend.app:app
+      pip install -r requirements.txt
+      python train_model.py
+    startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.1
