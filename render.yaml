@@ -3,7 +3,7 @@ services:
     name: mentivio
     env: python
     plan: free
-    buildCommand: |
+    buildCommand:
       pip install --upgrade pip
       pip install -r requirements.txt
       python train_model.py
