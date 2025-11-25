@@ -1750,24 +1750,23 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
       }
 
-      
-      startAssessment() {
-        // Record assessment start time
-        this.assessmentStartTime = new Date().toISOString();
-        
-        this.showScreen(this.questionsScreen);
-        this.updateProgress();
-        this.displayCurrentQuestion();
-        
-        // Focus on first option for keyboard navigation
-        setTimeout(() => {
-          const firstOption = this.optionsContainer.querySelector('.option-btn');
-          if (firstOption) {
-            firstOption.focus();
+      // Add this debug method to check what's being sent
+      debugAssessmentSubmission() {
+          console.log('🔍 DEBUG - Assessment submission data:');
+          console.log('  - assessmentStartTime:', this.assessmentStartTime);
+          console.log('  - patientInfo:', this.patientInfo);
+          console.log('  - responses count:', Object.keys(this.responses).length);
+          
+          // Check if assessmentStartTime is valid
+          if (!this.assessmentStartTime) {
+              console.error('❌ CRITICAL: assessmentStartTime is not set!');
+          } else {
+              console.log('✅ assessmentStartTime is set correctly');
           }
-        }, 100);
       }
-    
+
+
+          
       initializeElements() {
         // New login elements
         this.loginSection = document.getElementById('loginSection');
@@ -2432,17 +2431,23 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
       // Core Assessment Methods
       startAssessment() {
-        this.showScreen(this.questionsScreen);
-        this.updateProgress();
-        this.displayCurrentQuestion();
-        
-        // Focus on first option for keyboard navigation
-        setTimeout(() => {
-          const firstOption = this.optionsContainer.querySelector('.option-btn');
-          if (firstOption) {
-            firstOption.focus();
-          }
-        }, 100);
+          // Record assessment start time - THIS IS CRITICAL
+          // Use a more precise timestamp
+          this.assessmentStartTime = new Date().toISOString();
+          console.log('🕐 Assessment start time recorded:', this.assessmentStartTime);
+          console.log('🕐 Local time:', new Date().toString());
+          
+          this.showScreen(this.questionsScreen);
+          this.updateProgress();
+          this.displayCurrentQuestion();
+          
+          // Focus on first option for keyboard navigation
+          setTimeout(() => {
+              const firstOption = this.optionsContainer.querySelector('.option-btn');
+              if (firstOption) {
+                  firstOption.focus();
+              }
+          }, 100);
       }
 
       showScreen(screen) {
@@ -2643,58 +2648,86 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
 
 
-      // Update your submitFinalAssessment method to include timezone
       async submitFinalAssessment() {
-          // Validate patient info
-          if (!this.patientInfo.name.trim()) {
-              alert('Please enter patient name before submitting.');
-              return;
+        // Debug the submission flow
+        console.log('🔍 SUBMIT DEBUG - Starting submission process');
+        
+        // More flexible patient info validation
+        if (!this.patientInfo.name || !this.patientInfo.name.trim()) {
+          alert('Please enter patient name before submitting.');
+          console.error('❌ Validation failed: Patient name missing');
+          return;
+        }
+
+        // Optional: Make patient number optional or provide better feedback
+        if (!this.patientInfo.number || !this.patientInfo.number.trim()) {
+          if (!confirm('Patient number is not provided. Continue without saving to history?')) {
+            return;
           }
+        }
 
-          this.showScreen(this.loadingScreen);
-          this.isSubmitting = true;
+        console.log('✅ Validation passed, proceeding with submission...');
+        
+        this.showScreen(this.loadingScreen);
+        this.isSubmitting = true;
 
-          try {
-              await this.simulateProcessing();
-              
-              console.log('Submitting final assessment:', {
-                  responses: this.responses,
-                  patientInfo: this.patientInfo
-              });
-              
-              // Get user's timezone
-              const userTimezone = getUserTimezone();
-              console.log('Detected timezone:', userTimezone);
-              
-              const response = await fetch(`${API_BASE_URL}/api/predict`, {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-Client-Timezone': userTimezone  // Send timezone in header
-                  },
-                  body: JSON.stringify({
-                      responses: this.responses,
-                      patientInfo: this.patientInfo
-                  })
-              });
+        try {
+            await this.simulateProcessing();
+            
+            console.log('🕐 FINAL TIMESTAMP CHECK before submission:');
+            console.log('  - Assessment started at:', this.assessmentStartTime);
+            console.log('  - Submitting at:', new Date().toISOString());
+            
+            // Get user's timezone
+            const userTimezone = getUserTimezone();
+            console.log('🌍 User timezone:', userTimezone);
+            
+            // CRITICAL: Use the original assessmentStartTime, don't overwrite it
+            const assessmentStartTimeToSend = this.assessmentStartTime;
+            
+            if (!assessmentStartTimeToSend) {
+                console.error('❌ CRITICAL: assessmentStartTime is missing!');
+                // Fallback: create a timestamp 2 minutes ago (approximate)
+                const fallbackTime = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+                console.log('🔄 Using fallback timestamp:', fallbackTime);
+            }
+            
+            const response = await fetch(`${API_BASE_URL}/api/predict`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Client-Timezone': userTimezone
+                },
+                body: JSON.stringify({
+                    responses: this.responses,
+                    patientInfo: this.patientInfo,
+                    assessment_start_time: assessmentStartTimeToSend // Send the ORIGINAL start time
+                })
+            });
 
-              if (!response.ok) {
-                  const errorData = await response.json();
-                  throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-              }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
 
-              const result = await response.json();
-              result.patientInfo = this.patientInfo;
-              this.displayResults(result);
+            const result = await response.json();
+            result.patientInfo = this.patientInfo;
+            
+            // Ensure the original start time is preserved
+            if (assessmentStartTimeToSend && !result.assessment_timestamp) {
+                result.assessment_timestamp = assessmentStartTimeToSend;
+            }
+            
+            this.displayResults(result);
 
-          } catch (error) {
-              console.error('Error submitting assessment:', error);
-              this.showError(`Failed to process assessment: ${error.message}`);
-          } finally {
-              this.isSubmitting = false;
-          }
-      }
-
+        } catch (error) {
+            console.error('Error submitting assessment:', error);
+            this.showError(`Failed to process assessment: ${error.message}`);
+        } finally {
+            this.isSubmitting = false;
+        }
+    }
+    
       async simulateProcessing() {
         const steps = document.querySelectorAll('.loading-step');
         
@@ -2706,79 +2739,86 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-      async displayResults(result) {
-          // Show results screen first
-          this.showScreen(this.resultsScreen);
-          
-          // Clear any existing patient info first
-          const existingSavedInfo = document.querySelector('.saved-info');
-          if (existingSavedInfo) {
-              existingSavedInfo.remove();
-          }
-          
-          // Set results display
-          this.primaryDiagnosis.textContent = result.primary_diagnosis;
-          this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
-          
-          const confidencePercent = Math.round(result.confidence_percentage);
-          let confidenceColor = '#10b981';
-          if (confidencePercent < 50) confidenceColor = '#f59e0b';
-          if (confidencePercent < 30) confidenceColor = '#ef4444';
-          
-          this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
-          this.confidenceBadge.style.background = confidenceColor;
-          
-          this.resultsDate.textContent = new Date().toLocaleDateString();
-          this.assessmentId.textContent = `ID: ${result.assessment_id}`;
-          
-          // Create assessment data object with ALL diagnoses with BOTH timestamps
-            const assessmentData = {
-                id: result.assessment_id,
-                timestamp: result.timestamp,  // Report generated time (when submitted)
-                assessment_timestamp: this.assessmentStartTime,  // Assessment start time
-                timezone: result.timezone,
-                patient_info: this.patientInfo,
-                primary_diagnosis: result.primary_diagnosis,
-                confidence: result.confidence_percentage,
-                confidence_percentage: result.confidence_percentage,
-                all_diagnoses: result.all_diagnoses,
-                responses: this.responses,
-                processing_details: result.processing_details,
-                technical_details: result.technical_details,
-                clinical_insights: result.clinical_insights || null
-            };
+    async displayResults(result) {
+        // Show results screen first
+        this.showScreen(this.resultsScreen);
+        
+        // Clear any existing patient info first
+        const existingSavedInfo = document.querySelector('.saved-info');
+        if (existingSavedInfo) {
+            existingSavedInfo.remove();
+        }
+        
+        // Set results display
+        this.primaryDiagnosis.textContent = result.primary_diagnosis;
+        this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
+        
+        const confidencePercent = Math.round(result.confidence_percentage);
+        let confidenceColor = '#10b981';
+        if (confidencePercent < 50) confidenceColor = '#f59e0b';
+        if (confidencePercent < 30) confidenceColor = '#ef4444';
+        
+        this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
+        this.confidenceBadge.style.background = confidenceColor;
+        
+        this.resultsDate.textContent = new Date().toLocaleDateString();
+        this.assessmentId.textContent = `ID: ${result.assessment_id}`;
+        
+        // DEBUG: Check what timestamps we have
+        console.log('🔍 DEBUG - Result timestamps:', {
+            assessment_timestamp: result.assessment_timestamp,
+            timestamp: result.timestamp,
+            our_assessmentStartTime: this.assessmentStartTime
+        });
+        
+        // Create assessment data object with ALL diagnoses with BOTH timestamps
+        const assessmentData = {
+            id: result.assessment_id,
+            timestamp: result.timestamp,  // Report generation time
+            assessment_timestamp: result.assessment_timestamp || this.assessmentStartTime,  // Use backend value or fallback to frontend
+            timezone: result.timezone,
+            patient_info: this.patientInfo,
+            primary_diagnosis: result.primary_diagnosis,
+            confidence: result.confidence_percentage,
+            confidence_percentage: result.confidence_percentage,
+            all_diagnoses: result.all_diagnoses,
+            responses: this.responses,
+            processing_details: result.processing_details,
+            technical_details: result.technical_details,
+            clinical_insights: result.clinical_insights || null
+        };
 
         // Save assessment to backend
-          try {
-                const saveResult = await this.saveAssessmentToBackend(assessmentData);
-                console.log('✅ Assessment saved with both timestamps:', {
-                    assessment_start: this.assessmentStartTime,
-                    report_generated: result.timestamp
-                });
-              
-              // Store in assessmentHistory for current session
-              this.assessmentHistory.unshift(assessmentData);
-              console.log('✅ Assessment added to session history with all diagnoses');
-              
-          } catch (error) {
-              console.error('❌ Failed to save assessment:', error);
-              // Continue to show results even if save fails
-              this.assessmentHistory.unshift(assessmentData); // Still store locally
-          }
-          
-          // Display all the UI components
-          this.displayPatientInfo(this.patientInfo);
-          this.displayAllDiagnoses(result.all_diagnoses); // Updated to show ALL diagnoses
-          this.displaySafetyWarnings(result.processing_details?.clinical_safety_warnings || []);
-          this.displayTechnicalDetails(result);
-          
-          // Remove the save button since it's now automatic
-          this.removeSaveButton();
-          
-          // Debug: Log current assessment state
-          console.log('Current assessment history:', this.assessmentHistory);
-          console.log('Most recent assessment with all diagnoses:', this.assessmentHistory[0]);
-      }
+        try {
+            const saveResult = await this.saveAssessmentToBackend(assessmentData);
+            console.log('✅ Assessment saved with both timestamps:', {
+                assessment_start: assessmentData.assessment_timestamp,
+                report_generated: assessmentData.timestamp
+            });
+            
+            // Store in assessmentHistory for current session
+            this.assessmentHistory.unshift(assessmentData);
+            console.log('✅ Assessment added to session history with all diagnoses');
+            
+        } catch (error) {
+            console.error('❌ Failed to save assessment:', error);
+            // Continue to show results even if save fails
+            this.assessmentHistory.unshift(assessmentData); // Still store locally
+        }
+        
+        // Display all the UI components
+        this.displayPatientInfo(this.patientInfo);
+        this.displayAllDiagnoses(result.all_diagnoses);
+        this.displaySafetyWarnings(result.processing_details?.clinical_safety_warnings || []);
+        this.displayTechnicalDetails(result);
+        
+        // Remove the save button since it's now automatic
+        this.removeSaveButton();
+        
+        // Debug: Log current assessment state
+        console.log('Current assessment history:', this.assessmentHistory);
+        console.log('Most recent assessment with all diagnoses:', this.assessmentHistory[0]);
+    }
 
     displayPatientInfo(patientInfo) {
         if (!patientInfo) {
