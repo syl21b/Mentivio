@@ -4,6 +4,9 @@ services:
     env: python
     plan: free
     buildCommand: |
+      # Use a supported Python version
+      pyenv install 3.12.4
+      pyenv global 3.12.4
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
     startCommand: |
