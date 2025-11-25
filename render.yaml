@@ -6,6 +6,6 @@ services:
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-      # Train the model and generate the required files
-      python train_model.py
-    startCommand: python app.py
+    startCommand: |
+      python train_model.py  
+      python app.py         
