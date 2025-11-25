@@ -41,3 +41,11 @@ temp/
 tmp/
 EOFassessment/assessment_data.csv
 assessment/assessment_data copy.csv
+*.copy.*
+* copy.*
+
+# Check if models are ignored
+git check-ignore models/mental_health_model.pkl
+
+# Check your .gitignore file
+cat .gitignore | grep -i model
