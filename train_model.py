@@ -1889,7 +1889,7 @@ def create_final_summary_visualization(
     
     plt.tight_layout()
     
-    # ✅ FIXED: Save to 'models' folder (plural) instead of 'model'
+    # Save to 'models' folder (plural) instead of 'model'
     plt.savefig('models/clinical_model_summary.png', dpi=300, bbox_inches='tight')
     plt.show()
     
@@ -1908,5 +1908,5 @@ def ensure_models_directory():
 
 # Update the execution section
 if __name__ == "__main__":
-    ensure_models_directory()  # Create directory first
+    ensure_models_directory()  
     main()
