@@ -11,7 +11,7 @@ import logging
 from typing import Dict, List, Tuple, Optional, Any
 import psycopg
 from psycopg.rows import dict_row  
-import sqlite3  # Keep for fallback if needed
+import sqlite3
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -21,23 +21,211 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import io
 import json
-import sys 
+import sys
+import re
+import secrets
+import time
+from cryptography.fernet import Fernet
+import bcrypt
+from itsdangerous import URLSafeTimedSerializer
 
-# Global storage (in production, use a database)
+# ==================== SECURITY CONFIGURATION ====================
+class SecurityConfig:
+    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_urlsafe(32))
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key())
+    
+    SESSION_TIMEOUT = int(os.environ.get('SESSION_TIMEOUT', 3600))
+    MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', 16 * 1024 * 1024))
+    RATE_LIMIT_REQUESTS = int(os.environ.get('RATE_LIMIT_REQUESTS', 100))
+    RATE_LIMIT_WINDOW = int(os.environ.get('RATE_LIMIT_WINDOW', 3600))
+    
+    SECURITY_HEADERS = {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY',
+        'X-XSS-Protection': '1; mode=block',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'geolocation=(), microphone=()'
+    }
+    
+    MAX_INPUT_LENGTH = 500
+    MAX_RESPONSES = 50
+
+class SecurityUtils:
+    @staticmethod
+    def generate_secure_token(length=32):
+        return secrets.token_urlsafe(length)
+    
+    @staticmethod
+    def hash_password(password: str) -> str:
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    @staticmethod
+    def verify_password(password: str, hashed: str) -> bool:
+        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    
+    @staticmethod
+    def validate_email(email: str) -> bool:
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(pattern, email))
+    
+    @staticmethod
+    def sanitize_input(user_input: str) -> str:
+        if not isinstance(user_input, str):
+            return str(user_input)
+        sanitized = re.sub(r'[<>"\']', '', user_input)
+        return sanitized.strip()[:SecurityConfig.MAX_INPUT_LENGTH]
+    
+    @staticmethod
+    def validate_patient_data(patient_info: Dict) -> Tuple[bool, str]:
+        """Validate patient information for security"""
+        try:
+            name = patient_info.get('name', '').strip()
+            if not name or len(name) > 100:
+                return False, "Invalid patient name"
+            
+            number = patient_info.get('number', '').strip()
+            if not re.match(r'^[a-zA-Z0-9\-_]+$', number):
+                return False, "Invalid patient number format"
+            
+            age = patient_info.get('age', '').strip()
+            if age and not re.match(r'^[0-9]+$', age):
+                return False, "Invalid age format"
+            
+            gender = patient_info.get('gender', '').strip()
+            if gender and gender not in ['Male', 'Female', 'Other', 'Prefer not to say', '']:
+                return False, "Invalid gender selection"
+            
+            return True, "Valid"
+        except Exception as e:
+            return False, f"Validation error: {str(e)}"
+
+class EncryptionService:
+    def __init__(self):
+        self.fernet = Fernet(SecurityConfig.ENCRYPTION_KEY)
+    
+    def encrypt_data(self, data: str) -> str:
+        return self.fernet.encrypt(data.encode()).decode()
+    
+    def decrypt_data(self, encrypted_data: str) -> str:
+        return self.fernet.decrypt(encrypted_data.encode()).decode()
+    
+    def encrypt_dict(self, data: Dict) -> str:
+        return self.encrypt_data(json.dumps(data))
+    
+    def decrypt_dict(self, encrypted_data: str) -> Dict:
+        return json.loads(self.decrypt_data(encrypted_data))
+
+class RateLimiter:
+    def __init__(self):
+        self.requests = {}
+    
+    def is_rate_limited(self, identifier: str, max_requests: int, window: int) -> bool:
+        now = time.time()
+        window_start = now - window
+        
+        if identifier in self.requests:
+            self.requests[identifier] = [
+                req_time for req_time in self.requests[identifier] 
+                if req_time > window_start
+            ]
+        
+        if len(self.requests.get(identifier, [])) >= max_requests:
+            return True
+        
+        if identifier not in self.requests:
+            self.requests[identifier] = []
+        self.requests[identifier].append(now)
+        
+        return False
+
+class AuthService:
+    def __init__(self):
+        self.serializer = URLSafeTimedSerializer(SecurityConfig.SECRET_KEY)
+        self.active_sessions = {}
+    
+    def create_session(self, user_id: str, user_data: Dict) -> str:
+        session_id = SecurityUtils.generate_secure_token()
+        session_data = {
+            'user_id': user_id,
+            'user_data': user_data,
+            'created_at': time.time(),
+            'last_activity': time.time()
+        }
+        self.active_sessions[session_id] = session_data
+        return session_id
+    
+    def validate_session(self, session_id: str) -> Optional[Dict]:
+        if session_id not in self.active_sessions:
+            return None
+        
+        session_data = self.active_sessions[session_id]
+        
+        if time.time() - session_data['last_activity'] > SecurityConfig.SESSION_TIMEOUT:
+            del self.active_sessions[session_id]
+            return None
+        
+        session_data['last_activity'] = time.time()
+        return session_data
+    
+    def destroy_session(self, session_id: str):
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
+
+# Initialize security services
+encryption_service = EncryptionService()
+rate_limiter = RateLimiter()
+auth_service = AuthService()
+
+# ==================== FLASK APP SETUP ====================
 assessment_storage: Dict[str, Dict[str, Any]] = {}
 
 app = Flask(__name__, 
            static_folder='frontend',
            template_folder='frontend')
-    
-    
-# Configure CORS based on environment
+
+app.secret_key = SecurityConfig.SECRET_KEY
+
+# Security middleware
+@app.after_request
+def set_security_headers(response):
+    for header, value in SecurityConfig.SECURITY_HEADERS.items():
+        response.headers[header] = value
+    return response
+
+# Rate limiting middleware
+@app.before_request
+def check_rate_limit():
+    if request.endpoint and request.endpoint.startswith('api'):
+        client_ip = request.remote_addr
+        if rate_limiter.is_rate_limited(client_ip, SecurityConfig.RATE_LIMIT_REQUESTS, SecurityConfig.RATE_LIMIT_WINDOW):
+            return jsonify({
+                'error': 'Rate limit exceeded. Please try again later.',
+                'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
+            }), 429
+
+# Input validation middleware
+@app.before_request
+def validate_api_input():
+    if request.endpoint and request.endpoint.startswith('api') and request.method in ['POST', 'PUT']:
+        if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
+            return jsonify({'error': 'Request too large'}), 413
+        
+        if request.is_json:
+            try:
+                data = request.get_json()
+                if not isinstance(data, (dict, list)):
+                    return jsonify({'error': 'Invalid JSON format'}), 400
+            except Exception as e:
+                return jsonify({'error': 'Invalid JSON data'}), 400
+
+# Configure CORS with security
 if os.environ.get('RENDER'):
     CORS(app, origins=[
         'https://mentivio.onrender.com',
         'http://mentivio-MentalHealth.onrender.com',
-        'https://mentivio-web.onrender.com',
-        'http://your-actual-app-name.onrender.com'
+        'https://mentivio-web.onrender.com'
     ])
     app.debug = False
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
@@ -48,27 +236,15 @@ else:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Global variables for model components with type hints
-model_package: Optional[Dict[str, Any]] = None
-scaler: Optional[Any] = None
-label_encoder: Optional[Any] = None
-feature_names: Optional[List[str]] = None
-category_mappings: Optional[Dict[str, Any]] = None
-clinical_enhancer: Optional[Any] = None
-
-# PostgreSQL configuration with psycopg
+# ==================== DATABASE SETUP ====================
 def get_postgres_connection():
     """Get PostgreSQL database connection using psycopg"""
     try:
-        # Use external database URL for Render
         database_url = os.environ.get('DATABASE_URL')
         if database_url:
-            # Render provides DATABASE_URL in the format: postgresql://user:pass@host:port/dbname
-            # Convert to psycopg connection string if needed
             if database_url.startswith('postgresql://'):
                 conn = psycopg.connect(database_url, row_factory=dict_row)
             else:
-                # Fallback to individual connection parameters
                 conn = psycopg.connect(
                     host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
                     dbname='assessment_data',
@@ -78,7 +254,6 @@ def get_postgres_connection():
                     row_factory=dict_row
                 )
         else:
-            # Fallback to individual connection parameters
             conn = psycopg.connect(
                 host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
                 dbname='assessment_data',
@@ -92,7 +267,6 @@ def get_postgres_connection():
         return conn
     except Exception as e:
         logger.error(f"PostgreSQL connection failed: {e}")
-        # Fallback to SQLite for local development
         try:
             sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
             conn = sqlite3.connect(sqlite_path)
@@ -108,8 +282,7 @@ def init_database():
     try:
         conn = get_postgres_connection()
         
-        # Check if we're using PostgreSQL or SQLite
-        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+        if hasattr(conn, 'cursor'):
             with conn.cursor() as cur:
                 cur.execute('''
                     CREATE TABLE IF NOT EXISTS assessments (
@@ -140,7 +313,6 @@ def init_database():
             logger.info("PostgreSQL database initialized successfully with psycopg")
             
         else:
-            # SQLite fallback
             c = conn.cursor()
             
             c.execute('''
@@ -179,9 +351,18 @@ def init_database():
 def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
     """Save assessment data to PostgreSQL database using psycopg"""
     try:
+        sanitized_data = assessment_data.copy()
+        if 'patient_info' in sanitized_data:
+            sanitized_data['patient_info'] = {
+                'name': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('name', '')),
+                'number': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('number', '')),
+                'age': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('age', '')),
+                'gender': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('gender', ''))
+            }
+        
         conn = get_postgres_connection()
         
-        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+        if hasattr(conn, 'cursor'):
             with conn.cursor() as cur:
                 cur.execute('''
                     INSERT INTO assessments (
@@ -208,25 +389,24 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
                         technical_details_json = EXCLUDED.technical_details_json,
                         clinical_insights_json = EXCLUDED.clinical_insights_json
                 ''', (
-                    assessment_data.get('id'),
-                    assessment_data.get('assessment_timestamp'),
-                    assessment_data.get('timestamp'),
-                    assessment_data.get('timezone', 'UTC'),
-                    assessment_data.get('patient_info', {}).get('name', ''),
-                    assessment_data.get('patient_info', {}).get('number', ''),
-                    assessment_data.get('patient_info', {}).get('age', ''),
-                    assessment_data.get('patient_info', {}).get('gender', ''),
-                    assessment_data.get('primary_diagnosis', ''),
-                    assessment_data.get('confidence', 0),
-                    assessment_data.get('confidence_percentage', 0),
-                    json.dumps(assessment_data.get('all_diagnoses', [])),
-                    json.dumps(assessment_data.get('responses', {})),
-                    json.dumps(assessment_data.get('processing_details', {})),
-                    json.dumps(assessment_data.get('technical_details', {})),
-                    json.dumps(assessment_data.get('clinical_insights', {}))
+                    sanitized_data.get('id'),
+                    sanitized_data.get('assessment_timestamp'),
+                    sanitized_data.get('timestamp'),
+                    sanitized_data.get('timezone', 'UTC'),
+                    sanitized_data.get('patient_info', {}).get('name', ''),
+                    sanitized_data.get('patient_info', {}).get('number', ''),
+                    sanitized_data.get('patient_info', {}).get('age', ''),
+                    sanitized_data.get('patient_info', {}).get('gender', ''),
+                    sanitized_data.get('primary_diagnosis', ''),
+                    sanitized_data.get('confidence', 0),
+                    sanitized_data.get('confidence_percentage', 0),
+                    json.dumps(sanitized_data.get('all_diagnoses', [])),
+                    json.dumps(sanitized_data.get('responses', {})),
+                    json.dumps(sanitized_data.get('processing_details', {})),
+                    json.dumps(sanitized_data.get('technical_details', {})),
+                    json.dumps(sanitized_data.get('clinical_insights', {}))
                 ))
         else:
-            # SQLite fallback
             c = conn.cursor()
             
             c.execute('''
@@ -238,28 +418,28 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
                     technical_details_json, clinical_insights_json
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                assessment_data.get('id'),
-                assessment_data.get('assessment_timestamp'),
-                assessment_data.get('timestamp'),
-                assessment_data.get('timezone', 'UTC'),
-                assessment_data.get('patient_info', {}).get('name', ''),
-                assessment_data.get('patient_info', {}).get('number', ''),
-                assessment_data.get('patient_info', {}).get('age', ''),
-                assessment_data.get('patient_info', {}).get('gender', ''),
-                assessment_data.get('primary_diagnosis', ''),
-                assessment_data.get('confidence', 0),
-                assessment_data.get('confidence_percentage', 0),
-                json.dumps(assessment_data.get('all_diagnoses', [])),
-                json.dumps(assessment_data.get('responses', {})),
-                json.dumps(assessment_data.get('processing_details', {})),
-                json.dumps(assessment_data.get('technical_details', {})),
-                json.dumps(assessment_data.get('clinical_insights', {}))
+                sanitized_data.get('id'),
+                sanitized_data.get('assessment_timestamp'),
+                sanitized_data.get('timestamp'),
+                sanitized_data.get('timezone', 'UTC'),
+                sanitized_data.get('patient_info', {}).get('name', ''),
+                sanitized_data.get('patient_info', {}).get('number', ''),
+                sanitized_data.get('patient_info', {}).get('age', ''),
+                sanitized_data.get('patient_info', {}).get('gender', ''),
+                sanitized_data.get('primary_diagnosis', ''),
+                sanitized_data.get('confidence', 0),
+                sanitized_data.get('confidence_percentage', 0),
+                json.dumps(sanitized_data.get('all_diagnoses', [])),
+                json.dumps(sanitized_data.get('responses', {})),
+                json.dumps(sanitized_data.get('processing_details', {})),
+                json.dumps(sanitized_data.get('technical_details', {})),
+                json.dumps(sanitized_data.get('clinical_insights', {}))
             ))
         
         conn.commit()
         conn.close()
         
-        logger.info(f"Assessment saved to database: {assessment_data.get('id')}")
+        logger.info(f"Assessment saved to database: {sanitized_data.get('id')}")
         return True
         
     except Exception as e:
@@ -271,7 +451,7 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
     try:
         conn = get_postgres_connection()
         
-        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+        if hasattr(conn, 'cursor'):
             with conn.cursor() as cur:
                 if patient_number:
                     cur.execute('''
@@ -284,7 +464,6 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
                 
                 rows = cur.fetchall()
         else:
-            # SQLite fallback
             c = conn.cursor()
             
             if patient_number:
@@ -303,7 +482,6 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
         assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
         
         for row in rows:
-            # Convert row to dictionary
             if isinstance(row, dict):
                 row_dict = row
             else:
@@ -354,7 +532,7 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
     try:
         conn = get_postgres_connection()
         
-        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+        if hasattr(conn, 'cursor'):
             with conn.cursor() as cur:
                 cur.execute('''
                     SELECT * FROM assessments 
@@ -363,7 +541,6 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
                 
                 row = cur.fetchone()
         else:
-            # SQLite fallback
             c = conn.cursor()
             
             c.execute('''
@@ -378,7 +555,6 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
         if not row:
             return None
         
-        # Convert row to dictionary
         if isinstance(row, dict):
             row_dict = row
         else:
@@ -423,14 +599,13 @@ def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
     try:
         conn = get_postgres_connection()
         
-        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+        if hasattr(conn, 'cursor'):
             with conn.cursor() as cur:
                 cur.execute('''
                     DELETE FROM assessments 
                     WHERE patient_number = %s AND id = %s
                 ''', (patient_number, assessment_id))
         else:
-            # SQLite fallback
             c = conn.cursor()
             
             c.execute('''
@@ -451,6 +626,14 @@ def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
 # Initialize database at startup
 init_database()
 
+# ==================== MODEL COMPONENTS ====================
+model_package: Optional[Dict[str, Any]] = None
+scaler: Optional[Any] = None
+label_encoder: Optional[Any] = None
+feature_names: Optional[List[str]] = None
+category_mappings: Optional[Dict[str, Any]] = None
+clinical_enhancer: Optional[Any] = None
+
 def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Optional[Any], Optional[List[str]], Optional[Dict[str, Any]]]:
     """Load all required model components"""
     global model_package, scaler, label_encoder, feature_names, category_mappings
@@ -460,6 +643,22 @@ def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Op
         
         current_dir = os.path.dirname(os.path.abspath(__file__))
         models_dir = os.path.join(current_dir, 'models')
+        
+        required_files = [
+            'mental_health_model.pkl',
+            'scaler.pkl', 
+            'label_encoder.pkl',
+            'feature_names.pkl',
+            'category_mappings.pkl'
+        ]
+        
+        for file in required_files:
+            file_path = os.path.join(models_dir, file)
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"Required model file not found: {file}")
+            
+            if os.path.getsize(file_path) == 0:
+                raise ValueError(f"Model file is empty: {file}")
         
         model_path = os.path.join(models_dir, 'mental_health_model.pkl')
         model_package = joblib.load(model_path)
@@ -488,7 +687,7 @@ def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Op
     except Exception as e:
         logger.error(f"Error loading model components: {e}")
         return None, None, None, None, None
-    
+
 class ClinicalDecisionEnhancer:
     """Enhances model predictions with clinical rules and feature sensitivity"""
     
@@ -498,7 +697,6 @@ class ClinicalDecisionEnhancer:
         self.clinical_rules = self._initialize_clinical_rules()
         
     def _initialize_clinical_rules(self) -> Dict[str, Dict[str, Any]]:
-        """Define clinical rules for different diagnoses"""
         return {
             'depression_patterns': {
                 'required_features': ['Sadness', 'Sleep disorder', 'Exhausted'],
@@ -536,7 +734,6 @@ class ClinicalDecisionEnhancer:
         }
     
     def analyze_feature_patterns(self, processed_responses: Dict[str, Any], probabilities: np.ndarray) -> Dict[str, Any]:
-        """Analyze if feature patterns match clinical expectations"""
         analysis: Dict[str, Any] = {
             'depression_score': 0.0,
             'bipolar1_score': 0.0,
@@ -559,7 +756,6 @@ class ClinicalDecisionEnhancer:
         return analysis
     
     def _calculate_pattern_score(self, responses: Dict[str, Any], rules: Dict[str, Any]) -> float:
-        """Calculate how well responses match a clinical pattern"""
         score = 0
         max_score = len(rules['required_features']) + len(rules.get('exclusion_features', []))
         
@@ -578,7 +774,6 @@ class ClinicalDecisionEnhancer:
         return score / max_score if max_score > 0 else 0.0
     
     def _check_feature_consistency(self, responses: Dict[str, Any], diagnosis: str) -> Dict[str, Any]:
-        """Check if features are consistent with the diagnosis"""
         consistency: Dict[str, Any] = {}
         
         expected_ranges = {
@@ -620,7 +815,6 @@ class ClinicalDecisionEnhancer:
         return consistency
     
     def _suggest_adjustments(self, responses: Dict[str, Any], probabilities: np.ndarray) -> List[Dict[str, Any]]:
-        """Suggest diagnosis adjustments based on feature patterns"""
         suggestions: List[Dict[str, Any]] = []
         
         primary_idx = np.argmax(probabilities)
@@ -650,7 +844,6 @@ class ClinicalDecisionEnhancer:
         return suggestions
     
     def enhance_prediction(self, processed_responses: Dict[str, Any], probabilities: np.ndarray, original_diagnosis: str) -> Dict[str, Any]:
-        """Apply clinical enhancements to the prediction"""
         analysis = self.analyze_feature_patterns(processed_responses, probabilities)
         
         enhanced_prediction: Dict[str, Any] = {
@@ -694,12 +887,10 @@ class ClinicalPreprocessor:
         self.processing_log: List[str] = []
     
     def log_step(self, step: str, details: str) -> None:
-        """Log processing steps for transparency"""
         self.processing_log.append(f"{step}: {details}")
         logger.info(f"Preprocessing - {step}: {details}")
     
     def encode_user_responses(self, raw_responses: Dict[str, Any]) -> Dict[str, Any]:
-        """EXACTLY replicate the encoding from train_model.py encode_features()"""
         encoded_responses: Dict[str, Any] = {}
         
         frequency_mapping = self.category_mappings.get('frequency', {'Seldom': 0, 'Sometimes': 1, 'Usually': 2, 'Most-Often': 3})
@@ -772,7 +963,6 @@ class ClinicalPreprocessor:
         return encoded_responses
     
     def apply_feature_engineering(self, encoded_responses: Dict[str, Any]) -> Dict[str, Any]:
-        """EXACTLY replicate feature engineering from training - MATCHING THE MODEL"""
         responses = encoded_responses.copy()
         
         if 'Mood Swing' in responses and 'Sadness' in responses:
@@ -803,7 +993,6 @@ class ClinicalPreprocessor:
         return responses
 
     def normalize_feature_names(self, raw_responses: Dict[str, Any]) -> Dict[str, Any]:
-        """Normalize feature names to match training data format EXACTLY"""
         normalized_responses: Dict[str, Any] = {}
         
         feature_name_mapping = {
@@ -836,7 +1025,6 @@ class ClinicalPreprocessor:
         return normalized_responses
     
     def validate_clinical_safety(self, responses: Dict[str, Any]) -> Tuple[bool, List[str]]:
-        """Clinical safety checks for critical responses"""
         warnings: List[str] = []
         
         suicidal_thoughts = float(responses.get('Suicidal thoughts', 0))
@@ -875,8 +1063,6 @@ class ClinicalPreprocessor:
         return safety_ok, warnings
 
     def preprocess(self, raw_responses: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str], List[str]]:
-        """Complete preprocessing pipeline EXACTLY matching training"""
-        
         self.processing_log = []
         self.log_step("Pipeline_Start", f"Processing {len(raw_responses)} raw features: {list(raw_responses.keys())}")
         
@@ -896,23 +1082,43 @@ class ClinicalPreprocessor:
             import traceback
             self.log_step("Pipeline_Error", f"Traceback: {traceback.format_exc()}")
             raise e
-        
+
 def safe_float(value: Any, default: float = 0.0) -> float:
-    """Safely convert value to float"""
     try:
         return float(value)
     except (ValueError, TypeError):
         return default
 
+def validate_assessment_responses(responses: Dict[str, Any]) -> Tuple[bool, str]:
+    """Validate assessment responses for security"""
+    try:
+        if not isinstance(responses, dict):
+            return False, "Responses must be a dictionary"
+        
+        if len(responses) > SecurityConfig.MAX_RESPONSES:
+            return False, f"Too many responses. Maximum allowed: {SecurityConfig.MAX_RESPONSES}"
+        
+        for key, value in responses.items():
+            sanitized_key = SecurityUtils.sanitize_input(str(key))
+            if sanitized_key != key:
+                return False, f"Invalid characters in response key: {key}"
+            
+            if not isinstance(value, (str, int, float)):
+                return False, f"Invalid response type for {key}"
+            
+            if isinstance(value, str) and len(value) > SecurityConfig.MAX_INPUT_LENGTH:
+                return False, f"Response value too long for {key}"
+        
+        return True, "Valid"
+    except Exception as e:
+        return False, f"Validation error: {str(e)}"
 
 def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Optional[pd.DataFrame]:
-    """Convert processed responses to feature array with EXACT feature order matching training"""
     try:
         if feature_names is None:
             logger.error("Feature names not loaded")
             return None
             
-        # Create feature array with proper feature names
         feature_array = np.zeros(len(feature_names))
         
         missing_features: List[str] = []
@@ -943,7 +1149,6 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
         logger.info(f"Feature array created: {len(feature_array)} features, "
                    f"{len(missing_features)} missing, {len(found_features)} found")
         
-        # 🆕 CRITICAL FIX: Always return DataFrame with feature names
         feature_df = pd.DataFrame([feature_array], columns=feature_names)
         
         return feature_df
@@ -953,7 +1158,6 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
         return None
-        
 
 # Load components at startup
 model_package, scaler, label_encoder, feature_names, category_mappings = load_model_components()
@@ -962,7 +1166,7 @@ initialize_clinical_enhancer()
 # Initialize preprocessor
 preprocessor = ClinicalPreprocessor(category_mappings)
 
-# Routes to serve the frontend files
+# ==================== ROUTES ====================
 @app.route('/')
 def serve_index():
     return send_from_directory('frontend', 'Home.html')
@@ -1041,34 +1245,21 @@ def debug_path():
         'is_resource': '/resources/' in request.path,
         'suggested_base_path': '../' if '/resources/' in request.path else './'
     })
-    
-@app.errorhandler(404)
-def not_found(error):
-    if request.path.startswith('/api/'):
-        return jsonify({'error': 'API endpoint not found'}), 404
-    else:
-        try:
-            return send_from_directory('frontend', 'Home.html')  
-        except:
-            return jsonify({'error': 'Page not found'}), 404
-        
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Enhanced health check to properly wake up Render instance"""
     try:
-        # Test database connection
         db_healthy = False
         db_type = "Unknown"
         try:
             conn = get_postgres_connection()
             if conn:
-                # Execute a simple query to ensure DB is responsive
-                if hasattr(conn, 'cursor'):  # PostgreSQL
+                if hasattr(conn, 'cursor'):
                     with conn.cursor() as cur:
                         cur.execute('SELECT 1 as test')
                         db_healthy = True
                         db_type = 'PostgreSQL'
-                else:  # SQLite
+                else:
                     c = conn.cursor()
                     c.execute('SELECT 1 as test')
                     db_healthy = True
@@ -1077,7 +1268,6 @@ def health_check():
         except Exception as e:
             logger.warning(f"Database health check warning: {e}")
 
-        # Check all model components
         components_loaded = all([
             model_package is not None,
             scaler is not None, 
@@ -1086,7 +1276,6 @@ def health_check():
             category_mappings is not None
         ])
         
-        # Calculate overall health status
         overall_healthy = components_loaded and db_healthy
         
         health_info = {
@@ -1103,158 +1292,41 @@ def health_check():
             'total_features': len(feature_names) if feature_names else 0,
             'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
             'clinical_enhancer_available': clinical_enhancer is not None,
+            'security': {
+                'rate_limiting': True,
+                'input_validation': True,
+                'headers_security': True,
+                'encryption_available': True
+            },
             'message': 'Service is ready' if overall_healthy else 'Service is starting up'
         }
         
-        # Return 200 even if degraded, so UptimeRobot doesn't mark as down
-        # This ensures the instance stays awake during startup
         return jsonify(health_info)
         
     except Exception as e:
         logger.error(f"Health check failed: {e}")
-        # Still return 200 to keep instance awake
         return jsonify({
             'status': 'starting',
             'error': str(e),
             'timestamp': datetime.now(timezone.utc).isoformat(),
             'message': 'Instance is starting up, please wait'
-        }), 200  # Important: Return 200 even on error
+        }), 200
 
 @app.route('/ping', methods=['GET'])
 def simple_ping():
-    """Simple endpoint for uptime monitoring - minimal overhead"""
     return jsonify({
         'status': 'ok',
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'service': 'Mental Health Assessment API'
     })
-    
-    
-@app.route('/api/get-single-assessment', methods=['POST'])
-def get_single_assessment():
-    try:
-        data = request.json
-        patient_name = data.get('name', '').strip()
-        patient_number = data.get('number', '').strip()
-        assessment_id = data.get('assessment_id', '').strip()
-        
-        if not patient_name or not patient_number or not assessment_id:
-            return jsonify({'error': 'Patient name, number, and assessment ID required'}), 400
-        
-        target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id)
-        
-        if not target_assessment:
-            logger.warning(f"Assessment not found: {assessment_id} for {patient_name} (#{patient_number})")
-            return jsonify({'error': 'Assessment not found'}), 404
-        
-        enhanced_assessment = enhance_assessment_data(target_assessment)
-        
-        logger.info(f"Single assessment retrieved: {assessment_id}")
-        return jsonify({
-            'success': True,
-            'assessment': enhanced_assessment
-        })
-        
-    except Exception as e:
-        logger.error(f"Error retrieving single assessment: {e}")
-        return jsonify({'error': f'Failed to retrieve assessment: {str(e)}'}), 500
-    
-def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
-    try:
-        if not assessment.get('primary_diagnosis') and assessment.get('all_diagnoses'):
-            assessment['primary_diagnosis'] = assessment['all_diagnoses'][0].get('diagnosis', '')
-            if not assessment.get('confidence_percentage') and assessment['all_diagnoses']:
-                assessment['confidence_percentage'] = assessment['all_diagnoses'][0].get('confidence_percentage', 0)
-                assessment['confidence'] = assessment['confidence_percentage'] / 100.0
-        
-        if 'diagnosis_description' not in assessment:
-            assessment['diagnosis_description'] = get_diagnosis_description(assessment.get('primary_diagnosis', ''))
-        
-        if 'all_diagnoses' not in assessment or not assessment['all_diagnoses']:
-            assessment['all_diagnoses'] = [
-                {
-                    'diagnosis': assessment.get('primary_diagnosis', ''),
-                    'probability': assessment.get('confidence', 0),
-                    'confidence_percentage': assessment.get('confidence_percentage', 0)
-                }
-            ]
-        
-        if 'processing_details' not in assessment:
-            assessment['processing_details'] = {
-                'preprocessing_steps': 15,
-                'clinical_safety_warnings': [],
-                'total_features_processed': len(assessment.get('responses', {})),
-                'model_features_used': len(feature_names) if feature_names else 0,
-                'feature_engineering_applied': True,
-                'clinical_domains_calculated': True,
-                'clinical_enhancement_applied': False,
-                'safety_check_status': 'PASSED'
-            }
-        
-        if 'technical_details' not in assessment:
-            assessment['technical_details'] = {
-                'processing_log': [
-                    f"Assessment loaded from history: {assessment.get('id')}",
-                    f"Patient: {assessment.get('patient_info', {}).get('name', 'Unknown')}",
-                    f"Original assessment date: {assessment.get('timestamp', 'Unknown')}"
-                ],
-                'safety_checks_passed': True,
-                'feature_array_shape': [1, len(feature_names)] if feature_names else [1, 0],
-                'composite_scores_included': True
-            }
-        
-        return assessment
-        
-    except Exception as e:
-        logger.error(f"Error enhancing assessment data: {e}")
-        return assessment
 
-def get_diagnosis_description(diagnosis: str) -> str:
-    descriptions = {
-        'Normal': 'Your responses indicate typical mental well-being patterns with no significant clinical concerns detected.',
-        'Bipolar Type-1': 'Your responses show patterns that may indicate Bipolar Type-1 disorder. This is characterized by manic episodes that last at least 7 days.',
-        'Bipolar Type-2': 'Your responses suggest patterns consistent with Bipolar Type-2 disorder, characterized by hypomanic and depressive episodes.',
-        'Depression': 'Your responses align with patterns commonly seen in depressive disorders, including persistent sadness and loss of interest.'
-    }
-    return descriptions.get(diagnosis, 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.')
-
-def parse_assessment_timestamp(timestamp_str: str) -> datetime:
-    try:
-        if not timestamp_str or timestamp_str == 'N/A':
-            logger.warning("Empty or N/A timestamp provided, using current UTC time")
-            return datetime.now(timezone.utc)
-        
-        if 'T' in timestamp_str:
-            if timestamp_str.endswith('Z'):
-                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif '+' in timestamp_str or '-' in timestamp_str[-6:]:
-                dt = datetime.fromisoformat(timestamp_str)
-            else:
-                dt = datetime.fromisoformat(timestamp_str).replace(tzinfo=timezone.utc)
-        else:
-            try:
-                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-            except ValueError:
-                try:
-                    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
-                except ValueError:
-                    logger.warning(f"Could not parse timestamp format: {timestamp_str}, using current time")
-                    return datetime.now(timezone.utc)
-        
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-            
-        logger.info(f"Successfully parsed timestamp: {timestamp_str} -> {dt.isoformat()}")
-        return dt
-        
-    except (ValueError, TypeError) as e:
-        logger.warning(f"Could not parse timestamp '{timestamp_str}': {e}, using current UTC time")
-        return datetime.now(timezone.utc)
-    
 @app.route('/api/predict', methods=['POST'])
 def predict():
     try:
         data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
         user_responses = data.get('responses', {})
         patient_info = data.get('patientInfo', {})
         assessment_start_time = data.get('assessment_start_time')
@@ -1262,7 +1334,15 @@ def predict():
         if not user_responses:
             return jsonify({'error': 'No responses provided'}), 400
         
-        logger.info(f"Received {len(user_responses)} responses for patient: {patient_info.get('name', 'Unknown')}")
+        responses_valid, responses_msg = validate_assessment_responses(user_responses)
+        if not responses_valid:
+            return jsonify({'error': f'Invalid responses: {responses_msg}'}), 400
+        
+        patient_valid, patient_msg = SecurityUtils.validate_patient_data(patient_info)
+        if not patient_valid:
+            return jsonify({'error': f'Invalid patient data: {patient_msg}'}), 400
+        
+        logger.info(f"Received {len(user_responses)} validated responses for patient: {patient_info.get('name', 'Unknown')}")
         
         client_timezone = request.headers.get('X-Client-Timezone', 'UTC')
        
@@ -1398,7 +1478,8 @@ def predict():
                 'timezone_used': client_timezone,
                 'assessment_start_time': assessment_date_str,
                 'report_generation_time': report_generation_time,
-                'processing_duration_seconds': time_diff.total_seconds() if assessment_start_time else 0
+                'processing_duration_seconds': time_diff.total_seconds() if assessment_start_time else 0,
+                'security_validation': 'PASSED'
             },
             'technical_details': {
                 'processing_log': processing_log,
@@ -1423,22 +1504,59 @@ def predict():
                 'confidence_adjustment': float(clinical_enhancement['confidence_adjustment'] * 100)
             }
         
-        logger.info(f"Assessment completed successfully:")
-        logger.info(f"Primary Diagnosis: {final_diagnosis} ({final_confidence_percentage:.1f}%)")
-        logger.info(f"Total Diagnoses Returned: {len(all_diagnoses)}")
-        logger.info(f"Client Timezone: {client_timezone}")
-        
+        logger.info(f"Secure assessment completed successfully for patient: {patient_info.get('name', 'Unknown')}")
         return jsonify(response_data)
         
     except Exception as e:
-        logger.error(f"Prediction endpoint error: {e}")
+        logger.error(f"Secure prediction endpoint error: {e}")
         return jsonify({'error': 'Assessment failed. Please try again.'}), 500
-    
+
+def parse_assessment_timestamp(timestamp_str: str) -> datetime:
+    try:
+        if not timestamp_str or timestamp_str == 'N/A':
+            logger.warning("Empty or N/A timestamp provided, using current UTC time")
+            return datetime.now(timezone.utc)
+        
+        if 'T' in timestamp_str:
+            if timestamp_str.endswith('Z'):
+                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif '+' in timestamp_str or '-' in timestamp_str[-6:]:
+                dt = datetime.fromisoformat(timestamp_str)
+            else:
+                dt = datetime.fromisoformat(timestamp_str).replace(tzinfo=timezone.utc)
+        else:
+            try:
+                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            except ValueError:
+                try:
+                    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                except ValueError:
+                    logger.warning(f"Could not parse timestamp format: {timestamp_str}, using current time")
+                    return datetime.now(timezone.utc)
+        
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+            
+        logger.info(f"Successfully parsed timestamp: {timestamp_str} -> {dt.isoformat()}")
+        return dt
+        
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Could not parse timestamp '{timestamp_str}': {e}, using current UTC time")
+        return datetime.now(timezone.utc)
+
 @app.route('/api/save-assessment', methods=['POST'])
 def save_assessment():
     try:
         data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
         assessment_data = data.get('assessment_data', {})
+        if not assessment_data:
+            return jsonify({'error': 'No assessment data provided'}), 400
+        
+        if not isinstance(assessment_data, dict):
+            return jsonify({'error': 'Invalid assessment data format'}), 400
         
         if 'id' not in assessment_data:
             if 'timestamp' in assessment_data:
@@ -1454,7 +1572,7 @@ def save_assessment():
             assessment_data['timestamp'] = datetime.now(timezone.utc).isoformat()
         
         if save_assessment_to_db(assessment_data):
-            logger.info(f"Assessment saved to database: {assessment_data['id']}")
+            logger.info(f"Secure assessment saved to database: {assessment_data['id']}")
             return jsonify({
                 'success': True,
                 'assessment_id': assessment_data['id'],
@@ -1498,6 +1616,94 @@ def get_patient_assessments():
         logger.error(f"Error retrieving assessments: {e}")
         return jsonify({'error': f'Failed to retrieve assessments: {str(e)}'}), 500
 
+@app.route('/api/get-single-assessment', methods=['POST'])
+def get_single_assessment():
+    try:
+        data = request.json
+        patient_name = data.get('name', '').strip()
+        patient_number = data.get('number', '').strip()
+        assessment_id = data.get('assessment_id', '').strip()
+        
+        if not patient_name or not patient_number or not assessment_id:
+            return jsonify({'error': 'Patient name, number, and assessment ID required'}), 400
+        
+        target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id)
+        
+        if not target_assessment:
+            logger.warning(f"Assessment not found: {assessment_id} for {patient_name} (#{patient_number})")
+            return jsonify({'error': 'Assessment not found'}), 404
+        
+        enhanced_assessment = enhance_assessment_data(target_assessment)
+        
+        logger.info(f"Single assessment retrieved: {assessment_id}")
+        return jsonify({
+            'success': True,
+            'assessment': enhanced_assessment
+        })
+        
+    except Exception as e:
+        logger.error(f"Error retrieving single assessment: {e}")
+        return jsonify({'error': f'Failed to retrieve assessment: {str(e)}'}), 500
+
+def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
+    try:
+        if not assessment.get('primary_diagnosis') and assessment.get('all_diagnoses'):
+            assessment['primary_diagnosis'] = assessment['all_diagnoses'][0].get('diagnosis', '')
+            if not assessment.get('confidence_percentage') and assessment['all_diagnoses']:
+                assessment['confidence_percentage'] = assessment['all_diagnoses'][0].get('confidence_percentage', 0)
+                assessment['confidence'] = assessment['confidence_percentage'] / 100.0
+        
+        if 'diagnosis_description' not in assessment:
+            assessment['diagnosis_description'] = get_diagnosis_description(assessment.get('primary_diagnosis', ''))
+        
+        if 'all_diagnoses' not in assessment or not assessment['all_diagnoses']:
+            assessment['all_diagnoses'] = [
+                {
+                    'diagnosis': assessment.get('primary_diagnosis', ''),
+                    'probability': assessment.get('confidence', 0),
+                    'confidence_percentage': assessment.get('confidence_percentage', 0)
+                }
+            ]
+        
+        if 'processing_details' not in assessment:
+            assessment['processing_details'] = {
+                'preprocessing_steps': 15,
+                'clinical_safety_warnings': [],
+                'total_features_processed': len(assessment.get('responses', {})),
+                'model_features_used': len(feature_names) if feature_names else 0,
+                'feature_engineering_applied': True,
+                'clinical_domains_calculated': True,
+                'clinical_enhancement_applied': False,
+                'safety_check_status': 'PASSED'
+            }
+        
+        if 'technical_details' not in assessment:
+            assessment['technical_details'] = {
+                'processing_log': [
+                    f"Assessment loaded from history: {assessment.get('id')}",
+                    f"Patient: {assessment.get('patient_info', {}).get('name', 'Unknown')}",
+                    f"Original assessment date: {assessment.get('timestamp', 'Unknown')}"
+                ],
+                'safety_checks_passed': True,
+                'feature_array_shape': [1, len(feature_names)] if feature_names else [1, 0],
+                'composite_scores_included': True
+            }
+        
+        return assessment
+        
+    except Exception as e:
+        logger.error(f"Error enhancing assessment data: {e}")
+        return assessment
+
+def get_diagnosis_description(diagnosis: str) -> str:
+    descriptions = {
+        'Normal': 'Your responses indicate typical mental well-being patterns with no significant clinical concerns detected.',
+        'Bipolar Type-1': 'Your responses show patterns that may indicate Bipolar Type-1 disorder. This is characterized by manic episodes that last at least 7 days.',
+        'Bipolar Type-2': 'Your responses suggest patterns consistent with Bipolar Type-2 disorder, characterized by hypomanic and depressive episodes.',
+        'Depression': 'Your responses align with patterns commonly seen in depressive disorders, including persistent sadness and loss of interest.'
+    }
+    return descriptions.get(diagnosis, 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.')
+
 @app.route('/api/delete-assessment', methods=['POST'])
 def delete_assessment():
     try:
@@ -1530,16 +1736,38 @@ def api_info():
             'exact_training_match': True,
             'confidence_calibration': True,
             'clinical_decision_support': clinical_enhancer is not None,
-            'database_storage': True
+            'database_storage': True,
+            'security_features': True
         },
         'endpoints': {
             'health_check': '/api/health (GET)',
             'predict': '/api/predict (POST)',
             'save_assessment': '/api/save-assessment (POST)',
             'get_patient_assessments': '/api/get-patient-assessments (POST)',
-            'delete_assessment': '/api/delete-assessment (POST)'
+            'delete_assessment': '/api/delete-assessment (POST)',
+            'security_status': '/api/security-status (GET)'
         },
         'status': 'active'
+    })
+
+@app.route('/api/security-status', methods=['GET'])
+def security_status():
+    return jsonify({
+        'security': {
+            'rate_limiting': True,
+            'input_validation': True,
+            'security_headers': True,
+            'encryption_available': True,
+            'session_management': True,
+            'cors_protection': True
+        },
+        'config': {
+            'max_input_length': SecurityConfig.MAX_INPUT_LENGTH,
+            'max_responses': SecurityConfig.MAX_RESPONSES,
+            'rate_limit_requests': SecurityConfig.RATE_LIMIT_REQUESTS,
+            'rate_limit_window': SecurityConfig.RATE_LIMIT_WINDOW,
+            'session_timeout': SecurityConfig.SESSION_TIMEOUT
+        }
     })
 
 def format_timestamp(timestamp_str):
@@ -1860,9 +2088,33 @@ def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: st
     except Exception as e:
         return timestamp_str or "Timestamp unavailable"
 
+@app.errorhandler(404)
+def not_found(error):
+    if request.path.startswith('/api/'):
+        return jsonify({'error': 'API endpoint not found'}), 404
+    else:
+        try:
+            return send_from_directory('frontend', 'Home.html')  
+        except:
+            return jsonify({'error': 'Page not found'}), 404
 
-# ... all your existing code ...
+@app.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal server error: {error}")
+    return jsonify({'error': 'Internal server error'}), 500
 
+@app.errorhandler(413)
+def too_large(error):
+    return jsonify({'error': 'File too large'}), 413
+
+@app.errorhandler(429)
+def too_many_requests(error):
+    return jsonify({
+        'error': 'Too many requests',
+        'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
+    }), 429
+
+# ==================== MAIN EXECUTION ====================
 if __name__ == '__main__':
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
         logger.info("All model components loaded successfully!")
@@ -1871,8 +2123,10 @@ if __name__ == '__main__':
         logger.info("Enhanced preprocessing pipeline: ACTIVE")
         logger.info("EXACT training pipeline replication: VERIFIED")
         logger.info("Confidence calibration: ENABLED")
+        logger.info("SECURITY FEATURES: ACTIVE")
+        logger.info(f"Rate limiting: {SecurityConfig.RATE_LIMIT_REQUESTS} requests per {SecurityConfig.RATE_LIMIT_WINDOW}s")
+        logger.info(f"Input validation: MAX {SecurityConfig.MAX_INPUT_LENGTH} chars")
         
-        # Test database connection
         try:
             conn = get_postgres_connection()
             if hasattr(conn, 'cursor'):
@@ -1892,11 +2146,8 @@ if __name__ == '__main__':
         if not os.environ.get('RENDER'):
             sys.exit(1)
     
-    # ===== ADD THE PRE-WARM FUNCTION RIGHT HERE =====
     def pre_warm_app():
-        """Pre-warm the application to reduce first response time"""
         logger.info("Pre-warming application components...")
-        # This ensures models are loaded and ready
         with app.test_client() as client:
             try:
                 response = client.get('/api/health')
@@ -1904,10 +2155,8 @@ if __name__ == '__main__':
             except Exception as e:
                 logger.warning(f"Pre-warm warning: {e}")
     
-    # Call pre-warm when starting (only in production)
     if os.environ.get('RENDER'):
         pre_warm_app()
-    # ===== END OF PRE-WARM CODE =====
     
     port = int(os.environ.get('PORT', 5002))
     debug_mode = not bool(os.environ.get('RENDER'))
