@@ -3,19 +3,18 @@
 <!-- Navigation Bar -->
 <nav class="navbar">
   <div class="nav-container">
-    <div class="logo">
+    <a href="/Home.html" class="logo">
       <div class="logo-icon">
         <i class="fas fa-brain"></i>
       </div>
       <div class="logo-text">Mentivio</div>
-    </div>
+    </a>
 
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu" aria-expanded="false">
       <i class="fas fa-bars"></i>
     </button>
 
-    <div class="nav-links" id="navLinks">
-      <!-- Use root-relative paths -->
+    <div class="nav-links" id="navLinks" role="navigation" aria-label="Main navigation">
       <a href="/Home.html">Home</a>
       <a href="/MenHel_prediction.html">Self-Assessment</a>
       <a href="/MenHel_analogy.html">Condition Visualizer</a>

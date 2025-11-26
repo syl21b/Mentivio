@@ -8,42 +8,850 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Your external stylesheet -->
+  <!-- Your external stylesheet -->
   <link rel="stylesheet" href="../css/MenHel_analogy.css">
 
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #7c3aed;
+      --primary-dark: #3730a3;
+      --secondary: #6366f1;
+      --accent: #a78bfa;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #16a34a;
+      --warning: #facc15;
+      --danger: #ef4444;
+      --danger-light: #fecaca;
+      --danger-dark: #dc2626;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+      --transition: all 0.3s ease;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fa;
+      overflow-x: hidden;
+    }
+    
+    /* Hero Section - Enhanced for Mobile */
+    .hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: clamp(4rem, 10vw, 6rem) 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+      background-size: cover;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 2.5rem);
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: #ffffff;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+    
+    /* Crisis Alert - Enhanced for Mobile */
+    .crisis-alert {
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+      color: white;
+      padding: clamp(1.5rem, 3vw, 2rem);
+      text-align: center;
+      margin: 3rem 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(229, 62, 62, 0.2);
+      position: relative;
+      overflow: hidden;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .crisis-alert::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+      background-size: cover;
+    }
+    
+    .crisis-alert p {
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+      line-height: 1.6;
+    }
+    
+    .crisis-alert a {
+      color: white;
+      text-decoration: underline;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+    
+    .crisis-alert a:hover {
+      opacity: 0.9;
+    }
+    
+    .crisis-alert .note {
+      font-size: clamp(0.85rem, 2vw, 0.9rem);
+      opacity: 0.9;
+      margin-top: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Container - Enhanced for Mobile */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(1rem, 3vw, 1.5rem);
+    }
+    
+    /* Disclaimer Alert - Enhanced for Mobile */
+    .disclaimer-alert {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 12px;
+      padding: clamp(1.2rem, 3vw, 1.5rem);
+      margin: 2rem 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      box-shadow: var(--shadow);
+    }
+    
+    .alert-icon {
+      font-size: clamp(1.5rem, 3vw, 1.8rem);
+      flex-shrink: 0;
+    }
+    
+    .alert-content h3 {
+      color: #856404;
+      margin-bottom: 0.5rem;
+      font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+    }
+    
+    .alert-content p {
+      color: #856404;
+      line-height: 1.6;
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+    
+    /* Global Controls - Enhanced for Mobile */
+    .global-controls {
+      display: flex;
+      gap: clamp(0.8rem, 2vw, 1rem);
+      justify-content: center;
+      margin: 2.5rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .global-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: clamp(0.8rem, 2vw, 1rem) clamp(1.2rem, 3vw, 1.5rem);
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: clamp(0.9rem, 2vw, 1rem);
+    }
+    
+    .global-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    
+    .global-btn.stop {
+      background: var(--danger);
+    }
+    
+    .global-btn.stop:hover {
+      background: var(--danger-dark);
+    }
+    
+    /* Comparison Grid - Enhanced for Mobile */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+      gap: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 3rem;
+    }
+    
+    .visualization-card {
+      background: white;
+      border-radius: 16px;
+      padding: clamp(1.5rem, 3vw, 2rem);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .visualization-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-5px);
+    }
+    
+    /* Card Header - Enhanced for Mobile */
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .condition-indicator {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+    
+    .bipolar1-indicator { background: #ffeaa7; color: #e74c3c; }
+    .bipolar2-indicator { background: #d6eaf8; color: #3498db; }
+    .depression-indicator { background: #e8e8e8; color: #2c3e50; }
+    .normal-indicator { background: #d5f5e3; color: #27ae60; }
+    
+    /* Human Timeline Section - Enhanced for Mobile */
+    .human-timeline-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .human-container {
+      position: relative;
+      height: 160px;
+      background: var(--light);
+      border-radius: 12px;
+      padding: 1rem;
+      overflow: hidden;
+    }
+    
+    .conversation-box {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      background: white;
+      padding: 0.8rem 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      line-height: 1.4;
+      z-index: 2;
+      transition: var(--transition);
+    }
+    
+    .walking-human {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      transition: left 1s ease-in-out;
+      z-index: 1;
+    }
+    
+    .walker {
+      font-size: clamp(2.5rem, 3vw, 2rem);
+      transition: var(--transition);
+    }
+    
+    .walking-path {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gray-light);
+    }
+    
+    /* Timeline Section - Enhanced for Mobile */
+    .timeline-section {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 1.2rem;
+    }
+    
+    .timeline-title {
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: var(--dark);
+    }
+    
+    .timeline-container {
+      position: relative;
+      height: 60px;
+    }
+    
+    .timeline {
+      position: relative;
+      height: 100%;
+    }
+    
+    .timeline-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gray-light);
+      transform: translateY(-50%);
+    }
+    
+    .timeline-path {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      height: 4px;
+      transform: translateY(-50%);
+      transition: width 1s ease-in-out;
+      border-radius: 2px;
+    }
+    
+    .timeline-marker {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: left 1s ease-in-out;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+    }
+    
+    .timeline-label {
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+      color: var(--gray);
+      text-align: center;
+      flex: 1;
+    }
+    
+    /* Metrics Container - Enhanced for Mobile */
+    .metrics-container {
+      margin-bottom: 1.5rem;
+    }
+    
+    .metrics-title {
+      font-size: clamp(0.9rem, 2vw, 1rem);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    
+    .metric-item {
+      text-align: center;
+    }
+    
+    .metric-name {
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray);
+    }
+    
+    .donut-chart {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--segment-color) 0deg var(--segment-rotation),
+        var(--gray-light) var(--segment-rotation) 360deg
+      );
+    }
+    
+    .donut-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+      font-weight: 600;
+    }
+    
+    /* Controls - Enhanced for Mobile */
+    .controls {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+      margin-top: auto;
+    }
+    
+    .control-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      background: var(--primary);
+      color: white;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: clamp(0.8rem, 2vw, 0.9rem);
+      flex: 1;
+      justify-content: center;
+      max-width: 100px;
+    }
+    
+    .control-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    /* Comparison Summary - Enhanced for Mobile */
+    .comparison-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+      gap: clamp(1.2rem, 2.5vw, 1.5rem);
+      margin: 3rem 0;
+    }
+    
+    .summary-card {
+      background: white;
+      border-radius: 12px;
+      padding: clamp(1.2rem, 2.5vw, 1.5rem);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    
+    .summary-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .summary-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      color: var(--dark);
+    }
+    
+    .summary-card p {
+      font-size: clamp(0.85rem, 2vw, 0.9rem);
+      line-height: 1.5;
+      color: var(--gray);
+    }
+    
+    /* Info Panel - Enhanced for Mobile */
+    .info-panel {
+      background: white;
+      border-radius: 16px;
+      padding: clamp(1.5rem, 3vw, 2rem);
+      box-shadow: var(--shadow);
+      margin: 3rem 0;
+      overflow-x: auto;
+    }
+    
+    .info-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .info-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .bipolar1-icon { background: #e74c3c; }
+    .depression-icon { background: #3498db; }
+    
+    .info-title {
+      font-size: clamp(1.3rem, 3vw, 1.6rem);
+      color: var(--dark);
+      text-align: center;
+      font-weight: 700;
+    }
+    
+    /* Comparison Table - Enhanced for Mobile */
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: 0.8rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .comparison-table th {
+      background: var(--light);
+      font-weight: 600;
+      color: var(--dark);
+    }
+    
+    .condition-header {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+    }
+    
+    .bipolar1-header { color: #e74c3c; }
+    .bipolar2-header { color: #f39c12; }
+    .depression-header { color: #3498db; }
+    .normal-header { color: #27ae60; }
+    
+    .feature-name {
+      font-weight: 600;
+      color: var(--dark);
+      min-width: 120px;
+    }
+    
+    .critical-difference {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+    
+    .key-point {
+      display: block;
+      font-size: clamp(0.7rem, 1.6vw, 0.75rem);
+      color: var(--gray);
+      margin-top: 0.2rem;
+    }
+    
+    .highlight-box {
+      background: var(--light);
+      padding: 0.6rem;
+      border-radius: 6px;
+      margin-top: 0.5rem;
+      border-left: 3px solid var(--primary);
+    }
+    
+    /* Loading Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .condition-indicator {
+        max-width: 100%;
+        white-space: normal;
+      }
+      
+      .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+      }
+      
+      .controls {
+        flex-wrap: wrap;
+      }
+      
+      .control-btn {
+        flex: 1 0 calc(50% - 0.4rem);
+        max-width: none;
+      }
+      
+      .comparison-table {
+        font-size: 0.75rem;
+      }
+      
+      .comparison-table th,
+      .comparison-table td {
+        padding: 0.6rem 0.4rem;
+      }
+      
+      .feature-name {
+        min-width: 100px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero {
+        padding: 3rem 15px;
+      }
+      
+      .container {
+        padding: 0 0.8rem;
+      }
+      
+      .visualization-card {
+        padding: 1.2rem;
+      }
+      
+      .human-container {
+        height: 80px;
+        padding: 0.8rem;
+      }
+      
+      .conversation-box {
+        font-size: 0.75rem;
+        padding: 0.6rem 0.8rem;
+      }
+      
+      .walker {
+        font-size: 1.5rem;
+      }
+      
+      .timeline-section {
+        padding: 1rem;
+      }
+      
+      .timeline-container {
+        height: 50px;
+      }
+      
+      .donut-chart {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .donut-inner {
+        width: 30px;
+        height: 30px;
+        font-size: 0.7rem;
+      }
+      
+      .comparison-summary {
+        grid-template-columns: 1fr;
+      }
+      
+      .info-panel {
+        padding: 1.2rem;
+      }
+      
+      .info-header {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .global-controls {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .global-btn {
+        width: 100%;
+        max-width: 200px;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .control-btn {
+        flex: 1;
+        max-width: none;
+      }
+    }
+  /* High DPI Screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .hero::before,
+  .crisis-alert::before {
+    background-size: 1200px 800px;
+  }
+}
 
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
+  }
+}
 
+/* Print Styles - Corrected without deprecated properties */
+@media print {
+  .hero {
+    background: var(--primary) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .crisis-alert {
+    background: var(--danger) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .controls,
+  .global-controls {
+    display: none;
+  }
+  
+  /* Ensure good contrast for printed text */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* Improve print layout */
+  .visualization-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  
+  .comparison-grid {
+    display: block;
+  }
+  
+  .info-panel {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+  </style>
 </head>
 <body>
-    
-
-
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero fade-in">
     <div class="hero-content">
       <h1>Mental Health Condition Visualizer</h1>
       <p>Accurate clinical visualization of Bipolar I, Bipolar II, Depression, and normal mood states</p>
-   </div>
+    </div>
   </section>
 
-    <!-- Crisis Alert -->
-
-<div class="crisis-alert">
-  <p><i class="fas fa-exclamation-triangle"></i> 
-    <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
-    Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
-    or text <strong>HOME</strong> to <strong>741741</strong>.  
-    You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
-  </p>
-  
-  <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
-  
-  <p class="note">This assessment is not a substitute for professional or emergency care.</p>
-</div>
+  <!-- Crisis Alert -->
+  <div class="crisis-alert fade-in">
+    <p><i class="fas fa-exclamation-triangle"></i> 
+      <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
+      Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
+      or text <strong>HOME</strong> to <strong>741741</strong>.  
+      You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
+    </p>
+    
+    <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
+    
+    <p class="note">This assessment is not a substitute for professional or emergency care.</p>
+  </div>
       
   <div class="container">
-
-    <div class="disclaimer-alert">
+    <div class="disclaimer-alert fade-in">
       <div class="alert-icon">⚠️</div>
       <div class="alert-content">
         <h3>Important Disclaimer</h3>
@@ -54,7 +862,7 @@
       </div>
     </div>
 
-    <div class="global-controls">
+    <div class="global-controls fade-in">
       <button class="global-btn" onclick="startAllDemos()">
         <i class="fas fa-play"></i> Start All Demos
       </button>
@@ -68,7 +876,7 @@
 
     <div class="comparison-grid">
       <!-- Bipolar I Card -->
-      <div class="visualization-card bipolar1-card">
+      <div class="visualization-card bipolar1-card fade-in">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
@@ -80,32 +888,32 @@
 
         <!-- Part 2: Human and Mood Timeline -->
         <div class="human-timeline-section">
-        <div class="human-container">
+          <div class="human-container">
             <div class="conversation-box" id="bipolar1-conversation">
-            "I can do anything! I don't need sleep for days!"
+              "I can do anything! I don't need sleep for days!"
             </div>
             <!-- Walking human with emoji -->
             <div class="walking-human" id="bipolar1-walking-human">
               <div class="walker" id="bipolar1-walker">🚶‍➡️</div>
             </div>
             <div class="walking-path"></div>
-        </div>
+          </div>
 
-        <div class="timeline-section">
+          <div class="timeline-section">
             <div class="timeline-title">Mood Timeline</div>
             <div class="timeline-container">
-            <div class="timeline">
+              <div class="timeline">
                 <div class="timeline-line"></div>
                 <div class="timeline-path" id="bipolar1-timeline-path" style="background: #e74c3c; width: 90%"></div>
                 <div class="timeline-marker" id="bipolar1-timeline-marker" style="background: #e74c3c; left: 90%; top: 50%"></div>
                 <div class="timeline-labels">
-                <div class="timeline-label">Severe Depression</div>
-                <div class="timeline-label">Normal</div>
-                <div class="timeline-label">Mania</div>
+                  <div class="timeline-label">Severe Depression</div>
+                  <div class="timeline-label">Normal</div>
+                  <div class="timeline-label">Mania</div>
                 </div>
+              </div>
             </div>
-            </div>
-        </div>
+          </div>
         </div>
 
         <!-- Part 3: Key Metrics -->
@@ -158,7 +966,7 @@
       </div>
 
       <!-- Bipolar II Card -->
-      <div class="visualization-card bipolar2-card">
+      <div class="visualization-card bipolar2-card fade-in">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
@@ -246,7 +1054,7 @@
       </div>
 
       <!-- Depression Card -->
-      <div class="visualization-card depression-card">
+      <div class="visualization-card depression-card fade-in">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
@@ -334,7 +1142,7 @@
       </div>
 
       <!-- Normal Card -->
-      <div class="visualization-card normal-card">
+      <div class="visualization-card normal-card fade-in">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
@@ -450,7 +1258,7 @@
       </div>
     </div>
 
-    <div class="info-panel">
+    <div class="info-panel fade-in">
       <div class="info-header">
         <div class="info-icon bipolar1-icon">
           <i class="fas fa-bolt"></i>
@@ -1089,11 +1897,41 @@
     // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
       resetAllDemos();
+      
+      // Add scroll animation
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+      
+      // Observe all fade-in elements
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+      
+      // Handle window resize for better mobile experience
+      window.addEventListener('resize', function() {
+        document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
+      });
+      
+      // Initialize mobile view class
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('mobile-view');
+      }
     });
   </script>
 
- 
-    <script src="../js/components.js"></script>
-
-
+  <script src="../js/components.js"></script>
 </html>

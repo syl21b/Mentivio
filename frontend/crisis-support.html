@@ -10,50 +10,113 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* Main Container - Matching About Page Structure */
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #7c3aed;
+      --primary-dark: #3730a3;
+      --secondary: #6366f1;
+      --accent: #a78bfa;
+      --light: #f8fafc;
+      --dark: #1e293b;
+      --success: #16a34a;
+      --warning: #facc15;
+      --danger: #ef4444;
+      --danger-light: #fecaca;
+      --danger-dark: #dc2626;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+      --transition: all 0.3s ease;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: #f5f7fa;
+      overflow-x: hidden;
+    }
+
+    /* Main Container - Enhanced Responsiveness */
     .crisis-container {
       max-width: 1200px;
       margin: 2rem auto;
-      padding: 0 1.5rem;
+      padding: 0 clamp(1rem, 3vw, 1.5rem);
     }
 
-    /* Page Header - Consistent with About page */
+    /* Page Header - Enhanced for Mobile */
     .page-header {
       text-align: center;
       margin-bottom: 3rem;
-      padding: 4rem 0;
-      background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+      padding: clamp(3rem, 8vw, 5rem) 1.5rem;
+      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
       color: white;
       border-radius: 0 0 20px 20px;
       box-shadow: 0 10px 30px rgba(229, 62, 62, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+      background-size: cover;
     }
     
     .page-icon {
-      font-size: 4rem;
+      font-size: clamp(3rem, 8vw, 4rem);
       margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 1;
     }
     
     .page-header h1 {
-      font-size: 3rem;
+      font-size: clamp(2rem, 5vw, 3rem);
       margin-bottom: 1rem;
       font-weight: 700;
+      position: relative;
+      z-index: 1;
+      line-height: 1.2;
     }
     
     .page-subtitle {
-      font-size: 1.3rem;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
       line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
 
-    /* Content Sections - Matching About page structure */
+    /* Content Sections - Enhanced for Mobile */
     .content-section {
       background: white;
-      border-radius: 12px;
-      padding: 3rem;
+      border-radius: 16px;
+      padding: clamp(2rem, 5vw, 3rem);
       margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .content-section:hover {
+      box-shadow: var(--shadow-lg);
     }
 
     .section-header {
@@ -62,25 +125,27 @@
     }
 
     .section-header h2 {
-      font-size: 2.2rem;
-      color: #1e293b;
+      font-size: clamp(1.8rem, 4vw, 2.2rem);
+      color: var(--dark);
       margin-bottom: 1rem;
+      font-weight: 700;
+      line-height: 1.2;
     }
 
     .section-header p {
-      font-size: 1.1rem;
-      color: #64748b;
+      font-size: clamp(1rem, 2vw, 1.1rem);
+      color: var(--gray);
       max-width: 700px;
       margin: 0 auto;
       line-height: 1.6;
     }
 
-    /* Emergency Alert Section */
+    /* Emergency Alert Section - Enhanced for Mobile */
     .emergency-alert {
-      background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
-      border: 2px solid #e53e3e;
-      border-left: 6px solid #e53e3e;
-      padding: 2.5rem;
+      background: linear-gradient(135deg, #fff5f5 0%, var(--danger-light) 100%);
+      border: 2px solid var(--danger);
+      border-left: 6px solid var(--danger);
+      padding: clamp(1.5rem, 4vw, 2.5rem);
       border-radius: 16px;
       margin-bottom: 2rem;
       position: relative;
@@ -94,7 +159,7 @@
       left: 0;
       right: 0;
       height: 4px;
-      background: linear-gradient(90deg, #e53e3e, #c53030, #e53e3e);
+      background: linear-gradient(90deg, var(--danger), var(--danger-dark), var(--danger));
       animation: pulse 2s infinite;
     }
 
@@ -106,43 +171,43 @@
     .emergency-header {
       display: flex;
       align-items: flex-start;
-      gap: 1.5rem;
+      gap: clamp(1rem, 3vw, 1.5rem);
       margin-bottom: 2rem;
     }
 
     .emergency-icon {
-      background: #e53e3e;
+      background: var(--danger);
       color: white;
-      width: 60px;
-      height: 60px;
+      width: clamp(50px, 8vw, 60px);
+      height: clamp(50px, 8vw, 60px);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.8rem;
+      font-size: clamp(1.5rem, 3vw, 1.8rem);
       flex-shrink: 0;
       box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
     }
 
     .emergency-title h3 {
-      color: #c53030;
+      color: var(--danger-dark);
       margin: 0 0 0.5rem 0;
-      font-size: 1.6rem;
+      font-size: clamp(1.3rem, 3vw, 1.6rem);
       font-weight: 700;
     }
 
     .emergency-subtitle {
       color: #742a2a;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.1rem);
       margin: 0;
       font-weight: 500;
       line-height: 1.5;
     }
 
-    /* Emergency Resources Grid */
+    /* Emergency Resources Grid - Enhanced for Mobile */
     .emergency-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
@@ -154,9 +219,9 @@
       display: flex;
       align-items: flex-start;
       gap: 1rem;
-      transition: all 0.3s ease;
+      transition: var(--transition);
       border: 2px solid transparent;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      box-shadow: var(--shadow);
       position: relative;
       overflow: hidden;
     }
@@ -171,7 +236,7 @@
     }
 
     .emergency-card.critical::before {
-      background: #e53e3e;
+      background: var(--danger);
     }
 
     .emergency-card.severe::before {
@@ -183,24 +248,24 @@
     }
 
     .emergency-card:hover {
-      transform: translateY(-3px);
+      transform: translateY(-5px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     }
 
     .card-icon {
-      width: 50px;
-      height: 50px;
+      width: clamp(45px, 7vw, 50px);
+      height: clamp(45px, 7vw, 50px);
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
       flex-shrink: 0;
     }
 
     .emergency-card.critical .card-icon {
       background: #fed7d7;
-      color: #e53e3e;
+      color: var(--danger);
     }
 
     .emergency-card.severe .card-icon {
@@ -214,23 +279,23 @@
     }
 
     .card-content h4 {
-      color: #2d3748;
+      color: var(--dark);
       margin: 0 0 0.5rem 0;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.1rem);
       font-weight: 600;
     }
 
     .card-content p {
       color: #4a5568;
       margin: 0;
-      font-size: 0.95rem;
-      line-height: 1.4;
+      font-size: clamp(0.9rem, 1.8vw, 0.95rem);
+      line-height: 1.5;
     }
 
-    /* Quick Action Buttons */
+    /* Quick Action Buttons - Enhanced for Mobile */
     .action-buttons {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
       gap: 1rem;
       margin-top: 1.5rem;
     }
@@ -239,19 +304,21 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 1.5rem 1rem;
-      border-radius: 10px;
+      padding: clamp(1.2rem, 3vw, 1.5rem) 1rem;
+      border-radius: 12px;
       text-decoration: none;
-      transition: all 0.3s ease;
+      transition: var(--transition);
       text-align: center;
       border: 2px solid transparent;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;;
+      font-family: 'Inter', sans-serif;
       background: none;
+      min-height: 120px;
+      justify-content: center;
     }
 
     .action-btn.primary {
-      background: linear-gradient(135deg, #e53e3e, #c53030);
+      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
     }
 
@@ -262,87 +329,112 @@
 
     .action-btn.tertiary {
       background: #f7fafc;
-      color: #2d3748;
-      border-color: #e2e8f0;
+      color: var(--dark);
+      border-color: var(--gray-light);
     }
 
     .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
     .action-btn i {
-      font-size: 1.8rem;
+      font-size: clamp(1.5rem, 3vw, 1.8rem);
       margin-bottom: 0.5rem;
     }
 
     .action-btn span {
       font-weight: 600;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.1rem);
       margin-bottom: 0.25rem;
     }
 
     .action-btn small {
       opacity: 0.9;
-      font-size: 0.85rem;
+      font-size: clamp(0.8rem, 1.8vw, 0.85rem);
+      line-height: 1.4;
     }
 
-    /* Crisis Information Grid - Matching About page values grid */
+    /* Crisis Information Grid - Enhanced for Mobile */
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: clamp(1.5rem, 3vw, 2rem);
       margin-top: 2rem;
     }
 
     .info-card {
       text-align: center;
-      padding: 2rem 1.5rem;
-      border-radius: 8px;
-      transition: transform 0.3s;
-      background: #f8fafc;
+      padding: clamp(1.5rem, 3vw, 2rem) 1.5rem;
+      border-radius: 12px;
+      transition: var(--transition);
+      background: var(--light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
     }
 
     .info-card:hover {
       transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
     .info-icon {
-      width: 70px;
-      height: 70px;
-      background: linear-gradient(135deg, #e53e3e, #c53030);
+      width: clamp(60px, 10vw, 70px);
+      height: clamp(60px, 10vw, 70px);
+      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 1.5rem;
       color: white;
-      font-size: 1.8rem;
+      font-size: clamp(1.5rem, 3vw, 1.8rem);
     }
 
     .info-card h3 {
-      color: #1e293b;
+      color: var(--dark);
       margin-bottom: 1rem;
+      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+      font-weight: 600;
     }
 
     .info-card p {
-      color: #64748b;
+      color: var(--gray);
       line-height: 1.6;
+      flex-grow: 1;
     }
 
-    /* Call to Action - Matching About page */
+    /* Call to Action - Enhanced for Mobile */
     .cta-section {
-      background: linear-gradient(135deg, #e53e3e, #c53030);
+      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
-      border-radius: 12px;
-      padding: 3rem;
+      border-radius: 16px;
+      padding: clamp(2.5rem, 5vw, 3rem);
       text-align: center;
       margin: 3rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+      background-size: cover;
     }
 
     .cta-section h2 {
       margin-bottom: 1rem;
-      font-size: 2rem;
+      font-size: clamp(1.6rem, 4vw, 2rem);
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
     }
 
     .cta-section p {
@@ -351,8 +443,10 @@
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.1rem);
       line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
 
     .cta-buttons {
@@ -360,6 +454,8 @@
       gap: 1rem;
       justify-content: center;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
 
     .cta-btn {
@@ -370,14 +466,20 @@
       color: white;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: var(--transition);
       text-decoration: none;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      min-width: 160px;
+      justify-content: center;
     }
 
     .cta-btn.primary {
       background: white;
-      color: #e53e3e;
+      color: var(--danger);
     }
 
     .cta-btn:hover {
@@ -385,7 +487,11 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    /* Modal Styles */
+    .cta-btn.primary:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Modal Styles - Enhanced for Mobile */
     .modal {
       display: none;
       position: fixed;
@@ -396,6 +502,7 @@
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(5px);
+      padding: 1rem;
     }
 
     .modal-content {
@@ -407,8 +514,9 @@
       max-width: 500px;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       animation: modalSlideIn 0.3s ease;
+      max-height: 90vh;
+      overflow-y: auto;
     }
-
 
     @keyframes modalSlideIn {
       from { transform: translateY(-50px); opacity: 0; }
@@ -416,18 +524,21 @@
     }
 
     .modal-header {
-      background: linear-gradient(135deg, #e53e3e, #c53030);
+      background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
       padding: 20px;
       border-radius: 16px 16px 0 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .modal-header h3 {
       margin: 0;
-      font-size: 1.4rem;
+      font-size: clamp(1.2rem, 3vw, 1.4rem);
     }
 
     .close-modal {
@@ -442,10 +553,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: var(--transition);
+    }
+
+    .close-modal:hover {
+      transform: scale(1.1);
     }
 
     .modal-body {
-      padding: 25px;
+      padding: clamp(1.5rem, 3vw, 2rem);
     }
 
     .location-options {
@@ -453,29 +569,23 @@
       flex-direction: column;
       gap: 15px;
       margin-bottom: 20px;
-      align-items: center; /* Center the cards */
+      align-items: center;
     }
 
     .option-card {
       display: flex;
       align-items: center;
       gap: 15px;
-      padding: 20px;
-      border: 2px solid #e2e8f0;
+      padding: clamp(1rem, 3vw, 1.25rem);
+      border: 2px solid var(--gray-light);
       border-radius: 12px;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: var(--transition);
       background: none;
-      width: 90%; /* Constrain width instead of 100% */
-      max-width: 400px; /* Set a maximum width */
+      width: 90%;
+      max-width: 400px;
       text-align: left;
     }
-    @media (max-width: 480px) {
-    .option-card {
-      width: 95%; /* Slightly more width on very small screens */
-      padding: 15px;
-    }
-}
 
     .option-card:hover {
       border-color: #3182ce;
@@ -484,33 +594,33 @@
     }
 
     .option-icon {
-      width: 50px;
-      height: 50px;
+      width: clamp(45px, 7vw, 50px);
+      height: clamp(45px, 7vw, 50px);
       background: #ebf8ff;
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #3182ce;
-      font-size: 1.4rem;
+      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
       flex-shrink: 0;
     }
 
     .option-content h4 {
       margin: 0 0 5px 0;
-      color: #2d3748;
-      font-size: 1.1rem;
+      color: var(--dark);
+      font-size: clamp(1rem, 2vw, 1.1rem);
     }
 
     .option-content p {
       margin: 0 0 5px 0;
       color: #4a5568;
-      font-size: 0.95rem;
+      font-size: clamp(0.9rem, 1.8vw, 0.95rem);
     }
 
     .option-content small {
       color: #718096;
-      font-size: 0.85rem;
+      font-size: clamp(0.8rem, 1.8vw, 0.85rem);
     }
 
     .manual-search {
@@ -525,11 +635,11 @@
     #locationInput {
       flex: 1;
       padding: 12px 15px;
-      border: 2px solid #e2e8f0;
+      border: 2px solid var(--gray-light);
       border-radius: 8px;
       font-size: 1rem;
       transition: border-color 0.3s ease;
-      font-family: 'Inter', sans-serif;;
+      font-family: 'Inter', sans-serif;
     }
 
     #locationInput:focus {
@@ -549,39 +659,39 @@
       align-items: center;
       gap: 8px;
       transition: background 0.3s ease;
-      font-family: 'Inter', sans-serif;;
+      font-family: 'Inter', sans-serif;
     }
 
     .search-btn:hover {
       background: #2c5aa0;
     }
 
+    /* Loading Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .crisis-container {
-        padding: 0 1rem;
-      }
-      
-      .content-section {
-        padding: 2rem 1.5rem;
-      }
-      
-      .page-header h1 {
-        font-size: 2.5rem;
-      }
-      
-      .page-subtitle {
-        font-size: 1.1rem;
+        margin: 1.5rem auto;
       }
       
       .emergency-header {
         flex-direction: column;
         text-align: center;
         gap: 1rem;
-      }
-      
-      .emergency-grid {
-        grid-template-columns: 1fr;
       }
       
       .action-buttons {
@@ -595,19 +705,24 @@
       
       .cta-btn {
         width: 100%;
-        max-width: 250px;
+        max-width: 280px;
       }
       
       .search-input-group {
         flex-direction: column;
       }
+      
+      .modal {
+        padding: 0.5rem;
+      }
+      
+      .modal-content {
+        margin: 10% auto;
+        width: 95%;
+      }
     }
 
     @media (max-width: 480px) {
-      .content-section {
-        padding: 1.5rem 1rem;
-      }
-      
       .emergency-card {
         flex-direction: column;
         text-align: center;
@@ -615,11 +730,76 @@
       }
       
       .page-header {
-        padding: 3rem 0;
+        padding: 2.5rem 1rem;
       }
       
-      .page-header h1 {
-        font-size: 2rem;
+      .content-section {
+        padding: 1.5rem 1rem;
+      }
+      
+      .option-card {
+        width: 95%;
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .crisis-container {
+        padding: 0 0.8rem;
+      }
+      
+      .content-section {
+        padding: 1.2rem 0.8rem;
+      }
+      
+      .emergency-alert {
+        padding: 1.2rem;
+      }
+      
+      .action-btn {
+        padding: 1rem 0.8rem;
+      }
+    }
+
+    /* High DPI Screens */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .page-header::before,
+      .cta-section::before {
+        background-size: 1200px 800px;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      
+      html {
+        scroll-behavior: auto;
+      }
+      
+      .emergency-alert::before {
+        animation: none;
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      .page-header {
+        background: var(--danger) !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      
+      .cta-section {
+        display: none;
+      }
+      
+      .action-buttons {
+        display: none;
       }
     }
   </style>
@@ -636,7 +816,7 @@
 
   <div class="crisis-container">
     <!-- Emergency Alert Section -->
-    <section class="content-section">
+    <section class="content-section fade-in">
       <div class="emergency-alert">
         <div class="emergency-header">
           <div class="emergency-icon">
@@ -648,30 +828,30 @@
           </div>
         </div>
         
-          <div class="action-buttons emergency-actions">
-            <button class="action-btn primary" onclick="window.open('tel:988')">
-              <i class="fas fa-phone-alt"></i>
-              <span>988 Suicide & Crisis Lifeline</span>
-              <small>Call or text 988 — available 24/7 for free, confidential support</small>
-            </button>
+        <div class="action-buttons emergency-actions">
+          <button class="action-btn primary" onclick="window.open('tel:988')">
+            <i class="fas fa-phone-alt"></i>
+            <span>988 Suicide & Crisis Lifeline</span>
+            <small>Call or text 988 — available 24/7 for free, confidential support</small>
+          </button>
 
-            <button class="action-btn secondary" onclick="window.open('sms:741741&body=HOME')">
-              <i class="fas fa-comment-medical"></i>
-              <span>Crisis Text Line</span>
-              <small>Text HOME to 741741 to connect with a trained crisis counselor</small>
-            </button>
+          <button class="action-btn secondary" onclick="window.open('sms:741741&body=HOME')">
+            <i class="fas fa-comment-medical"></i>
+            <span>Crisis Text Line</span>
+            <small>Text HOME to 741741 to connect with a trained crisis counselor</small>
+          </button>
 
-            <button class="action-btn tertiary" onclick="findEmergencyRooms()">
-              <i class="fas fa-ambulance"></i>
-              <span>Emergency Services</span>
-              <small>Call 911 or go to your nearest emergency room if in immediate danger</small>
-            </button>
-          </div>
+          <button class="action-btn tertiary" onclick="findEmergencyRooms()">
+            <i class="fas fa-ambulance"></i>
+            <span>Emergency Services</span>
+            <small>Call 911 or go to your nearest emergency room if in immediate danger</small>
+          </button>
+        </div>
       </div>
     </section>
 
     <!-- Crisis Information Section -->
-    <section class="content-section">
+    <section class="content-section fade-in">
       <div class="section-header">
         <h2>What to Do in a Crisis</h2>
         <p>Recognizing the signs and knowing how to respond can make a critical difference in a mental health emergency</p>
@@ -729,7 +909,7 @@
     </section>
 
     <!-- Call to Action Section -->
-    <section class="cta-section">
+    <section class="cta-section fade-in">
       <h2>Your Mental Health Matters</h2>
       <p>Reaching out for help is a sign of strength, not weakness. Whether you're in crisis or just need someone to talk to, support is available.</p>
       <div class="cta-buttons">
@@ -794,6 +974,9 @@
 
     function closeCrisisModal() {
       document.getElementById('crisisModal').style.display = 'none';
+      // Reset manual search
+      document.getElementById('manualSearch').style.display = 'none';
+      document.getElementById('locationInput').value = '';
     }
 
     function enableManualSearch() {
@@ -806,6 +989,12 @@
 
     function useCurrentLocationForMaps() {
       if (navigator.geolocation) {
+        // Show loading state
+        const optionCard = event.currentTarget;
+        const originalHTML = optionCard.innerHTML;
+        optionCard.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
+        optionCard.style.pointerEvents = 'none';
+        
         navigator.geolocation.getCurrentPosition(
           function(position) {
             const lat = position.coords.latitude;
@@ -813,10 +1002,18 @@
             const googleMapsUrl = `https://www.google.com/maps/search/emergency+room/@${lat},${lng},13z`;
             window.open(googleMapsUrl, '_blank');
             closeCrisisModal();
+            
+            // Restore button
+            optionCard.innerHTML = originalHTML;
+            optionCard.style.pointerEvents = 'auto';
           },
           function(error) {
             alert('Unable to access your location. Please try manual search.');
             enableManualSearch();
+            
+            // Restore button
+            optionCard.innerHTML = originalHTML;
+            optionCard.style.pointerEvents = 'auto';
           }
         );
       } else {
@@ -850,8 +1047,43 @@
         closeCrisisModal();
       }
     });
+
+    // Add scroll animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+      
+      // Observe all fade-in elements
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+      
+      // Handle window resize for better mobile experience
+      window.addEventListener('resize', function() {
+        document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
+      });
+      
+      // Initialize mobile view class
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('mobile-view');
+      }
+    });
   </script>
 
-  <script src="../js/components.js"></script>
 </body>
+<script src="../js/components.js"></script>
 </html>

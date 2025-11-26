@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-
   <style>
     :root {
       --primary: #4f46e5;
@@ -24,6 +23,9 @@
       --danger: #ef4444;
       --gray: #64748b;
       --gray-light: #e2e8f0;
+      --transition: all 0.3s ease;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
     }
     
     * {
@@ -32,69 +34,97 @@
       box-sizing: border-box;
     }
     
+    html {
+      scroll-behavior: smooth;
+    }
+    
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       line-height: 1.6;
       color: var(--dark);
       background-color: #f5f7fa;
+      overflow-x: hidden;
     }
     
-    /* Hero Section */
+    /* Improved Hero Section */
     .hero {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       color: white;
-      padding: 80px 20px;
+      padding: 100px 20px;
       text-align: center;
       position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+      background-size: cover;
     }
     
     .hero-content {
       max-width: 800px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
     
     .hero h1 {
-      font-size: 2.5rem;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
       color: #ffffff;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+      line-height: 1.2;
     }
     
     .hero p {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
       color: #ffffff;
       max-width: 700px;
-      margin: 0 auto 2rem;
+      margin: 0 auto 2.5rem;
       opacity: 0.9;
+      line-height: 1.6;
     }
     
     .mission-statement {
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 2rem;
       margin-top: 2rem;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.2rem);
       font-style: italic;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      max-width: 600px;
+      max-width: 700px;
       margin-left: auto;
       margin-right: auto;
+      line-height: 1.7;
     }
     
     /* About Container */
     .about-container {
       max-width: 1200px;
-      margin: 2rem auto;
+      margin: 3rem auto;
       padding: 0 1.5rem;
     }
     
     /* Content Sections */
     .content-section {
       background: white;
-      border-radius: 12px;
-      padding: 3rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-radius: 16px;
+      padding: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+    
+    .content-section:hover {
+      box-shadow: var(--shadow-lg);
     }
     
     .section-header {
@@ -103,14 +133,16 @@
     }
     
     .section-header h2 {
-      font-size: 2.2rem;
-      color: #1e293b;
-      margin-bottom: 1rem;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      color: var(--dark);
+      margin-bottom: 1.2rem;
+      font-weight: 700;
+      line-height: 1.2;
     }
     
     .section-header p {
-      font-size: 1.1rem;
-      color: #64748b;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--gray);
       max-width: 700px;
       margin: 0 auto;
       line-height: 1.6;
@@ -129,8 +161,9 @@
       left: 30px;
       top: 0;
       bottom: 0;
-      width: 2px;
+      width: 3px;
       background: linear-gradient(to bottom, var(--primary), var(--secondary));
+      border-radius: 3px;
     }
     
     .timeline-item {
@@ -148,30 +181,106 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.9rem;
       margin-right: 2rem;
       flex-shrink: 0;
       position: relative;
       z-index: 2;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      transition: var(--transition);
+    }
+    
+    .timeline-item:hover .timeline-year {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
     }
     
     .timeline-content {
       flex: 1;
       background: var(--light);
-      padding: 1.5rem;
-      border-radius: 8px;
+      padding: 1.8rem;
+      border-radius: 12px;
       border-left: 4px solid var(--primary);
+      transition: var(--transition);
+    }
+    
+    .timeline-item:hover .timeline-content {
+      transform: translateX(5px);
     }
     
     .timeline-content h3 {
       color: var(--primary);
       margin-bottom: 0.75rem;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
+      font-weight: 600;
     }
     
     .timeline-content p {
       color: var(--gray);
+      line-height: 1.7;
+    }
+    
+    /* New Sub-timeline for 2025 */
+    .sub-timeline {
+      margin-left: 2rem;
+      margin-top: 1.5rem;
+      border-left: 2px solid var(--accent);
+      padding-left: 1.5rem;
+    }
+    
+    .sub-timeline-item {
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    
+    .sub-timeline-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .sub-timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -1.65rem;
+      top: 0.5rem;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+    
+    .sub-timeline-date {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .sub-timeline-date i {
+      color: var(--accent);
+    }
+    
+    .sub-timeline-content {
+      background: rgba(248, 250, 252, 0.8);
+      padding: 1.2rem;
+      border-radius: 8px;
+      border: 1px solid var(--gray-light);
+    }
+    
+    .sub-timeline-content h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    .sub-timeline-content p {
+      color: var(--gray);
+      font-size: 0.95rem;
       line-height: 1.6;
     }
     
@@ -185,16 +294,21 @@
     
     .value-card {
       background: var(--light);
-      border-radius: 12px;
-      padding: 2rem;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
       text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: var(--transition);
       border: 1px solid var(--gray-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
     }
     
     .value-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      border-color: var(--accent);
     }
     
     .value-icon {
@@ -208,38 +322,51 @@
       justify-content: center;
       margin: 0 auto 1.5rem;
       font-size: 2rem;
+      transition: var(--transition);
+    }
+    
+    .value-card:hover .value-icon {
+      transform: scale(1.1);
     }
     
     .value-card h3 {
       color: var(--dark);
       margin-bottom: 1rem;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
+      font-weight: 600;
     }
     
     .value-card p {
       color: var(--gray);
-      line-height: 1.6;
+      line-height: 1.7;
+      flex-grow: 1;
     }
     
     /* Team Grid */
     .team-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
+      gap: 2.5rem;
       margin-top: 2rem;
     }
     
     .team-member {
       background: var(--light);
-      border-radius: 12px;
-      padding: 2rem;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
       text-align: center;
-      transition: transform 0.3s ease;
+      transition: var(--transition);
       border: 1px solid var(--gray-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
     }
     
     .team-member:hover {
-      transform: translateY(-5px);
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+      border-color: var(--accent);
     }
     
     .member-photo {
@@ -253,75 +380,104 @@
       justify-content: center;
       margin: 0 auto 1.5rem;
       font-size: 2.5rem;
+      transition: var(--transition);
+    }
+    
+    .team-member:hover .member-photo {
+      transform: scale(1.05);
     }
     
     .team-member h3 {
       color: var(--dark);
       margin-bottom: 0.5rem;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
+      font-weight: 600;
     }
     
     .member-role {
       color: var(--primary);
       font-weight: 600;
-      margin-bottom: 1rem;
-      font-size: 1rem;
+      margin-bottom: 1.2rem;
+      font-size: 1.1rem;
     }
     
     .member-bio {
       color: var(--gray);
-      line-height: 1.6;
-      font-size: 0.95rem;
+      line-height: 1.7;
+      font-size: 1rem;
+      flex-grow: 1;
     }
     
     /* CTA Section */
     .cta-section {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
-      border-radius: 16px;
-      padding: 4rem 2rem;
+      border-radius: 20px;
+      padding: clamp(3rem, 6vw, 5rem) 2rem;
       text-align: center;
-      margin: 4rem 0;
-      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.2);
+      margin: 5rem 0 3rem;
+      box-shadow: 0 15px 35px rgba(79, 70, 229, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+      background-size: cover;
     }
     
     .cta-section h2 {
-      margin-bottom: 1rem;
-      font-size: 2.2rem;
+      margin-bottom: 1.2rem;
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 700;
+      position: relative;
+      z-index: 1;
     }
     
     .cta-section p {
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
       opacity: 0.9;
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
-      font-size: 1.1rem;
+      font-size: clamp(1rem, 2vw, 1.2rem);
       line-height: 1.6;
+      position: relative;
+      z-index: 1;
     }
     
     .cta-buttons {
       display: flex;
-      gap: 1rem;
+      gap: 1.2rem;
       justify-content: center;
       flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
     
     .cta-btn {
-      padding: 0.75rem 1.5rem;
+      padding: 0.9rem 1.8rem;
       border: 2px solid white;
-      border-radius: 8px;
+      border-radius: 10px;
       background: transparent;
       color: white;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: var(--transition);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       font-family: 'Inter', sans-serif;
       font-size: 1rem;
+      min-width: 160px;
+      justify-content: center;
     }
     
     .cta-btn.primary {
@@ -330,30 +486,58 @@
     }
     
     .cta-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .cta-btn.primary:hover {
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .cta-btn:not(.primary):hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Loading Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .fade-in {
+      animation: fadeInUp 0.6s ease forwards;
     }
     
     /* Responsive Design */
+    @media (max-width: 1024px) {
+      .about-container {
+        padding: 0 1.2rem;
+      }
+      
+      .content-section {
+        padding: 2.5rem 2rem;
+      }
+    }
+    
     @media (max-width: 768px) {
       .hero {
-        padding: 60px 20px;
-      }
-      
-      .hero h1 {
-        font-size: 2.2rem;
-      }
-      
-      .hero p {
-        font-size: 1rem;
+        padding: 80px 20px;
       }
       
       .about-container {
         padding: 0 1rem;
+        margin: 2rem auto;
       }
       
       .content-section {
         padding: 2rem 1.5rem;
+        margin-bottom: 2rem;
       }
       
       .story-timeline::before {
@@ -362,52 +546,164 @@
       
       .timeline-item {
         flex-direction: column;
+        margin-bottom: 2.5rem;
       }
       
       .timeline-year {
         margin-right: 0;
-        margin-bottom: 1rem;
-        width: 50px;
-        height: 50px;
-        font-size: 0.8rem;
+        margin-bottom: 1.2rem;
+        width: 55px;
+        height: 55px;
+        font-size: 0.85rem;
+      }
+      
+      .timeline-content {
+        padding: 1.5rem;
+      }
+      
+      .sub-timeline {
+        margin-left: 1rem;
+        padding-left: 1rem;
       }
       
       .values-grid,
       .team-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      
+      .value-card,
+      .team-member {
+        padding: 2rem 1.5rem;
       }
       
       .cta-section {
         padding: 3rem 1.5rem;
+        margin: 4rem 0 2rem;
       }
       
       .cta-buttons {
         flex-direction: column;
         align-items: center;
+        gap: 1rem;
       }
       
       .cta-btn {
         width: 100%;
-        max-width: 250px;
-        justify-content: center;
+        max-width: 280px;
       }
     }
     
     @media (max-width: 480px) {
+      .hero {
+        padding: 60px 15px;
+      }
+      
+      .about-container {
+        padding: 0 0.8rem;
+      }
+      
+      .content-section {
+        padding: 1.8rem 1.2rem;
+        border-radius: 12px;
+      }
+      
+      .section-header {
+        margin-bottom: 2.5rem;
+      }
+      
+      .mission-statement {
+        padding: 1.5rem;
+        border-radius: 12px;
+      }
+      
+      .timeline-year {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .timeline-content {
+        padding: 1.2rem;
+      }
+      
+      .sub-timeline {
+        margin-left: 0.5rem;
+        padding-left: 0.8rem;
+      }
+      
+      .sub-timeline-content {
+        padding: 1rem;
+      }
+      
+      .value-card,
+      .team-member {
+        padding: 1.8rem 1.2rem;
+      }
+      
+      .value-icon,
+      .member-photo {
+        width: 70px;
+        height: 70px;
+        font-size: 1.8rem;
+        margin-bottom: 1.2rem;
+      }
+      
+      .cta-section {
+        padding: 2.5rem 1rem;
+        border-radius: 16px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .hero {
+        padding: 50px 12px;
+      }
+      
+      .about-container {
+        padding: 0 0.5rem;
+      }
+      
       .content-section {
         padding: 1.5rem 1rem;
       }
       
-      .section-header h2 {
-        font-size: 1.8rem;
+      .value-card,
+      .team-member {
+        padding: 1.5rem 1rem;
+      }
+    }
+    
+    /* High DPI Screens */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .hero::before,
+      .cta-section::before {
+        background-size: 1200px 800px;
+      }
+    }
+    
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      
+      html {
+        scroll-behavior: auto;
+      }
+    }
+    
+    /* Print Styles */
+    @media print {
+      .hero {
+        background: #4f46e5 !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
       }
       
       .cta-section {
-        padding: 2rem 1rem;
-      }
-      
-      .cta-section h2 {
-        font-size: 1.8rem;
+        display: none;
       }
     }
   </style>
@@ -428,7 +724,7 @@
   <div class="about-container">
 
     <!-- Our Story Section -->
-    <section class="content-section">
+    <section class="content-section fade-in">
       <div class="section-header">
         <h2>Our Story</h2>
         <p>How Mentivio began and our journey toward making mental health resources more accessible</p>
@@ -448,6 +744,42 @@
           <div class="timeline-content">
             <h3>Building With Purpose</h3>
             <p>I began collaborating with mental health professionals to create tools that bridge the gap between clinical care and everyday struggles. Our goal was simple: make mental health support accessible to everyone, regardless of their circumstances.</p>
+            
+            <!-- New Sub-timeline for 2025 -->
+            <div class="sub-timeline">
+              <div class="sub-timeline-item">
+                <div class="sub-timeline-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  August 2025
+                </div>
+                <div class="sub-timeline-content">
+                  <h4>Ideation & Data Collection</h4>
+                  <p>Initial brainstorming sessions, concept development, and comprehensive data collection and cleaning to build our foundational dataset.</p>
+                </div>
+              </div>
+              
+              <div class="sub-timeline-item">
+                <div class="sub-timeline-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  October 2025
+                </div>
+                <div class="sub-timeline-content">
+                  <h4>Machine Learning Development</h4>
+                  <p>Built and tested multiple ML models to find the optimal solution for developing our mental health assessment tool, focusing on accuracy and user experience.</p>
+                </div>
+              </div>
+              
+              <div class="sub-timeline-item">
+                <div class="sub-timeline-date">
+                  <i class="fas fa-calendar-alt"></i>
+                  November 2025
+                </div>
+                <div class="sub-timeline-content">
+                  <h4>Platform Development</h4>
+                  <p>Integrated the ML models into a user-friendly web platform, focusing on intuitive design and accessibility for all users.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -462,7 +794,7 @@
     </section>
 
     <!-- Our Values Section -->
-    <section class="content-section">
+    <section class="content-section fade-in">
       <div class="section-header">
         <h2>Our Values</h2>
         <p>The principles that guide everything we do at Mentivio</p>
@@ -504,7 +836,7 @@
     </section>
 
     <!-- Team Section -->
-    <section class="content-section">
+    <section class="content-section fade-in">
       <div class="section-header">
         <h2>Our Team</h2>
         <p>The people behind Mentivio</p>
@@ -541,12 +873,16 @@
     </section>
 
     <!-- Call to Action -->
-    <section class="cta-section">
+    <section class="cta-section fade-in">
       <h2>Start Your Journey</h2>
       <p>Take the first step toward understanding your mental health with our free, confidential tools</p>
       <div class="cta-buttons">
-        <button class="cta-btn primary" onclick="location.href='MenHel_prediction.html'">Take Assessment</button>
-        <button class="cta-btn" onclick="location.href='resources.html'">Learn More</button>
+        <button class="cta-btn primary" onclick="location.href='MenHel_prediction.html'">
+          <i class="fas fa-clipboard-check"></i> Take Assessment
+        </button>
+        <button class="cta-btn" onclick="location.href='resources.html'">
+          <i class="fas fa-book-open"></i> Learn More
+        </button>
       </div>
     </section>
   </div>
@@ -557,14 +893,69 @@
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
           e.preventDefault();
-          document.querySelector(this.getAttribute('href')).scrollIntoView({
-            behavior: 'smooth'
-          });
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+      
+      // Add scroll animation
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+      
+      // Observe all fade-in elements
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+      
+      // Add loading state for buttons
+      document.querySelectorAll('.cta-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+          // If it's a button that navigates, add a small delay to show loading state
+          if (this.getAttribute('onclick') && this.getAttribute('onclick').includes('location.href')) {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            this.disabled = true;
+            
+            setTimeout(() => {
+              this.innerHTML = originalText;
+              this.disabled = false;
+            }, 1500);
+          }
         });
       });
     });
+    
+    // Handle window resize for better mobile experience
+    window.addEventListener('resize', function() {
+      // Adjust any layout issues on resize
+      document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
+    });
+    
+    // Initialize mobile view class
+    if (window.innerWidth <= 768) {
+      document.body.classList.add('mobile-view');
+    }
   </script>
-  <script src="../js/components.js"></script>
 
 </body>
+<script src="../js/components.js"></script>
 </html>

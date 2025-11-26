@@ -45,7 +45,7 @@ mental-health-web/
 ## 🚀 Features
 
 ### Core Assessment
-- **20-question comprehensive evaluation** across multiple domains:
+- **17-question comprehensive evaluation** across multiple domains:
   - Mood & Emotions
   - Sleep & Energy Patterns
   - Cognitive Function

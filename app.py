@@ -9,7 +9,9 @@ from datetime import datetime, timezone, timedelta
 import os
 import logging
 from typing import Dict, List, Tuple, Optional, Any
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import sqlite3  # Keep for fallback if needed
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -19,11 +21,8 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import io
 import json
+import sys 
 
-# Import preprocessing functions directly from train_model
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Global storage (in production, use a database)
 assessment_storage: Dict[str, Dict[str, Any]] = {}
@@ -57,85 +56,198 @@ feature_names: Optional[List[str]] = None
 category_mappings: Optional[Dict[str, Any]] = None
 clinical_enhancer: Optional[Any] = None
 
-# Database configuration
-DATABASE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+# PostgreSQL configuration
+def get_postgres_connection():
+    """Get PostgreSQL database connection"""
+    try:
+        # Use external database URL for Render
+        database_url = os.environ.get('DATABASE_URL')
+        if database_url:
+            # Render provides DATABASE_URL in the format: postgresql://user:pass@host:port/dbname
+            conn = psycopg2.connect(database_url, sslmode='require')
+        else:
+            # Fallback to individual connection parameters
+            conn = psycopg2.connect(
+                host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
+                database='assessment_data',
+                user='assessment_data_user',
+                password='QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA',
+                port=5432,
+                sslmode='require'
+            )
+        
+        logger.info("PostgreSQL connection established successfully")
+        return conn
+    except Exception as e:
+        logger.error(f"PostgreSQL connection failed: {e}")
+        # Fallback to SQLite for local development
+        try:
+            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+            conn = sqlite3.connect(sqlite_path)
+            conn.row_factory = sqlite3.Row
+            logger.info("Fallback to SQLite connection")
+            return conn
+        except Exception as sqlite_error:
+            logger.error(f"SQLite fallback also failed: {sqlite_error}")
+            raise e
 
 def init_database():
-    """Initialize SQLite database with required tables"""
+    """Initialize PostgreSQL database with required tables"""
     try:
-        conn = sqlite3.connect(DATABASE_PATH)
-        c = conn.cursor()
+        conn = get_postgres_connection()
         
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS assessments (
-                id TEXT PRIMARY KEY,
-                assessment_timestamp TEXT,
-                report_timestamp TEXT,
-                timezone TEXT,
-                patient_name TEXT,
-                patient_number TEXT,
-                patient_age TEXT,
-                patient_gender TEXT,
-                primary_diagnosis TEXT,
-                confidence REAL,
-                confidence_percentage REAL,
-                all_diagnoses_json TEXT,
-                responses_json TEXT,
-                processing_details_json TEXT,
-                technical_details_json TEXT,
-                clinical_insights_json TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        ''')
+        # Check if we're using PostgreSQL or SQLite
+        if isinstance(conn, psycopg2.extensions.connection):
+            # PostgreSQL
+            c = conn.cursor()
+            
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS assessments (
+                    id TEXT PRIMARY KEY,
+                    assessment_timestamp TEXT,
+                    report_timestamp TEXT,
+                    timezone TEXT,
+                    patient_name TEXT,
+                    patient_number TEXT,
+                    patient_age TEXT,
+                    patient_gender TEXT,
+                    primary_diagnosis TEXT,
+                    confidence REAL,
+                    confidence_percentage REAL,
+                    all_diagnoses_json TEXT,
+                    responses_json TEXT,
+                    processing_details_json TEXT,
+                    technical_details_json TEXT,
+                    clinical_insights_json TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            c.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
+            c.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
+            
+            conn.commit()
+            c.close()
+            logger.info("PostgreSQL database initialized successfully")
+            
+        else:
+            # SQLite fallback
+            c = conn.cursor()
+            
+            c.execute('''
+                CREATE TABLE IF NOT EXISTS assessments (
+                    id TEXT PRIMARY KEY,
+                    assessment_timestamp TEXT,
+                    report_timestamp TEXT,
+                    timezone TEXT,
+                    patient_name TEXT,
+                    patient_number TEXT,
+                    patient_age TEXT,
+                    patient_gender TEXT,
+                    primary_diagnosis TEXT,
+                    confidence REAL,
+                    confidence_percentage REAL,
+                    all_diagnoses_json TEXT,
+                    responses_json TEXT,
+                    processing_details_json TEXT,
+                    technical_details_json TEXT,
+                    clinical_insights_json TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
+            c.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
+            c.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
+            
+            conn.commit()
+            logger.info("SQLite database initialized successfully")
         
-        c.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
-        c.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
-        
-        conn.commit()
         conn.close()
-        logger.info("Database initialized successfully")
         
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
 
-def get_db_connection():
-    """Get database connection"""
-    conn = sqlite3.connect(DATABASE_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
 def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
-    """Save assessment data to SQLite database"""
+    """Save assessment data to PostgreSQL database"""
     try:
-        conn = get_db_connection()
-        c = conn.cursor()
+        conn = get_postgres_connection()
         
-        c.execute('''
-            INSERT OR REPLACE INTO assessments (
-                id, assessment_timestamp, report_timestamp, timezone,
-                patient_name, patient_number, patient_age, patient_gender,
-                primary_diagnosis, confidence, confidence_percentage,
-                all_diagnoses_json, responses_json, processing_details_json,
-                technical_details_json, clinical_insights_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            assessment_data.get('id'),
-            assessment_data.get('assessment_timestamp'),
-            assessment_data.get('timestamp'),
-            assessment_data.get('timezone', 'UTC'),
-            assessment_data.get('patient_info', {}).get('name', ''),
-            assessment_data.get('patient_info', {}).get('number', ''),
-            assessment_data.get('patient_info', {}).get('age', ''),
-            assessment_data.get('patient_info', {}).get('gender', ''),
-            assessment_data.get('primary_diagnosis', ''),
-            assessment_data.get('confidence', 0),
-            assessment_data.get('confidence_percentage', 0),
-            json.dumps(assessment_data.get('all_diagnoses', [])),
-            json.dumps(assessment_data.get('responses', {})),
-            json.dumps(assessment_data.get('processing_details', {})),
-            json.dumps(assessment_data.get('technical_details', {})),
-            json.dumps(assessment_data.get('clinical_insights', {}))
-        ))
+        if isinstance(conn, psycopg2.extensions.connection):
+            # PostgreSQL
+            c = conn.cursor()
+            
+            c.execute('''
+                INSERT INTO assessments (
+                    id, assessment_timestamp, report_timestamp, timezone,
+                    patient_name, patient_number, patient_age, patient_gender,
+                    primary_diagnosis, confidence, confidence_percentage,
+                    all_diagnoses_json, responses_json, processing_details_json,
+                    technical_details_json, clinical_insights_json
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET
+                    assessment_timestamp = EXCLUDED.assessment_timestamp,
+                    report_timestamp = EXCLUDED.report_timestamp,
+                    timezone = EXCLUDED.timezone,
+                    patient_name = EXCLUDED.patient_name,
+                    patient_number = EXCLUDED.patient_number,
+                    patient_age = EXCLUDED.patient_age,
+                    patient_gender = EXCLUDED.patient_gender,
+                    primary_diagnosis = EXCLUDED.primary_diagnosis,
+                    confidence = EXCLUDED.confidence,
+                    confidence_percentage = EXCLUDED.confidence_percentage,
+                    all_diagnoses_json = EXCLUDED.all_diagnoses_json,
+                    responses_json = EXCLUDED.responses_json,
+                    processing_details_json = EXCLUDED.processing_details_json,
+                    technical_details_json = EXCLUDED.technical_details_json,
+                    clinical_insights_json = EXCLUDED.clinical_insights_json
+            ''', (
+                assessment_data.get('id'),
+                assessment_data.get('assessment_timestamp'),
+                assessment_data.get('timestamp'),
+                assessment_data.get('timezone', 'UTC'),
+                assessment_data.get('patient_info', {}).get('name', ''),
+                assessment_data.get('patient_info', {}).get('number', ''),
+                assessment_data.get('patient_info', {}).get('age', ''),
+                assessment_data.get('patient_info', {}).get('gender', ''),
+                assessment_data.get('primary_diagnosis', ''),
+                assessment_data.get('confidence', 0),
+                assessment_data.get('confidence_percentage', 0),
+                json.dumps(assessment_data.get('all_diagnoses', [])),
+                json.dumps(assessment_data.get('responses', {})),
+                json.dumps(assessment_data.get('processing_details', {})),
+                json.dumps(assessment_data.get('technical_details', {})),
+                json.dumps(assessment_data.get('clinical_insights', {}))
+            ))
+        else:
+            # SQLite fallback
+            c = conn.cursor()
+            
+            c.execute('''
+                INSERT OR REPLACE INTO assessments (
+                    id, assessment_timestamp, report_timestamp, timezone,
+                    patient_name, patient_number, patient_age, patient_gender,
+                    primary_diagnosis, confidence, confidence_percentage,
+                    all_diagnoses_json, responses_json, processing_details_json,
+                    technical_details_json, clinical_insights_json
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                assessment_data.get('id'),
+                assessment_data.get('assessment_timestamp'),
+                assessment_data.get('timestamp'),
+                assessment_data.get('timezone', 'UTC'),
+                assessment_data.get('patient_info', {}).get('name', ''),
+                assessment_data.get('patient_info', {}).get('number', ''),
+                assessment_data.get('patient_info', {}).get('age', ''),
+                assessment_data.get('patient_info', {}).get('gender', ''),
+                assessment_data.get('primary_diagnosis', ''),
+                assessment_data.get('confidence', 0),
+                assessment_data.get('confidence_percentage', 0),
+                json.dumps(assessment_data.get('all_diagnoses', [])),
+                json.dumps(assessment_data.get('responses', {})),
+                json.dumps(assessment_data.get('processing_details', {})),
+                json.dumps(assessment_data.get('technical_details', {})),
+                json.dumps(assessment_data.get('clinical_insights', {}))
+            ))
         
         conn.commit()
         conn.close()
@@ -150,48 +262,73 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
 def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
     """Load assessments from database, optionally filtered by patient number"""
     try:
-        conn = get_db_connection()
-        c = conn.cursor()
+        conn = get_postgres_connection()
         
-        if patient_number:
-            c.execute('''
-                SELECT * FROM assessments 
-                WHERE patient_number = ? 
-                ORDER BY report_timestamp DESC
-            ''', (patient_number,))
+        if isinstance(conn, psycopg2.extensions.connection):
+            # PostgreSQL
+            c = conn.cursor(cursor_factory=RealDictCursor)
+            
+            if patient_number:
+                c.execute('''
+                    SELECT * FROM assessments 
+                    WHERE patient_number = %s 
+                    ORDER BY report_timestamp DESC
+                ''', (patient_number,))
+            else:
+                c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+            
+            rows = c.fetchall()
+            c.close()
         else:
-            c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+            # SQLite fallback
+            c = conn.cursor()
+            
+            if patient_number:
+                c.execute('''
+                    SELECT * FROM assessments 
+                    WHERE patient_number = ? 
+                    ORDER BY report_timestamp DESC
+                ''', (patient_number,))
+            else:
+                c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+            
+            rows = c.fetchall()
         
-        rows = c.fetchall()
         conn.close()
         
         assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
         
         for row in rows:
-            patient_num = row['patient_number']
+            # Convert row to dictionary
+            if isinstance(row, dict):
+                row_dict = row
+            else:
+                row_dict = dict(row)
+            
+            patient_num = row_dict['patient_number']
             if patient_num not in assessments_by_patient:
                 assessments_by_patient[patient_num] = []
             
-            all_diagnoses = json.loads(row['all_diagnoses_json']) if row['all_diagnoses_json'] else []
-            responses = json.loads(row['responses_json']) if row['responses_json'] else {}
-            processing_details = json.loads(row['processing_details_json']) if row['processing_details_json'] else {}
-            technical_details = json.loads(row['technical_details_json']) if row['technical_details_json'] else {}
-            clinical_insights = json.loads(row['clinical_insights_json']) if row['clinical_insights_json'] else {}
+            all_diagnoses = json.loads(row_dict['all_diagnoses_json']) if row_dict['all_diagnoses_json'] else []
+            responses = json.loads(row_dict['responses_json']) if row_dict['responses_json'] else {}
+            processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
+            technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
+            clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict['clinical_insights_json'] else {}
             
             assessment: Dict[str, Any] = {
-                'id': row['id'],
-                'timestamp': row['report_timestamp'],
-                'assessment_timestamp': row['assessment_timestamp'],
-                'timezone': row['timezone'],
+                'id': row_dict['id'],
+                'timestamp': row_dict['report_timestamp'],
+                'assessment_timestamp': row_dict['assessment_timestamp'],
+                'timezone': row_dict['timezone'],
                 'patient_info': {
-                    'name': row['patient_name'],
-                    'number': row['patient_number'],
-                    'age': row['patient_age'],
-                    'gender': row['patient_gender']
+                    'name': row_dict['patient_name'],
+                    'number': row_dict['patient_number'],
+                    'age': row_dict['patient_age'],
+                    'gender': row_dict['patient_gender']
                 },
-                'primary_diagnosis': row['primary_diagnosis'],
-                'confidence': row['confidence'],
-                'confidence_percentage': row['confidence_percentage'],
+                'primary_diagnosis': row_dict['primary_diagnosis'],
+                'confidence': row_dict['confidence'],
+                'confidence_percentage': row_dict['confidence_percentage'],
                 'all_diagnoses': all_diagnoses,
                 'responses': responses,
                 'processing_details': processing_details,
@@ -211,13 +348,24 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
 def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
     """Load a single specific assessment from database"""
     try:
-        conn = get_db_connection()
-        c = conn.cursor()
+        conn = get_postgres_connection()
         
-        c.execute('''
-            SELECT * FROM assessments 
-            WHERE patient_number = ? AND id = ? AND patient_name = ?
-        ''', (patient_number, assessment_id, patient_name))
+        if isinstance(conn, psycopg2.extensions.connection):
+            # PostgreSQL
+            c = conn.cursor(cursor_factory=RealDictCursor)
+            
+            c.execute('''
+                SELECT * FROM assessments 
+                WHERE patient_number = %s AND id = %s AND patient_name = %s
+            ''', (patient_number, assessment_id, patient_name))
+        else:
+            # SQLite fallback
+            c = conn.cursor()
+            
+            c.execute('''
+                SELECT * FROM assessments 
+                WHERE patient_number = ? AND id = ? AND patient_name = ?
+            ''', (patient_number, assessment_id, patient_name))
         
         row = c.fetchone()
         conn.close()
@@ -225,26 +373,32 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
         if not row:
             return None
         
-        all_diagnoses = json.loads(row['all_diagnoses_json']) if row['all_diagnoses_json'] else []
-        responses = json.loads(row['responses_json']) if row['responses_json'] else {}
-        processing_details = json.loads(row['processing_details_json']) if row['processing_details_json'] else {}
-        technical_details = json.loads(row['technical_details_json']) if row['technical_details_json'] else {}
-        clinical_insights = json.loads(row['clinical_insights_json']) if row['clinical_insights_json'] else {}
+        # Convert row to dictionary
+        if isinstance(row, dict):
+            row_dict = row
+        else:
+            row_dict = dict(row)
+        
+        all_diagnoses = json.loads(row_dict['all_diagnoses_json']) if row_dict['all_diagnoses_json'] else []
+        responses = json.loads(row_dict['responses_json']) if row_dict['responses_json'] else {}
+        processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
+        technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
+        clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict['clinical_insights_json'] else {}
         
         assessment: Dict[str, Any] = {
-            'id': row['id'],
-            'timestamp': row['report_timestamp'],
-            'assessment_timestamp': row['assessment_timestamp'],
-            'timezone': row['timezone'],
+            'id': row_dict['id'],
+            'timestamp': row_dict['report_timestamp'],
+            'assessment_timestamp': row_dict['assessment_timestamp'],
+            'timezone': row_dict['timezone'],
             'patient_info': {
-                'name': row['patient_name'],
-                'number': row['patient_number'],
-                'age': row['patient_age'],
-                'gender': row['patient_gender']
+                'name': row_dict['patient_name'],
+                'number': row_dict['patient_number'],
+                'age': row_dict['patient_age'],
+                'gender': row_dict['patient_gender']
             },
-            'primary_diagnosis': row['primary_diagnosis'],
-            'confidence': row['confidence'],
-            'confidence_percentage': row['confidence_percentage'],
+            'primary_diagnosis': row_dict['primary_diagnosis'],
+            'confidence': row_dict['confidence'],
+            'confidence_percentage': row_dict['confidence_percentage'],
             'all_diagnoses': all_diagnoses,
             'responses': responses,
             'processing_details': processing_details,
@@ -262,13 +416,24 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
 def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
     """Delete assessment from database"""
     try:
-        conn = get_db_connection()
-        c = conn.cursor()
+        conn = get_postgres_connection()
         
-        c.execute('''
-            DELETE FROM assessments 
-            WHERE patient_number = ? AND id = ?
-        ''', (patient_number, assessment_id))
+        if isinstance(conn, psycopg2.extensions.connection):
+            # PostgreSQL
+            c = conn.cursor()
+            
+            c.execute('''
+                DELETE FROM assessments 
+                WHERE patient_number = %s AND id = %s
+            ''', (patient_number, assessment_id))
+        else:
+            # SQLite fallback
+            c = conn.cursor()
+            
+            c.execute('''
+                DELETE FROM assessments 
+                WHERE patient_number = ? AND id = ?
+            ''', (patient_number, assessment_id))
         
         conn.commit()
         conn.close()
@@ -886,6 +1051,16 @@ def not_found(error):
         
 @app.route('/api/health', methods=['GET'])
 def health_check():
+    # Add database health check
+    db_healthy = False
+    try:
+        conn = get_postgres_connection()
+        if conn:
+            db_healthy = True
+            conn.close()
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
+    
     components_loaded = all([
         model_package is not None,
         scaler is not None, 
@@ -895,21 +1070,23 @@ def health_check():
     ])
     
     health_info = {
-        'status': 'healthy' if components_loaded else 'unhealthy',
+        'status': 'healthy' if components_loaded and db_healthy else 'unhealthy',
         'model_loaded': model_package is not None,
         'scaler_loaded': scaler is not None,
         'encoder_loaded': label_encoder is not None,
         'features_loaded': feature_names is not None,
         'category_mappings_loaded': category_mappings is not None,
+        'database_healthy': db_healthy,
+        'database_type': 'PostgreSQL' if db_healthy and os.environ.get('DATABASE_URL') else 'SQLite (fallback)',
         'total_features': len(feature_names) if feature_names else 0,
         'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
         'preprocessing_available': True,
         'clinical_validation': True,
-        'clinical_enhancer_available': clinical_enhancer is not None,
-        'database_initialized': True
+        'clinical_enhancer_available': clinical_enhancer is not None
     }
     
     return jsonify(health_info)
+
 
 @app.route('/api/get-single-assessment', methods=['POST'])
 def get_single_assessment():
@@ -1641,6 +1818,7 @@ def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: st
     except Exception as e:
         return timestamp_str or "Timestamp unavailable"
 
+
 if __name__ == '__main__':
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
         logger.info("All model components loaded successfully!")
@@ -1649,6 +1827,18 @@ if __name__ == '__main__':
         logger.info("Enhanced preprocessing pipeline: ACTIVE")
         logger.info("EXACT training pipeline replication: VERIFIED")
         logger.info("Confidence calibration: ENABLED")
+        
+        # Test database connection
+        try:
+            conn = get_postgres_connection()
+            if isinstance(conn, psycopg2.extensions.connection):
+                logger.info("Database: PostgreSQL (Production)")
+            else:
+                logger.info("Database: SQLite (Development Fallback)")
+            conn.close()
+        except Exception as e:
+            logger.error(f"Database connection test failed: {e}")
+            
         if clinical_enhancer:
             logger.info("Clinical Decision Enhancer: ACTIVE")
         else:

@@ -10,7 +10,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-
+    :root {
+      --primary: #4f46e5;
+      --secondary: #7c3aed;
+      --dark: #1e293b;
+      --light: #f5f7fa;
+      --gray: #64748b;
+      --light-gray: #e2e8f0;
+      --white: #ffffff;
+    }
     
     * {
       margin: 0;
@@ -22,33 +30,51 @@
       font-family: 'Inter', sans-serif;
       line-height: 1.6;
       color: var(--dark);
-      background-color: #f5f7fa;
+      background-color: var(--light);
+      overflow-x: hidden;
     }
     
     /* Hero Section */
     .hero {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      color: white;
+      color: var(--white);
       padding: 80px 20px;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiPjwvcmVjdD48cGF0aCBkPSJNMCwwIEwxMDAwLDUwMCBMMCwxMDAwIFoiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSI+PC9wYXRoPjwvc3ZnPg==');
+      opacity: 0.3;
     }
     
     .hero-content {
       max-width: 800px;
       margin: 0 auto;
+      position: relative;
+      z-index: 1;
     }
     
     .hero h1 {
       font-size: 2.5rem;
-      color: #ffffff;
+      color: var(--white);
       margin-bottom: 1rem;
+      font-weight: 700;
     }
     
     .hero p {
       font-size: 1.2rem;
-      color: #ffffff;
+      color: var(--white);
       max-width: 700px;
       margin: 0 auto;
+      opacity: 0.9;
     }
     
     /* Resources Container */
@@ -60,7 +86,7 @@
     
     /* Content Sections */
     .content-section {
-      background: white;
+      background: var(--white);
       border-radius: 12px;
       padding: 3rem;
       margin-bottom: 2rem;
@@ -74,41 +100,54 @@
     
     .section-header h2 {
       font-size: 2.2rem;
-      color: #1e293b;
+      color: var(--dark);
       margin-bottom: 1rem;
     }
     
     .section-header p {
       font-size: 1.1rem;
-      color: #64748b;
+      color: var(--gray);
       max-width: 700px;
       margin: 0 auto;
       line-height: 1.6;
     }
     
     /* Resource Categories */
+    .categories-container {
+      position: sticky;
+      top: 0;
+      background: var(--white);
+      padding: 1rem 0;
+      z-index: 10;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--light-gray);
+    }
+    
     .categories {
       display: flex;
       gap: 1rem;
-      margin-bottom: 2rem;
       flex-wrap: wrap;
       justify-content: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
     }
     
     .category-btn {
       padding: 0.75rem 1.5rem;
-      background: white;
-      border: 2px solid #e2e8f0;
+      background: var(--white);
+      border: 2px solid var(--light-gray);
       border-radius: 8px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s;
+      white-space: nowrap;
     }
     
     .category-btn.active, .category-btn:hover {
-      background: #4f46e5;
-      color: white;
-      border-color: #4f46e5;
+      background: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
     }
     
     /* Resource Cards Grid */
@@ -120,11 +159,14 @@
     }
     
     .resource-card {
-      background: white;
+      background: var(--white);
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
     }
     
     .resource-card:hover {
@@ -137,69 +179,74 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--white);
       font-size: 2.5rem;
     }
     
     /* Different colors for each resource icon background */
-  /* Smooth chained gradient colors */
-.resource-card:nth-child(1) .resource-icon { 
-    background: linear-gradient(135deg, #667eea, #764ba2); 
-}
+    /* Smooth chained gradient colors */
+    .resource-card:nth-child(1) .resource-icon { 
+        background: linear-gradient(135deg, #667eea, #764ba2); 
+    }
 
-.resource-card:nth-child(2) .resource-icon { 
-    background: linear-gradient(135deg, #764ba2, #4facfe); 
-}
+    .resource-card:nth-child(2) .resource-icon { 
+        background: linear-gradient(135deg, #764ba2, #4facfe); 
+    }
 
-.resource-card:nth-child(3) .resource-icon { 
-    background: linear-gradient(135deg, #4facfe, #00f2fe); 
-}
+    .resource-card:nth-child(3) .resource-icon { 
+        background: linear-gradient(135deg, #4facfe, #00f2fe); 
+    }
 
-.resource-card:nth-child(4) .resource-icon { 
-    background: linear-gradient(135deg, #00f2fe, #28b2f1); 
-}
+    .resource-card:nth-child(4) .resource-icon { 
+        background: linear-gradient(135deg, #00f2fe, #28b2f1); 
+    }
 
-.resource-card:nth-child(5) .resource-icon { 
-    background: linear-gradient(135deg, #28b2f1, #48bb78); 
-}
+    .resource-card:nth-child(5) .resource-icon { 
+        background: linear-gradient(135deg, #28b2f1, #48bb78); 
+    }
 
-.resource-card:nth-child(6) .resource-icon { 
-    background: linear-gradient(135deg, #48bb78, #5c9e06); 
-}
+    .resource-card:nth-child(6) .resource-icon { 
+        background: linear-gradient(135deg, #48bb78, #5c9e06); 
+    }
 
-.resource-card:nth-child(7) .resource-icon { 
-    background: linear-gradient(135deg, #5c9e06, #c7c41b); 
-}
+    .resource-card:nth-child(7) .resource-icon { 
+        background: linear-gradient(135deg, #5c9e06, #c7c41b); 
+    }
 
-.resource-card:nth-child(8) .resource-icon { 
-    background: linear-gradient(135deg, #c7c41b, #f7b017); 
-}
+    .resource-card:nth-child(8) .resource-icon { 
+        background: linear-gradient(135deg, #c7c41b, #f7b017); 
+    }
     
     .resource-content {
       padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
     }
     
     .resource-content h3 {
       font-size: 1.3rem;
-      color: #1e293b;
+      color: var(--dark);
       margin-bottom: 0.75rem;
     }
     
     .resource-content p {
-      color: #64748b;
+      color: var(--gray);
       margin-bottom: 1.5rem;
       font-size: 0.95rem;
       line-height: 1.5;
+      flex-grow: 1;
     }
     
     .resource-link {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      color: #4f46e5;
+      color: var(--primary);
       text-decoration: none;
       font-weight: 500;
       transition: all 0.3s;
+      margin-top: auto;
     }
     
     .resource-link:hover {
@@ -210,7 +257,7 @@
     /* FAQ Section */
     .faq-section {
       margin: 3rem 0;
-      background: white;
+      background: var(--white);
       border-radius: 12px;
       padding: 3rem;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -219,7 +266,7 @@
     .faq-section h2 {
       text-align: center;
       margin-bottom: 2rem;
-      color: #1e293b;
+      color: var(--dark);
       font-size: 2.2rem;
     }
     
@@ -236,6 +283,7 @@
       padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s ease;
+      cursor: pointer;
     }
     
     .faq-item:hover {
@@ -244,7 +292,7 @@
     
     .faq-question {
       font-weight: 600;
-      color: #1e293b;
+      color: var(--dark);
       margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
@@ -253,19 +301,26 @@
     }
     
     .faq-question i {
-      color: #4f46e5;
+      color: var(--primary);
     }
     
     .faq-answer {
-      color: #64748b;
+      color: var(--gray);
       line-height: 1.6;
       font-size: 0.95rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    
+    .faq-item.active .faq-answer {
+      max-height: 500px;
     }
     
     /* Newsletter Section */
     .newsletter-section {
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--white);
       border-radius: 12px;
       padding: 3rem 2rem;
       text-align: center;
@@ -309,8 +364,8 @@
     }
     
     .newsletter-form button {
-      background: #1e293b;
-      color: white;
+      background: var(--dark);
+      color: var(--white);
       border: none;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
@@ -349,7 +404,7 @@
     .support-resource-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      background: white;
+      background: var(--white);
     }
     
     .support-resource-icon {
@@ -360,7 +415,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: var(--white);
       font-size: 2rem;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
@@ -372,14 +427,14 @@
     .support-resource-card:nth-child(3) .support-resource-icon { background: linear-gradient(135deg, #10b981, #34d399); }
     
     .support-resource-card h3 {
-      color: #1e293b;
+      color: var(--dark);
       margin-bottom: 1rem;
       font-size: 1.4rem;
       line-height: 1.3;
     }
     
     .support-resource-card p {
-      color: #64748b;
+      color: var(--gray);
       margin-bottom: 1.5rem;
       line-height: 1.6;
       font-size: 0.95rem;
@@ -390,26 +445,54 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      color: #4f46e5;
+      color: var(--primary);
       font-weight: 600;
       text-decoration: none;
       transition: all 0.3s ease;
       padding: 0.75rem 1.5rem;
       border-radius: 8px;
-      background: white;
-      border: 2px solid #e2e8f0;
+      background: var(--white);
+      border: 2px solid var(--light-gray);
       margin-top: auto;
     }
     
     .support-resource-link:hover {
       gap: 0.75rem;
-      background: #4f46e5;
-      color: white;
-      border-color: #4f46e5;
+      background: var(--primary);
+      color: var(--white);
+      border-color: var(--primary);
       transform: translateY(-2px);
     }
     
+    /* Loading Animation */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(79, 70, 229, 0.2);
+      border-left: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
     /* Responsive Design */
+    @media (max-width: 1024px) {
+      .resources-grid {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      }
+    }
+    
     @media (max-width: 768px) {
       .resources-container {
         padding: 0 1rem;
@@ -433,6 +516,7 @@
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
       }
       
       .category-btn {
@@ -454,6 +538,10 @@
       .hero p {
         font-size: 1rem;
       }
+      
+      .hero {
+        padding: 60px 20px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -474,6 +562,10 @@
       .newsletter-section {
         padding: 2rem 1rem;
       }
+      
+      .categories-container {
+        padding: 0.5rem 0;
+      }
     }
     
     /* Animation for resource cards */
@@ -492,6 +584,37 @@
     .support-resource-card {
       animation: fadeIn 0.5s ease-out;
     }
+    
+    /* Back to top button */
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: var(--white);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+    }
+    
+    .back-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .back-to-top:hover {
+      background: var(--secondary);
+      transform: translateY(-3px);
+    }
   </style>
 </head>
 <body>
@@ -505,14 +628,21 @@
   </section>
 
   <div class="resources-container">
-
     <!-- Resource Categories -->
-    <div class="categories">
-      <button class="category-btn active" data-category="all">All Resources</button>
-      <button class="category-btn" data-category="conditions">Mental Health Conditions</button>
-      <button class="category-btn" data-category="treatment">Treatment Options</button>
-      <button class="category-btn" data-category="coping">Coping Strategies</button>
-      <button class="category-btn" data-category="self-help">Self-Help Tools</button>
+    <div class="categories-container">
+      <div class="categories">
+        <button class="category-btn active" data-category="all">All Resources</button>
+        <button class="category-btn" data-category="conditions">Mental Health Conditions</button>
+        <button class="category-btn" data-category="treatment">Treatment Options</button>
+        <button class="category-btn" data-category="coping">Coping Strategies</button>
+        <button class="category-btn" data-category="self-help">Self-Help Tools</button>
+      </div>
+    </div>
+
+    <!-- Loading Animation -->
+    <div class="loading">
+      <div class="loading-spinner"></div>
+      <p>Loading resources...</p>
     </div>
 
     <!-- Resources Grid -->
@@ -691,14 +821,23 @@
     </div>
   </div>
 
+  <!-- Back to Top Button -->
+  <div class="back-to-top">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // Category filtering
       const categoryButtons = document.querySelectorAll('.category-btn');
       const resourceCards = document.querySelectorAll('.resource-card');
+      const loadingElement = document.querySelector('.loading');
       
       categoryButtons.forEach(button => {
         button.addEventListener('click', function() {
+          // Show loading animation
+          loadingElement.style.display = 'block';
+          
           // Remove active class from all buttons
           categoryButtons.forEach(btn => btn.classList.remove('active'));
           // Add active class to clicked button
@@ -706,14 +845,19 @@
           
           const category = this.getAttribute('data-category');
           
-          // Filter resources
-          resourceCards.forEach(card => {
-            if (category === 'all' || card.getAttribute('data-category') === category) {
-              card.style.display = '';
-            } else {
-              card.style.display = 'none';
-            }
-          });
+          // Filter resources with a slight delay for better UX
+          setTimeout(() => {
+            resourceCards.forEach(card => {
+              if (category === 'all' || card.getAttribute('data-category') === category) {
+                card.style.display = '';
+              } else {
+                card.style.display = 'none';
+              }
+            });
+            
+            // Hide loading animation
+            loadingElement.style.display = 'none';
+          }, 300);
         });
       });
 
@@ -727,9 +871,46 @@
           this.reset();
         });
       }
+      
+      // FAQ accordion functionality
+      const faqItems = document.querySelectorAll('.faq-item');
+      faqItems.forEach(item => {
+        item.addEventListener('click', function() {
+          // Close all other FAQ items
+          faqItems.forEach(otherItem => {
+            if (otherItem !== this) {
+              otherItem.classList.remove('active');
+            }
+          });
+          
+          // Toggle current FAQ item
+          this.classList.toggle('active');
+        });
+      });
+      
+      // Back to top button
+      const backToTopButton = document.querySelector('.back-to-top');
+      
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+          backToTopButton.classList.add('visible');
+        } else {
+          backToTopButton.classList.remove('visible');
+        }
+      });
+      
+      backToTopButton.addEventListener('click', function() {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // Enhanced touch support for mobile
+      document.addEventListener('touchstart', function() {}, {passive: true});
     });
   </script>
-<script src="../js/components.js"></script>
 
 </body>
+<script src="../js/components.js"></script>
 </html>
