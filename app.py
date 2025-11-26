@@ -9,8 +9,8 @@ from datetime import datetime, timezone, timedelta
 import os
 import logging
 from typing import Dict, List, Tuple, Optional, Any
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import psycopg
+from psycopg.rows import dict_row  
 import sqlite3  # Keep for fallback if needed
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
@@ -22,7 +22,6 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import io
 import json
 import sys 
-
 
 # Global storage (in production, use a database)
 assessment_storage: Dict[str, Dict[str, Any]] = {}
@@ -56,27 +55,39 @@ feature_names: Optional[List[str]] = None
 category_mappings: Optional[Dict[str, Any]] = None
 clinical_enhancer: Optional[Any] = None
 
-# PostgreSQL configuration
+# PostgreSQL configuration with psycopg
 def get_postgres_connection():
-    """Get PostgreSQL database connection"""
+    """Get PostgreSQL database connection using psycopg"""
     try:
         # Use external database URL for Render
         database_url = os.environ.get('DATABASE_URL')
         if database_url:
             # Render provides DATABASE_URL in the format: postgresql://user:pass@host:port/dbname
-            conn = psycopg2.connect(database_url, sslmode='require')
+            # Convert to psycopg connection string if needed
+            if database_url.startswith('postgresql://'):
+                conn = psycopg.connect(database_url, row_factory=dict_row)
+            else:
+                # Fallback to individual connection parameters
+                conn = psycopg.connect(
+                    host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
+                    dbname='assessment_data',
+                    user='assessment_data_user',
+                    password='QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA',
+                    port=5432,
+                    row_factory=dict_row
+                )
         else:
             # Fallback to individual connection parameters
-            conn = psycopg2.connect(
+            conn = psycopg.connect(
                 host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
-                database='assessment_data',
+                dbname='assessment_data',
                 user='assessment_data_user',
                 password='QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA',
                 port=5432,
-                sslmode='require'
+                row_factory=dict_row
             )
         
-        logger.info("PostgreSQL connection established successfully")
+        logger.info("PostgreSQL connection established successfully with psycopg")
         return conn
     except Exception as e:
         logger.error(f"PostgreSQL connection failed: {e}")
@@ -92,43 +103,40 @@ def get_postgres_connection():
             raise e
 
 def init_database():
-    """Initialize PostgreSQL database with required tables"""
+    """Initialize PostgreSQL database with required tables using psycopg"""
     try:
         conn = get_postgres_connection()
         
         # Check if we're using PostgreSQL or SQLite
-        if isinstance(conn, psycopg2.extensions.connection):
-            # PostgreSQL
-            c = conn.cursor()
-            
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS assessments (
-                    id TEXT PRIMARY KEY,
-                    assessment_timestamp TEXT,
-                    report_timestamp TEXT,
-                    timezone TEXT,
-                    patient_name TEXT,
-                    patient_number TEXT,
-                    patient_age TEXT,
-                    patient_gender TEXT,
-                    primary_diagnosis TEXT,
-                    confidence REAL,
-                    confidence_percentage REAL,
-                    all_diagnoses_json TEXT,
-                    responses_json TEXT,
-                    processing_details_json TEXT,
-                    technical_details_json TEXT,
-                    clinical_insights_json TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
-            
-            c.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
-            c.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
-            
+        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+            with conn.cursor() as cur:
+                cur.execute('''
+                    CREATE TABLE IF NOT EXISTS assessments (
+                        id TEXT PRIMARY KEY,
+                        assessment_timestamp TEXT,
+                        report_timestamp TEXT,
+                        timezone TEXT,
+                        patient_name TEXT,
+                        patient_number TEXT,
+                        patient_age TEXT,
+                        patient_gender TEXT,
+                        primary_diagnosis TEXT,
+                        confidence REAL,
+                        confidence_percentage REAL,
+                        all_diagnoses_json TEXT,
+                        responses_json TEXT,
+                        processing_details_json TEXT,
+                        technical_details_json TEXT,
+                        clinical_insights_json TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                cur.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
+                cur.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
+                
             conn.commit()
-            c.close()
-            logger.info("PostgreSQL database initialized successfully")
+            logger.info("PostgreSQL database initialized successfully with psycopg")
             
         else:
             # SQLite fallback
@@ -168,56 +176,54 @@ def init_database():
         logger.error(f"Database initialization failed: {e}")
 
 def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
-    """Save assessment data to PostgreSQL database"""
+    """Save assessment data to PostgreSQL database using psycopg"""
     try:
         conn = get_postgres_connection()
         
-        if isinstance(conn, psycopg2.extensions.connection):
-            # PostgreSQL
-            c = conn.cursor()
-            
-            c.execute('''
-                INSERT INTO assessments (
-                    id, assessment_timestamp, report_timestamp, timezone,
-                    patient_name, patient_number, patient_age, patient_gender,
-                    primary_diagnosis, confidence, confidence_percentage,
-                    all_diagnoses_json, responses_json, processing_details_json,
-                    technical_details_json, clinical_insights_json
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (id) DO UPDATE SET
-                    assessment_timestamp = EXCLUDED.assessment_timestamp,
-                    report_timestamp = EXCLUDED.report_timestamp,
-                    timezone = EXCLUDED.timezone,
-                    patient_name = EXCLUDED.patient_name,
-                    patient_number = EXCLUDED.patient_number,
-                    patient_age = EXCLUDED.patient_age,
-                    patient_gender = EXCLUDED.patient_gender,
-                    primary_diagnosis = EXCLUDED.primary_diagnosis,
-                    confidence = EXCLUDED.confidence,
-                    confidence_percentage = EXCLUDED.confidence_percentage,
-                    all_diagnoses_json = EXCLUDED.all_diagnoses_json,
-                    responses_json = EXCLUDED.responses_json,
-                    processing_details_json = EXCLUDED.processing_details_json,
-                    technical_details_json = EXCLUDED.technical_details_json,
-                    clinical_insights_json = EXCLUDED.clinical_insights_json
-            ''', (
-                assessment_data.get('id'),
-                assessment_data.get('assessment_timestamp'),
-                assessment_data.get('timestamp'),
-                assessment_data.get('timezone', 'UTC'),
-                assessment_data.get('patient_info', {}).get('name', ''),
-                assessment_data.get('patient_info', {}).get('number', ''),
-                assessment_data.get('patient_info', {}).get('age', ''),
-                assessment_data.get('patient_info', {}).get('gender', ''),
-                assessment_data.get('primary_diagnosis', ''),
-                assessment_data.get('confidence', 0),
-                assessment_data.get('confidence_percentage', 0),
-                json.dumps(assessment_data.get('all_diagnoses', [])),
-                json.dumps(assessment_data.get('responses', {})),
-                json.dumps(assessment_data.get('processing_details', {})),
-                json.dumps(assessment_data.get('technical_details', {})),
-                json.dumps(assessment_data.get('clinical_insights', {}))
-            ))
+        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+            with conn.cursor() as cur:
+                cur.execute('''
+                    INSERT INTO assessments (
+                        id, assessment_timestamp, report_timestamp, timezone,
+                        patient_name, patient_number, patient_age, patient_gender,
+                        primary_diagnosis, confidence, confidence_percentage,
+                        all_diagnoses_json, responses_json, processing_details_json,
+                        technical_details_json, clinical_insights_json
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        assessment_timestamp = EXCLUDED.assessment_timestamp,
+                        report_timestamp = EXCLUDED.report_timestamp,
+                        timezone = EXCLUDED.timezone,
+                        patient_name = EXCLUDED.patient_name,
+                        patient_number = EXCLUDED.patient_number,
+                        patient_age = EXCLUDED.patient_age,
+                        patient_gender = EXCLUDED.patient_gender,
+                        primary_diagnosis = EXCLUDED.primary_diagnosis,
+                        confidence = EXCLUDED.confidence,
+                        confidence_percentage = EXCLUDED.confidence_percentage,
+                        all_diagnoses_json = EXCLUDED.all_diagnoses_json,
+                        responses_json = EXCLUDED.responses_json,
+                        processing_details_json = EXCLUDED.processing_details_json,
+                        technical_details_json = EXCLUDED.technical_details_json,
+                        clinical_insights_json = EXCLUDED.clinical_insights_json
+                ''', (
+                    assessment_data.get('id'),
+                    assessment_data.get('assessment_timestamp'),
+                    assessment_data.get('timestamp'),
+                    assessment_data.get('timezone', 'UTC'),
+                    assessment_data.get('patient_info', {}).get('name', ''),
+                    assessment_data.get('patient_info', {}).get('number', ''),
+                    assessment_data.get('patient_info', {}).get('age', ''),
+                    assessment_data.get('patient_info', {}).get('gender', ''),
+                    assessment_data.get('primary_diagnosis', ''),
+                    assessment_data.get('confidence', 0),
+                    assessment_data.get('confidence_percentage', 0),
+                    json.dumps(assessment_data.get('all_diagnoses', [])),
+                    json.dumps(assessment_data.get('responses', {})),
+                    json.dumps(assessment_data.get('processing_details', {})),
+                    json.dumps(assessment_data.get('technical_details', {})),
+                    json.dumps(assessment_data.get('clinical_insights', {}))
+                ))
         else:
             # SQLite fallback
             c = conn.cursor()
@@ -260,25 +266,22 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
         return False
 
 def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
-    """Load assessments from database, optionally filtered by patient number"""
+    """Load assessments from database using psycopg, optionally filtered by patient number"""
     try:
         conn = get_postgres_connection()
         
-        if isinstance(conn, psycopg2.extensions.connection):
-            # PostgreSQL
-            c = conn.cursor(cursor_factory=RealDictCursor)
-            
-            if patient_number:
-                c.execute('''
-                    SELECT * FROM assessments 
-                    WHERE patient_number = %s 
-                    ORDER BY report_timestamp DESC
-                ''', (patient_number,))
-            else:
-                c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
-            
-            rows = c.fetchall()
-            c.close()
+        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+            with conn.cursor() as cur:
+                if patient_number:
+                    cur.execute('''
+                        SELECT * FROM assessments 
+                        WHERE patient_number = %s 
+                        ORDER BY report_timestamp DESC
+                    ''', (patient_number,))
+                else:
+                    cur.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+                
+                rows = cur.fetchall()
         else:
             # SQLite fallback
             c = conn.cursor()
@@ -346,18 +349,18 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
         return {}
 
 def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
-    """Load a single specific assessment from database"""
+    """Load a single specific assessment from database using psycopg"""
     try:
         conn = get_postgres_connection()
         
-        if isinstance(conn, psycopg2.extensions.connection):
-            # PostgreSQL
-            c = conn.cursor(cursor_factory=RealDictCursor)
-            
-            c.execute('''
-                SELECT * FROM assessments 
-                WHERE patient_number = %s AND id = %s AND patient_name = %s
-            ''', (patient_number, assessment_id, patient_name))
+        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+            with conn.cursor() as cur:
+                cur.execute('''
+                    SELECT * FROM assessments 
+                    WHERE patient_number = %s AND id = %s AND patient_name = %s
+                ''', (patient_number, assessment_id, patient_name))
+                
+                row = cur.fetchone()
         else:
             # SQLite fallback
             c = conn.cursor()
@@ -366,8 +369,9 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
                 SELECT * FROM assessments 
                 WHERE patient_number = ? AND id = ? AND patient_name = ?
             ''', (patient_number, assessment_id, patient_name))
+            
+            row = c.fetchone()
         
-        row = c.fetchone()
         conn.close()
         
         if not row:
@@ -414,18 +418,16 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
         return None
 
 def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
-    """Delete assessment from database"""
+    """Delete assessment from database using psycopg"""
     try:
         conn = get_postgres_connection()
         
-        if isinstance(conn, psycopg2.extensions.connection):
-            # PostgreSQL
-            c = conn.cursor()
-            
-            c.execute('''
-                DELETE FROM assessments 
-                WHERE patient_number = %s AND id = %s
-            ''', (patient_number, assessment_id))
+        if hasattr(conn, 'cursor'):  # PostgreSQL with psycopg
+            with conn.cursor() as cur:
+                cur.execute('''
+                    DELETE FROM assessments 
+                    WHERE patient_number = %s AND id = %s
+                ''', (patient_number, assessment_id))
         else:
             # SQLite fallback
             c = conn.cursor()
@@ -1077,7 +1079,7 @@ def health_check():
         'features_loaded': feature_names is not None,
         'category_mappings_loaded': category_mappings is not None,
         'database_healthy': db_healthy,
-        'database_type': 'PostgreSQL' if db_healthy and os.environ.get('DATABASE_URL') else 'SQLite (fallback)',
+        'database_type': 'PostgreSQL (psycopg)' if db_healthy and hasattr(conn, 'cursor') else 'SQLite (fallback)',
         'total_features': len(feature_names) if feature_names else 0,
         'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
         'preprocessing_available': True,
@@ -1819,6 +1821,7 @@ def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: st
         return timestamp_str or "Timestamp unavailable"
 
 
+
 if __name__ == '__main__':
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
         logger.info("All model components loaded successfully!")
@@ -1831,8 +1834,8 @@ if __name__ == '__main__':
         # Test database connection
         try:
             conn = get_postgres_connection()
-            if isinstance(conn, psycopg2.extensions.connection):
-                logger.info("Database: PostgreSQL (Production)")
+            if hasattr(conn, 'cursor'):
+                logger.info("Database: PostgreSQL (Production) with psycopg")
             else:
                 logger.info("Database: SQLite (Development Fallback)")
             conn.close()
