@@ -404,63 +404,73 @@
       flex: 1;
     }
     
-    /* Metrics Container - Enhanced for Mobile */
-    .metrics-container {
-      margin-bottom: 1.5rem;
-    }
-    
-    .metrics-title {
-      font-size: clamp(0.9rem, 2vw, 1rem);
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--dark);
-    }
-    
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-    
-    .metric-item {
-      text-align: center;
-    }
-    
-    .metric-name {
-      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--gray);
-    }
-    
-    .donut-chart {
-      position: relative;
-      width: 60px;
-      height: 60px;
-      margin: 0 auto;
-      border-radius: 50%;
-      background: conic-gradient(
-        var(--segment-color) 0deg var(--segment-rotation),
-        var(--gray-light) var(--segment-rotation) 360deg
-      );
-    }
-    
-    .donut-inner {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
-      background: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-      font-weight: 600;
-    }
-    
+   /* Metrics Container - Enhanced for Mobile */
+.metrics-container {
+  margin-bottom: 1.5rem;
+}
+
+.metrics-title {
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--dark);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.metric-item {
+  text-align: center;
+}
+
+.metric-name {
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--gray);
+}
+
+.donut-chart {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--gray-light);
+}
+
+.donut-segment {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
+  transform: rotate(var(--segment-rotation, 0deg));
+  background: conic-gradient(
+    var(--segment-color, var(--primary)) 0deg var(--segment-rotation, 0deg),
+    transparent var(--segment-rotation, 0deg) 360deg
+  );
+}
+
+.donut-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  font-weight: 600;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+}
     /* Controls - Enhanced for Mobile */
     .controls {
       display: flex;
