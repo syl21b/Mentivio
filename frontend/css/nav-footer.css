@@ -155,7 +155,7 @@ body {
   border: none;
   font-size: 1.4rem;
   cursor: pointer;
-  color: var(--dark);
+  color: var(--light);
   width: 44px;
   height: 44px;
   border-radius: 8px;
