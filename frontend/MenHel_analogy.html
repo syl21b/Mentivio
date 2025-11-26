@@ -764,67 +764,47 @@
         max-width: none;
       }
     }
-  /* High DPI Screens */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-  .hero::before,
-  .crisis-alert::before {
-    background-size: 1200px 800px;
-  }
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-  }
-  
-  html {
-    scroll-behavior: auto;
-  }
-}
-
-/* Print Styles - Corrected without deprecated properties */
-@media print {
-  .hero {
-    background: var(--primary) !important;
-    -webkit-print-color-adjust: exact;
+    
+    /* High DPI Screens */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      .hero::before,
+      .crisis-alert::before {
+        background-size: 1200px 800px;
+      }
+    }
+    
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      
+      html {
+        scroll-behavior: auto;
+      }
+    }
+    
+    /* Print Styles */
+    @media print {
+      .hero {
+        background: var(--primary) !important;
+         -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      }
+      
+      .crisis-alert {
+        background: var(--danger) !important;
+        -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  }
-  
-  .crisis-alert {
-    background: var(--danger) !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .controls,
-  .global-controls {
-    display: none;
-  }
-  
-  /* Ensure good contrast for printed text */
-  * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  /* Improve print layout */
-  .visualization-card {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-  
-  .comparison-grid {
-    display: block;
-  }
-  
-  .info-panel {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-}
+      }
+      
+      .controls,
+      .global-controls {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
