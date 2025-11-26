@@ -46,11 +46,10 @@
       overflow-x: hidden;
     }
     
-    /* Improved Hero Section */
-    .hero {
+ .hero {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       color: white;
-      padding: 100px 20px;
+      padding: clamp(4rem, 10vw, 6rem) 20px;
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -75,7 +74,7 @@
     }
     
     .hero h1 {
-      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-size: clamp(2.2rem, 5vw, 3rem);
       color: #ffffff;
       margin-bottom: 1.5rem;
       font-weight: 700;

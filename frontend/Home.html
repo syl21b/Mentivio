@@ -141,55 +141,33 @@
       box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
     }
     
-    /* Crisis Alert - Enhanced for Mobile */
+     /* Crisis Alert */
     .crisis-alert {
-      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
+      background-color: var(--danger);
       color: white;
-      padding: clamp(1.5rem, 3vw, 2rem);
+      padding: 1.25rem;
       text-align: center;
-      margin: 3rem 0;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(229, 62, 62, 0.2);
+      margin: 2rem 0;
+      border-radius: 10px;
       position: relative;
-      overflow: hidden;
-    }
-    
-    .crisis-alert::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
-      background-size: cover;
     }
     
     .crisis-alert p {
-      margin-bottom: 1rem;
-      position: relative;
-      z-index: 1;
-      line-height: 1.6;
+      margin-bottom: 0.75rem;
     }
     
     .crisis-alert a {
       color: white;
       text-decoration: underline;
       font-weight: 600;
-      transition: var(--transition);
-    }
-    
-    .crisis-alert a:hover {
-      opacity: 0.9;
     }
     
     .crisis-alert .note {
-      font-size: clamp(0.85rem, 2vw, 0.9rem);
+      font-size: 0.9rem;
       opacity: 0.9;
-      margin-top: 1rem;
-      position: relative;
-      z-index: 1;
+      margin-top: 0.75rem;
     }
+
     
     /* Features Section - Enhanced for Mobile */
     .features {
@@ -510,7 +488,6 @@
   </section>
 
   <!-- Crisis Alert -->
-  <div class="container">
     <div class="crisis-alert fade-in">
       <p><i class="fas fa-exclamation-triangle"></i> 
         <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
@@ -518,12 +495,11 @@
         or text <strong>HOME</strong> to <strong>741741</strong>.  
         You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
       </p>
-      
+    
       <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
-      
+
       <p class="note">This assessment is not a substitute for professional or emergency care.</p>
     </div>
-  </div>
 
   <!-- Features Section -->
   <section class="features fade-in">

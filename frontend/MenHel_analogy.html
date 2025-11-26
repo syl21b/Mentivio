@@ -50,7 +50,6 @@
       overflow-x: hidden;
     }
     
-    /* Hero Section - Enhanced for Mobile */
     .hero {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       color: white;
@@ -79,7 +78,7 @@
     }
     
     .hero h1 {
-      font-size: clamp(2rem, 5vw, 2.5rem);
+      font-size: clamp(2.2rem, 5vw, 3rem);
       color: #ffffff;
       margin-bottom: 1.5rem;
       font-weight: 700;
@@ -87,67 +86,15 @@
     }
     
     .hero p {
-      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
       color: #ffffff;
       max-width: 700px;
-      margin: 0 auto;
+      margin: 0 auto 2.5rem;
       opacity: 0.9;
       line-height: 1.6;
     }
     
-    /* Crisis Alert - Enhanced for Mobile */
-    .crisis-alert {
-      background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
-      color: white;
-      padding: clamp(1.5rem, 3vw, 2rem);
-      text-align: center;
-      margin: 3rem 0;
-      border-radius: 12px;
-      box-shadow: 0 8px 25px rgba(229, 62, 62, 0.2);
-      position: relative;
-      overflow: hidden;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    
-    .crisis-alert::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
-      background-size: cover;
-    }
-    
-    .crisis-alert p {
-      margin-bottom: 1rem;
-      position: relative;
-      z-index: 1;
-      line-height: 1.6;
-    }
-    
-    .crisis-alert a {
-      color: white;
-      text-decoration: underline;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-    
-    .crisis-alert a:hover {
-      opacity: 0.9;
-    }
-    
-    .crisis-alert .note {
-      font-size: clamp(0.85rem, 2vw, 0.9rem);
-      opacity: 0.9;
-      margin-top: 1rem;
-      position: relative;
-      z-index: 1;
-    }
-    
+  
     /* Container - Enhanced for Mobile */
     .container {
       max-width: 1200px;
@@ -825,20 +772,8 @@
     </div>
   </section>
 
-  <!-- Crisis Alert -->
-  <div class="crisis-alert fade-in">
-    <p><i class="fas fa-exclamation-triangle"></i> 
-      <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
-      Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
-      or text <strong>HOME</strong> to <strong>741741</strong>.  
-      You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
-    </p>
-    
-    <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
-    
-    <p class="note">This assessment is not a substitute for professional or emergency care.</p>
-  </div>
       
+
   <div class="container">
     <div class="disclaimer-alert fade-in">
       <div class="alert-icon">⚠️</div>

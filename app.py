@@ -41,13 +41,19 @@ class SecurityConfig:
     
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY',
+        'X-Frame-Options': 'DENY', 
         'X-XSS-Protection': '1; mode=block',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+        'Content-Security-Policy': "default-src 'self'; "
+                                "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
+                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+                                "img-src 'self' data: https:; "
+                                "font-src 'self' data: https: fonts.gstatic.com; "
+                                "connect-src 'self'",
         'Referrer-Policy': 'strict-origin-when-cross-origin',
         'Permissions-Policy': 'geolocation=(), microphone=()'
     }
+    
     
     MAX_INPUT_LENGTH = 500
     MAX_RESPONSES = 50
@@ -2114,6 +2120,35 @@ def too_many_requests(error):
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
 
+
+@app.after_request
+def set_security_headers(response):
+    # TEMPORARY: Add reporting to see what's being blocked
+    csp_header = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data: https:; "
+        "report-uri /csp-violation-report-endpoint"  # This will show us what's being blocked
+    )
+    
+    headers = {
+        'X-Content-Type-Options': 'nosniff',
+        'X-Frame-Options': 'DENY', 
+        'X-XSS-Protection': '1; mode=block',
+        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+        'Content-Security-Policy': csp_header,
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'geolocation=(), microphone=()'
+    }
+    
+    for header, value in headers.items():
+        response.headers[header] = value
+    return response
+
+    
+    
 # ==================== MAIN EXECUTION ====================
 if __name__ == '__main__':
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
@@ -2154,11 +2189,12 @@ if __name__ == '__main__':
                 logger.info(f"Pre-warm completed with status: {response.status_code}")
             except Exception as e:
                 logger.warning(f"Pre-warm warning: {e}")
+
     
     if os.environ.get('RENDER'):
         pre_warm_app()
     
-    port = int(os.environ.get('PORT', 5002))
+    port = int(os.environ.get('PORT', 5003))
     debug_mode = not bool(os.environ.get('RENDER'))
     
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

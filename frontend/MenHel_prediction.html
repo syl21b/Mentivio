@@ -58,18 +58,16 @@
       position: relative;
     }
 
-    /* Hero Section */
-    .hero {
+   .hero {
       background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
       color: white;
-      padding: 3.5rem 2rem;
+      padding: clamp(4rem, 10vw, 6rem) 20px;
       text-align: center;
-      margin-bottom: 2rem;
-      border-radius: var(--radius);
       position: relative;
       overflow: hidden;
+      margin-bottom: 2rem;
     }
-
+    
     .hero::before {
       content: '';
       position: absolute;
@@ -77,55 +75,60 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.05"><polygon points="0,0 1000,50 1000,100 0,100"></polygon></svg>');
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
       background-size: cover;
     }
-
+    
     .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
       position: relative;
       z-index: 1;
     }
-
+    
     .hero h1 {
-      font-size: clamp(2rem, 4vw, 2.75rem);
-      margin-bottom: 1rem;
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      color: #ffffff;
+      margin-bottom: 1.5rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
+      line-height: 1.2;
     }
-
+    
     .hero p {
-      font-size: clamp(1rem, 2vw, 1.25rem);
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: #ffffff;
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
       opacity: 0.9;
-      font-weight: 300;
+      line-height: 1.6;
     }
+  .hero-features {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+  }
 
-    /* Crisis Alert */
-    .crisis-alert {
-      background-color: var(--danger);
-      color: white;
-      padding: 1.25rem;
-      text-align: center;
-      margin: 2rem 0;
-      border-radius: 10px;
-      position: relative;
-    }
-    
-    .crisis-alert p {
-      margin-bottom: 0.75rem;
-    }
-    
-    .crisis-alert a {
-      color: white;
-      text-decoration: underline;
-      font-weight: 600;
-    }
-    
-    .crisis-alert .note {
-      font-size: 0.9rem;
-      opacity: 0.9;
-      margin-top: 0.75rem;
-    }
+  .feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
 
+  .feature i {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    opacity: 0.9;
+  }
+
+  .feature span {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+   
     /* Progress Bar */
     .progress-text {
       text-align: center;
@@ -1280,24 +1283,29 @@
 <body>
 
   <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>Mental Health Condition Visualizer</h1>
-      <p>Accurate clinical visualization of Bipolar I, Bipolar II, Depression, and normal mood states</p>
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Mental Health Self-Assessment</h1>
+    <p>Take a confidential, clinically-informed assessment to better understand your mental wellbeing and receive personalized insights</p>
+    <div class="hero-features">
+      <div class="feature">
+        <i class="fas fa-shield-alt"></i>
+        <span>Secure & Confidential</span>
+      </div>
+      <div class="feature">
+        <i class="fas fa-brain"></i>
+        <span>Clinically-Informed</span>
+      </div>
+      <div class="feature">
+        <i class="fas fa-chart-line"></i>
+        <span>Personalized Insights</span>
+      </div>
     </div>
-  </section>
-
-  <!-- Crisis Alert -->
-  <div class="crisis-alert">
-    <p><i class="fas fa-exclamation-triangle"></i> 
-      <strong>If you're in crisis or experiencing suicidal thoughts:</strong>
-      Please call or text <strong>988</strong> (U.S.) for free, confidential 24/7 support,  
-      or text <strong>HOME</strong> to <strong>741741</strong>.  
-      You can also visit <a href="https://988lifeline.org" target="_blank">988lifeline.org</a>.
-    </p>
-    <p>For immediate danger or life-threatening emergencies, call <strong>911</strong> or go to the nearest emergency room.</p>
-    <p class="note">This assessment is not a substitute for professional or emergency care.</p>
   </div>
+</section>
+
+
 
   <div class="container">
     <div class="survey-card">
