@@ -29,7 +29,8 @@ assessment_storage: Dict[str, Dict[str, Any]] = {}
 app = Flask(__name__, 
            static_folder='frontend',
            template_folder='frontend')
-
+    
+    
 # Configure CORS based on environment
 if os.environ.get('RENDER'):
     CORS(app, origins=[
@@ -1053,43 +1054,82 @@ def not_found(error):
         
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    # Add database health check
-    db_healthy = False
+    """Enhanced health check to properly wake up Render instance"""
     try:
-        conn = get_postgres_connection()
-        if conn:
-            db_healthy = True
-            conn.close()
+        # Test database connection
+        db_healthy = False
+        db_type = "Unknown"
+        try:
+            conn = get_postgres_connection()
+            if conn:
+                # Execute a simple query to ensure DB is responsive
+                if hasattr(conn, 'cursor'):  # PostgreSQL
+                    with conn.cursor() as cur:
+                        cur.execute('SELECT 1 as test')
+                        db_healthy = True
+                        db_type = 'PostgreSQL'
+                else:  # SQLite
+                    c = conn.cursor()
+                    c.execute('SELECT 1 as test')
+                    db_healthy = True
+                    db_type = 'SQLite'
+                conn.close()
+        except Exception as e:
+            logger.warning(f"Database health check warning: {e}")
+
+        # Check all model components
+        components_loaded = all([
+            model_package is not None,
+            scaler is not None, 
+            label_encoder is not None,
+            feature_names is not None,
+            category_mappings is not None
+        ])
+        
+        # Calculate overall health status
+        overall_healthy = components_loaded and db_healthy
+        
+        health_info = {
+            'status': 'healthy' if overall_healthy else 'degraded',
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'components_loaded': components_loaded,
+            'database_healthy': db_healthy,
+            'database_type': db_type,
+            'model_loaded': model_package is not None,
+            'scaler_loaded': scaler is not None,
+            'encoder_loaded': label_encoder is not None,
+            'features_loaded': feature_names is not None,
+            'category_mappings_loaded': category_mappings is not None,
+            'total_features': len(feature_names) if feature_names else 0,
+            'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
+            'clinical_enhancer_available': clinical_enhancer is not None,
+            'message': 'Service is ready' if overall_healthy else 'Service is starting up'
+        }
+        
+        # Return 200 even if degraded, so UptimeRobot doesn't mark as down
+        # This ensures the instance stays awake during startup
+        return jsonify(health_info)
+        
     except Exception as e:
-        logger.error(f"Database health check failed: {e}")
-    
-    components_loaded = all([
-        model_package is not None,
-        scaler is not None, 
-        label_encoder is not None,
-        feature_names is not None,
-        category_mappings is not None
-    ])
-    
-    health_info = {
-        'status': 'healthy' if components_loaded and db_healthy else 'unhealthy',
-        'model_loaded': model_package is not None,
-        'scaler_loaded': scaler is not None,
-        'encoder_loaded': label_encoder is not None,
-        'features_loaded': feature_names is not None,
-        'category_mappings_loaded': category_mappings is not None,
-        'database_healthy': db_healthy,
-        'database_type': 'PostgreSQL (psycopg)' if db_healthy and hasattr(conn, 'cursor') else 'SQLite (fallback)',
-        'total_features': len(feature_names) if feature_names else 0,
-        'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
-        'preprocessing_available': True,
-        'clinical_validation': True,
-        'clinical_enhancer_available': clinical_enhancer is not None
-    }
-    
-    return jsonify(health_info)
+        logger.error(f"Health check failed: {e}")
+        # Still return 200 to keep instance awake
+        return jsonify({
+            'status': 'starting',
+            'error': str(e),
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'message': 'Instance is starting up, please wait'
+        }), 200  # Important: Return 200 even on error
 
-
+@app.route('/ping', methods=['GET'])
+def simple_ping():
+    """Simple endpoint for uptime monitoring - minimal overhead"""
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now(timezone.utc).isoformat(),
+        'service': 'Mental Health Assessment API'
+    })
+    
+    
 @app.route('/api/get-single-assessment', methods=['POST'])
 def get_single_assessment():
     try:
@@ -1821,6 +1861,7 @@ def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: st
         return timestamp_str or "Timestamp unavailable"
 
 
+# ... all your existing code ...
 
 if __name__ == '__main__':
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
@@ -1850,6 +1891,23 @@ if __name__ == '__main__':
         logger.error("Failed to load model components!")
         if not os.environ.get('RENDER'):
             sys.exit(1)
+    
+    # ===== ADD THE PRE-WARM FUNCTION RIGHT HERE =====
+    def pre_warm_app():
+        """Pre-warm the application to reduce first response time"""
+        logger.info("Pre-warming application components...")
+        # This ensures models are loaded and ready
+        with app.test_client() as client:
+            try:
+                response = client.get('/api/health')
+                logger.info(f"Pre-warm completed with status: {response.status_code}")
+            except Exception as e:
+                logger.warning(f"Pre-warm warning: {e}")
+    
+    # Call pre-warm when starting (only in production)
+    if os.environ.get('RENDER'):
+        pre_warm_app()
+    # ===== END OF PRE-WARM CODE =====
     
     port = int(os.environ.get('PORT', 5002))
     debug_mode = not bool(os.environ.get('RENDER'))

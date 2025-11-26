@@ -410,7 +410,7 @@
 }
 
 .metrics-title {
-  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-size: clamp(0.9rem, 1.5vw, 1rem);
   font-weight: 600;
   margin-bottom: 1rem;
   color: var(--dark);
@@ -418,7 +418,7 @@
 
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
@@ -427,9 +427,9 @@
 }
 
 .metric-name {
-  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+  font-size: clamp(0.6rem, 0.5vw, 1rem);
+  font-weight: 400;
+  margin-bottom: 1rem;
   color: var(--gray);
 }
 
@@ -618,13 +618,12 @@
     }
     
     .critical-difference {
-      display: block;
+      color: var(--primary) ;
       font-weight: 700;
       margin-bottom: 0.3rem;
     }
     
     .key-point {
-      display: block;
       font-size: clamp(0.7rem, 1.6vw, 0.75rem);
       color: var(--gray);
       margin-top: 0.2rem;
