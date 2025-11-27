@@ -285,6 +285,18 @@
       transform: none !important;
       box-shadow: none !important;
     }
+    /* Add to your existing button styles */
+    .btn-info {
+      background: linear-gradient(135deg, #0ea5e9, #0369a1);
+      color: white;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+
+    .btn-info:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+      background: linear-gradient(135deg, #0284c7, #075985);
+    }
 
     /* Question Box */
     .question-box {
@@ -1536,6 +1548,10 @@
             <button id="newAssessmentBtn" class="btn btn-secondary">
               ↻ New Assessment
             </button>
+            <!-- ADD THIS NEW BUTTON -->
+            <button id="learnMoreBtn" class="btn btn-info">
+            <i class="fas fa-chart-line"></i> Learn More About Your Status
+          </button>
             <button id="downloadBtn" class="btn btn-primary">
               📥 Download Report
             </button>
@@ -1873,6 +1889,7 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.attachKeyboardListeners();
         this.assessmentStartTime = null; // Track when assessment starts
 
+
       }
 
       // Add this debug method to check what's being sent
@@ -1916,6 +1933,8 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.historyScreen = document.getElementById('historyScreen');
         this.viewHistoryBtn = document.getElementById('viewHistoryBtn');
         this.backToWelcomeBtn = document.getElementById('backToWelcomeBtn');
+        this.learnMoreBtn = document.getElementById('learnMoreBtn');
+
         
         // Existing elements
         this.responsesList = document.getElementById('responsesList');
@@ -1943,13 +1962,19 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.resultsDate = document.getElementById('resultsDate');
         this.assessmentId = document.getElementById('assessmentId');
       }
-
+      
+      learnMoreAboutCondition() {
+          // Simply navigate to the visualizer page
+          window.location.href = 'MenHel_analogy.html';
+      }
+      
       attachEventListeners() {
         // New login listeners
         this.loginBtn.addEventListener('click', () => this.handleLogin());
         this.logoutBtn.addEventListener('click', () => this.handleLogout());
         this.backToWelcomeFromLoginBtn.addEventListener('click', () => this.showScreen(this.welcomeScreen));
-        
+        this.learnMoreBtn.addEventListener('click', () => this.learnMoreAboutCondition());
+
         // Allow Enter key to submit login form
         this.loginPatientName.addEventListener('keypress', (e) => {
           if (e.key === 'Enter') this.handleLogin();
