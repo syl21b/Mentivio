@@ -11,8 +11,9 @@
   --danger: #ef4444;
   --gray: #64748b;
   --gray-light: #e2e8f0;
+  --gray-dark: #374151;
   --transition: all 0.3s ease;
-  --shadow: 0 2px 10px rgba(0,0,0,0.1);
+  --shadow: 0 2px 10px rgba(0,0,0,0.08);
   --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
 }
 
@@ -28,13 +29,14 @@ body {
 
 /* Navbar Styles */
 .navbar {
-  background-color: white;
+  background-color: #ffffff;
   box-shadow: var(--shadow);
   position: sticky;
   top: 0;
   z-index: 1000;
   backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .nav-container {
@@ -55,11 +57,11 @@ body {
   text-decoration: none;
   color: inherit;
   z-index: 1001;
+  transition: var(--transition);
 }
 
 .logo:hover {
   transform: translateY(-1px);
-  transition: var(--transition);
 }
 
 .logo-icon {
@@ -72,13 +74,13 @@ body {
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
   transition: var(--transition);
 }
 
 .logo:hover .logo-icon {
   transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
 }
 
 .logo-text {
@@ -98,23 +100,26 @@ body {
 
 .nav-links a {
   text-decoration: none;
-  color: var(--dark);
+  color: var(--gray-dark);
   font-weight: 500;
   transition: var(--transition);
   position: relative;
   padding: 8px 4px;
   font-size: 0.95rem;
   white-space: nowrap;
+  border-radius: 6px;
 }
 
 .nav-links a:hover {
   color: var(--primary);
+  background-color: #f8fafc;
   transform: translateY(-1px);
 }
 
 .nav-links a.active {
   color: var(--primary);
   font-weight: 600;
+  background-color: #f8faff;
 }
 
 .nav-links a.active::after {
@@ -131,17 +136,19 @@ body {
 .crisis-link {
   background: linear-gradient(135deg, var(--danger), #f87171);
   color: white !important;
-  padding: 8px 16px !important;
+  padding: 10px 20px !important;
   border-radius: 8px;
   font-weight: 600 !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
   transition: var(--transition);
+  margin-left: 8px;
 }
 
 .crisis-link:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.35);
   color: white !important;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
 }
 
 .crisis-link::after {
@@ -155,7 +162,7 @@ body {
   border: none;
   font-size: 1.4rem;
   cursor: pointer;
-  color: var(--light);
+  color: var(--gray-dark);
   width: 44px;
   height: 44px;
   border-radius: 8px;
@@ -163,10 +170,12 @@ body {
   z-index: 1001;
   align-items: center;
   justify-content: center;
+  background-color: #f8fafc;
 }
 
 .mobile-menu-btn:hover {
-  background-color: var(--gray-light);
+  background-color: #f1f5f9;
+  color: var(--primary);
 }
 
 .mobile-menu-btn.active {
@@ -304,11 +313,18 @@ body {
   }
   
   .nav-links a {
-    padding: 16px 0;
+    padding: 16px 20px;
     font-size: 1.1rem;
     border-bottom: 1px solid var(--gray-light);
     width: 100%;
-    text-align: center;
+    text-align: left;
+    margin: 0;
+    border-radius: 8px;
+    background-color: transparent;
+  }
+  
+  .nav-links a:hover {
+    background-color: #f8fafc;
   }
   
   .nav-links a:last-child {
@@ -319,10 +335,17 @@ body {
     display: none;
   }
   
+  .nav-links a.active {
+    background-color: #f8faff;
+    border-left: 4px solid var(--primary);
+  }
+  
   .crisis-link {
     margin-top: 20px;
     padding: 16px 24px !important;
     font-size: 1.1rem;
+    text-align: center;
+    margin-left: 0;
   }
   
   .footer-content {
@@ -409,22 +432,6 @@ body {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-  }
-}
-
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-  .navbar {
-    background-color: #1a1a1a;
-    color: white;
-  }
-  
-  .nav-links a {
-    color: #e2e8f0;
-  }
-  
-  .nav-links a:hover {
-    color: var(--accent);
   }
 }
 
