@@ -1,188 +1,145 @@
-// Load components (navbar and footer)
+// Cache for components
+const componentCache = new Map();
+
+// Load components with caching
 function loadComponents() {
     loadNavbar();
     loadFooter();
 }
 
-// Improved navbar loading with better path detection
+// Optimized navbar loading with caching
 function loadNavbar() {
-    const currentPath = window.location.pathname;
-    let navbarPath;
+    const cacheKey = 'navbar';
     
-    // Determine the correct path based on current location
-    if (currentPath.includes('/resources/')) {
-        navbarPath = '../navbar.html';
-    } else if (currentPath === '/' || currentPath.endsWith('Home.html')) {
-        navbarPath = '../navbar.html';
-    } else {
-        navbarPath = 'navbar.html';
+    // Check cache first
+    if (componentCache.has(cacheKey)) {
+        document.body.insertAdjacentHTML('afterbegin', componentCache.get(cacheKey));
+        initNavbar();
+        return;
     }
     
-    console.log('Loading navbar from:', navbarPath);
+    const navbarPath = getComponentPath('navbar.html');
     
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', navbarPath, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            document.body.insertAdjacentHTML('afterbegin', xhr.responseText);
-            initNavbar(); // Initialize navbar functionality after loading
-            setActiveNav();
-        } else if (xhr.readyState === 4) {
-            console.error('Failed to load navbar. Status:', xhr.status);
+    fetch(navbarPath)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            // Cache the HTML
+            componentCache.set(cacheKey, html);
+            document.body.insertAdjacentHTML('afterbegin', html);
+            initNavbar();
+        })
+        .catch(error => {
+            console.error('Failed to load navbar:', error);
             createEmergencyNavbar();
-        }
-    };
-    xhr.onerror = function() {
-        console.error('Network error loading navbar');
-        createEmergencyNavbar();
-    };
-    xhr.send();
+        });
 }
 
-// Improved footer loading
+// Optimized footer loading with caching
 function loadFooter() {
-    const currentPath = window.location.pathname;
-    let footerPath;
-    const timestamp = new Date().getTime();
+    const cacheKey = 'footer';
     
-    if (currentPath.includes('/resources/')) {
-        footerPath = `../footer.html?t=${timestamp}`;
-    } else {
-        footerPath = `footer.html?t=${timestamp}`;
+    if (componentCache.has(cacheKey)) {
+        document.body.insertAdjacentHTML('beforeend', componentCache.get(cacheKey));
+        return;
     }
     
-    console.log('Loading footer from:', footerPath);
+    const footerPath = getComponentPath('footer.html');
     
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', footerPath, true);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            document.body.insertAdjacentHTML('beforeend', xhr.responseText);
-        } else {
-            console.error('Failed to load footer');
-        }
-    };
-    xhr.send();
+    fetch(footerPath)
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.text();
+        })
+        .then(html => {
+            componentCache.set(cacheKey, html);
+            document.body.insertAdjacentHTML('beforeend', html);
+        })
+        .catch(error => {
+            console.error('Failed to load footer:', error);
+            createEmergencyFooter();
+        });
 }
 
-// Initialize navbar functionality
+// Helper function to determine correct path
+function getComponentPath(filename) {
+    const currentPath = window.location.pathname;
+    
+    if (currentPath.includes('/resources/')) {
+        return `../${filename}`;
+    } else if (currentPath === '/' || currentPath.endsWith('Home.html')) {
+        return `../${filename}`;
+    } else {
+        return filename;
+    }
+}
+
+// Fast navbar initialization
 function initNavbar() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const navLinks = document.getElementById('navLinks');
-    const navbar = document.querySelector('.navbar');
     
     if (mobileMenuBtn && navLinks) {
+        // Ensure menu starts closed
+        navLinks.classList.remove('active');
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        
         // Mobile menu toggle
         mobileMenuBtn.addEventListener('click', function(e) {
             e.stopPropagation();
+            const isOpening = !navLinks.classList.contains('active');
+            
             navLinks.classList.toggle('active');
             mobileMenuBtn.classList.toggle('active');
-            const icon = this.querySelector('i');
+            mobileMenuBtn.setAttribute('aria-expanded', isOpening ? 'true' : 'false');
             
-            if (navLinks.classList.contains('active')) {
-                icon.className = 'fas fa-times';
-                document.body.style.overflow = 'hidden'; // Prevent background scrolling
-            } else {
-                icon.className = 'fas fa-bars';
-                document.body.style.overflow = '';
-            }
+            const icon = this.querySelector('i');
+            icon.className = isOpening ? 'fas fa-times' : 'fas fa-bars';
+            document.body.style.overflow = isOpening ? 'hidden' : '';
         });
         
-        // Close menu when clicking on a link (for single page navigation)
+        // Close menu when clicking links
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                mobileMenuBtn.classList.remove('active');
-                mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
-                document.body.style.overflow = '';
+                closeMobileMenu();
             });
         });
         
         // Close menu when clicking outside
         document.addEventListener('click', function(e) {
-            if (!navbar.contains(e.target)) {
-                navLinks.classList.remove('active');
-                mobileMenuBtn.classList.remove('active');
-                mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
-                document.body.style.overflow = '';
+            if (!e.target.closest('.navbar') && navLinks.classList.contains('active')) {
+                closeMobileMenu();
             }
         });
         
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (window.innerWidth > 768) {
-                navLinks.classList.remove('active');
-                mobileMenuBtn.classList.remove('active');
-                mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
-                document.body.style.overflow = '';
+        // Close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                closeMobileMenu();
             }
         });
         
-        // Add touch events for better mobile experience
-        let startX = 0;
-        let currentX = 0;
-        
-        navLinks.addEventListener('touchstart', function(e) {
-            startX = e.touches[0].clientX;
-        }, { passive: true });
-        
-        navLinks.addEventListener('touchmove', function(e) {
-            currentX = e.touches[0].clientX;
-        }, { passive: true });
-        
-        navLinks.addEventListener('touchend', function() {
-            const diff = startX - currentX;
-            // If swiped left more than 50px, close menu
-            if (diff > 50 && window.innerWidth <= 768) {
-                navLinks.classList.remove('active');
-                mobileMenuBtn.classList.remove('active');
-                mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
-                document.body.style.overflow = '';
-            }
-        }, { passive: true });
+        // Set active navigation
+        setActiveNav();
     }
 }
 
-// Emergency navbar fallback
-function createEmergencyNavbar() {
-    const currentPath = window.location.pathname;
-    let basePath = '';
+function closeMobileMenu() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navLinks = document.getElementById('navLinks');
     
-    if (currentPath.includes('/resources/')) {
-        basePath = '../';
-    } else {
-        basePath = './';
+    if (navLinks) navLinks.classList.remove('active');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.classList.remove('active');
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        const icon = mobileMenuBtn.querySelector('i');
+        if (icon) icon.className = 'fas fa-bars';
     }
-    
-    const emergencyNavbar = `
-        <nav class="navbar" style="background: white; padding: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 1000;">
-            <div class="nav-container">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <div class="logo-text">Mentivio</div>
-                </div>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="nav-links" id="navLinks">
-                    <a href="${basePath}Home.html">Home</a>
-                    <a href="${basePath}MenHel_prediction.html">Self-Assessment</a>
-                    <a href="${basePath}MenHel_analogy.html">Visualizer</a>
-                    <a href="${basePath}resources.html">Resources</a>
-                    <a href="${basePath}About.html">About</a>
-                    <a href="${basePath}crisis-support.html" class="crisis-link">Crisis Support</a>
-                </div>
-            </div>
-        </nav>
-    `;
-    document.body.insertAdjacentHTML('afterbegin', emergencyNavbar);
-    initNavbar();
-    setActiveNav();
+    document.body.style.overflow = '';
 }
 
-// Set active navigation link
 function setActiveNav() {
     const currentPage = window.location.pathname.split('/').pop() || 'Home.html';
     const navLinks = document.querySelectorAll('.nav-links a');
@@ -197,7 +154,71 @@ function setActiveNav() {
     });
 }
 
-// Load components when DOM is ready
+// Emergency fallbacks
+function createEmergencyNavbar() {
+    const basePath = getComponentPath('').replace('navbar.html', '');
+    const navbarHTML = `
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="${basePath}Home.html" class="logo">
+                    <div class="logo-icon"><i class="fas fa-brain"></i></div>
+                    <div class="logo-text">Mentivio</div>
+                </a>
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-links" id="navLinks">
+                    <a href="${basePath}Home.html">Home</a>
+                    <a href="${basePath}MenHel_prediction.html">Self-Assessment</a>
+                    <a href="${basePath}MenHel_analogy.html">Condition Visualizer</a>
+                    <a href="${basePath}resources.html">Resources</a>
+                    <a href="${basePath}About.html">About</a>
+                    <a href="${basePath}crisis-support.html" class="crisis-link">Crisis Support</a>
+                </div>
+            </div>
+        </nav>
+    `;
+    document.body.insertAdjacentHTML('afterbegin', navbarHTML);
+    initNavbar();
+}
+
+function createEmergencyFooter() {
+    const basePath = getComponentPath('').replace('footer.html', '');
+    const footerHTML = `
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>About Mentivio</h4>
+                    <p>A compassionate mental health platform designed to provide insights and promote mental wellness awareness.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="${basePath}Home.html">Home</a></li>
+                        <li><a href="${basePath}MenHel_prediction.html">Self-Assessment</a></li>
+                        <li><a href="${basePath}MenHel_analogy.html">Condition Visualizer</a></li>
+                        <li><a href="${basePath}resources.html">Resources</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://github.com/syl21b" aria-label="Github"><i class="fab fa-github"></i></a>
+                        <a href="https://syl21b.github.io/shinle-portfolio/" aria-label="Portfolio"><i class="fas fa-briefcase"></i></a>
+                        <a href="https://linkedin.com/in/shin-le-b9727a238" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Mentivio Mental Health Platform. Created by Shin Le.</p>
+            </div>
+        </footer>
+    `;
+    document.body.insertAdjacentHTML('beforeend', footerHTML);
+}
+
+// Start loading immediately
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadComponents);
 } else {

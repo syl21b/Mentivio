@@ -9,6 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+     <!-- Preload navbar and footer -->
+    <link rel="preload" href="navbar.html" as="document">
+    <link rel="preload" href="footer.html" as="document">
+    
+    <!-- Preload CSS -->
+    <link rel="preload" href="/css/nav-footer.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- Load CSS -->
+    <link rel="stylesheet" href="/css/nav-footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Load component script with defer -->
+    <script src="../js/components.js" defer></script>
+
   <style>
     :root {
       --primary: #4f46e5;
@@ -913,5 +928,4 @@
   </script>
 
 </body>
-<script src="../js/components.js"></script>
 </html>

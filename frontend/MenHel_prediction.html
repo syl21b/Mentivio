@@ -9,6 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+     <!-- Preload navbar and footer -->
+    <link rel="preload" href="navbar.html" as="document">
+    <link rel="preload" href="footer.html" as="document">
+    
+    <!-- Preload CSS -->
+    <link rel="preload" href="/css/nav-footer.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    
+    <!-- Load CSS -->
+    <link rel="stylesheet" href="/css/nav-footer.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Load component script with defer -->
+    <script src="../js/components.js" defer></script>
+
   <style>
     /* Reset and Base Styles */
     * {
@@ -1618,28 +1633,23 @@
       </div>
     </div>
   </div>
-
-  <!-- Mobile Navigation -->
-  <nav class="mobile-nav">
-    <div class="mobile-nav-items">
-      <a href="#" class="mobile-nav-item active" data-screen="welcomeScreen">
-        <i class="fas fa-home"></i>
-        <span>Home</span>
-      </a>
-      <a href="#" class="mobile-nav-item" data-screen="questionsScreen">
-        <i class="fas fa-question-circle"></i>
-        <span>Assessment</span>
-      </a>
-      <a href="#" class="mobile-nav-item" data-screen="historyScreen">
-        <i class="fas fa-history"></i>
-        <span>History</span>
-      </a>
-      <a href="#" class="mobile-nav-item" data-screen="resultsScreen">
-        <i class="fas fa-chart-bar"></i>
-        <span>Results</span>
-      </a>
-    </div>
-  </nav>
+<!-- Mobile Navigation -->
+<nav class="mobile-nav">
+  <div class="mobile-nav-items">
+    <a href="#" class="mobile-nav-item active" data-screen="welcomeScreen">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="mobile-nav-item" id="mobileAssessmentBtn">
+      <i class="fas fa-question-circle"></i>
+      <span>Assessment</span>
+    </a>
+    <a href="#" class="mobile-nav-item" id="mobileHistoryBtn">
+      <i class="fas fa-history"></i>
+      <span>History</span>
+    </a>
+  </div>
+</nav>
 
   <script>
 
@@ -1888,10 +1898,62 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.attachEventListeners();
         this.attachKeyboardListeners();
         this.assessmentStartTime = null; // Track when assessment starts
-
+        // Mobile navigation listeners
+        this.attachMobileNavigationListeners();
 
       }
 
+      // Add this new method to the MentalHealthAssessment class
+      attachMobileNavigationListeners() {
+        // Mobile assessment button - start new assessment
+        const mobileAssessmentBtn = document.getElementById('mobileAssessmentBtn');
+        if (mobileAssessmentBtn) {
+          mobileAssessmentBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.startAssessment();
+            this.updateMobileNavActiveState('mobileAssessmentBtn');
+          });
+        }
+      // Mobile history button - view assessment history
+      const mobileHistoryBtn = document.getElementById('mobileHistoryBtn');
+      if (mobileHistoryBtn) {
+        mobileHistoryBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.showHistoryScreen();
+          this.updateMobileNavActiveState('mobileHistoryBtn');
+        });
+      }
+
+  // Home button - show welcome screen
+      const mobileHomeItems = document.querySelectorAll('.mobile-nav-item[data-screen="welcomeScreen"]');
+      mobileHomeItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.showScreen(this.welcomeScreen);
+          this.updateMobileNavActiveState('welcomeScreen');
+        });
+      });
+    }
+
+    // Add this method to update the active state of mobile navigation
+    updateMobileNavActiveState(activeItem) {
+      // Remove active class from all mobile nav items
+      document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Add active class to the appropriate item
+      if (activeItem === 'welcomeScreen') {
+        const homeItem = document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]');
+        if (homeItem) homeItem.classList.add('active');
+      } else if (activeItem === 'mobileAssessmentBtn') {
+        const assessmentItem = document.getElementById('mobileAssessmentBtn');
+        if (assessmentItem) assessmentItem.classList.add('active');
+      } else if (activeItem === 'mobileHistoryBtn') {
+        const historyItem = document.getElementById('mobileHistoryBtn');
+        if (historyItem) historyItem.classList.add('active');
+      }
+    }
       // Add this debug method to check what's being sent
       debugAssessmentSubmission() {
           console.log('🔍 DEBUG - Assessment submission data:');
@@ -2096,7 +2158,8 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
       showHistoryScreen() {
         this.showScreen(this.historyScreen);
-        
+        this.updateMobileNavActiveState('mobileHistoryBtn'); 
+
         // Reset login state when showing history screen
         this.currentPatient = null;
         this.loginSection.style.display = 'block';
@@ -2582,7 +2645,6 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
       // Core Assessment Methods
       startAssessment() {
           // Record assessment start time - THIS IS CRITICAL
-          // Use a more precise timestamp
           this.assessmentStartTime = new Date().toISOString();
           console.log('🕐 Assessment start time recorded:', this.assessmentStartTime);
           console.log('🕐 Local time:', new Date().toString());
@@ -2590,6 +2652,8 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
           this.showScreen(this.questionsScreen);
           this.updateProgress();
           this.displayCurrentQuestion();
+          this.updateMobileNavActiveState('mobileAssessmentBtn'); 
+
           
           // Focus on first option for keyboard navigation
           setTimeout(() => {
@@ -2606,6 +2670,15 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         
         // Show target screen
         screen.classList.add('active');
+
+        // Sync mobile navigation active state
+    if (screen === this.welcomeScreen) {
+        this.updateMobileNavActiveState('welcomeScreen');
+    } else if (screen === this.questionsScreen) {
+        this.updateMobileNavActiveState('mobileAssessmentBtn');
+    } else if (screen === this.historyScreen) {
+        this.updateMobileNavActiveState('mobileHistoryBtn');
+    }
       }
 
       updateProgress() {
@@ -2750,8 +2823,8 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
       }
 
       showReviewScreen() {
-        this.showScreen(this.reviewScreen);
-        this.displayReviewResponses();
+           this.showScreen(this.reviewScreen);
+          this.displayReviewResponses();
       }
 
       displayReviewResponses() {
@@ -3364,5 +3437,4 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
   </script>
 
 </body>
-  <script src="../js/components.js"></script>
 </html>

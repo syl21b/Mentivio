@@ -2194,7 +2194,8 @@ if __name__ == '__main__':
     if os.environ.get('RENDER'):
         pre_warm_app()
     
-    port = int(os.environ.get('PORT', 5003))
+    port = int(os.environ.get('PORT', 5001))
     debug_mode = not bool(os.environ.get('RENDER'))
     
-    app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    #app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False)
