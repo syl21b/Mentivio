@@ -63,16 +63,17 @@ function loadFooter() {
         });
 }
 
-// Helper function to determine correct path
+// Helper function to determine correct path - FIXED VERSION
 function getComponentPath(filename) {
     const currentPath = window.location.pathname;
+    const isHomePage = currentPath === '/' || currentPath.endsWith('Home.html') || currentPath.endsWith('index.html');
     
-    if (currentPath.includes('/resources/')) {
-        return `../${filename}`;
-    } else if (currentPath === '/' || currentPath.endsWith('Home.html')) {
-        return `../${filename}`;
+    if (isHomePage) {
+        return filename; // For home page, components are in same directory
+    } else if (currentPath.includes('/resources/') || currentPath.includes('/pages/')) {
+        return `../${filename}`; // For subdirectories, go up one level
     } else {
-        return filename;
+        return filename; // Default to same directory
     }
 }
 
@@ -96,7 +97,9 @@ function initNavbar() {
             mobileMenuBtn.setAttribute('aria-expanded', isOpening ? 'true' : 'false');
             
             const icon = this.querySelector('i');
-            icon.className = isOpening ? 'fas fa-times' : 'fas fa-bars';
+            if (icon) {
+                icon.className = isOpening ? 'fas fa-times' : 'fas fa-bars';
+            }
             document.body.style.overflow = isOpening ? 'hidden' : '';
         });
         
@@ -105,20 +108,6 @@ function initNavbar() {
             link.addEventListener('click', () => {
                 closeMobileMenu();
             });
-        });
-        
-        // Close menu when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.navbar') && navLinks.classList.contains('active')) {
-                closeMobileMenu();
-            }
-        });
-        
-        // Close on escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && navLinks.classList.contains('active')) {
-                closeMobileMenu();
-            }
         });
         
         // Set active navigation
