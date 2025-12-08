@@ -1,37 +1,521 @@
-
 <!-- Footer -->
 <footer class="footer">
   <div class="footer-content">
-    <div class="footer-section">
-      <h4>About Mentivio</h4>
-      <p>A compassionate mental health platform designed to provide insights and promote mental wellness awareness through education and self-assessment tools.</p>
+    <!-- Footer Top: 2x2 Grid on Mobile -->
+    <div class="footer-top">
+      <!-- Mobile 2x2 Grid Layout -->
+      <div class="footer-grid">
+        <!-- Brand Section -->
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <i class="fas fa-brain"></i>
+            <span>Mentivio</span>
+          </div>
+          <p class="footer-tagline">Mental wellness through compassion and technology.</p>
+          
+          <div class="footer-social">
+            <a href="https://github.com/syl21b" aria-label="GitHub" class="social-icon">
+              <i class="fab fa-github"></i>
+            </a>
+            <a href="https://linkedin.com/in/shin-le-b9727a238" aria-label="LinkedIn" class="social-icon">
+              <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="https://syl21b.github.io/shinle-portfolio/" aria-label="Portfolio" class="social-icon">
+              <i class="fas fa-briefcase"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Newsletter -->
+        <div class="footer-newsletter">
+          <form class="newsletter-form">
+            <h4>Stay Updated</h4>
+            <p>Get mental wellness tips and platform updates.</p>
+            <div class="form-group">
+              <input type="email" placeholder="Your email" aria-label="Email for newsletter" required>
+              <button type="submit">Subscribe</button>
+            </div>
+          </form>
+        </div>
+        
+        <!-- Platform Links -->
+        <div class="link-group">
+          <h4>Platform</h4>
+          <a href="/Home.html">Home</a>
+          <a href="/MenHel_prediction.html">Self-Assessment</a>
+          <a href="/MenHel_analogy.html">Condition Visualizer</a>
+          <a href="/resources.html">Resources</a>
+        </div>
+        
+        <!-- Support Links -->
+        <div class="link-group">
+          <h4>Support</h4>
+          <a href="/About.html">About</a>
+          <a href="/crisis-support.html" class="crisis-link-footer">Crisis Support</a>
+          <a href="mailto:contact@mentivio.com">Contact</a>
+        </div>
+      </div>
     </div>
     
-    <div class="footer-section">
-      <h4>Quick Links</h4>
-      <ul>
-            <a href="/Home.html">Home</a>
-            <a href="/MenHel_prediction.html">Self-Assessment</a>
-            <a href="/MenHel_analogy.html">Condition Visualizer</a>
-            <a href="/resources.html">Resources</a>
-            <a href="/About.html">About</a>
-            <a href="/crisis-support.html" class="crisis-link">Crisis Support</a>
-      </ul>
-    </div>
-    
-    <div class="footer-section">
-      <h4>Connect With Us</h4>
-      <div class="social-links">
-        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="https://github.com/syl21b" aria-label="Github"><i class="fab fa-github"></i></a>
-        <a href="https://syl21b.github.io/shinle-portfolio/" aria-label="Portfolio"><i class="fas fa-briefcase"></i></a>
-        <a href="https://linkedin.com/in/shin-le-b9727a238" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <!-- Footer Bottom: Legal & Credit -->
+    <div class="footer-bottom">
+      <div class="footer-legal">
+        <p>&copy; 2025 Mentivio. Educational content only.</p>
+      </div>
+      <div class="footer-made">
+        <p>Built with <i class="fas fa-heart"></i> by Shin Le</p>
       </div>
     </div>
   </div>
-  
-  <div class="copyright">
-    <p>&copy; 2025 Mentivio Mental Health Platform. Created by Shin Le.</p>
-    <p>This platform is for educational purposes only. Always consult healthcare professionals for medical advice.</p>
-  </div>
 </footer>
+
+<script>
+  // Mobile Menu Toggle
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navLinks = document.getElementById('navLinks');
+
+  mobileMenuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      mobileMenuBtn.innerHTML = navLinks.classList.contains('active') 
+          ? '<i class="fas fa-times"></i>' 
+          : '<i class="fas fa-bars"></i>';
+  });
+
+  // Close mobile menu when clicking on a link
+  document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+          navLinks.classList.remove('active');
+          mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+      });
+  });
+
+  // Newsletter form submission
+  document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = this.querySelector('input[type="email"]').value;
+      if (email) {
+          alert(`Thank you for subscribing with: ${email}`);
+          this.reset();
+      }
+  });
+
+  // Update active nav link based on current page
+  document.addEventListener('DOMContentLoaded', function() {
+      const currentPath = window.location.pathname;
+      document.querySelectorAll('.nav-links a').forEach(link => {
+          if (link.getAttribute('href') === currentPath) {
+              link.classList.add('active');
+          }
+      });
+  });
+</script>
+
+<style>
+  /* ===== FOOTER ===== */
+.footer {
+    background: var(--darker);
+    color: white;
+    padding: 60px 0 30px;
+    margin-top: auto;
+}
+
+.footer-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Footer Top Section */
+.footer-top {
+    margin-bottom: 50px;
+    padding-bottom: 50px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* DESKTOP LAYOUT - All items in one row */
+.footer-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr; /* 4 equal-ish columns */
+    gap: 50px;
+    align-items: start;
+}
+
+/* Brand Section */
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+}
+
+.footer-logo i {
+    color: var(--primary-light);
+    font-size: 1.8rem;
+}
+
+.footer-tagline {
+    font-size: 1rem;
+    line-height: 1.6;
+    opacity: 0.8;
+    margin: 0;
+    max-width: 280px;
+}
+
+/* Social Links */
+.footer-social {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.social-icon {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius);
+    color: white;
+    transition: var(--transition);
+    font-size: 1.1rem;
+    text-decoration: none;
+}
+
+.social-icon:hover {
+    background: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Newsletter - Desktop: 2nd column */
+.footer-newsletter {
+    margin-top: 0;
+    min-width: 0; /* Allow flexible width */
+}
+
+.newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    min-width: 0;
+}
+
+.newsletter-form h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: white;
+}
+
+.newsletter-form p {
+    opacity: 0.8;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.form-group {
+    display: flex;
+    gap: 10px;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    font-size: 0.9rem;
+    transition: var(--transition);
+    min-width: 0; /* Allow flexible width */
+}
+
+.newsletter-form input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.newsletter-form input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.newsletter-form button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--primary);
+    color: white;
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.newsletter-form button:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+/* Link Groups - 3rd & 4th columns */
+.link-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+.link-group h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.link-group a {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    transition: var(--transition);
+    text-decoration: none;
+}
+
+.link-group a:hover {
+    color: white;
+    transform: translateX(4px);
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.footer-made {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer-made i {
+    color: var(--danger);
+}
+
+/* ===== MOBILE 2x2 LAYOUT ===== */
+@media (max-width: 1024px) {
+    /* Tablet - 2x2 layout */
+    .footer-grid {
+        grid-template-columns: 1fr 1fr; /* 2 columns */
+        grid-template-rows: auto auto;
+        gap: 40px 30px;
+        grid-template-areas:
+            "brand newsletter"
+            "platform support";
+    }
+    
+    /* Assign grid areas */
+    .footer-brand {
+        grid-area: brand;
+        gap: 16px;
+    }
+    
+    .footer-newsletter {
+        grid-area: newsletter;
+        margin-top: 0;
+    }
+    
+    .link-group:nth-of-type(1) {
+        grid-area: platform;
+    }
+    
+    .link-group:nth-of-type(2) {
+        grid-area: support;
+    }
+    
+    /* Adjust newsletter form for tablet */
+    .newsletter-form {
+        max-width: 100%;
+        gap: 12px;
+    }
+    
+    .form-group {
+        flex-direction: column;
+    }
+    
+    .newsletter-form button {
+        width: 100%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .footer {
+        padding: 40px 0 20px;
+    }
+    
+    .footer-content {
+        padding: 0 20px;
+    }
+    
+    .footer-top {
+        margin-bottom: 40px;
+        padding-bottom: 40px;
+    }
+    
+    /* Mobile 2x2 Grid - Equal Space Distribution */
+    .footer-grid {
+        gap: 30px;
+    }
+    
+    /* Ensure all grid items have equal height distribution */
+    .footer-grid > * {
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Adjust newsletter form for mobile */
+    .newsletter-form {
+        gap: 12px;
+    }
+    
+    .form-group {
+        flex-direction: column;
+    }
+    
+    .footer-bottom {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+}
+
+/* Small Tablets - Adjust gap */
+@media (max-width: 900px) and (min-width: 769px) {
+    .footer-grid {
+        gap: 40px;
+    }
+}
+
+/* Small Phones - Stack to 1 column */
+@media (max-width: 480px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, auto);
+        grid-template-areas:
+            "brand"
+            "newsletter"
+            "platform"
+            "support";
+        gap: 30px;
+    }
+    
+    .footer-brand {
+        gap: 16px;
+    }
+    
+    .footer-tagline {
+        max-width: 100%;
+    }
+    
+    .footer-social {
+        justify-content: center;
+    }
+}
+
+/* Very Small Phones */
+@media (max-width: 380px) {
+    .footer-grid {
+        gap: 25px;
+    }
+    
+    .footer-content {
+        padding: 0 16px;
+    }
+    
+    .footer-social {
+        gap: 10px;
+    }
+    
+    .social-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+}
+
+/* Large Screens */
+@media (min-width: 1200px) {
+    .footer-content {
+        padding: 0 40px;
+    }
+    
+    .footer-grid {
+        gap: 60px;
+    }
+}
+
+/* Extra Large Screens */
+@media (min-width: 1400px) {
+    .footer-content {
+        max-width: 1400px;
+    }
+    
+    .footer-grid {
+        gap: 80px;
+    }
+}
+
+/* Crisis Link-footer */
+.crisis-link-footer {
+    color: var(--danger) !important;
+    border-radius: var(--radius);
+    font-weight: 600 !important;
+    transition: var(--transition);
+}
+
+.crisis-link-footer:hover {
+    transform: translateY(-2px);
+}
+
+/* Accessibility */
+.link-group a:focus,
+.newsletter-form input:focus,
+.newsletter-form button:focus,
+.social-icon:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .social-icon:hover,
+    .link-group a:hover,
+    .newsletter-form button:hover,
+    .crisis-link-footer:hover {
+        transform: none;
+    }
+}
+</style>

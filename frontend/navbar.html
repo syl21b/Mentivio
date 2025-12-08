@@ -1,25 +1,290 @@
-<!-- Remove these link tags from navbar.html - they should only be in home.html -->
 <!-- Navigation Bar -->
-<nav class="navbar">
-  <div class="nav-container">
-    <a href="/Home.html" class="logo">
-      <div class="logo-icon">
-        <i class="fas fa-brain"></i>
-      </div>
-      <div class="logo-text">Mentivio</div>
-    </a>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/Home.html" class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="logo-text">Mentivio</div>
+            </a>
 
-    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu" aria-expanded="false">
-      <i class="fas fa-bars"></i>
-    </button>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
 
-    <div class="nav-links" id="navLinks" role="navigation" aria-label="Main navigation">
-            <a href="/Home.html">Home</a>
-            <a href="/MenHel_prediction.html">Self-Assessment</a>
-            <a href="/MenHel_analogy.html">Condition Visualizer</a>
-            <a href="/resources.html">Resources</a>
-            <a href="/About.html">About</a>
-            <a href="/crisis-support.html" class="crisis-link">Crisis Support</a>
-    </div>
-  </div>
-</nav>
+            <div class="nav-links" id="navLinks">
+                <a href="/Home.html">Home</a>
+                <a href="/MenHel_prediction.html">Self-Assessment</a>
+                <a href="/MenHel_analogy.html">Condition Visualizer</a>
+                <a href="/resources.html">Resources</a>
+                <a href="/About.html">About</a>
+                <a href="/crisis-support.html" class="crisis-link">Crisis Support</a>
+            </div>
+        </div>
+    </nav>
+
+    <style>
+     /* ===== NAVIGATION ===== */
+             :root {
+            /* Color Palette */
+            --primary: #4f46e5;
+            --primary-light: #7c3aed;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --white: #ffffff;
+            --gray-light: #f1f5f9;
+            --gray: #94a3b8;
+            --gray-dark: #475569;
+            
+            /* Design Tokens */
+            --transition: all 0.2s ease;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+            --radius: 8px;
+            --radius-lg: 12px;
+        }
+
+     .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-light);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 70px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        /* Logo */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: translateY(-1px);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            letter-spacing: -0.5px;
+        }
+
+        /* Desktop Navigation */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            padding: 8px 0;
+            font-weight: 500;
+            color: var(--gray-dark);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            position: relative;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        /* Crisis Link */
+        .crisis-link {
+            background: linear-gradient(135deg, var(--danger), #f87171);
+            color: white !important;
+            padding: 8px 20px !important;
+            border-radius: var(--radius);
+            font-weight: 600 !important;
+            margin-left: 8px;
+            transition: var(--transition);
+        }
+
+        .crisis-link:hover {
+            background: linear-gradient(135deg, #dc2626, var(--danger));
+            transform: translateY(-2px);
+        }
+
+
+        /* Mobile Menu Button */
+        .mobile-menu-btn {
+            display: none;
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-light);
+            background: var(--white);
+            color: var(--gray-dark);
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .mobile-menu-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--gray-light);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+
+        /* Tablet */
+        @media (max-width: 1024px) {
+            .footer-top {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .footer-brand-section {
+                max-width: 500px;
+            }
+        }
+
+        /* Mobile Navigation */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: var(--white);
+                flex-direction: column;
+                padding: 20px;
+                gap: 0;
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                box-shadow: var(--shadow-lg);
+                border-top: 1px solid var(--gray-light);
+            }
+            
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            .nav-links a {
+                width: 100%;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--gray-light);
+            }
+            
+            .nav-links a:last-child {
+                border-bottom: none;
+            }
+            
+            .nav-links a.active::after {
+                display: none;
+            }
+            
+            .crisis-link {
+                margin: 16px 0 0 0;
+                width: 100%;
+                text-align: center;
+            }
+
+
+         
+        /* Large Screens */
+        @media (min-width: 1200px) {
+            .nav-container{
+            padding: 0 40px;
+            }
+          }
+        }
+
+        /* Accessibility */
+        .nav-links a:focus,
+        .mobile-menu-btn:focus,
+        .social-icon:focus,
+        .link-group a:focus,
+        .newsletter-form input:focus,
+        .newsletter-form button:focus {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            .navbar {
+                background: var(--darker);
+                border-bottom-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .logo-text {
+                color: white;
+            }
+            
+            .nav-links a {
+                color: rgba(255, 255, 255, 0.8);
+            }
+            
+            .mobile-menu-btn {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.1);
+                color: white;
+            }
+          }
+
+    </style>
