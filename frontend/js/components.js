@@ -71,7 +71,15 @@ class ComponentLoader {
         // Determine base path
         let basePath = this.config.componentDir;
         
-        if (currentPath.includes('/resources/') || currentPath.includes('/pages/')) {
+        // Check if we're in the resources directory
+        if (currentPath.includes('/resources/')) {
+            // For files inside resources/ directory
+            if (currentPath.endsWith('.html') && !currentPath.includes('/frontend/')) {
+                basePath = '../frontend/';
+            } else {
+                basePath = '../../frontend/';
+            }
+        } else if (currentPath.includes('/pages/')) {
             basePath = '../../frontend/';
         } else if (currentPath.includes('/frontend/')) {
             basePath = '';
@@ -83,6 +91,7 @@ class ComponentLoader {
         this.log(`Resolved path: ${fullPath}`, 'success');
         return fullPath;
     }
+
     
     // Load component with caching
     async loadComponent(name, filename, position = 'beforeend', element = document.body) {
@@ -225,9 +234,13 @@ class ComponentLoader {
             link.classList.remove('active');
             const href = link.getAttribute('href');
             
+            // Check for resources directory
+            const isInResourcesDir = window.location.pathname.includes('/resources/');
+            
             if (href && (href.includes(currentPage) || 
                 (currentPage === '' && href.includes('Home.html')) ||
-                (currentPage === 'index.html' && href.includes('Home.html')))) {
+                (currentPage === 'index.html' && href.includes('Home.html')) ||
+                (isInResourcesDir && href.includes('resources.html')))) {
                 link.classList.add('active');
             }
         });
@@ -255,7 +268,10 @@ class ComponentLoader {
     calculateRelativePrefix() {
         const currentPath = window.location.pathname;
         
-        if (currentPath.includes('/resources/')) {
+        // Check if we're accessing an HTML file in the resources directory
+        if (currentPath.includes('/resources/') && currentPath.endsWith('.html')) {
+            return '../frontend/';
+        } else if (currentPath.includes('/resources/')) {
             return '../../frontend/';
         } else if (currentPath.includes('/pages/')) {
             return '../../frontend/';
@@ -267,7 +283,7 @@ class ComponentLoader {
             return 'frontend/';
         }
     }
-    
+        
     // Emergency head (minimal fallback)
     createEmergencyHead() {
         const currentPath = window.location.pathname;
@@ -283,9 +299,15 @@ class ComponentLoader {
     }
     
     // Emergency navbar (fallback when fetch fails)
-    createEmergencyNavbar() {
-        const relativePrefix = this.calculateRelativePrefix();
-        
+createEmergencyNavbar() {
+    const currentPath = window.location.pathname;
+    let relativePrefix = '../frontend/';
+    
+    // Check if we're in resources directory
+    if (currentPath.includes('/resources/') && currentPath.endsWith('.html')) {
+        relativePrefix = '../frontend/';
+    }
+    
         const navbarHTML = `
             <nav class="navbar">
                 <div class="nav-container">
