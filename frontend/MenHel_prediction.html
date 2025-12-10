@@ -1730,7 +1730,6 @@ async function initializeApp() {
         // Now initialize your MentalHealthAssessment
         mentalHealthAssessment = new MentalHealthAssessment();
     } catch (error) {
-        console.error('Failed to load app config:', error);
         // Fallback to environment variables or default
         API_BASE_URL = window.location.origin;
         API_KEY = 'fallback-key-if-config-fails';
@@ -2004,14 +2003,12 @@ document.addEventListener('DOMContentLoaded', initializeApp);
       // Add this new method to the MentalHealthAssessment class
     // Mobile navigation methods
         attachMobileNavigationListeners() {
-            console.log('📱 Attaching mobile navigation listeners...');
-            
+
             // Use event delegation for dynamic elements
             document.addEventListener('click', (e) => {
                 // Handle mobile assessment button
                 if (e.target.closest('#mobileAssessmentBtn')) {
                     e.preventDefault();
-                    console.log('📱 Mobile assessment button clicked');
                     this.startAssessment();
                     this.updateMobileNavActiveState('mobileAssessmentBtn');
                 }
@@ -2019,7 +2016,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
                 // Handle mobile history button
                 if (e.target.closest('#mobileHistoryBtn')) {
                     e.preventDefault();
-                    console.log('📱 Mobile history button clicked');
                     this.showHistoryScreen();
                     this.updateMobileNavActiveState('mobileHistoryBtn');
                 }
@@ -2028,7 +2024,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
                 const homeNavItem = e.target.closest('.mobile-nav-item[data-screen="welcomeScreen"]');
                 if (homeNavItem) {
                     e.preventDefault();
-                    console.log('📱 Mobile home button clicked');
                     this.showScreen(this.welcomeScreen);
                     this.updateMobileNavActiveState('welcomeScreen');
                 }
@@ -2036,8 +2031,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
         }
 
         updateMobileNavActiveState(activeItem) {
-            console.log('📱 Updating mobile nav active state:', activeItem);
-            
             // Remove active class from all mobile nav items
             document.querySelectorAll('.mobile-nav-item').forEach(item => {
                 item.classList.remove('active');
@@ -2056,36 +2049,13 @@ document.addEventListener('DOMContentLoaded', initializeApp);
             
             if (targetElement) {
                 targetElement.classList.add('active');
-                console.log('✅ Set active class on:', targetElement);
             }
         }
 
 
-// Add this debug method to check what's being sent
-      debugAssessmentSubmission() {
-          console.log('🔍 DEBUG - Assessment submission data:');
-          console.log('  - assessmentStartTime:', this.assessmentStartTime);
-          console.log('  - patientInfo:', this.patientInfo);
-          console.log('  - responses count:', Object.keys(this.responses).length);
-          
-          // Check if assessmentStartTime is valid
-          if (!this.assessmentStartTime) {
-              console.error('❌ CRITICAL: assessmentStartTime is not set!');
-          } else {
-              console.log('✅ assessmentStartTime is set correctly');
-          }
-      }
-
-
           
       initializeElements() {
-      console.log('🔍 initializeElements() called');
-    
-      // Debug: Check if buttons exist
-      console.log('Looking for startBtn:', document.getElementById('startBtn'));
-      console.log('Looking for viewHistoryBtn:', document.getElementById('viewHistoryBtn'));
-    
-        // New login elements
+  // New login elements
         this.loginSection = document.getElementById('loginSection');
         this.patientHistorySection = document.getElementById('patientHistorySection');
         this.loginPatientName = document.getElementById('loginPatientName');
@@ -2165,7 +2135,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
       }
       
       attachEventListeners() {
-          console.log('🔗 attachEventListeners() called');
           
           // Remove any existing event listeners first to prevent duplicates
           this.removeExistingListeners();
@@ -2173,8 +2142,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
           // New login listeners
           if (this.loginBtn) {
               this.loginBtn.addEventListener('click', () => this.handleLogin());
-          } else {
-              console.error('❌ loginBtn not found');
           }
 
           // Add real-time validation listeners
@@ -2211,24 +2178,16 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
           // Start button - add direct logging
           if (this.startBtn) {
-              console.log('✅ Found startBtn, attaching listener');
               this.startBtn.addEventListener('click', () => {
-                  console.log('🎯 startBtn clicked!');
                   this.startAssessment();
               });
-          } else {
-              console.error('❌ startBtn not found!');
           }
           
           // View History button
           if (this.viewHistoryBtn) {
-              console.log('✅ Found viewHistoryBtn, attaching listener');
               this.viewHistoryBtn.addEventListener('click', () => {
-                  console.log('📚 viewHistoryBtn clicked!');
                   this.showHistoryScreen();
               });
-          } else {
-              console.error('❌ viewHistoryBtn not found!');
           }
           
           // Existing button listeners
@@ -2470,9 +2429,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 // Backend API methods
       async saveAssessmentToBackend(assessmentData) {
         try {
-
-          console.log('💾 Saving assessment to backend (CSV):', assessmentData.id);
-          
           const response = await fetch(`${API_BASE_URL}/api/save-assessment`, {
             method: 'POST',
             headers: {
@@ -2490,11 +2446,9 @@ document.addEventListener('DOMContentLoaded', initializeApp);
           }
 
           const result = await response.json();
-          console.log('✅ Assessment saved to CSV successfully:', result);
           return result;
           
         } catch (error) {
-          console.error('❌ Error saving assessment to backend:', error);
           return { success: false, error: error.message, fallback: true };
         }
       }
@@ -2518,11 +2472,9 @@ document.addEventListener('DOMContentLoaded', initializeApp);
           }
 
           const result = await response.json();
-          console.log('✅ Assessments loaded from CSV backend:', result.assessments.length);
           return result.assessments;
           
         } catch (error) {
-          console.error('❌ Error loading assessments from backend:', error);
           alert('Error loading assessment history. Please check your connection and try again.');
           return [];
         }
@@ -2547,11 +2499,9 @@ document.addEventListener('DOMContentLoaded', initializeApp);
           }
 
           const result = await response.json();
-          console.log('✅ Assessment deleted from CSV backend:', result);
           return result;
           
         } catch (error) {
-          console.error('❌ Error deleting assessment from backend:', error);
           alert('Error deleting assessment. Please try again.');
           throw error;
         }
@@ -2598,7 +2548,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
           this.showPatientHistory(patientAssessments);
 
         } catch (error) {
-          console.error('Login error:', error);
         } finally {
           // Reset button state
           this.loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access History';
@@ -2705,11 +2654,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
                 viewBtn.disabled = true;
             }
 
-            console.log('👀 Viewing assessment:', {
-                patient: this.currentPatient,
-                assessmentId: assessmentId
-            });
-
             // Load the specific assessment from backend
             const assessment = await this.loadSingleAssessmentFromBackend(
                 this.currentPatient.name, 
@@ -2718,15 +2662,10 @@ document.addEventListener('DOMContentLoaded', initializeApp);
             );
 
             if (assessment) {
-                console.log('✅ Assessment loaded successfully:', assessment);
                 this.displayAssessmentDetails(assessment);
-            } else {
-                console.error('❌ Assessment not found');
-                alert('Assessment not found. Please try reloading your history.');
-            }
+            } 
 
         } catch (error) {
-            console.error('❌ Error viewing assessment:', error);
             alert('Error loading assessment. Please try again.');
         } finally {
             // Reset button state
@@ -2741,12 +2680,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
     // New method to load single assessment from backend
     async loadSingleAssessmentFromBackend(patientName, patientNumber, assessmentId) {
         try {
-            console.log('🔍 Loading single assessment:', {
-                patientName,
-                patientNumber, 
-                assessmentId
-            });
-
             const response = await fetch(`${API_BASE_URL}/api/get-single-assessment`, {
                 method: 'POST',
                 headers: {
@@ -2762,7 +2695,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('❌ Backend error:', errorText);
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -2772,11 +2704,9 @@ document.addEventListener('DOMContentLoaded', initializeApp);
                 throw new Error(result.error || 'Failed to load assessment');
             }
             
-            console.log('✅ Single assessment loaded:', result.assessment);
             return result.assessment;
             
         } catch (error) {
-            console.error('❌ Error loading single assessment:', error);
             throw error; // Re-throw to handle in calling function
         }
     }
@@ -2788,7 +2718,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
             const questionsSection = document.getElementById('questionsAnswersSection');
             
             if (!responsesList || !questionsSection) {
-                console.error('Questions and answers section elements not found');
                 return;
             }
 
@@ -2822,7 +2751,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
                 responsesList.appendChild(responseItem);
             });
 
-            console.log('✅ Historical questions and answers displayed');
 
         } catch (error) {
             console.error('❌ Error displaying historical questions and answers:', error);
@@ -2874,8 +2802,6 @@ document.addEventListener('DOMContentLoaded', initializeApp);
       // Fixed downloadReport method - PDF only
 async downloadReport() {
     try {
-        console.log('📥 Download PDF report triggered');
-        
         // Get current assessment data - FIXED LOGIC
         let currentAssessment = null;
         
@@ -2883,13 +2809,11 @@ async downloadReport() {
         if (this.assessmentHistory && this.assessmentHistory.length > 0) {
             // Get the MOST RECENT assessment
             currentAssessment = this.assessmentHistory[0];
-            console.log('✅ Found assessment in history:', currentAssessment.id);
         }
         
         // If not in history, try to get it from the displayed results
         if (!currentAssessment && window.currentAssessmentData) {
             currentAssessment = window.currentAssessmentData;
-            console.log('✅ Using window.currentAssessmentData');
         }
         
         // If still no data, check the displayed results on the page
@@ -2901,14 +2825,12 @@ async downloadReport() {
         if (!currentAssessment) {
             // LAST RESORT: Check if there's a current patient and load their most recent
             if (this.currentPatient) {
-                console.log('🔄 Loading assessments from backend for current patient...');
                 const assessments = await this.loadPatientAssessmentsFromBackend(
                     this.currentPatient.name, 
                     this.currentPatient.number
                 );
                 if (assessments.length > 0) {
                     currentAssessment = assessments[0];
-                    console.log('✅ Loaded assessment from backend:', currentAssessment.id);
                 }
             }
         }
@@ -2931,7 +2853,6 @@ async downloadReport() {
         await this.generatePDFReport(currentAssessment);
 
     } catch (error) {
-        console.error('❌ Error generating PDF report:', error);
         alert('Failed to generate PDF report. Please try again. Error: ' + error.message);
     } finally {
         // Reset button state
@@ -3000,11 +2921,9 @@ reconstructAssessmentFromDisplay() {
             rank: 0
         });
         
-        console.log('🔄 Reconstructed assessment from display:', assessment);
         return assessment;
         
     } catch (error) {
-        console.error('❌ Failed to reconstruct assessment:', error);
         return null;
     }
 }
@@ -3013,7 +2932,6 @@ reconstructAssessmentFromDisplay() {
       // Enhanced method to generate the PDF report using backend
       async generatePDFReport(assessment) {
         try {
-          console.log('📄 Generating PDF for assessment:', assessment.id);
           
           // Ensure we have all necessary data
           if (!assessment.patient_info) {
@@ -3063,7 +2981,7 @@ reconstructAssessmentFromDisplay() {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
-          
+
           console.log('✅ PDF report generated successfully');
           
         } catch (error) {
@@ -3114,7 +3032,6 @@ reconstructAssessmentFromDisplay() {
             }
 
         } catch (error) {
-            console.error('Error downloading assessment:', error);
             alert('Error downloading assessment. Please try again.');
         } finally {
             // Reset button state
@@ -3140,10 +3057,7 @@ reconstructAssessmentFromDisplay() {
       startAssessment() {
           // Record assessment start time with ISO format
           this.assessmentStartTime = new Date().toISOString();
-          console.log('🕐 Assessment start time recorded:', this.assessmentStartTime);
-          console.log('🕐 Local time:', new Date().toString());
-          console.log('🕐 UTC time:', new Date().toUTCString());
-          
+
           // Also store a human-readable version for debugging
           this.assessmentStartLocal = new Date().toLocaleString();
           
@@ -3168,8 +3082,7 @@ reconstructAssessmentFromDisplay() {
       }
 
     showScreen(screen) {
-        console.log('🖥️ Showing screen:', screen.id);
-        
+
         // Hide all screens
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         
@@ -3480,30 +3393,23 @@ showReviewScreen() {
                   return;
               }
           }
-
-          console.log('✅ Validation passed, proceeding with submission...');
           
           this.showScreen(this.loadingScreen);
 
           try {
               await this.simulateProcessing();
-              
-              console.log('🕐 FINAL TIMESTAMP CHECK before submission:');
-              console.log('  - Assessment started at:', this.assessmentStartTime);
-              console.log('  - Submitting at:', new Date().toISOString());
+
               
               // Get user's timezone
               const userTimezone = getUserTimezone();
-              console.log('🌍 User timezone:', userTimezone);
+
               
               // CRITICAL: Use the original assessmentStartTime, don't overwrite it
               const assessmentStartTimeToSend = this.assessmentStartTime;
               
               if (!assessmentStartTimeToSend) {
-                  console.error('❌ CRITICAL: assessmentStartTime is missing!');
                   // Fallback: create a timestamp 2 minutes ago (approximate)
                   const fallbackTime = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-                  console.log('🔄 Using fallback timestamp:', fallbackTime);
               }
               
               // DEBUG: Log what we're about to send
@@ -3562,37 +3468,36 @@ showReviewScreen() {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
 
-    async displayResults(result) {
-        // Show results screen first
-        this.showScreen(this.resultsScreen);
-        
-        // Clear any existing patient info first
-        const existingSavedInfo = document.querySelector('.saved-info');
-        if (existingSavedInfo) {
-            existingSavedInfo.remove();
-        }
-        
-        // Set results display
-        this.primaryDiagnosis.textContent = result.primary_diagnosis;
-        this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
-        
-        const confidencePercent = Math.round(result.confidence_percentage);
-        let confidenceColor = '#10b981';
-        if (confidencePercent < 50) confidenceColor = '#f59e0b';
-        if (confidencePercent < 30) confidenceColor = '#ef4444';
-        
-        this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
-        this.confidenceBadge.style.background = confidenceColor;
-        
-        this.resultsDate.textContent = new Date().toLocaleDateString();
-        this.assessmentId.textContent = `ID: ${result.assessment_id}`;
-        
-        // DEBUG: Check what timestamps we have
-        console.log('🔍 DEBUG - Result timestamps:', {
-            assessment_timestamp: result.assessment_timestamp,
-            timestamp: result.timestamp,
-            our_assessmentStartTime: this.assessmentStartTime
-        });
+      async displayResults(result) {
+          // Show results screen first
+          this.showScreen(this.resultsScreen);
+          
+          // Set results display immediately
+          this.primaryDiagnosis.textContent = result.primary_diagnosis;
+          this.diagnosisDescription.textContent = this.getDiagnosisDescription(result.primary_diagnosis);
+          
+          const confidencePercent = Math.round(result.confidence_percentage);
+          let confidenceColor = '#10b981';
+          if (confidencePercent < 50) confidenceColor = '#f59e0b';
+          if (confidencePercent < 30) confidenceColor = '#ef4444';
+          
+          this.confidenceBadge.innerHTML = `<span class="confidence-text">${confidencePercent}% Confidence</span>`;
+          this.confidenceBadge.style.background = confidenceColor;
+          
+          this.resultsDate.textContent = new Date().toLocaleDateString();
+          this.assessmentId.textContent = `ID: ${result.assessment_id}`;
+          
+          // Show all diagnoses immediately with loading state
+          if (result.all_diagnoses) {
+              this.displayAllDiagnoses(result.all_diagnoses);
+          } else {
+              // If no diagnoses array, create one from the primary diagnosis
+              this.displayAllDiagnoses([{
+                  diagnosis: result.primary_diagnosis,
+                  confidence_percentage: confidencePercent,
+                  probability: result.confidence
+              }]);
+          }
         
         // Create assessment data object with ALL diagnoses with BOTH timestamps
         const assessmentData = {
@@ -3617,17 +3522,12 @@ showReviewScreen() {
         // Save assessment to backend
         try {
             const saveResult = await this.saveAssessmentToBackend(assessmentData);
-            console.log('✅ Assessment saved with both timestamps:', {
-                assessment_start: assessmentData.assessment_timestamp,
-                report_generated: assessmentData.timestamp
-            });
+      
             
             // Store in assessmentHistory for current session
             this.assessmentHistory.unshift(assessmentData);
-            console.log('✅ Assessment added to session history with all diagnoses');
             
         } catch (error) {
-            console.error('❌ Failed to save assessment:', error);
             // Continue to show results even if save fails
             this.assessmentHistory.unshift(assessmentData); // Still store locally
         }
@@ -3641,9 +3541,7 @@ showReviewScreen() {
         // Remove the save button since it's now automatic
         this.removeSaveButton();
         
-        // Debug: Log current assessment state
-        console.log('Current assessment history:', this.assessmentHistory);
-        console.log('Most recent assessment with all diagnoses:', this.assessmentHistory[0]);
+   
     }
 
     displayPatientInfo(patientInfo) {
@@ -3915,88 +3813,98 @@ selectOption(optionBtn, option) {
         }
       }
 
-      displayAllDiagnoses(allDiagnoses) {
-          if (!this.diagnosesList) {
-              console.error('Diagnoses list element not found');
-              return;
-          }
-          
-          this.diagnosesList.innerHTML = '';
-          
-          if (!allDiagnoses || !Array.isArray(allDiagnoses)) {
-              console.warn('No diagnoses data available');
-              const noDataItem = document.createElement('div');
-              noDataItem.className = 'diagnosis-item';
-              noDataItem.innerHTML = `
-                  <span class="diagnosis-name">No additional diagnoses available</span>
-                  <span class="diagnosis-probability">-</span>
-              `;
-              this.diagnosesList.appendChild(noDataItem);
-              return;
-          }
-          
-          // Display only TOP 4 diagnoses (excluding primary which is already shown)
-          const otherDiagnoses = allDiagnoses.slice(1, 4); // Get diagnoses 2, 3, 4
-          
-          if (otherDiagnoses.length === 0) {
-              const noDataItem = document.createElement('div');
-              noDataItem.className = 'diagnosis-item';
-              noDataItem.innerHTML = `
-                  <span class="diagnosis-name">No other diagnoses considered</span>
-                  <span class="diagnosis-probability">-</span>
-              `;
-              this.diagnosesList.appendChild(noDataItem);
-              return;
-          }
-          
-          otherDiagnoses.forEach(diagnosis => {
-              const diagnosisItem = document.createElement('div');
-              diagnosisItem.className = 'diagnosis-item';
-              
-              const diagnosisName = diagnosis.diagnosis || 'Unknown';
-              const confidence = diagnosis.confidence_percentage !== undefined ? 
-                  Math.round(diagnosis.confidence_percentage) : 
-                  (diagnosis.probability !== undefined ? Math.round(diagnosis.probability * 100) : 0);
-              
-              diagnosisItem.innerHTML = `
-                  <span class="diagnosis-name">${diagnosisName}</span>
-                  <span class="diagnosis-probability">${confidence}%</span>
-              `;
-              
-              this.diagnosesList.appendChild(diagnosisItem);
-          });
-          
-          console.log('✅ Other diagnoses displayed (top 3 after primary):', otherDiagnoses.length);
-      }
+    displayAllDiagnoses(allDiagnoses) {
+        if (!this.diagnosesList) {
+            console.error('Diagnoses list element not found');
+            return;
+        }
+        
+        // Show loading state immediately
+        this.diagnosesList.innerHTML = `
+            <div class="loading-diagnoses">
+                <div class="loading-spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <span style="margin-left: 10px; color: #64748b;">Loading diagnoses...</span>
+            </div>
+        `;
+        
+        // Add CSS for spinner animation
+        if (!document.querySelector('#diagnoses-spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'diagnoses-spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                .loading-diagnoses {
+                    text-align: center;
+                    padding: 2rem;
+                    color: #64748b;
+                    font-size: 0.9rem;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Process the diagnoses with a small delay to ensure smooth transition
+        setTimeout(() => {
+            this.processAndDisplayDiagnoses(allDiagnoses);
+        }, 100);
+    }
 
-      // Add this method to your MentalHealthAssessment class
-debugMobileNavigation() {
-    console.log('🔍 Debugging Mobile Navigation:');
-    console.log('Mobile Assessment Button:', document.getElementById('mobileAssessmentBtn'));
-    console.log('Mobile History Button:', document.getElementById('mobileHistoryBtn'));
-    console.log('Mobile Home Button:', document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]'));
-    
-    // Check if event listeners are attached
-    const assessmentBtn = document.getElementById('mobileAssessmentBtn');
-    const historyBtn = document.getElementById('mobileHistoryBtn');
-    const homeBtn = document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]');
-    
-    if (assessmentBtn) {
-        console.log('Assessment Button exists:', assessmentBtn);
-        console.log('Assessment Button HTML:', assessmentBtn.outerHTML);
+    processAndDisplayDiagnoses(allDiagnoses) {
+        if (!allDiagnoses || !Array.isArray(allDiagnoses)) {
+            console.warn('No diagnoses data available');
+            this.diagnosesList.innerHTML = `
+                <div class="diagnosis-item">
+                    <span class="diagnosis-name">No additional diagnoses available</span>
+                    <span class="diagnosis-probability">-</span>
+                </div>
+            `;
+            return;
+        }
+        
+        // Display only TOP 4 diagnoses (excluding primary which is already shown)
+        const otherDiagnoses = allDiagnoses.slice(1, 4); // Get diagnoses 2, 3, 4
+        
+        if (otherDiagnoses.length === 0) {
+            this.diagnosesList.innerHTML = `
+                <div class="diagnosis-item">
+                    <span class="diagnosis-name">No other diagnoses considered</span>
+                    <span class="diagnosis-probability">-</span>
+                </div>
+            `;
+            return;
+        }
+        
+        // Build the diagnoses HTML
+        let diagnosesHTML = '';
+        otherDiagnoses.forEach(diagnosis => {
+            const diagnosisName = diagnosis.diagnosis || 'Unknown';
+            const confidence = diagnosis.confidence_percentage !== undefined ? 
+                Math.round(diagnosis.confidence_percentage) : 
+                (diagnosis.probability !== undefined ? Math.round(diagnosis.probability * 100) : 0);
+            
+            diagnosesHTML += `
+                <div class="diagnosis-item">
+                    <span class="diagnosis-name">${diagnosisName}</span>
+                    <span class="diagnosis-probability">${confidence}%</span>
+                </div>
+            `;
+        });
+        
+        // Update the HTML
+        this.diagnosesList.innerHTML = diagnosesHTML;
+        
+        // Add a subtle fade-in effect
+        this.diagnosesList.style.opacity = '0';
+        this.diagnosesList.style.transition = 'opacity 0.5s ease';
+        
+        setTimeout(() => {
+            this.diagnosesList.style.opacity = '1';
+        }, 50);
+        
     }
-    
-    if (historyBtn) {
-        console.log('History Button exists:', historyBtn);
-        console.log('History Button HTML:', historyBtn.outerHTML);
-    }
-    
-    if (homeBtn) {
-        console.log('Home Button exists:', homeBtn);
-        console.log('Home Button HTML:', homeBtn.outerHTML);
-    }
-}
-
 
 
       displayAssessmentDetails(assessment) {
@@ -4083,20 +3991,6 @@ debugMobileNavigation() {
           }
       }
 
-      // Add this method to the MentalHealthAssessment class
-debugButtonStatus() {
-  console.log('🔍 Button Debug Status:');
-  console.log('startBtn:', this.startBtn);
-  console.log('viewHistoryBtn:', this.viewHistoryBtn);
-  console.log('startBtn exists in DOM:', document.getElementById('startBtn'));
-  console.log('viewHistoryBtn exists in DOM:', document.getElementById('viewHistoryBtn'));
-  
-  // Check event listeners
-  if (this.startBtn) {
-    const listeners = getEventListeners(this.startBtn);
-    console.log('startBtn listeners:', listeners);
-  }
-}
   }
 
     // Initialize the assessment when the page loads
@@ -4106,36 +4000,29 @@ let mentalHealthAssessment = null;
 // Proper initialization function
 async function initializeApplication() {
   try {
-    console.log('🚀 Starting application initialization...');
     
     // Wait for DOM to be fully loaded first
     if (document.readyState === 'loading') {
       await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
     }
     
-    console.log('✅ DOM fully loaded');
     
     // Initialize the assessment system
     mentalHealthAssessment = new MentalHealthAssessment();
     
     // Force button binding (safety check)
     if (mentalHealthAssessment.startBtn) {
-      console.log('🔗 Re-binding start button listener');
       mentalHealthAssessment.startBtn.addEventListener('click', () => {
-        console.log('🎯 startBtn clicked via direct binding');
         mentalHealthAssessment.startAssessment();
       });
     }
     
     if (mentalHealthAssessment.viewHistoryBtn) {
-      console.log('🔗 Re-binding history button listener');
       mentalHealthAssessment.viewHistoryBtn.addEventListener('click', () => {
-        console.log('📚 viewHistoryBtn clicked via direct binding');
         mentalHealthAssessment.showHistoryScreen();
       });
     }
     
-    console.log('✅ Application fully initialized');
     
     // Debug: Check if buttons are now working
     setTimeout(() => {
