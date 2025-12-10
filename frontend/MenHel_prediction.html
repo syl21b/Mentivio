@@ -1720,25 +1720,50 @@
 let API_BASE_URL = '';
 let API_KEY = '';
 
-async function initializeApp() {
+// Global variable for the assessment instance
+let mentalHealthAssessment = null;
+
+// Combined initialization function
+async function initializeApplication() {
     try {
-        const response = await fetch('/api/config');
-        const config = await response.json();
-        API_BASE_URL = window.location.origin;
-        API_KEY = config.api_key;
+        console.log('🚀 Starting application initialization...');
         
-        // Now initialize your MentalHealthAssessment
+        // Wait for DOM to be fully loaded first
+        if (document.readyState === 'loading') {
+            console.log('⏳ Waiting for DOM to load...');
+            await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+        }
+        console.log('✅ DOM is ready');
+        
+        // Load API configuration
+        console.log('🌐 Loading API configuration...');
+        try {
+            const response = await fetch('/api/config');
+            const config = await response.json();
+            API_BASE_URL = window.location.origin;
+            API_KEY = config.api_key;
+            console.log('✅ API configuration loaded');
+        } catch (error) {
+            // Fallback to environment variables or default
+            API_BASE_URL = window.location.origin;
+            API_KEY = 'fallback-key-if-config-fails';
+            console.warn('⚠️ Using fallback API configuration:', error.message);
+        }
+        
+        // Initialize the assessment system (ONLY ONCE!)
+        console.log('🧠 Creating MentalHealthAssessment instance...');
         mentalHealthAssessment = new MentalHealthAssessment();
+        console.log('✅ Mental Health Assessment system initialized');
+        
     } catch (error) {
-        // Fallback to environment variables or default
-        API_BASE_URL = window.location.origin;
-        API_KEY = 'fallback-key-if-config-fails';
-        mentalHealthAssessment = new MentalHealthAssessment();
+        console.error('❌ Failed to initialize application:', error);
+        // Show user-friendly error
+        alert('Failed to initialize the assessment system. Please refresh the page and try again.');
     }
 }
 
-// Update your DOMContentLoaded listener
-document.addEventListener('DOMContentLoaded', initializeApp);
+// Start the application
+initializeApplication();
 
 
     // Assessment questions and configuration
@@ -2002,34 +2027,39 @@ document.addEventListener('DOMContentLoaded', initializeApp);
       }
       // Add this new method to the MentalHealthAssessment class
     // Mobile navigation methods
-        attachMobileNavigationListeners() {
-
-            // Use event delegation for dynamic elements
-            document.addEventListener('click', (e) => {
-                // Handle mobile assessment button
-                if (e.target.closest('#mobileAssessmentBtn')) {
-                    e.preventDefault();
-                    this.startAssessment();
-                    this.updateMobileNavActiveState('mobileAssessmentBtn');
-                }
-                
-                // Handle mobile history button
-                if (e.target.closest('#mobileHistoryBtn')) {
-                    e.preventDefault();
-                    this.showHistoryScreen();
-                    this.updateMobileNavActiveState('mobileHistoryBtn');
-                }
-                
-                // Handle mobile home button
-                const homeNavItem = e.target.closest('.mobile-nav-item[data-screen="welcomeScreen"]');
-                if (homeNavItem) {
-                    e.preventDefault();
-                    this.showScreen(this.welcomeScreen);
-                    this.updateMobileNavActiveState('welcomeScreen');
-                }
-            });
-        }
-
+      attachMobileNavigationListeners() {
+          // Use event delegation for dynamic elements
+          document.addEventListener('click', (e) => {
+              // EXCLUDE login button from this delegation
+              if (e.target.closest('#loginBtn') || 
+                  e.target.closest('#logoutBtn') ||
+                  e.target.closest('#backToWelcomeFromLoginBtn')) {
+                  return; // Let the specific handlers handle these
+              }
+              
+              // Handle mobile assessment button
+              if (e.target.closest('#mobileAssessmentBtn')) {
+                  e.preventDefault();
+                  this.startAssessment();
+                  this.updateMobileNavActiveState('mobileAssessmentBtn');
+              }
+              
+              // Handle mobile history button
+              if (e.target.closest('#mobileHistoryBtn')) {
+                  e.preventDefault();
+                  this.showHistoryScreen();
+                  this.updateMobileNavActiveState('mobileHistoryBtn');
+              }
+              
+              // Handle mobile home button
+              const homeNavItem = e.target.closest('.mobile-nav-item[data-screen="welcomeScreen"]');
+              if (homeNavItem) {
+                  e.preventDefault();
+                  this.showScreen(this.welcomeScreen);
+                  this.updateMobileNavActiveState('welcomeScreen');
+              }
+          });
+      }
         updateMobileNavActiveState(activeItem) {
             // Remove active class from all mobile nav items
             document.querySelectorAll('.mobile-nav-item').forEach(item => {
@@ -2453,33 +2483,34 @@ document.addEventListener('DOMContentLoaded', initializeApp);
         }
       }
 
-      async loadPatientAssessmentsFromBackend(patientName, patientNumber) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/get-patient-assessments`, {
+async loadPatientAssessmentsFromBackend(patientName, patientNumber) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/get-patient-assessments`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'X-API-Key': API_KEY
+                'Content-Type': 'application/json',
+                'X-API-Key': API_KEY
             },
             body: JSON.stringify({
-              name: patientName,
-              number: patientNumber
+                name: patientName,
+                number: patientNumber
             })
-          });
+        });
 
-          if (!response.ok) {
+        if (!response.ok) {
+            const errorText = await response.text();
             throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const result = await response.json();
-          return result.assessments;
-          
-        } catch (error) {
-          alert('Error loading assessment history. Please check your connection and try again.');
-          return [];
         }
-      }
 
+        const result = await response.json();
+        return result.assessments || [];
+        
+    } catch (error) {
+        // Don't show alert here - let the calling function handle it
+        console.error('Error loading assessment history:', error);
+        throw error; // Re-throw to handle in calling function
+    }
+}
       async deleteAssessmentFromBackend(patientNumber, assessmentId) {
         try {
           const response = await fetch(`${API_BASE_URL}/api/delete-assessment`, {
@@ -2521,41 +2552,75 @@ document.addEventListener('DOMContentLoaded', initializeApp);
         this.loginPatientNumber.value = '';
       }
 
-      async handleLogin() {
-        const name = this.loginPatientName.value.trim();
-        const number = this.loginPatientNumber.value.trim();
-        
-        if (!name || !number) {
-          alert('Please enter both your name and patient number.');
-          return;
+async handleLogin() {
+    const name = this.loginPatientName.value.trim();
+    const number = this.loginPatientNumber.value.trim();
+    
+    if (!name || !number) {
+        alert('Please enter both your name and patient number.');
+        return;
+    }
+
+    try {
+        // Show loading state
+        this.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        this.loginBtn.disabled = true;
+
+        // Load assessments from backend
+        const response = await fetch(`${API_BASE_URL}/api/get-patient-assessments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-API-Key': API_KEY
+            },
+            body: JSON.stringify({
+                name: name,
+                number: number
+            })
+        });
+
+        // Check if response is ok first
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        try {
-          // Show loading state
-          this.loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-          this.loginBtn.disabled = true;
+        const result = await response.json();
+        
+        // Check if the API call was successful
+        if (!result.success) {
+            // Single alert for API error
+            alert(result.error || 'Failed to load assessment history. Please try again.');
+            return;
+        }
 
-          // Load assessments from backend
-          const patientAssessments = await this.loadPatientAssessmentsFromBackend(name, number);
+        const patientAssessments = result.assessments || [];
 
-          if (patientAssessments.length === 0) {
+        if (patientAssessments.length === 0) {
+            // Single alert for no history found
             alert('No assessment history found for the provided name and patient number.');
             return;
-          }
-
-          // Set current patient and show their history
-          this.currentPatient = { name, number };
-          this.showPatientHistory(patientAssessments);
-
-        } catch (error) {
-        } finally {
-          // Reset button state
-          this.loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access History';
-          this.loginBtn.disabled = false;
         }
-      }
 
-      showPatientHistory(assessments) {
+        // Set current patient and show their history
+        this.currentPatient = { name, number };
+        this.showPatientHistory(patientAssessments);
+
+    } catch (error) {
+        // Only show alert if it's not already shown above
+        if (!error.message.includes('already shown')) {
+            console.error('Login error:', error);
+            // Don't show duplicate alert - just log to console
+        }
+    } finally {
+        // Reset button state
+        this.loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Access History';
+        this.loginBtn.disabled = false;
+    }
+}
+      
+
+showPatientHistory(assessments) {
         // Update UI to show patient history
         this.loggedInPatientName.textContent = this.currentPatient.name;
         this.loggedInPatientNumber.textContent = this.currentPatient.number;
@@ -2632,51 +2697,55 @@ document.addEventListener('DOMContentLoaded', initializeApp);
           });
       }
     // Enhanced method to view assessment from CSV data
-    async viewPatientAssessment(assessmentId, event = null) {
-        try {
-            if (!this.currentPatient) {
-                alert('No patient logged in.');
-                return;
-            }
-
-            // Show loading state
-            let viewBtn;
-            if (event) {
-                viewBtn = event.target.closest('.btn-view');
-            } else {
-                // Fallback: find the button by assessment ID
-                viewBtn = document.querySelector(`button[onclick*="viewPatientAssessment('${assessmentId}'"]`);
-            }
-            
-            if (viewBtn) {
-                const originalText = viewBtn.innerHTML;
-                viewBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-                viewBtn.disabled = true;
-            }
-
-            // Load the specific assessment from backend
-            const assessment = await this.loadSingleAssessmentFromBackend(
-                this.currentPatient.name, 
-                this.currentPatient.number, 
-                assessmentId
-            );
-
-            if (assessment) {
-                this.displayAssessmentDetails(assessment);
-            } 
-
-        } catch (error) {
-            alert('Error loading assessment. Please try again.');
-        } finally {
-            // Reset button state
-            const viewBtns = document.querySelectorAll('.btn-view');
-            viewBtns.forEach(btn => {
-                btn.innerHTML = '<i class="fas fa-eye"></i> View';
-                btn.disabled = false;
-            });
+async viewPatientAssessment(assessmentId, event = null) {
+    try {
+        if (!this.currentPatient) {
+            alert('No patient logged in.');
+            return;
         }
-    }
 
+        // Show loading state
+        let viewBtn;
+        if (event) {
+            viewBtn = event.target.closest('.btn-view');
+        } else {
+            // Fallback: find the button by assessment ID
+            viewBtn = document.querySelector(`button[onclick*="viewPatientAssessment('${assessmentId}'"]`);
+        }
+        
+        if (viewBtn) {
+            const originalText = viewBtn.innerHTML;
+            viewBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+            viewBtn.disabled = true;
+        }
+
+        // Store the assessment ID for PDF download reference
+        window.currentlyViewingAssessmentId = assessmentId;
+        
+        // Load the specific assessment from backend
+        const assessment = await this.loadSingleAssessmentFromBackend(
+            this.currentPatient.name, 
+            this.currentPatient.number, 
+            assessmentId
+        );
+
+        if (assessment) {
+            // Also store in window for easy access
+            window.currentAssessmentData = assessment;
+            this.displayAssessmentDetails(assessment);
+        } 
+
+    } catch (error) {
+        alert('Error loading assessment. Please try again.');
+    } finally {
+        // Reset button state
+        const viewBtns = document.querySelectorAll('.btn-view');
+        viewBtns.forEach(btn => {
+            btn.innerHTML = '<i class="fas fa-eye"></i> View';
+            btn.disabled = false;
+        });
+    }
+}
     // New method to load single assessment from backend
     async loadSingleAssessmentFromBackend(patientName, patientNumber, assessmentId) {
         try {
@@ -2799,68 +2868,74 @@ document.addEventListener('DOMContentLoaded', initializeApp);
         }
     }
 
-      // Fixed downloadReport method - PDF only
 async downloadReport() {
     try {
-        // Get current assessment data - FIXED LOGIC
-        let currentAssessment = null;
+        console.log('📥 Starting PDF download process...');
         
-        // First, check if we have just completed an assessment
-        if (this.assessmentHistory && this.assessmentHistory.length > 0) {
-            // Get the MOST RECENT assessment
-            currentAssessment = this.assessmentHistory[0];
+        // First, check if we have current assessment data from the recent submission
+        if (window.currentAssessmentData) {
+            console.log('📊 Using current assessment data from window:', window.currentAssessmentData.id);
+            return await this.generatePDFReport(window.currentAssessmentData);
         }
         
-        // If not in history, try to get it from the displayed results
-        if (!currentAssessment && window.currentAssessmentData) {
-            currentAssessment = window.currentAssessmentData;
+        // If not, check if we're viewing a historical assessment
+        const primaryDiagnosis = document.getElementById('primaryDiagnosis')?.textContent;
+        const confidenceBadge = document.querySelector('.confidence-text')?.textContent || 
+                              document.getElementById('confidenceBadge')?.textContent;
+        
+        if (primaryDiagnosis && primaryDiagnosis !== 'Unknown') {
+            console.log('📊 Reconstructing assessment from displayed results');
+            
+            // Reconstruct from displayed data on results screen
+            const reconstructedAssessment = this.reconstructAssessmentFromDisplay();
+            if (reconstructedAssessment) {
+                console.log('✅ Successfully reconstructed assessment:', reconstructedAssessment.id);
+                return await this.generatePDFReport(reconstructedAssessment);
+            }
         }
         
-        // If still no data, check the displayed results on the page
-        if (!currentAssessment) {
-            // Try to reconstruct from displayed data
-            currentAssessment = this.reconstructAssessmentFromDisplay();
-        }
-        
-        if (!currentAssessment) {
-            // LAST RESORT: Check if there's a current patient and load their most recent
-            if (this.currentPatient) {
-                const assessments = await this.loadPatientAssessmentsFromBackend(
+        // If we're in the history view (viewing an assessment)
+        if (this.currentPatient && window.currentlyViewingAssessmentId) {
+            console.log('📊 Loading specific assessment from history:', window.currentlyViewingAssessmentId);
+            
+            // Show loading state
+            this.downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Assessment...';
+            this.downloadBtn.disabled = true;
+            
+            try {
+                const assessment = await this.loadSingleAssessmentFromBackend(
                     this.currentPatient.name, 
-                    this.currentPatient.number
+                    this.currentPatient.number, 
+                    window.currentlyViewingAssessmentId
                 );
-                if (assessments.length > 0) {
-                    currentAssessment = assessments[0];
+                
+                if (assessment) {
+                    return await this.generatePDFReport(assessment);
                 }
+            } finally {
+                // Reset button state
+                this.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF Report';
+                this.downloadBtn.disabled = false;
             }
         }
         
-        if (!currentAssessment) {
-            // Show more informative error
-            const shouldContinue = confirm('No assessment data found in current session. Would you like to try loading from your assessment history?');
-            if (shouldContinue) {
-                this.showHistoryScreen();
-            }
-            return;
+        // Last resort: ask the user
+        const shouldLoadFromHistory = confirm('No current assessment data found. Would you like to access your assessment history to download a report?');
+        if (shouldLoadFromHistory) {
+            this.showHistoryScreen();
         }
-
-        // Show loading state
-        const originalText = this.downloadBtn.innerHTML;
-        this.downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
-        this.downloadBtn.disabled = true;
-
-        // Generate the PDF report using the backend
-        await this.generatePDFReport(currentAssessment);
-
+        
     } catch (error) {
+        console.error('❌ PDF download failed:', error);
         alert('Failed to generate PDF report. Please try again. Error: ' + error.message);
     } finally {
-        // Reset button state
-        this.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF Report';
-        this.downloadBtn.disabled = false;
+        // Always reset button state
+        if (this.downloadBtn) {
+            this.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF Report';
+            this.downloadBtn.disabled = false;
+        }
     }
 }
-
 // Add this new method to reconstruct assessment from displayed data
 reconstructAssessmentFromDisplay() {
     try {
@@ -3051,10 +3126,15 @@ reconstructAssessmentFromDisplay() {
         this.loginPatientName.value = '';
         this.loginPatientNumber.value = '';
       }
-
+      clearPreviousData() {
+          window.currentAssessmentData = null;
+          window.currentlyViewingAssessmentId = null;
+      }
       // Core Assessment Methods
       // In the MentalHealthAssessment class, update the startAssessment method:
       startAssessment() {
+          this.clearPreviousData();
+
           // Record assessment start time with ISO format
           this.assessmentStartTime = new Date().toISOString();
 
@@ -3909,7 +3989,7 @@ selectOption(optionBtn, option) {
 
       displayAssessmentDetails(assessment) {
           try {
-              console.log('📊 Displaying assessment details with ALL diagnoses:', assessment);
+              console.log('📊 Displaying assessment details for PDF download:', assessment.id);
               
               // First, show the results screen
               this.showScreen(this.resultsScreen);
@@ -3920,6 +4000,10 @@ selectOption(optionBtn, option) {
                   existingSavedInfo.remove();
               }
 
+              // Store the assessment globally for PDF download
+              window.currentAssessmentData = assessment;
+              window.currentlyViewingAssessmentId = assessment.id;
+              
               // Populate results screen with historical data
               this.primaryDiagnosis.textContent = assessment.primary_diagnosis || 'Unknown';
               
@@ -3993,51 +4077,7 @@ selectOption(optionBtn, option) {
 
   }
 
-    // Initialize the assessment when the page loads
-// Global variable for the assessment instance
-let mentalHealthAssessment = null;
 
-// Proper initialization function
-async function initializeApplication() {
-  try {
-    
-    // Wait for DOM to be fully loaded first
-    if (document.readyState === 'loading') {
-      await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
-    }
-    
-    
-    // Initialize the assessment system
-    mentalHealthAssessment = new MentalHealthAssessment();
-    
-    // Force button binding (safety check)
-    if (mentalHealthAssessment.startBtn) {
-      mentalHealthAssessment.startBtn.addEventListener('click', () => {
-        mentalHealthAssessment.startAssessment();
-      });
-    }
-    
-    if (mentalHealthAssessment.viewHistoryBtn) {
-      mentalHealthAssessment.viewHistoryBtn.addEventListener('click', () => {
-        mentalHealthAssessment.showHistoryScreen();
-      });
-    }
-    
-    
-    // Debug: Check if buttons are now working
-    setTimeout(() => {
-      console.log('🔍 Debug: Checking button status after initialization');
-      console.log('Start button exists:', document.getElementById('startBtn'));
-      console.log('History button exists:', document.getElementById('viewHistoryBtn'));
-    }, 500);
-    
-  } catch (error) {
-    console.error('❌ Failed to initialize application:', error);
-  }
-}
-
-// Start the application
-initializeApplication();
   </script>
 
 </body>

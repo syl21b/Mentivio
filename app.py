@@ -12,12 +12,11 @@ from typing import Dict, List, Tuple, Optional, Any
 import psycopg
 from psycopg.rows import dict_row  
 import sqlite3
-from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
-from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import io
 import json
@@ -34,7 +33,9 @@ from functools import wraps
 import ipaddress
 import pytz
 from dotenv import load_dotenv
-load_dotenv() 
+
+load_dotenv()
+
 
 # ==================== ENVIRONMENT VALIDATION ====================
 def validate_environment():
@@ -49,12 +50,10 @@ def validate_environment():
     if missing:
         raise EnvironmentError(f"Missing required environment variables: {', '.join(missing)}")
     
-    # Validate SECRET_KEY length
     secret_key = os.environ.get('SECRET_KEY', '')
     if len(secret_key) < 32:
         raise ValueError("SECRET_KEY must be at least 32 characters")
     
-    # Validate encryption key
     encryption_key = os.environ.get('ENCRYPTION_KEY')
     if encryption_key:
         try:
@@ -66,30 +65,25 @@ def validate_environment():
 
 # ==================== SECURITY CONFIGURATION ====================
 class SecurityConfig:
-    # REQUIRED - Will raise error if not set via environment
     SECRET_KEY = os.environ.get('SECRET_KEY', '')
     if not SECRET_KEY:
         raise EnvironmentError("SECRET_KEY environment variable is required")
     
-    # ENCRYPTION - Generate if not provided but warn
     ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
     if not ENCRYPTION_KEY:
         ENCRYPTION_KEY = Fernet.generate_key().decode()
-        print("WARNING: ENCRYPTION_KEY not set, generating random key. SESSIONS WILL NOT PERSIST!")
+        logging.warning("ENCRYPTION_KEY not set, generating random key. SESSIONS WILL NOT PERSIST!")
     
-    # API SECURITY
     API_KEY = os.environ.get('API_KEY')
     if not API_KEY:
         API_KEY = secrets.token_urlsafe(32)
-        print("WARNING: API_KEY not set, generating random key. SET THIS FOR PRODUCTION!")
+        logging.warning("API_KEY not set, generating random key. SET THIS FOR PRODUCTION!")
     
-    # RATE LIMITING
     SESSION_TIMEOUT = int(os.environ.get('SESSION_TIMEOUT', 3600))
     MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', 16 * 1024 * 1024))
     RATE_LIMIT_REQUESTS = int(os.environ.get('RATE_LIMIT_REQUESTS', 100))
     RATE_LIMIT_WINDOW = int(os.environ.get('RATE_LIMIT_WINDOW', 3600))
     
-    # PASSWORD POLICY
     MIN_PASSWORD_LENGTH = 12
     PASSWORD_COMPLEXITY = {
         'min_lowercase': 1,
@@ -98,13 +92,11 @@ class SecurityConfig:
         'min_special': 1
     }
     
-    # INPUT VALIDATION
     MAX_INPUT_LENGTH = 500
     MAX_RESPONSES = 50
     MAX_PATIENT_NAME_LENGTH = 100
     MAX_PATIENT_NUMBER_LENGTH = 50
     
-    # SECURITY HEADERS - FIXED CSP
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY', 
@@ -124,21 +116,17 @@ class SecurityConfig:
         'Cache-Control': 'no-store, max-age=0'
     }
     
-    # AUDIT LOGGING
     AUDIT_LOG_FILE = os.environ.get('AUDIT_LOG_FILE', 'security_audit.log')
     
-    # SESSION SECURITY
     SESSION_COOKIE_SECURE = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     
-    # DATABASE CONNECTION - USE ENVIRONMENT VARIABLES ONLY
     @staticmethod
     def get_database_url():
         """Get database URL from environment variables"""
         db_url = os.environ.get('DATABASE_URL')
         if not db_url:
-            # Construct from individual environment variables
             db_host = os.environ.get('DB_HOST')
             db_name = os.environ.get('DB_NAME')
             db_user = os.environ.get('DB_USER')
@@ -148,7 +136,6 @@ class SecurityConfig:
             if all([db_host, db_name, db_user, db_password]):
                 db_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
             else:
-                # Fallback to SQLite for development
                 return 'sqlite:///mental_health_assessments.db'
         
         return db_url
@@ -162,7 +149,6 @@ class AuditLogger:
         
     def log_event(self, event_type: str, user_id: str = None, ip: str = None, 
                   details: str = None, severity: str = 'INFO'):
-        """Log security events"""
         timestamp = datetime.now(timezone.utc).isoformat()
         ip = ip or (request.remote_addr if request else '0.0.0.0')
         
@@ -179,20 +165,16 @@ class AuditLogger:
         }
         
         with self.lock:
-            # Log to file
             try:
                 with open(self.log_file, 'a') as f:
                     f.write(json.dumps(log_entry) + '\n')
-            except Exception as e:
-                print(f"Failed to write audit log: {e}")
+            except Exception:
+                pass
             
-            # Also log to console based on severity
             if severity == 'CRITICAL':
                 logging.critical(f"AUDIT [{severity}]: {event_type} - {details}")
             elif severity == 'WARNING':
                 logging.warning(f"AUDIT [{severity}]: {event_type} - {details}")
-            else:
-                logging.info(f"AUDIT [{severity}]: {event_type} - {details}")
 
 class SecurityUtils:
     @staticmethod
@@ -201,7 +183,6 @@ class SecurityUtils:
     
     @staticmethod
     def hash_password(password: str) -> Tuple[str, str]:
-        """Hash password with salt, return hash and salt separately"""
         salt = bcrypt.gensalt()
         hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed.decode('utf-8'), salt.decode('utf-8')
@@ -211,58 +192,20 @@ class SecurityUtils:
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
     
     @staticmethod
-    def validate_email(email: str) -> bool:
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        return bool(re.match(pattern, email))
-    
-    @staticmethod
-    def validate_password(password: str) -> Tuple[bool, List[str]]:
-        """Validate password against security policy"""
-        errors = []
-        
-        if len(password) < SecurityConfig.MIN_PASSWORD_LENGTH:
-            errors.append(f"Password must be at least {SecurityConfig.MIN_PASSWORD_LENGTH} characters")
-        
-        # Check complexity
-        complexity = SecurityConfig.PASSWORD_COMPLEXITY
-        if sum(c.islower() for c in password) < complexity['min_lowercase']:
-            errors.append(f"At least {complexity['min_lowercase']} lowercase letter required")
-        if sum(c.isupper() for c in password) < complexity['min_uppercase']:
-            errors.append(f"At least {complexity['min_uppercase']} uppercase letter required")
-        if sum(c.isdigit() for c in password) < complexity['min_digits']:
-            errors.append(f"At least {complexity['min_digits']} digit required")
-        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-            errors.append("At least 1 special character required")
-        
-        # Check common passwords
-        common_passwords = ['password', '123456', 'qwerty', 'letmein', 'welcome']
-        if password.lower() in common_passwords:
-            errors.append("Password is too common")
-        
-        return len(errors) == 0, errors
-    
-    @staticmethod
     def sanitize_input(user_input: str, allow_html: bool = False) -> str:
-        """Sanitize user input to prevent XSS and injection attacks"""
         if not isinstance(user_input, str):
             user_input = str(user_input)
         
-        # Trim and limit length
         sanitized = user_input.strip()[:SecurityConfig.MAX_INPUT_LENGTH]
         
         if not allow_html:
-            # Remove HTML tags and dangerous characters
             sanitized = re.sub(r'<[^>]*>', '', sanitized)
             sanitized = re.sub(r'[<>"\']', '', sanitized)
         
-        # Escape SQL special characters
-        sql_safe = re.sub(r'[\';]', '', sanitized)
-        
-        return sql_safe
+        return re.sub(r'[\';]', '', sanitized)
     
     @staticmethod
     def sanitize_json_input(data: Any) -> Any:
-        """Recursively sanitize JSON input"""
         if isinstance(data, dict):
             return {SecurityUtils.sanitize_input(k): SecurityUtils.sanitize_json_input(v) for k, v in data.items()}
         elif isinstance(data, list):
@@ -274,9 +217,7 @@ class SecurityUtils:
     
     @staticmethod
     def validate_patient_data(patient_info: Dict) -> Tuple[bool, str]:
-        """Validate patient information with strict security checks"""
         try:
-            # Name validation
             name = patient_info.get('name', '').strip()
             if not name:
                 return False, "Patient name is required"
@@ -285,16 +226,14 @@ class SecurityUtils:
             if not re.match(r'^[A-Za-z\s\-\'\.]+$', name):
                 return False, "Invalid characters in patient name"
             
-            # Number validation - alphanumeric with hyphens/underscores only
             number = patient_info.get('number', '').strip()
             if not number:
                 return False, "Patient number is required"
             if len(number) > SecurityConfig.MAX_PATIENT_NUMBER_LENGTH:
                 return False, f"Patient number too long (max {SecurityConfig.MAX_PATIENT_NUMBER_LENGTH} chars)"
             if not re.match(r'^[A-Za-z0-9\-_]+$', number):
-                return False, "Invalid patient number format (alphanumeric, hyphens, underscores only)"
+                return False, "Invalid patient number format"
             
-            # Age validation
             age = patient_info.get('age', '').strip()
             if age:
                 if not re.match(r'^[0-9]{1,3}$', age):
@@ -303,7 +242,6 @@ class SecurityUtils:
                 if not (0 <= age_int <= 150):
                     return False, "Age must be between 0 and 150"
             
-            # Gender validation
             gender = patient_info.get('gender', '').strip()
             valid_genders = ['Male', 'Female', 'Other', 'Prefer not to say', '']
             if gender and gender not in valid_genders:
@@ -315,17 +253,7 @@ class SecurityUtils:
             return False, f"Validation error: {str(e)}"
     
     @staticmethod
-    def validate_ip_address(ip: str) -> bool:
-        """Validate IP address format"""
-        try:
-            ipaddress.ip_address(ip)
-            return True
-        except ValueError:
-            return False
-    
-    @staticmethod
     def generate_request_id() -> str:
-        """Generate unique request ID for tracing"""
         return f"req_{uuid.uuid4().hex[:16]}"
 
 class EncryptionService:
@@ -337,41 +265,38 @@ class EncryptionService:
             raise
     
     def encrypt_data(self, data: str) -> str:
-        """Encrypt sensitive data"""
         return self.fernet.encrypt(data.encode()).decode()
     
     def decrypt_data(self, encrypted_data: str) -> str:
-        """Decrypt sensitive data"""
         return self.fernet.decrypt(encrypted_data.encode()).decode()
     
     def encrypt_dict(self, data: Dict) -> str:
-        """Encrypt dictionary data"""
         return self.encrypt_data(json.dumps(data))
     
     def decrypt_dict(self, encrypted_data: str) -> Dict:
-        """Decrypt dictionary data"""
         return json.loads(self.decrypt_data(encrypted_data))
-    
-    def encrypt_field(self, field_value: Any) -> str:
-        """Encrypt a single field if it's sensitive"""
-        if isinstance(field_value, (dict, list)):
-            return self.encrypt_data(json.dumps(field_value))
-        return self.encrypt_data(str(field_value))
 
-class RateLimiter:
+class AdvancedRateLimiter:
+    """Enhanced rate limiter with different limits per endpoint"""
+    
     def __init__(self):
         self.requests = {}
         self.lock = threading.Lock()
         self.audit_logger = AuditLogger()
+        self.endpoint_limits = {
+            'predict': {'max_requests': 50, 'window': 3600},
+            'save_assessment': {'max_requests': 20, 'window': 3600},
+            'get_patient_assessments': {'max_requests': 30, 'window': 3600},
+            'default': {'max_requests': SecurityConfig.RATE_LIMIT_REQUESTS, 
+                       'window': SecurityConfig.RATE_LIMIT_WINDOW}
+        }
     
     def is_rate_limited(self, identifier: str, max_requests: int, window: int) -> Tuple[bool, str]:
-        """Check if request should be rate limited"""
         now = time.time()
         window_start = now - window
         
         with self.lock:
             if identifier in self.requests:
-                # Clean old requests
                 self.requests[identifier] = [
                     req_time for req_time in self.requests[identifier] 
                     if req_time > window_start
@@ -380,40 +305,31 @@ class RateLimiter:
             request_count = len(self.requests.get(identifier, []))
             
             if request_count >= max_requests:
-                # Log rate limit event
                 self.audit_logger.log_event(
                     event_type='RATE_LIMIT_EXCEEDED',
-                    ip=identifier if SecurityUtils.validate_ip_address(identifier) else None,
+                    ip=identifier if self._validate_ip(identifier) else None,
                     details=f"Rate limit exceeded: {request_count}/{max_requests} in {window}s",
                     severity='WARNING'
                 )
                 return True, f"Rate limit exceeded. Try again in {window} seconds."
             
-            # Add current request
             if identifier not in self.requests:
                 self.requests[identifier] = []
             self.requests[identifier].append(now)
             
             return False, ""
-
-class AdvancedRateLimiter(RateLimiter):
-    """Enhanced rate limiter with different limits per endpoint"""
     
-    def __init__(self):
-        super().__init__()
-        self.endpoint_limits = {
-            'predict': {'max_requests': 50, 'window': 3600},
-            'save_assessment': {'max_requests': 20, 'window': 3600},
-            'get_patient_assessments': {'max_requests': 30, 'window': 3600},
-            'default': {'max_requests': SecurityConfig.RATE_LIMIT_REQUESTS, 'window': SecurityConfig.RATE_LIMIT_WINDOW}
-        }
+    def _validate_ip(self, ip: str) -> bool:
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except ValueError:
+            return False
     
     def get_endpoint_limit(self, endpoint: str) -> Dict[str, int]:
-        """Get rate limit for specific endpoint"""
         return self.endpoint_limits.get(endpoint, self.endpoint_limits['default'])
     
     def is_endpoint_rate_limited(self, identifier: str, endpoint: str) -> Tuple[bool, str]:
-        """Check rate limit for specific endpoint"""
         limits = self.get_endpoint_limit(endpoint)
         return self.is_rate_limited(
             f"{identifier}:{endpoint}",
@@ -429,10 +345,9 @@ class AuthService:
         self.lock = threading.Lock()
         self.audit_logger = AuditLogger()
         self.max_failed_attempts = 5
-        self.lockout_time = 900  # 15 minutes
+        self.lockout_time = 900
     
     def create_session(self, user_id: str, user_data: Dict) -> str:
-        """Create a new secure session"""
         session_id = SecurityUtils.generate_secure_token()
         session_data = {
             'user_id': user_id,
@@ -446,7 +361,6 @@ class AuthService:
         with self.lock:
             self.active_sessions[session_id] = session_data
         
-        # Log session creation
         self.audit_logger.log_event(
             event_type='SESSION_CREATED',
             user_id=user_id,
@@ -457,7 +371,6 @@ class AuthService:
         return session_id
     
     def validate_session(self, session_id: str) -> Optional[Dict]:
-        """Validate session and check for security issues"""
         if not session_id:
             return None
         
@@ -467,7 +380,6 @@ class AuthService:
             
             session_data = self.active_sessions[session_id]
             
-            # Check session timeout
             if time.time() - session_data['last_activity'] > SecurityConfig.SESSION_TIMEOUT:
                 self.audit_logger.log_event(
                     event_type='SESSION_EXPIRED',
@@ -478,7 +390,6 @@ class AuthService:
                 del self.active_sessions[session_id]
                 return None
             
-            # Check for IP change (session hijacking detection)
             current_ip = request.remote_addr if request else '0.0.0.0'
             if (session_data['ip_address'] != current_ip and 
                 session_data['ip_address'] != '0.0.0.0'):
@@ -488,17 +399,12 @@ class AuthService:
                     details=f"IP changed from {session_data['ip_address']} to {current_ip}",
                     severity='WARNING'
                 )
-                # Optionally: destroy session on IP change
-                # del self.active_sessions[session_id]
-                # return None
             
-            # Update last activity
             session_data['last_activity'] = time.time()
             
             return session_data
     
     def destroy_session(self, session_id: str):
-        """Destroy session securely"""
         with self.lock:
             if session_id in self.active_sessions:
                 user_id = self.active_sessions[session_id]['user_id']
@@ -509,58 +415,11 @@ class AuthService:
                     severity='INFO'
                 )
                 del self.active_sessions[session_id]
-    
-    def record_failed_attempt(self, identifier: str):
-        """Record failed login attempt"""
-        with self.lock:
-            if identifier not in self.failed_attempts:
-                self.failed_attempts[identifier] = []
-            
-            self.failed_attempts[identifier].append(time.time())
-            
-            # Clean old attempts
-            window_start = time.time() - self.lockout_time
-            self.failed_attempts[identifier] = [
-                t for t in self.failed_attempts[identifier]
-                if t > window_start
-            ]
-            
-            attempt_count = len(self.failed_attempts[identifier])
-            
-            if attempt_count >= self.max_failed_attempts:
-                self.audit_logger.log_event(
-                    event_type='ACCOUNT_LOCKED',
-                    ip=identifier if SecurityUtils.validate_ip_address(identifier) else None,
-                    details=f"Account locked after {attempt_count} failed attempts",
-                    severity='CRITICAL'
-                )
-    
-    def is_account_locked(self, identifier: str) -> bool:
-        """Check if account is locked due to failed attempts"""
-        with self.lock:
-            if identifier not in self.failed_attempts:
-                return False
-            
-            window_start = time.time() - self.lockout_time
-            recent_attempts = [
-                t for t in self.failed_attempts[identifier]
-                if t > window_start
-            ]
-            
-            return len(recent_attempts) >= self.max_failed_attempts
-    
-    def clear_failed_attempts(self, identifier: str):
-        """Clear failed attempts after successful login"""
-        with self.lock:
-            if identifier in self.failed_attempts:
-                del self.failed_attempts[identifier]
 
 # ==================== SECURITY MIDDLEWARE DECORATORS ====================
 def require_api_key(f):
-    """Decorator to require API key for endpoint"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Skip API key check for health endpoints
         if request.endpoint in ['health_check', 'simple_ping', 'api_info']:
             return f(*args, **kwargs)
         
@@ -575,10 +434,8 @@ def require_api_key(f):
             )
             return jsonify({'error': 'API key required'}), 401
         
-        # Validate API key
         valid_key = SecurityConfig.API_KEY
         
-        # Use constant-time comparison to prevent timing attacks
         if not secrets.compare_digest(api_key, valid_key):
             audit_logger.log_event(
                 event_type='INVALID_API_KEY',
@@ -593,11 +450,9 @@ def require_api_key(f):
     return decorated_function
 
 def validate_json_content(f):
-    """Decorator to validate JSON content and size"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if request.method in ['POST', 'PUT']:
-            # Check content length
             if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
                 audit_logger.log_event(
                     event_type='REQUEST_TOO_LARGE',
@@ -607,7 +462,6 @@ def validate_json_content(f):
                 )
                 return jsonify({'error': 'Request too large'}), 413
             
-            # Validate JSON
             if request.is_json:
                 try:
                     data = request.get_json()
@@ -627,10 +481,8 @@ def validate_json_content(f):
     return decorated_function
 
 def sanitize_inputs(f):
-    """Decorator to sanitize all input parameters"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Sanitize URL parameters
         sanitized_kwargs = {}
         for key, value in kwargs.items():
             if isinstance(value, str):
@@ -638,12 +490,10 @@ def sanitize_inputs(f):
             else:
                 sanitized_kwargs[key] = value
         
-        # Sanitize form data
         if request.form:
             for key in request.form:
                 request.form[key] = SecurityUtils.sanitize_input(request.form[key])
         
-        # Sanitize JSON data
         if request.is_json:
             try:
                 data = request.get_json()
@@ -665,7 +515,7 @@ category_mappings: Optional[Dict[str, Any]] = None
 clinical_enhancer: Optional[Any] = None
 preprocessor: Optional[Any] = None
 
-def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Optional[Any], Optional[List[str]], Optional[Dict[str, Any]]]:
+def load_model_components():
     """Load all required model components"""
     global model_package, scaler, label_encoder, feature_names, category_mappings
     
@@ -691,28 +541,17 @@ def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Op
             if os.path.getsize(file_path) == 0:
                 raise ValueError(f"Model file is empty: {file}")
         
-        model_path = os.path.join(models_dir, 'mental_health_model.pkl')
-        model_package = joblib.load(model_path)
-        logger.info("Model package loaded")
+        model_package = joblib.load(os.path.join(models_dir, 'mental_health_model.pkl'))
+        scaler = joblib.load(os.path.join(models_dir, 'scaler.pkl'))
+        label_encoder = joblib.load(os.path.join(models_dir, 'label_encoder.pkl'))
         
-        scaler_path = os.path.join(models_dir, 'scaler.pkl')
-        scaler = joblib.load(scaler_path)
-        logger.info("Scaler loaded")
-        
-        encoder_path = os.path.join(models_dir, 'label_encoder.pkl')
-        label_encoder = joblib.load(encoder_path)
-        logger.info("Label encoder loaded")
-        
-        feature_names_path = os.path.join(models_dir, 'feature_names.pkl')
-        with open(feature_names_path, 'rb') as f:
+        with open(os.path.join(models_dir, 'feature_names.pkl'), 'rb') as f:
             feature_names = pickle.load(f)
-        logger.info(f"Feature names loaded: {len(feature_names)} features")
         
-        category_mappings_path = os.path.join(models_dir, 'category_mappings.pkl')
-        with open(category_mappings_path, 'rb') as f:
+        with open(os.path.join(models_dir, 'category_mappings.pkl'), 'rb') as f:
             category_mappings = pickle.load(f)
-        logger.info("Category mappings loaded")
         
+        logger.info(f"Model components loaded: {len(feature_names)} features")
         return model_package, scaler, label_encoder, feature_names, category_mappings
         
     except Exception as e:
@@ -902,16 +741,13 @@ class ClinicalDecisionEnhancer:
         return enhanced_prediction
 
 def initialize_clinical_enhancer():
-    """Initialize the clinical decision enhancer"""
     global clinical_enhancer
     if feature_names and label_encoder:
         clinical_enhancer = ClinicalDecisionEnhancer(feature_names, label_encoder)
         logger.info("Clinical Decision Enhancer initialized")
-    else:
-        logger.warning("Could not initialize Clinical Decision Enhancer")
 
 class ClinicalPreprocessor:
-    """EXACTLY replicates the preprocessing pipeline from train_model.py"""
+    """Replicates the preprocessing pipeline from train_model.py"""
     
     def __init__(self, category_mappings: Optional[Dict[str, Any]] = None):
         self.category_mappings = category_mappings or {}
@@ -919,98 +755,78 @@ class ClinicalPreprocessor:
     
     def log_step(self, step: str, details: str) -> None:
         self.processing_log.append(f"{step}: {details}")
-        logger.info(f"Preprocessing - {step}: {details}")
     
     def encode_user_responses(self, raw_responses: Dict[str, Any]) -> Dict[str, Any]:
         encoded_responses: Dict[str, Any] = {}
         
-        frequency_mapping = self.category_mappings.get('frequency', {'Seldom': 0, 'Sometimes': 1, 'Usually': 2, 'Most-Often': 3})
+        frequency_mapping = self.category_mappings.get('frequency', 
+            {'Seldom': 0, 'Sometimes': 1, 'Usually': 2, 'Most-Often': 3})
         yes_no_mapping = self.category_mappings.get('yes_no', {'NO': 0, 'YES': 1})
         sexual_activity_mapping = self.category_mappings.get('sexual_activity', {
-            'No interest': 0, 'Low interest': 1, 'Moderate interest': 2, 'High interest': 3, 'Very high interest': 4
+            'No interest': 0, 'Low interest': 1, 'Moderate interest': 2, 
+            'High interest': 3, 'Very high interest': 4
         })
         concentration_mapping = self.category_mappings.get('concentration', {
-            'Cannot concentrate': 0, 'Poor concentration': 1, 'Average concentration': 2, 'Good concentration': 3, 'Excellent concentration': 4
+            'Cannot concentrate': 0, 'Poor concentration': 1, 'Average concentration': 2, 
+            'Good concentration': 3, 'Excellent concentration': 4
         })
         optimism_mapping = self.category_mappings.get('optimism', {
-            'Extremely pessimistic': 0, 'Pessimistic': 1, 'Neutral outlook': 2, 'Optimistic': 3, 'Extremely optimistic': 4
+            'Extremely pessimistic': 0, 'Pessimistic': 1, 'Neutral outlook': 2, 
+            'Optimistic': 3, 'Extremely optimistic': 4
         })
         
         for feature, value in raw_responses.items():
-            training_feature_name = feature
-            
             if feature in ['Sadness', 'Euphoric', 'Exhausted', 'Sleep disorder', 'Anxiety', 
                         'Depressed_Mood', 'Irritability', 'Worrying', 'Fatigue']:
                 if value in frequency_mapping:
-                    encoded_value = frequency_mapping[value]
-                    encoded_responses[training_feature_name] = encoded_value
-                    self.log_step("Frequency_Encoding", f"{feature}: {value} -> {encoded_value}")
+                    encoded_responses[feature] = frequency_mapping[value]
                 else:
-                    encoded_responses[training_feature_name] = 1
-                    self.log_step("Frequency_Encoding", f"{feature}: {value} -> 1 (default)")
+                    encoded_responses[feature] = 1
             
-            elif feature in ['Mood Swing', 'Suicidal thoughts', 'Aggressive Response', 'Nervous Breakdown', 
-                           'Overthinking', 'Anorexia', 'Authority Respect', 'Try Explanation',
-                           'Ignore & Move-On', 'Admit Mistakes']:
+            elif feature in ['Mood Swing', 'Suicidal thoughts', 'Aggressive Response', 
+                           'Nervous Breakdown', 'Overthinking', 'Anorexia', 'Authority Respect', 
+                           'Try Explanation', 'Ignore & Move-On', 'Admit Mistakes']:
                 if value in yes_no_mapping:
-                    encoded_value = yes_no_mapping[value]
-                    encoded_responses[training_feature_name] = encoded_value
-                    self.log_step("YesNo_Encoding", f"{feature}: {value} -> {encoded_value}")
+                    encoded_responses[feature] = yes_no_mapping[value]
                 else:
-                    encoded_responses[training_feature_name] = 0
-                    self.log_step("YesNo_Encoding", f"{feature}: {value} -> 0 (default)")
+                    encoded_responses[feature] = 0
             
             elif feature == 'Concentration':
                 if value in concentration_mapping:
-                    encoded_value = concentration_mapping[value]
-                    encoded_responses[training_feature_name] = encoded_value
-                    self.log_step("Concentration_Encoding", f"{feature}: {value} -> {encoded_value}")
+                    encoded_responses[feature] = concentration_mapping[value]
                 else:
-                    encoded_responses[training_feature_name] = 2
-                    self.log_step("Concentration_Encoding", f"{feature}: {value} -> 2 (default)")
+                    encoded_responses[feature] = 2
             
             elif feature == 'Optimism':
                 if value in optimism_mapping:
-                    encoded_value = optimism_mapping[value]
-                    encoded_responses[training_feature_name] = encoded_value
-                    self.log_step("Optimism_Encoding", f"{feature}: {value} -> {encoded_value}")
+                    encoded_responses[feature] = optimism_mapping[value]
                 else:
-                    encoded_responses[training_feature_name] = 2
-                    self.log_step("Optimism_Encoding", f"{feature}: {value} -> 2 (default)")
+                    encoded_responses[feature] = 2
             
             elif feature == 'Sexual Activity':
                 if value in sexual_activity_mapping:
-                    encoded_value = sexual_activity_mapping[value]
-                    encoded_responses[training_feature_name] = encoded_value
-                    self.log_step("SexualActivity_Encoding", f"{feature}: {value} -> {encoded_value}")
+                    encoded_responses[feature] = sexual_activity_mapping[value]
                 else:
-                    encoded_responses[training_feature_name] = 2
-                    self.log_step("SexualActivity_Encoding", f"{feature}: {value} -> 2 (default)")
+                    encoded_responses[feature] = 2
             
             else:
-                encoded_responses[training_feature_name] = value
-                self.log_step("Direct_Copy", f"{feature}: {value} -> {value}")
+                encoded_responses[feature] = value
         
         return encoded_responses
     
     def apply_feature_engineering(self, encoded_responses: Dict[str, Any]) -> Dict[str, Any]:
         responses = encoded_responses.copy()
         
-        # 1. Mood Emotion Composite (already exists)
         if 'Mood Swing' in responses and 'Sadness' in responses:
             mood_swing = float(responses.get('Mood Swing', 0))
             sadness = float(responses.get('Sadness', 0))
             responses['Mood_Emotion_Composite'] = mood_swing * 0.6 + sadness * 0.4
-            self.log_step("Composite_Score", f"Mood_Emotion_Composite: {mood_swing}*0.6 + {sadness}*0.4 = {responses['Mood_Emotion_Composite']:.2f}")
         
-        # 2. Sleep Fatigue Composite (already exists)
         if 'Sleep disorder' in responses and 'Exhausted' in responses:
             sleep_disorder = float(responses.get('Sleep disorder', 0))
             exhausted = float(responses.get('Exhausted', 0))
             responses['Sleep_Fatigue_Composite'] = sleep_disorder * 0.7 + exhausted * 0.3
-            self.log_step("Composite_Score", f"Sleep_Fatigue_Composite: {sleep_disorder}*0.7 + {exhausted}*0.3 = {responses['Sleep_Fatigue_Composite']:.2f}")
         
-        # 3. Behavioral Stress Composite (already exists)
         behavioral_features = ['Aggressive Response', 'Nervous Breakdown', 'Overthinking']
         behavioral_scores = []
         for feat in behavioral_features:
@@ -1022,9 +838,7 @@ class ClinicalPreprocessor:
         
         if behavioral_scores:
             responses['Behavioral_Stress_Composite'] = sum(behavioral_scores) / len(behavioral_scores)
-            self.log_step("Composite_Score", f"Behavioral_Stress_Composite: {behavioral_scores} = {responses['Behavioral_Stress_Composite']:.2f}")
         
-        # 4. Risk Assessment Score (NEW - based on high-risk indicators)
         risk_indicators = ['Suicidal thoughts', 'Aggressive Response', 'Nervous Breakdown']
         risk_scores = []
         for feat in risk_indicators:
@@ -1035,32 +849,25 @@ class ClinicalPreprocessor:
                     risk_scores.append(0.0)
         
         if risk_scores:
-            responses['Risk_Assessment_Score'] = sum(risk_scores) * 10  # Scale to 0-30 range
-            self.log_step("Composite_Score", f"Risk_Assessment_Score: {risk_scores} * 10 = {responses['Risk_Assessment_Score']:.2f}")
+            responses['Risk_Assessment_Score'] = sum(risk_scores) * 10
         else:
             responses['Risk_Assessment_Score'] = 0.0
-            self.log_step("Composite_Score", f"Risk_Assessment_Score: No risk indicators, set to 0")
         
-        # 5. Cognitive Function Score (NEW - based on cognitive features)
         cognitive_features = ['Concentration', 'Optimism']
         cognitive_scores = []
         for feat in cognitive_features:
             if feat in responses:
                 try:
-                    # Normalize to 0-1 range (assuming Concentration and Optimism are 0-4 scale)
                     normalized_score = float(responses[feat]) / 4.0
                     cognitive_scores.append(normalized_score)
                 except (ValueError, TypeError):
-                    cognitive_scores.append(0.5)  # Default neutral
+                    cognitive_scores.append(0.5)
         
         if cognitive_scores:
-            responses['Cognitive_Function_Score'] = sum(cognitive_scores) / len(cognitive_scores) * 10  # Scale to 0-10
-            self.log_step("Composite_Score", f"Cognitive_Function_Score: {cognitive_scores} = {responses['Cognitive_Function_Score']:.2f}")
+            responses['Cognitive_Function_Score'] = sum(cognitive_scores) / len(cognitive_scores) * 10
         else:
-            responses['Cognitive_Function_Score'] = 5.0  # Default neutral
-            self.log_step("Composite_Score", f"Cognitive_Function_Score: No cognitive indicators, set to 5.0")
+            responses['Cognitive_Function_Score'] = 5.0
         
-        # 6. Mood Stability Score (NEW - inverse of mood volatility)
         mood_features = ['Mood Swing', 'Euphoric', 'Sadness']
         stability_scores = []
         
@@ -1068,12 +875,9 @@ class ClinicalPreprocessor:
             if feat in responses:
                 try:
                     value = float(responses[feat])
-                    # Lower values indicate more stability
                     if feat == 'Mood Swing':
-                        # Mood Swing: 0 = stable, 1 = volatile
-                        stability_scores.append(10 - (value * 10))  # Convert to stability score
+                        stability_scores.append(10 - (value * 10))
                     elif feat == 'Euphoric':
-                        # Euphoric: Extreme values (0 or 3) indicate instability, middle values indicate stability
                         if value == 0 or value == 3:
                             stability_scores.append(3.0)
                         elif value == 1 or value == 2:
@@ -1081,17 +885,14 @@ class ClinicalPreprocessor:
                         else:
                             stability_scores.append(5.0)
                     elif feat == 'Sadness':
-                        # Sadness: Lower values indicate stability
-                        stability_scores.append(10 - (value * 3.33))  # Scale 0-3 to 0-10
+                        stability_scores.append(10 - (value * 3.33))
                 except (ValueError, TypeError):
-                    stability_scores.append(5.0)  # Default neutral
+                    stability_scores.append(5.0)
         
         if stability_scores:
             responses['Mood_Stability_Score'] = sum(stability_scores) / len(stability_scores)
-            self.log_step("Composite_Score", f"Mood_Stability_Score: {stability_scores} = {responses['Mood_Stability_Score']:.2f}")
         else:
-            responses['Mood_Stability_Score'] = 5.0  # Default neutral
-            self.log_step("Composite_Score", f"Mood_Stability_Score: No mood indicators, set to 5.0")
+            responses['Mood_Stability_Score'] = 5.0
         
         return responses
     
@@ -1122,9 +923,6 @@ class ClinicalPreprocessor:
             training_feature_name = feature_name_mapping.get(feature, feature)
             normalized_responses[training_feature_name] = value
             
-        self.log_step("Feature_Name_Mapping", 
-                    f"Mapped {len(raw_responses)} features to {len(normalized_responses)} training features")
-        
         return normalized_responses
     
     def validate_clinical_safety(self, responses: Dict[str, Any]) -> Tuple[bool, List[str]]:
@@ -1167,7 +965,7 @@ class ClinicalPreprocessor:
 
     def preprocess(self, raw_responses: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str], List[str]]:
         self.processing_log = []
-        self.log_step("Pipeline_Start", f"Processing {len(raw_responses)} raw features: {list(raw_responses.keys())}")
+        self.log_step("Pipeline_Start", f"Processing {len(raw_responses)} raw features")
         
         try:
             normalized_responses = self.normalize_feature_names(raw_responses)
@@ -1182,18 +980,9 @@ class ClinicalPreprocessor:
             
         except Exception as e:
             self.log_step("Pipeline_Error", f"Preprocessing failed: {str(e)}")
-            import traceback
-            self.log_step("Pipeline_Error", f"Traceback: {traceback.format_exc()}")
-            raise e
-
-def safe_float(value: Any, default: float = 0.0) -> float:
-    try:
-        return float(value)
-    except (ValueError, TypeError):
-        return default
+            raise
 
 def validate_assessment_responses(responses: Dict[str, Any]) -> Tuple[bool, str]:
-    """Validate assessment responses for security"""
     try:
         if not isinstance(responses, dict):
             return False, "Responses must be a dictionary"
@@ -1222,10 +1011,6 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
             logger.error("Feature names not loaded")
             return None
             
-        # Debug: Show expected vs actual features
-        logger.info(f"Expected features ({len(feature_names)}): {feature_names}")
-        logger.info(f"Actual features ({len(processed_responses)}): {list(processed_responses.keys())}")
-            
         feature_array = np.zeros(len(feature_names))
         
         missing_features: List[str] = []
@@ -1241,17 +1026,13 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
                         feature_array[i] = float(value)
                     except (ValueError, TypeError):
                         feature_array[i] = 0
-                        logger.warning(f"Feature {feature_name} value {value} could not be converted to float, using 0")
                 found_features.append(feature_name)
             else:
                 feature_array[i] = 0
                 missing_features.append(feature_name)
         
         if missing_features:
-            logger.warning(f"Missing features filled with defaults: {missing_features}")
-        
-        if found_features:
-            logger.info(f"Found features: {found_features}")
+            logger.warning(f"Missing features filled with defaults: {len(missing_features)}")
         
         logger.info(f"Feature array created: {len(feature_array)} features, "
                    f"{len(missing_features)} missing, {len(found_features)} found")
@@ -1262,9 +1043,8 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
         
     except Exception as e:
         logger.error(f"Feature conversion error: {e}")
-        import traceback
-        logger.error(f"Traceback: {traceback.format_exc()}")
         return None
+
 # Initialize security services
 audit_logger = AuditLogger()
 encryption_service = EncryptionService()
@@ -1272,27 +1052,22 @@ rate_limiter = AdvancedRateLimiter()
 auth_service = AuthService()
 
 # ==================== FLASK APP SETUP ====================
-assessment_storage: Dict[str, Dict[str, Any]] = {}
-
 app = Flask(__name__, 
            static_folder='frontend',
            template_folder='frontend')
 
-# Configure Flask security
 app.secret_key = SecurityConfig.SECRET_KEY
 app.config['SESSION_COOKIE_SECURE'] = SecurityConfig.SESSION_COOKIE_SECURE
 app.config['SESSION_COOKIE_HTTPONLY'] = SecurityConfig.SESSION_COOKIE_HTTPONLY
 app.config['SESSION_COOKIE_SAMESITE'] = SecurityConfig.SESSION_COOKIE_SAMESITE
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# Validate environment at startup
 try:
     validate_environment()
     logger.info("Environment validation passed")
@@ -1300,20 +1075,16 @@ except Exception as e:
     logger.error(f"CRITICAL: Environment validation failed: {e}")
     sys.exit(1)
 
-# Load model components
 model_package, scaler, label_encoder, feature_names, category_mappings = load_model_components()
 initialize_clinical_enhancer()
-
-# Initialize preprocessor
 preprocessor = ClinicalPreprocessor(category_mappings)
 
-# ==================== SECURE DATABASE SETUP ====================
-def get_postgres_connection():
-    """Get PostgreSQL database connection using environment variables ONLY"""
+# ==================== DATABASE SETUP ====================
+def get_database_connection():
+    """Get database connection"""
     try:
         database_url = SecurityConfig.get_database_url()
         
-        # Check if it's SQLite
         if database_url.startswith('sqlite:///'):
             sqlite_path = database_url.replace('sqlite:///', '')
             if sqlite_path == 'mental_health_assessments.db':
@@ -1323,14 +1094,8 @@ def get_postgres_connection():
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON")
             conn.execute("PRAGMA journal_mode = WAL")
-            logger.info("Development SQLite connection established")
             return conn
         
-        # Validate database URL doesn't contain hardcoded credentials
-        #if 'QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA' in database_url:
-        #    raise ValueError("Hardcoded credentials detected in database URL")
-        
-        # Connect with SSL in production
         ssl_mode = 'require' if os.environ.get('RENDER') else 'prefer'
         
         conn = psycopg.connect(
@@ -1339,19 +1104,16 @@ def get_postgres_connection():
             sslmode=ssl_mode
         )
         
-        # Set statement timeout to prevent long-running queries
         with conn.cursor() as cur:
-            cur.execute("SET statement_timeout = 30000")  # 30 seconds
+            cur.execute("SET statement_timeout = 30000")
         
-        logger.info("Secure PostgreSQL connection established")
         return conn
         
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
         
-        # Fallback to SQLite ONLY in development
         if os.environ.get('RENDER'):
-            raise e  # Don't fallback in production
+            raise e
         
         try:
             sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
@@ -1359,31 +1121,21 @@ def get_postgres_connection():
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA foreign_keys = ON")
             conn.execute("PRAGMA journal_mode = WAL")
-            logger.info("Development SQLite connection established")
             return conn
-        except Exception as sqlite_error:
-            logger.error(f"SQLite fallback failed: {sqlite_error}")
+        except Exception:
             raise e
-           
-        
+
 def init_database():
-    """Initialize database with security features"""
+    """Initialize database"""
     try:
-        conn = get_postgres_connection()
+        conn = get_database_connection()
         
-        # Determine if it's SQLite or PostgreSQL by checking cursor context manager support
-        # PostgreSQL psycopg cursors support context managers (__enter__/__exit__)
-        # SQLite cursors do not
-        
-        # Try to get a cursor and check if it has __enter__ method
         try:
             cursor = conn.cursor()
             has_context_manager = hasattr(cursor, '__enter__')
             
             if has_context_manager:
-                # PostgreSQL
                 with cursor as cur:
-                    # Create assessments table with audit columns
                     cur.execute('''
                         CREATE TABLE IF NOT EXISTS assessments (
                             id TEXT PRIMARY KEY,
@@ -1410,13 +1162,10 @@ def init_database():
                         )
                     ''')
                     
-                    # Create indexes
                     cur.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
                     cur.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
                     cur.execute('CREATE INDEX IF NOT EXISTS idx_created_at ON assessments(created_at)')
             else:
-                # SQLite
-                # Create assessments table with audit columns
                 cursor.execute('''
                     CREATE TABLE IF NOT EXISTS assessments (
                         id TEXT PRIMARY KEY,
@@ -1443,7 +1192,6 @@ def init_database():
                     )
                 ''')
                 
-                # Create indexes
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_created_at ON assessments(created_at)')
@@ -1453,7 +1201,7 @@ def init_database():
         
         conn.commit()
         conn.close()
-        logger.info("Secure database initialized successfully")
+        logger.info("Database initialized successfully")
         
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
@@ -1462,15 +1210,12 @@ def init_database():
             details=str(e),
             severity='CRITICAL'
         )
-        
-         
+
 def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
-    """Save assessment data with audit trail"""
+    """Save assessment data"""
     try:
-        # Deep copy and sanitize
         sanitized_data = assessment_data.copy()
         
-        # Sanitize patient info
         if 'patient_info' in sanitized_data:
             patient_info = sanitized_data['patient_info']
             patient_info['name'] = SecurityUtils.sanitize_input(patient_info.get('name', ''))
@@ -1478,7 +1223,6 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
             patient_info['age'] = SecurityUtils.sanitize_input(patient_info.get('age', ''))
             patient_info['gender'] = SecurityUtils.sanitize_input(patient_info.get('gender', ''))
         
-        # Prepare audit log
         audit_entry = {
             'timestamp': datetime.now(timezone.utc).isoformat(),
             'action': 'CREATE',
@@ -1487,22 +1231,18 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
             'changes': {}
         }
         
-        conn = get_postgres_connection()
+        conn = get_database_connection()
         
         try:
             cursor = conn.cursor()
             has_context_manager = hasattr(cursor, '__enter__')
             
             if has_context_manager:
-                # PostgreSQL
                 with cursor as cur:
-                    # Check if assessment already exists
-                    # Check if assessment already exists
                     cur.execute('SELECT id FROM assessments WHERE id = %s', (sanitized_data.get('id'),))
                     existing = cur.fetchone()
 
                     if existing:
-                        # UPDATE existing assessment
                         audit_entry['action'] = 'UPDATE'
                         cur.execute('''
                             UPDATE assessments SET
@@ -1546,7 +1286,6 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
                             sanitized_data.get('id')
                         ))
                     else:
-                        # INSERT new assessment
                         audit_entry['action'] = 'CREATE'
                         cur.execute('''
                             INSERT INTO assessments (
@@ -1579,14 +1318,11 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
                             json.dumps([audit_entry])
                         ))
             else:
-                # SQLite
-                # Check if assessment already exists
                 cursor.execute('SELECT id FROM assessments WHERE id = ?', (sanitized_data.get('id'),))
                 existing = cursor.fetchone()
                 
                 if existing:
                     audit_entry['action'] = 'UPDATE'
-                    # Update existing assessment
                     cursor.execute('''
                         UPDATE assessments SET
                             assessment_timestamp = ?,
@@ -1629,7 +1365,6 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
                         sanitized_data.get('id')
                     ))
                 else:
-                    # Insert new assessment
                     cursor.execute('''
                         INSERT INTO assessments (
                             id, assessment_timestamp, report_timestamp, timezone,
@@ -1667,7 +1402,6 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
             cursor.close()
             conn.close()
         
-        # Log successful save
         audit_logger.log_event(
             event_type='ASSESSMENT_SAVED',
             details=f"Assessment {sanitized_data.get('id')} saved successfully",
@@ -1684,51 +1418,15 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
             severity='ERROR'
         )
         return False
-    
-    
-def is_postgresql(conn):
-    """Determine if connection is PostgreSQL (psycopg) or SQLite"""
-    try:
-        cursor = conn.cursor()
-        is_pg = hasattr(cursor, '__enter__')
-        cursor.close()
-        return is_pg
-    except:
-        return False
 
-def execute_db_query(conn, query, params=None, fetch=False):
-    """Execute query with proper handling for SQLite and PostgreSQL"""
-    is_pg = is_postgresql(conn)
-    cursor = conn.cursor()
-    
-    try:
-        if params:
-            if is_pg:
-                cursor.execute(query, params)
-            else:
-                # SQLite uses ? placeholders, convert %s to ?
-                if '%s' in query:
-                    query = query.replace('%s', '?')
-                cursor.execute(query, params)
-        else:
-            cursor.execute(query)
-        
-        if fetch:
-            return cursor.fetchall()
-        return None
-    finally:
-        cursor.close()
-        
-            
 def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
-    """Load assessments from database, optionally filtered by patient number"""
+    """Load assessments from database"""
     try:
-        conn = get_postgres_connection()
+        conn = get_database_connection()
         
         assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
         
         if hasattr(conn, 'cursor'):
-            # PostgreSQL
             with conn.cursor() as cur:
                 if patient_number:
                     cur.execute('''
@@ -1741,7 +1439,6 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
                 
                 rows = cur.fetchall()
         else:
-            # SQLite
             c = conn.cursor()
             
             if patient_number:
@@ -1767,7 +1464,6 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
             if patient_num not in assessments_by_patient:
                 assessments_by_patient[patient_num] = []
             
-            # Decrypt sensitive fields if needed
             all_diagnoses_json = row_dict['all_diagnoses_json']
             responses_json = row_dict['responses_json']
             clinical_insights_json = row_dict['clinical_insights_json']
@@ -1778,7 +1474,7 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
                     responses_json = encryption_service.decrypt_data(responses_json) if responses_json else '{}'
                     clinical_insights_json = encryption_service.decrypt_data(clinical_insights_json) if clinical_insights_json else '{}'
                 except:
-                    pass  # If decryption fails, use as-is (might be plain text)
+                    pass
             
             all_diagnoses = json.loads(all_diagnoses_json) if all_diagnoses_json else []
             responses = json.loads(responses_json) if responses_json else {}
@@ -1819,10 +1515,9 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
 def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
     """Load a single specific assessment from database"""
     try:
-        conn = get_postgres_connection()
+        conn = get_database_connection()
         
         if hasattr(conn, 'cursor'):
-            # PostgreSQL
             with conn.cursor() as cur:
                 cur.execute('''
                     SELECT * FROM assessments 
@@ -1831,7 +1526,6 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
                 
                 row = cur.fetchone()
         else:
-            # SQLite
             c = conn.cursor()
             
             c.execute('''
@@ -1851,7 +1545,6 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
         else:
             row_dict = dict(row)
         
-        # Decrypt sensitive fields if needed
         all_diagnoses_json = row_dict['all_diagnoses_json']
         responses_json = row_dict['responses_json']
         clinical_insights_json = row_dict['clinical_insights_json']
@@ -1862,7 +1555,7 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
                 responses_json = encryption_service.decrypt_data(responses_json) if responses_json else '{}'
                 clinical_insights_json = encryption_service.decrypt_data(clinical_insights_json) if clinical_insights_json else '{}'
             except:
-                pass  # If decryption fails, use as-is
+                pass
         
         all_diagnoses = json.loads(all_diagnoses_json) if all_diagnoses_json else []
         responses = json.loads(responses_json) if responses_json else {}
@@ -1891,7 +1584,6 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
             'clinical_insights': clinical_insights
         }
         
-        logger.info(f"Loaded single assessment from database: {assessment_id}")
         return assessment
         
     except Exception as e:
@@ -1901,17 +1593,15 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
 def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
     """Delete assessment from database"""
     try:
-        conn = get_postgres_connection()
+        conn = get_database_connection()
         
         if hasattr(conn, 'cursor'):
-            # PostgreSQL
             with conn.cursor() as cur:
                 cur.execute('''
                     DELETE FROM assessments 
                     WHERE patient_number = %s AND id = %s
                 ''', (patient_number, assessment_id))
         else:
-            # SQLite
             c = conn.cursor()
             
             c.execute('''
@@ -1929,17 +1619,14 @@ def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
         logger.error(f"Error deleting from database: {e}")
         return False
 
-# Initialize database at startup
 init_database()
 
-# Security middleware
 @app.after_request
 def set_security_headers(response):
     """Set security headers on all responses"""
     for header, value in SecurityConfig.SECURITY_HEADERS.items():
         response.headers[header] = value
     
-    # Add request ID for tracing
     request_id = getattr(request, 'request_id', None)
     if request_id:
         response.headers['X-Request-ID'] = request_id
@@ -1948,11 +1635,8 @@ def set_security_headers(response):
 
 @app.before_request
 def security_middleware():
-    """Comprehensive security middleware"""
-    # Generate request ID for tracing
     request.request_id = SecurityUtils.generate_request_id()
     
-    # Log request for auditing
     audit_logger.log_event(
         event_type='REQUEST_START',
         ip=request.remote_addr,
@@ -1960,7 +1644,6 @@ def security_middleware():
         severity='INFO'
     )
     
-    # Validate request size early
     if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
         audit_logger.log_event(
             event_type='REQUEST_TOO_LARGE',
@@ -1970,7 +1653,6 @@ def security_middleware():
         )
         return jsonify({'error': 'Request too large'}), 413
     
-    # Rate limiting
     if request.endpoint and request.endpoint.startswith('api'):
         client_ip = request.remote_addr
         endpoint = request.endpoint.replace('api_', '').replace('_', '-')
@@ -1983,7 +1665,6 @@ def security_middleware():
                 'message': message
             }), 429
 
-# Configure CORS with security
 if os.environ.get('RENDER'):
     CORS(app, origins=[
         'https://mentivio.onrender.com',
@@ -2001,19 +1682,19 @@ else:
     }})
 
 # ==================== ROUTES ====================
+
 @app.route('/api/config', methods=['GET'])
 def get_config():
-    """Provide frontend configuration including API key"""
+    """Provide necessary configuration to frontend"""
     return jsonify({
         'api_key': SecurityConfig.API_KEY,
+        'api_base_url': request.host_url.rstrip('/'),
+        'version': '4.0',
         'features': {
-            'assessment': True,
-            'history': True,
-            'pdf_export': True,
-            'security': True
-        },
-        'version': '3.0',
-        'timestamp': datetime.now(timezone.utc).isoformat()
+            'pdf_generation': True,
+            'assessment_history': True,
+            'clinical_enhancement': True
+        }
     })
     
 @app.route('/')
@@ -2059,17 +1740,9 @@ def serve_css(filename):
 def serve_js(filename):
     return send_from_directory('frontend/js', filename)
 
-@app.route('/resources/css/<path:filename>')
-def serve_resource_css(filename):
-    return send_from_directory('frontend/resources', filename)
-
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory('frontend/assets', filename)
-
-@app.route('/resource-detail.css')
-def serve_resource_detail_css():
-    return send_from_directory('frontend/resources', 'resource-detail.css')
 
 @app.route('/<path:path>')
 def serve_static_files(path):
@@ -2085,24 +1758,13 @@ def serve_static_files(path):
     except:
         return send_from_directory('frontend', 'Home.html')
 
-@app.route('/debug-path')
-def debug_path():
-    return jsonify({
-        'current_path': request.path,
-        'url': request.url,
-        'referrer': request.referrer,
-        'is_resource': '/resources/' in request.path,
-        'suggested_base_path': '../' if '/resources/' in request.path else './'
-    })
-
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    """Security health check endpoint"""
     try:
         db_healthy = False
         db_type = "Unknown"
         try:
-            conn = get_postgres_connection()
+            conn = get_database_connection()
             if conn:
                 if hasattr(conn, 'cursor'):
                     with conn.cursor() as cur:
@@ -2115,8 +1777,8 @@ def health_check():
                     db_healthy = True
                     db_type = 'SQLite'
                 conn.close()
-        except Exception as e:
-            logger.warning(f"Database health check warning: {e}")
+        except Exception:
+            pass
 
         components_loaded = all([
             model_package is not None,
@@ -2126,7 +1788,6 @@ def health_check():
             category_mappings is not None
         ])
         
-        # Check security configuration
         security_checks = {
             'secret_key_set': bool(os.environ.get('SECRET_KEY')),
             'secret_key_length': len(os.environ.get('SECRET_KEY', '')) >= 32,
@@ -2189,7 +1850,6 @@ def simple_ping():
 def parse_assessment_timestamp(timestamp_str: str) -> datetime:
     try:
         if not timestamp_str or timestamp_str == 'N/A':
-            logger.warning("Empty or N/A timestamp provided, using current UTC time")
             return datetime.now(timezone.utc)
         
         if 'T' in timestamp_str:
@@ -2206,17 +1866,14 @@ def parse_assessment_timestamp(timestamp_str: str) -> datetime:
                 try:
                     dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
                 except ValueError:
-                    logger.warning(f"Could not parse timestamp format: {timestamp_str}, using current time")
                     return datetime.now(timezone.utc)
         
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
             
-        logger.info(f"Successfully parsed timestamp: {timestamp_str} -> {dt.isoformat()}")
         return dt
         
-    except (ValueError, TypeError) as e:
-        logger.warning(f"Could not parse timestamp '{timestamp_str}': {e}, using current UTC time")
+    except (ValueError, TypeError):
         return datetime.now(timezone.utc)
 
 @app.route('/api/predict', methods=['POST'])
@@ -2224,18 +1881,15 @@ def parse_assessment_timestamp(timestamp_str: str) -> datetime:
 @validate_json_content
 @sanitize_inputs
 def predict():
-    """Secure prediction endpoint with all security checks"""
     try:
         data = request.json
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
-        # Validate inputs
         user_responses = data.get('responses', {})
         patient_info = data.get('patientInfo', {})
         assessment_start_time = data.get('assessment_start_time')
         
-        # Input validation
         responses_valid, responses_msg = validate_assessment_responses(user_responses)
         if not responses_valid:
             audit_logger.log_event(
@@ -2256,15 +1910,12 @@ def predict():
             )
             return jsonify({'error': f'Invalid patient data: {patient_msg}'}), 400
         
-        # Log prediction request
         audit_logger.log_event(
             event_type='PREDICTION_REQUEST',
             ip=request.remote_addr,
             details=f"Prediction for patient: {patient_info.get('name', 'Unknown')}",
             severity='INFO'
         )
-        
-        logger.info(f"Received {len(user_responses)} validated responses for patient: {patient_info.get('name', 'Unknown')}")
         
         client_timezone = request.headers.get('X-Client-Timezone', 'UTC')
        
@@ -2285,18 +1936,15 @@ def predict():
                 
                 time_diff = client_now - assessment_dt_client
                 
-            except Exception as e:
-                logger.warning(f"Could not parse assessment start time: {e}, using current time")
+            except Exception:
                 assessment_date_str = client_now.isoformat()
                 time_diff = timedelta(0)
         else:
-            logger.warning("No assessment start time provided, using current time")
             assessment_date_str = client_now.isoformat()
             time_diff = timedelta(0)
 
         try:
             processed_responses, processing_log, safety_warnings = preprocessor.preprocess(user_responses)
-            logger.info("Preprocessing completed successfully")
         except Exception as e:
             logger.error(f"Preprocessing failed: {e}")
             return jsonify({'error': f'Data preprocessing failed: {str(e)}'}), 400
@@ -2307,8 +1955,6 @@ def predict():
         
         try:
             feature_array_scaled = scaler.transform(feature_df)
-            logger.info("Feature scaling completed")
-            
             feature_df_scaled = pd.DataFrame(feature_array_scaled, columns=feature_names)
             
         except Exception as e:
@@ -2318,7 +1964,6 @@ def predict():
         try:
             prediction = model_package['model'].predict(feature_df_scaled)
             probabilities = model_package['model'].predict_proba(feature_df_scaled)
-            logger.info("Prediction completed")
             
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
@@ -2429,7 +2074,6 @@ def predict():
         
         logger.info(f"Secure assessment completed successfully for patient: {patient_info.get('name', 'Unknown')}")
         
-        # Return response with security headers
         response = jsonify(response_data)
         response.headers['X-Content-Security-Policy'] = SecurityConfig.SECURITY_HEADERS['Content-Security-Policy']
         return response
@@ -2448,32 +2092,18 @@ def predict():
 @require_api_key
 @validate_json_content
 def save_assessment():
-    """Secure assessment saving"""
     try:
         data = request.json
         if not data:
-            logger.warning("No data provided to save_assessment")
             return jsonify({'error': 'No data provided'}), 400
             
         assessment_data = data.get('assessment_data', {})
         if not assessment_data:
-            logger.warning("No assessment_data in request")
             return jsonify({'error': 'No assessment data provided'}), 400
         
         if not isinstance(assessment_data, dict):
-            logger.warning(f"Invalid assessment data type: {type(assessment_data)}")
             return jsonify({'error': 'Invalid assessment data format'}), 400
         
-        # Log what we received
-        logger.info(f"Save assessment received - ID: {assessment_data.get('id', 'NO_ID')}, "
-                   f"Responses: {len(assessment_data.get('responses', {}))}, "
-                   f"Patient: {assessment_data.get('patient_info', {}).get('name', 'NO_NAME')}")
-        
-        # Validate we have responses
-        if 'responses' not in assessment_data or not assessment_data['responses']:
-            logger.warning(f"No responses in assessment data for ID: {assessment_data.get('id', 'NO_ID')}")
-        
-        # Add security metadata
         assessment_data['_security'] = {
             'saved_at': datetime.now(timezone.utc).isoformat(),
             'saved_by_ip': request.remote_addr,
@@ -2494,7 +2124,6 @@ def save_assessment():
             assessment_data['timestamp'] = datetime.now(timezone.utc).isoformat()
         
         if save_assessment_to_db(assessment_data):
-            logger.info(f"Secure assessment saved to database: {assessment_data['id']}")
             audit_logger.log_event(
                 event_type='ASSESSMENT_SAVED_SUCCESS',
                 ip=request.remote_addr,
@@ -2632,12 +2261,10 @@ def get_single_assessment():
         target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id)
         
         if not target_assessment:
-            logger.warning(f"Assessment not found: {assessment_id} for {patient_name} (#{patient_number})")
             return jsonify({'error': 'Assessment not found'}), 404
         
         enhanced_assessment = enhance_assessment_data(target_assessment)
         
-        logger.info(f"Single assessment retrieved: {assessment_id}")
         return jsonify({
             'success': True,
             'assessment': enhanced_assessment
@@ -2660,7 +2287,6 @@ def delete_assessment():
             return jsonify({'error': 'Patient number and assessment ID required'}), 400
         
         if delete_assessment_from_db(patient_number, assessment_id):
-            logger.info(f"Assessment {assessment_id} deleted for patient #{patient_number}")
             audit_logger.log_event(
                 event_type='ASSESSMENT_DELETED',
                 ip=request.remote_addr,
@@ -2705,7 +2331,6 @@ def api_info():
 @app.route('/api/security-status', methods=['GET'])
 @require_api_key
 def security_status():
-    """Comprehensive security status endpoint"""
     security_info = {
         'authentication': {
             'api_key_required': True,
@@ -2753,7 +2378,6 @@ def security_status():
         'recommendations': []
     }
     
-    # Generate recommendations
     if not security_info['configuration']['api_key_set']:
         security_info['recommendations'].append('Set API_KEY environment variable')
     if not security_info['configuration']['encryption_key_set']:
@@ -2766,25 +2390,21 @@ def security_status():
     return jsonify(security_info)
 
 def calculate_security_score(security_info: Dict) -> int:
-    """Calculate security score (0-100)"""
     score = 0
     max_score = 0
     
-    # Check authentication
     auth_items = security_info['authentication']
     for key, value in auth_items.items():
         max_score += 10
         if value:
             score += 10
     
-    # Check data protection
     data_items = security_info['data_protection']
     for key, value in data_items.items():
         max_score += 10
         if value:
             score += 10
     
-    # Check configuration
     config_items = security_info['configuration']
     for key, value in config_items.items():
         max_score += 10
@@ -2796,19 +2416,16 @@ def calculate_security_score(security_info: Dict) -> int:
 @app.route('/api/audit-logs', methods=['GET'])
 @require_api_key
 def get_audit_logs():
-    """Get recent audit logs (admin only)"""
     try:
-        # Check admin API key
         admin_key = request.headers.get('X-Admin-Key')
         expected_admin_key = os.environ.get('ADMIN_API_KEY')
         
         if not admin_key or not secrets.compare_digest(admin_key, expected_admin_key or ''):
             return jsonify({'error': 'Admin access required'}), 403
         
-        # Read audit logs
         try:
             with open(SecurityConfig.AUDIT_LOG_FILE, 'r') as f:
-                logs = [json.loads(line) for line in f.readlines()[-100:]]  # Last 100 entries
+                logs = [json.loads(line) for line in f.readlines()[-100:]]
         except FileNotFoundError:
             logs = []
         
@@ -2822,23 +2439,7 @@ def get_audit_logs():
         logger.error(f"Error reading audit logs: {e}")
         return jsonify({'error': 'Failed to read audit logs'}), 500
 
-# Add this new endpoint for CSP violation reports
-@app.route('/csp-violation-report-endpoint', methods=['POST'])
-def csp_violation_report():
-    """Endpoint to receive CSP violation reports"""
-    try:
-        report = request.get_json(force=True)
-        audit_logger.log_event(
-            event_type='CSP_VIOLATION',
-            ip=request.remote_addr,
-            details=json.dumps(report),
-            severity='WARNING'
-        )
-        return jsonify({'status': 'ok'})
-    except:
-        return jsonify({'status': 'ok'})
-
-def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: str = "") -> str:
+def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str) -> str:
     try:
         if not timestamp_str or timestamp_str == 'N/A':
             return "N/A"
@@ -2855,11 +2456,11 @@ def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: st
             formatted = local_dt.strftime("%B %d, %Y at %H:%M %Z")
             return formatted
             
-        except Exception as tz_error:
+        except Exception:
             fallback = dt.strftime("%B %d, %Y at %H:%M UTC")
             return fallback
             
-    except Exception as e:
+    except Exception:
         return timestamp_str or "Timestamp unavailable"
 
 @app.route('/api/generate-pdf-report', methods=['POST'])
@@ -2923,8 +2524,8 @@ def generate_pdf_report():
         report_timestamp_str = assessment_data.get('timestamp', '')
         timezone_used = assessment_data.get('timezone', 'UTC')
         
-        assessment_date_str = format_timestamp_for_pdf(assessment_timestamp_str, timezone_used, "Assessment")
-        report_date_str = format_timestamp_for_pdf(report_timestamp_str, timezone_used, "Report")
+        assessment_date_str = format_timestamp_for_pdf(assessment_timestamp_str, timezone_used)
+        report_date_str = format_timestamp_for_pdf(report_timestamp_str, timezone_used)
         
         meta_data = [
             ["Assessment ID:", assessment_data.get('id', 'N/A')],
@@ -3048,59 +2649,6 @@ def generate_pdf_report():
         
         story.append(Spacer(1, 20))
         
-        story.append(Paragraph("KEY ASSESSMENT RESPONSES", heading_style))
-        responses = assessment_data.get('responses', {})
-        
-        if responses:
-            response_data = [["Domain", "Question", "Response"]]
-            
-            category_mapping = {
-                'Mood Swing': 'Mood & Emotions',
-                'Sadness': 'Mood & Emotions',
-                'Euphoric': 'Mood & Emotions',
-                'Anxiety': 'Anxiety & Worry',
-                'Overthinking': 'Anxiety & Worry',
-                'Sleep disorder': 'Sleep & Energy',
-                'Exhausted': 'Sleep & Energy',
-                'Suicidal thoughts': 'Behavioral',
-                'Aggressive Response': 'Behavioral',
-                'Concentration': 'Cognitive',
-                'Optimism': 'Cognitive'
-            }
-            
-            grouped_responses = {}
-            for feature, response in responses.items():
-                category = category_mapping.get(feature, 'Other')
-                if category not in grouped_responses:
-                    grouped_responses[category] = []
-                
-                question_text = feature.replace('_', ' ').title()
-                grouped_responses[category].append([question_text, str(response)])
-            
-            for category, responses_list in grouped_responses.items():
-                for i, (question, response) in enumerate(responses_list):
-                    if i == 0:
-                        response_data.append([category, question, response])
-                    else:
-                        response_data.append(["", question, response])
-            
-            response_table = Table(response_data, colWidths=[1.2*inch, 3.3*inch, 1.5*inch])
-            response_table.setStyle(TableStyle([
-                ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 9),
-                ('FONT', (0, 1), (-1, -1), 'Helvetica', 8),
-                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ffffff')),
-                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
-                ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
-                ('PADDING', (0, 0), (-1, -1), 6),
-                ('SPAN', (0, 1), (0, 1)),
-            ]))
-            
-            story.append(response_table)
-        story.append(Spacer(1, 25))
-        
         story.append(Paragraph("IMPORTANT DISCLAIMER", heading_style))
         disclaimer_text = """
         This mental health assessment is provided for informational and educational purposes only. 
@@ -3141,17 +2689,14 @@ def generate_pdf_report():
         filename = f"mental_health_assessment_{assessment_data.get('id', 'report')}.pdf"
         response.headers['Content-Disposition'] = f'attachment; filename={filename}'
         
-        logger.info(f"PDF report generated for assessment {assessment_data.get('id', 'unknown')}")
         return response
         
     except Exception as e:
         logger.error(f"Error generating PDF report: {e}")
         return jsonify({'error': f'Failed to generate PDF report: {str(e)}'}), 500
 
-# ==================== ERROR HANDLERS ====================
 @app.errorhandler(404)
 def not_found(error):
-    """Secure 404 handler"""
     audit_logger.log_event(
         event_type='PAGE_NOT_FOUND',
         ip=request.remote_addr,
@@ -3169,7 +2714,6 @@ def not_found(error):
 
 @app.errorhandler(500)
 def internal_error(error):
-    """Secure 500 handler - don't leak internal errors"""
     logger.error(f"Internal server error: {error}")
     audit_logger.log_event(
         event_type='INTERNAL_SERVER_ERROR',
@@ -3202,57 +2746,11 @@ def too_many_requests(error):
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
 
-# ==================== DEPLOYMENT SETUP ====================
-def create_env_template():
-    """Create .env.template with required variables"""
-    template = """# REQUIRED: Security
-SECRET_KEY=your-32-character-minimum-secret-key-here
-API_KEY=your-api-key-for-client-applications
-
-# OPTIONAL but RECOMMENDED: Encryption
-ENCRYPTION_KEY=your-fernet-encryption-key-base64
-ENCRYPT_SENSITIVE_DATA=true
-
-# REQUIRED: Database (PostgreSQL)
-DATABASE_URL=postgresql://user:password@host:port/database
-# OR individual variables:
-# DB_HOST=your-db-host
-# DB_NAME=your-db-name
-# DB_USER=your-db-user
-# DB_PASSWORD=your-db-password
-# DB_PORT=5432
-
-# OPTIONAL: Security tuning
-SESSION_TIMEOUT=3600
-RATE_LIMIT_REQUESTS=100
-RATE_LIMIT_WINDOW=3600
-MAX_FILE_SIZE=16777216
-
-# OPTIONAL: Admin
-ADMIN_API_KEY=your-admin-api-key-for-audit-logs
-
-# RENDER specific
-RENDER=true
-PORT=10000
-"""
-    
-    with open('.env.template', 'w') as f:
-        f.write(template)
-    
-    logger.info("Created .env.template with required variables")
-
-# ==================== MAIN EXECUTION ====================
 if __name__ == '__main__':
-    # Create environment template on first run
-    if not os.path.exists('.env.template'):
-        create_env_template()
-    
-    # Initialize all components
     logger.info("=" * 60)
     logger.info("MENTAL HEALTH ASSESSMENT API - SECURE EDITION v4.0")
     logger.info("=" * 60)
     
-    # Load model components
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
         logger.info("✓ All model components loaded")
         logger.info(f"  Features: {len(feature_names)}")
@@ -3262,14 +2760,12 @@ if __name__ == '__main__':
         if os.environ.get('RENDER'):
             sys.exit(1)
     
-    # Initialize database
     try:
         init_database()
         logger.info("✓ Secure database initialized")
     except Exception as e:
         logger.error(f"✗ Database initialization failed: {e}")
     
-    # Security configuration check
     logger.info("🔒 SECURITY CONFIGURATION:")
     logger.info(f"  API Key Required: {'✓' if SecurityConfig.API_KEY else '✗'}")
     logger.info(f"  Encryption: {'✓' if os.environ.get('ENCRYPTION_KEY') else '✗ (generated)'}")
@@ -3281,26 +2777,6 @@ if __name__ == '__main__':
     if clinical_enhancer:
         logger.info("✓ Clinical Decision Enhancer: ACTIVE")
     
-    # Pre-warm application
-    def pre_warm_app():
-        logger.info("Pre-warming application...")
-        with app.test_client() as client:
-            try:
-                # Test health endpoint
-                response = client.get('/api/health')
-                logger.info(f"Pre-warm status: {response.status_code}")
-                
-                # Test security endpoint
-                client.headers = {'X-API-Key': SecurityConfig.API_KEY}
-                response = client.get('/api/security-status')
-                logger.info(f"Security status: {response.status_code}")
-                
-            except Exception as e:
-                logger.warning(f"Pre-warm warning: {e}")
-    
-    if os.environ.get('RENDER'):
-        pre_warm_app()
-    
     port = int(os.environ.get('PORT', 5000))
     debug_mode = not bool(os.environ.get('RENDER'))
     
@@ -3308,12 +2784,7 @@ if __name__ == '__main__':
     logger.info(f"Starting server on port {port} (Debug: {debug_mode})")
     logger.info("=" * 60)
     
-    # IMPORTANT: In production, use a proper WSGI server like gunicorn
-    # For Render, they'll use gunicorn automatically if gunicorn is in requirements.txt
     if os.environ.get('RENDER'):
-        # Render will use gunicorn if specified in render.yaml
         app.run(host='0.0.0.0', port=port, debug=False)
     else:
-        # Local development
         app.run(host='0.0.0.0', port=port, debug=debug_mode)
-        
