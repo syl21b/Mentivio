@@ -1283,6 +1283,76 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    /* Validation Styles */
+.validation-message {
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: none;
+}
+
+.validation-message.error {
+  display: block;
+  color: var(--danger);
+  background: #fef2f2;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border-left: 3px solid var(--danger);
+}
+
+.validation-message.success {
+  display: block;
+  color: var(--success);
+  background: #f0fdf4;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border-left: 3px solid var(--success);
+}
+
+.validation-hint {
+  font-size: 0.8rem;
+  color: var(--gray);
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+/* Add visual feedback for invalid fields */
+.form-group input:invalid,
+.form-group select:invalid {
+  border-color: var(--danger);
+}
+
+.form-group input:valid,
+.form-group select:valid {
+  border-color: var(--success);
+}
+
+/* Focus states for accessibility */
+.form-group input:focus:invalid,
+.form-group select:focus:invalid {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-group input:focus:valid,
+.form-group select:focus:valid {
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+
+  .validation-hint {
+    font-size: 0.8rem;
+    color: var(--gray);
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+.validation-hint.error {
+    color: var(--danger);
+}
+
+.validation-hint.success {
+    color: var(--success);
+}
+}
+
   </style>
 </head>
 <body>
@@ -1426,34 +1496,49 @@
               <h3>Patient Information</h3>
               <div class="patient-form">
                 <div class="form-group">
-                  <label for="patientName">Patient Name:</label>
-                  <input type="text" id="patientName" placeholder="Enter patient name">
+                  <label for="patientName" id="patient-name-label"></label>
+                  <input type="text" id="patientName" placeholder="">
+                  <div class="validation-message" id="patient-name-validation"></div>
                 </div>
                 <div class="form-group">
-                  <label for="patientNumber">Patient Number:</label>
-                  <input type="text" id="patientNumber" placeholder="Enter patient number">
+                  <label for="patientNumber" id="patient-number-label"></label>
+                  <input type="text" id="patientNumber" 
+                        placeholder=""
+                        maxlength="20"
+                        title="">
+                  <div class="validation-message" id="patient-number-validation">
+                    <div class="validation-hint" id="patient-number-hint"></div>
+                  </div>
                 </div>
                 <div class="form-group">
-                  <label for="patientAge">Age:</label>
-                  <input type="number" id="patientAge" placeholder="Enter age" min="1" max="120">
+                  <label for="patientAge" id="patient-age-label"></label>
+                  <input type="number" id="patientAge" 
+                        min="12" 
+                        max="100" 
+                        step="1"
+                        placeholder=""
+                        title="">
+                  <div class="validation-message" id="patient-age-validation">
+                    <div class="validation-hint" id="patient-age-hint"></div>
+                  </div>
                 </div>
                 <div class="form-group">
-                  <label for="patientGender">Gender:</label>
+                  <label for="patientGender" id="patient-gender-label"></label>
                   <select id="patientGender">
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                    <option value="Prefer not to say">Prefer not to say</option>
+                    <option value="" id="gender-default"></option>
+                    <option value="Male" id="gender-male"></option>
+                    <option value="Female" id="gender-female"></option>
+                    <option value="Other" id="gender-other"></option>
+                    <option value="Prefer not to say" id="gender-prefer-not"></option>
                   </select>
+                  <div class="validation-message" id="patient-gender-validation"></div>
                 </div>
               </div>
-              <!-- Add this right after the patient information form in the review screen -->
-                <div class="info-note" style="margin-top: 1rem;">
+              <div class="info-note" style="margin-top: 1rem;">
                 <strong>📝 Important:</strong> To save your assessment and access your history later, 
                 please enter your <strong>name</strong> and a <strong>unique patient number</strong>. You'll need these same details 
                 to view your assessment history next time.
-                </div>
+              </div>
             </div>
 
             <div class="responses-section">
@@ -1546,7 +1631,7 @@
             <i class="fas fa-chart-line"></i> Learn More About Your Status
           </button>
             <button id="downloadBtn" class="btn btn-primary">
-              📥 Download Report
+               <i class="fas fa-download"></i> Download PDF Report
             </button>
           </div>
         </div>
@@ -1631,7 +1716,31 @@
 
   <script>
 
-const API_BASE_URL = window.location.origin; // Automatically uses current domain
+// Replace the hardcoded API_BASE_URL and API_KEY initialization
+let API_BASE_URL = '';
+let API_KEY = '';
+
+async function initializeApp() {
+    try {
+        const response = await fetch('/api/config');
+        const config = await response.json();
+        API_BASE_URL = window.location.origin;
+        API_KEY = config.api_key;
+        
+        // Now initialize your MentalHealthAssessment
+        mentalHealthAssessment = new MentalHealthAssessment();
+    } catch (error) {
+        console.error('Failed to load app config:', error);
+        // Fallback to environment variables or default
+        API_BASE_URL = window.location.origin;
+        API_KEY = 'fallback-key-if-config-fails';
+        mentalHealthAssessment = new MentalHealthAssessment();
+    }
+}
+
+// Update your DOMContentLoaded listener
+document.addEventListener('DOMContentLoaded', initializeApp);
+
 
     // Assessment questions and configuration
     const ASSESSMENT_CONFIG = {
@@ -1859,80 +1968,100 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
     class MentalHealthAssessment {
       constructor() {
-        this.currentQuestionIndex = 0;
-        this.responses = {};
-        this.isSubmitting = false;
-        this.patientInfo = {
-          name: '',
-          number: '',
-          age: '',
-          gender: ''
-        };
-        
-        this.assessmentHistory = [];
-        this.currentPatient = null;
-        
-        this.initializeElements();
-        this.attachEventListeners();
-        this.attachKeyboardListeners();
-        this.assessmentStartTime = null; // Track when assessment starts
-        // Mobile navigation listeners
-        this.attachMobileNavigationListeners();
-
+          this.currentQuestionIndex = 0;
+          this.responses = {};
+          this.isSubmitting = false;
+          this.patientInfo = {
+              name: '',
+              number: '',
+              age: '',
+              gender: ''
+          };
+          
+          this.assessmentHistory = [];
+          this.currentPatient = null;
+          
+          // Wait for DOM to be fully loaded before initializing
+          if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', () => {
+                  this.initializeElements();
+                  this.attachEventListeners();
+                  this.attachKeyboardListeners();
+                  this.initializeFormLabels(); 
+                  this.attachMobileNavigationListeners(); 
+              });
+          } else {
+              // DOM already loaded
+              this.initializeElements();
+              this.attachEventListeners();
+              this.initializeFormLabels(); 
+              this.attachKeyboardListeners();
+              this.attachMobileNavigationListeners();
+          }
+          
+          this.assessmentStartTime = null;
       }
-
       // Add this new method to the MentalHealthAssessment class
-      attachMobileNavigationListeners() {
-        // Mobile assessment button - start new assessment
-        const mobileAssessmentBtn = document.getElementById('mobileAssessmentBtn');
-        if (mobileAssessmentBtn) {
-          mobileAssessmentBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.startAssessment();
-            this.updateMobileNavActiveState('mobileAssessmentBtn');
-          });
+    // Mobile navigation methods
+        attachMobileNavigationListeners() {
+            console.log('📱 Attaching mobile navigation listeners...');
+            
+            // Use event delegation for dynamic elements
+            document.addEventListener('click', (e) => {
+                // Handle mobile assessment button
+                if (e.target.closest('#mobileAssessmentBtn')) {
+                    e.preventDefault();
+                    console.log('📱 Mobile assessment button clicked');
+                    this.startAssessment();
+                    this.updateMobileNavActiveState('mobileAssessmentBtn');
+                }
+                
+                // Handle mobile history button
+                if (e.target.closest('#mobileHistoryBtn')) {
+                    e.preventDefault();
+                    console.log('📱 Mobile history button clicked');
+                    this.showHistoryScreen();
+                    this.updateMobileNavActiveState('mobileHistoryBtn');
+                }
+                
+                // Handle mobile home button
+                const homeNavItem = e.target.closest('.mobile-nav-item[data-screen="welcomeScreen"]');
+                if (homeNavItem) {
+                    e.preventDefault();
+                    console.log('📱 Mobile home button clicked');
+                    this.showScreen(this.welcomeScreen);
+                    this.updateMobileNavActiveState('welcomeScreen');
+                }
+            });
         }
-      // Mobile history button - view assessment history
-      const mobileHistoryBtn = document.getElementById('mobileHistoryBtn');
-      if (mobileHistoryBtn) {
-        mobileHistoryBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.showHistoryScreen();
-          this.updateMobileNavActiveState('mobileHistoryBtn');
-        });
-      }
 
-  // Home button - show welcome screen
-      const mobileHomeItems = document.querySelectorAll('.mobile-nav-item[data-screen="welcomeScreen"]');
-      mobileHomeItems.forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.showScreen(this.welcomeScreen);
-          this.updateMobileNavActiveState('welcomeScreen');
-        });
-      });
-    }
+        updateMobileNavActiveState(activeItem) {
+            console.log('📱 Updating mobile nav active state:', activeItem);
+            
+            // Remove active class from all mobile nav items
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
 
-    // Add this method to update the active state of mobile navigation
-    updateMobileNavActiveState(activeItem) {
-      // Remove active class from all mobile nav items
-      document.querySelectorAll('.mobile-nav-item').forEach(item => {
-        item.classList.remove('active');
-      });
+            // Add active class to the appropriate item
+            let targetElement;
+            
+            if (activeItem === 'welcomeScreen') {
+                targetElement = document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]');
+            } else if (activeItem === 'mobileAssessmentBtn') {
+                targetElement = document.getElementById('mobileAssessmentBtn');
+            } else if (activeItem === 'mobileHistoryBtn') {
+                targetElement = document.getElementById('mobileHistoryBtn');
+            }
+            
+            if (targetElement) {
+                targetElement.classList.add('active');
+                console.log('✅ Set active class on:', targetElement);
+            }
+        }
 
-      // Add active class to the appropriate item
-      if (activeItem === 'welcomeScreen') {
-        const homeItem = document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]');
-        if (homeItem) homeItem.classList.add('active');
-      } else if (activeItem === 'mobileAssessmentBtn') {
-        const assessmentItem = document.getElementById('mobileAssessmentBtn');
-        if (assessmentItem) assessmentItem.classList.add('active');
-      } else if (activeItem === 'mobileHistoryBtn') {
-        const historyItem = document.getElementById('mobileHistoryBtn');
-        if (historyItem) historyItem.classList.add('active');
-      }
-    }
-      // Add this debug method to check what's being sent
+
+// Add this debug method to check what's being sent
       debugAssessmentSubmission() {
           console.log('🔍 DEBUG - Assessment submission data:');
           console.log('  - assessmentStartTime:', this.assessmentStartTime);
@@ -1950,6 +2079,12 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
           
       initializeElements() {
+      console.log('🔍 initializeElements() called');
+    
+      // Debug: Check if buttons exist
+      console.log('Looking for startBtn:', document.getElementById('startBtn'));
+      console.log('Looking for viewHistoryBtn:', document.getElementById('viewHistoryBtn'));
+    
         // New login elements
         this.loginSection = document.getElementById('loginSection');
         this.patientHistorySection = document.getElementById('patientHistorySection');
@@ -1974,7 +2109,28 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         this.viewHistoryBtn = document.getElementById('viewHistoryBtn');
         this.backToWelcomeBtn = document.getElementById('backToWelcomeBtn');
         this.learnMoreBtn = document.getElementById('learnMoreBtn');
-
+          
+        // Validation elements
+        this.patientNameLabel = document.getElementById('patient-name-label');
+        this.patientNameValidation = document.getElementById('patient-name-validation');
+        
+        this.patientNumberLabel = document.getElementById('patient-number-label');
+        this.patientNumberValidation = document.getElementById('patient-number-validation');
+        this.patientNumberHint = document.getElementById('patient-number-hint');
+        
+        this.patientAgeLabel = document.getElementById('patient-age-label');
+        this.patientAgeValidation = document.getElementById('patient-age-validation');
+        this.patientAgeHint = document.getElementById('patient-age-hint');
+        
+        this.patientGenderLabel = document.getElementById('patient-gender-label');
+        this.patientGenderValidation = document.getElementById('patient-gender-validation');
+        
+        // Dropdown option labels
+        this.genderDefault = document.getElementById('gender-default');
+        this.genderMale = document.getElementById('gender-male');
+        this.genderFemale = document.getElementById('gender-female');
+        this.genderOther = document.getElementById('gender-other');
+        this.genderPreferNot = document.getElementById('gender-prefer-not');
         
         // Existing elements
         this.responsesList = document.getElementById('responsesList');
@@ -2009,45 +2165,309 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
       }
       
       attachEventListeners() {
-        // New login listeners
-        this.loginBtn.addEventListener('click', () => this.handleLogin());
-        this.logoutBtn.addEventListener('click', () => this.handleLogout());
-        this.backToWelcomeFromLoginBtn.addEventListener('click', () => this.showScreen(this.welcomeScreen));
-        this.learnMoreBtn.addEventListener('click', () => this.learnMoreAboutCondition());
+          console.log('🔗 attachEventListeners() called');
+          
+          // Remove any existing event listeners first to prevent duplicates
+          this.removeExistingListeners();
+          
+          // New login listeners
+          if (this.loginBtn) {
+              this.loginBtn.addEventListener('click', () => this.handleLogin());
+          } else {
+              console.error('❌ loginBtn not found');
+          }
 
-        // Allow Enter key to submit login form
-        this.loginPatientName.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') this.handleLogin();
-        });
-        this.loginPatientNumber.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') this.handleLogin();
-        });
+          // Add real-time validation listeners
+          if (this.patientName) {
+            this.patientName.addEventListener('input', () => this.validatePatientName());
+            this.patientName.addEventListener('blur', () => this.validatePatientName());
+          }
+          
+          if (this.patientNumber) {
+            this.patientNumber.addEventListener('input', () => this.validatePatientNumber());
+            this.patientNumber.addEventListener('blur', () => this.validatePatientNumber());
+          }
+          
+          if (this.patientAge) {
+            this.patientAge.addEventListener('input', () => this.validatePatientAge());
+            this.patientAge.addEventListener('blur', () => this.validatePatientAge());
+          }
+          
+          if (this.patientGender) {
+            this.patientGender.addEventListener('change', () => this.validatePatientGender());
+          }
+          
+          if (this.logoutBtn) {
+              this.logoutBtn.addEventListener('click', () => this.handleLogout());
+          }
+          
+          if (this.backToWelcomeFromLoginBtn) {
+              this.backToWelcomeFromLoginBtn.addEventListener('click', () => this.showScreen(this.welcomeScreen));
+          }
+          
+          if (this.learnMoreBtn) {
+              this.learnMoreBtn.addEventListener('click', () => this.learnMoreAboutCondition());
+          }
 
-        this.startBtn.addEventListener('click', () => this.startAssessment());
-        this.prevBtn.addEventListener('click', () => this.previousQuestion());
-        this.nextBtn.addEventListener('click', () => this.nextQuestion());
-        this.newAssessmentBtn.addEventListener('click', () => this.resetAssessment());
-        this.downloadBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          this.downloadReport();
-        });
+          // Start button - add direct logging
+          if (this.startBtn) {
+              console.log('✅ Found startBtn, attaching listener');
+              this.startBtn.addEventListener('click', () => {
+                  console.log('🎯 startBtn clicked!');
+                  this.startAssessment();
+              });
+          } else {
+              console.error('❌ startBtn not found!');
+          }
+          
+          // View History button
+          if (this.viewHistoryBtn) {
+              console.log('✅ Found viewHistoryBtn, attaching listener');
+              this.viewHistoryBtn.addEventListener('click', () => {
+                  console.log('📚 viewHistoryBtn clicked!');
+                  this.showHistoryScreen();
+              });
+          } else {
+              console.error('❌ viewHistoryBtn not found!');
+          }
+          
+          // Existing button listeners
+          if (this.prevBtn) {
+              this.prevBtn.addEventListener('click', () => this.previousQuestion());
+          }
+          
+          if (this.nextBtn) {
+              this.nextBtn.addEventListener('click', () => this.nextQuestion());
+          }
+          
+          if (this.newAssessmentBtn) {
+              this.newAssessmentBtn.addEventListener('click', () => this.resetAssessment());
+          }
+          
+          if (this.downloadBtn) {
+              this.downloadBtn.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  this.downloadReport();
+              });
+          }
+          
+          // Existing review screen listeners
+          if (this.backToQuestionsBtn) {
+              this.backToQuestionsBtn.addEventListener('click', () => this.backToQuestions());
+          }
+          
+          if (this.submitFinalBtn) {
+              this.submitFinalBtn.addEventListener('click', () => this.submitFinalAssessment());
+          }
+          
+          // Patient info change listeners
+          if (this.patientName) {
+              this.patientName.addEventListener('input', (e) => this.patientInfo.name = e.target.value);
+          }
+          
+          if (this.patientNumber) {
+              this.patientNumber.addEventListener('input', (e) => this.patientInfo.number = e.target.value);
+          }
+          
+          if (this.patientAge) {
+              this.patientAge.addEventListener('input', (e) => this.patientInfo.age = e.target.value);
+          }
+          
+          if (this.patientGender) {
+              this.patientGender.addEventListener('change', (e) => this.patientInfo.gender = e.target.value);
+          }
+      }
+      
+      removeExistingListeners() {
+    // Clone and replace elements to remove all event listeners
+    if (this.submitFinalBtn) {
+        const newBtn = this.submitFinalBtn.cloneNode(true);
+        this.submitFinalBtn.parentNode.replaceChild(newBtn, this.submitFinalBtn);
+        this.submitFinalBtn = newBtn;
+    }
+    
+    // Do the same for other critical buttons
+    if (this.nextBtn) {
+        const newNextBtn = this.nextBtn.cloneNode(true);
+        this.nextBtn.parentNode.replaceChild(newNextBtn, this.nextBtn);
+        this.nextBtn = newNextBtn;
+    }
+    
+    if (this.startBtn) {
+        const newStartBtn = this.startBtn.cloneNode(true);
+        this.startBtn.parentNode.replaceChild(newStartBtn, this.startBtn);
+        this.startBtn = newStartBtn;
+    }
+}
+
+
+      // Add a new method to initialize form labels and placeholders:
+      initializeFormLabels() {
+        // Set labels
+        this.patientNameLabel.textContent = 'Full Name:';
+        this.patientName.placeholder = 'Enter your full name';
         
-        // New history screen listeners
-        this.viewHistoryBtn.addEventListener('click', () => this.showHistoryScreen());
-        this.backToWelcomeBtn.addEventListener('click', () => this.showScreen(this.welcomeScreen));
+        this.patientNumberLabel.textContent = 'Patient Number:';
+        this.patientNumber.placeholder = 'e.g., PT-12345 or MRN-001';
+        this.patientNumber.title = 'Enter your unique patient identifier';
+        this.patientNumberHint.textContent = 'Must be 6-20 characters with at least 1 letter and 1 number';
         
-        // Existing review screen listeners
-        this.backToQuestionsBtn.addEventListener('click', () => this.backToQuestions());
-        this.submitFinalBtn.addEventListener('click', () => this.submitFinalAssessment());
+        this.patientAgeLabel.textContent = 'Age:';
+        this.patientAge.placeholder = 'Enter your age';
+        this.patientAge.title = 'Must be between 12 and 100 years';
+        this.patientAgeHint.textContent = 'Must be between 12 and 100 years';
         
-        // Patient info change listeners
-        this.patientName.addEventListener('input', (e) => this.patientInfo.name = e.target.value);
-        this.patientNumber.addEventListener('input', (e) => this.patientInfo.number = e.target.value);
-        this.patientAge.addEventListener('input', (e) => this.patientInfo.age = e.target.value);
-        this.patientGender.addEventListener('change', (e) => this.patientInfo.gender = e.target.value);
+        this.patientGenderLabel.textContent = 'Gender:';
+        
+        // Set dropdown options
+        this.genderDefault.textContent = 'Select Gender';
+        this.genderMale.textContent = 'Male';
+        this.genderFemale.textContent = 'Female';
+        this.genderOther.textContent = 'Other';
+        this.genderPreferNot.textContent = 'Prefer not to say';
       }
 
-      // Backend API methods
+      // Add validation methods
+      validatePatientName() {
+        const name = this.patientName.value.trim();
+        const validationElement = this.patientNameValidation;
+        
+        if (!name) {
+          validationElement.textContent = 'Please enter your name';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        if (name.length < 2) {
+          validationElement.textContent = 'Name must be at least 2 characters';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        if (name.length > 50) {
+          validationElement.textContent = 'Name is too long (max 50 characters)';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        validationElement.textContent = '✓ Valid name';
+        validationElement.className = 'validation-message success';
+        return true;
+      }
+
+      // In the MentalHealthAssessment class, update the validatePatientNumber method:
+      validatePatientNumber() {
+          const number = this.patientNumber.value.trim();
+          const validationElement = this.patientNumberValidation;
+          
+          if (!number) {
+              validationElement.textContent = 'Please enter a patient number';
+              validationElement.className = 'validation-message error';
+              return false;
+          }
+          
+          // Check minimum length (6 characters)
+          if (number.length < 6) {
+              validationElement.textContent = 'Patient number must be at least 6 characters';
+              validationElement.className = 'validation-message error';
+              return false;
+          }
+          
+          if (number.length > 20) {
+              validationElement.textContent = 'Patient number is too long (max 20 characters)';
+              validationElement.className = 'validation-message error';
+              return false;
+          }
+          
+          // Check for at least 1 letter and 1 number
+          const hasLetter = /[a-zA-Z]/.test(number);
+          const hasNumber = /[0-9]/.test(number);
+          
+          if (!hasLetter) {
+              validationElement.textContent = 'Patient number must contain at least 1 letter (a-z, A-Z)';
+              validationElement.className = 'validation-message error';
+              return false;
+          }
+          
+          if (!hasNumber) {
+              validationElement.textContent = 'Patient number must contain at least 1 number (0-9)';
+              validationElement.className = 'validation-message error';
+              return false;
+          }
+          
+          // Check for valid format (alphanumeric with optional dashes/underscores)
+          const validFormat = /^[A-Za-z0-9\-_]+$/;
+          if (!validFormat.test(number)) {
+              validationElement.textContent = 'Use only letters, numbers, dashes, or underscores';
+              validationElement.className = 'validation-message error';
+              return false;
+          }
+          
+          validationElement.textContent = '✓ Valid patient number';
+          validationElement.className = 'validation-message success';
+          return true;
+      }
+
+      validatePatientAge() {
+        const age = this.patientAge.value;
+        const validationElement = this.patientAgeValidation;
+        
+        if (!age) {
+          validationElement.textContent = 'Please enter your age';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        const ageNum = parseInt(age);
+        
+        if (isNaN(ageNum)) {
+          validationElement.textContent = 'Please enter a valid number';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        if (ageNum < 12) {
+          validationElement.textContent = 'You must be at least 12 years old';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        if (ageNum > 100) {
+          validationElement.textContent = 'Please enter a valid age (max 100)';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        validationElement.textContent = '✓ Valid age';
+        validationElement.className = 'validation-message success';
+        return true;
+      }
+
+      validatePatientGender() {
+        const gender = this.patientGender.value;
+        const validationElement = this.patientGenderValidation;
+        
+        if (!gender) {
+          validationElement.textContent = 'Please select a gender option';
+          validationElement.className = 'validation-message error';
+          return false;
+        }
+        
+        validationElement.textContent = '✓ Selected';
+        validationElement.className = 'validation-message success';
+        return true;
+      }
+
+      validateAllFields() {
+        const nameValid = this.validatePatientName();
+        const numberValid = this.validatePatientNumber();
+        const ageValid = this.validatePatientAge();
+        const genderValid = this.validatePatientGender();
+        
+        return nameValid && numberValid && ageValid && genderValid;
+      }
+
+// Backend API methods
       async saveAssessmentToBackend(assessmentData) {
         try {
 
@@ -2057,6 +2477,7 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'X-API-Key': API_KEY
             },
             body: JSON.stringify({
               assessment_data: assessmentData
@@ -2084,6 +2505,7 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'X-API-Key': API_KEY
             },
             body: JSON.stringify({
               name: patientName,
@@ -2112,6 +2534,7 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'X-API-Key': API_KEY
             },
             body: JSON.stringify({
               patient_number: patientNumber,
@@ -2328,6 +2751,7 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-API-Key': API_KEY
                 },
                 body: JSON.stringify({
                     name: patientName,
@@ -2448,53 +2872,143 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
     }
 
       // Fixed downloadReport method - PDF only
-      async downloadReport() {
-        try {
-          console.log('📥 Download PDF report triggered');
-          
-          // Get current assessment data
-          let currentAssessment = null;
-          
-          // Try to get from assessment history
-          if (this.assessmentHistory && this.assessmentHistory.length > 0) {
+async downloadReport() {
+    try {
+        console.log('📥 Download PDF report triggered');
+        
+        // Get current assessment data - FIXED LOGIC
+        let currentAssessment = null;
+        
+        // First, check if we have just completed an assessment
+        if (this.assessmentHistory && this.assessmentHistory.length > 0) {
+            // Get the MOST RECENT assessment
             currentAssessment = this.assessmentHistory[0];
-            console.log('✅ Found assessment in history:', currentAssessment);
-          } 
-          // Try to load from backend if we have a logged-in patient
-          else if (this.currentPatient) {
-            console.log('🔄 Loading assessments from backend for PDF...');
-            const assessments = await this.loadPatientAssessmentsFromBackend(
-              this.currentPatient.name, 
-              this.currentPatient.number
-            );
-            if (assessments.length > 0) {
-              currentAssessment = assessments[0];
-              console.log('✅ Loaded assessment from backend:', currentAssessment);
-            }
-          }
-          
-          if (!currentAssessment) {
-            alert('No assessment data available to download. Please complete an assessment first.');
-            return;
-          }
-
-          // Show loading state
-          const originalText = this.downloadBtn.innerHTML;
-          this.downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
-          this.downloadBtn.disabled = true;
-
-          // Generate the PDF report using the backend
-          await this.generatePDFReport(currentAssessment);
-
-        } catch (error) {
-          console.error('❌ Error generating PDF report:', error);
-          alert('Failed to generate PDF report. Please try again. Error: ' + error.message);
-        } finally {
-          // Reset button state
-          this.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF Report';
-          this.downloadBtn.disabled = false;
+            console.log('✅ Found assessment in history:', currentAssessment.id);
         }
-      }
+        
+        // If not in history, try to get it from the displayed results
+        if (!currentAssessment && window.currentAssessmentData) {
+            currentAssessment = window.currentAssessmentData;
+            console.log('✅ Using window.currentAssessmentData');
+        }
+        
+        // If still no data, check the displayed results on the page
+        if (!currentAssessment) {
+            // Try to reconstruct from displayed data
+            currentAssessment = this.reconstructAssessmentFromDisplay();
+        }
+        
+        if (!currentAssessment) {
+            // LAST RESORT: Check if there's a current patient and load their most recent
+            if (this.currentPatient) {
+                console.log('🔄 Loading assessments from backend for current patient...');
+                const assessments = await this.loadPatientAssessmentsFromBackend(
+                    this.currentPatient.name, 
+                    this.currentPatient.number
+                );
+                if (assessments.length > 0) {
+                    currentAssessment = assessments[0];
+                    console.log('✅ Loaded assessment from backend:', currentAssessment.id);
+                }
+            }
+        }
+        
+        if (!currentAssessment) {
+            // Show more informative error
+            const shouldContinue = confirm('No assessment data found in current session. Would you like to try loading from your assessment history?');
+            if (shouldContinue) {
+                this.showHistoryScreen();
+            }
+            return;
+        }
+
+        // Show loading state
+        const originalText = this.downloadBtn.innerHTML;
+        this.downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+        this.downloadBtn.disabled = true;
+
+        // Generate the PDF report using the backend
+        await this.generatePDFReport(currentAssessment);
+
+    } catch (error) {
+        console.error('❌ Error generating PDF report:', error);
+        alert('Failed to generate PDF report. Please try again. Error: ' + error.message);
+    } finally {
+        // Reset button state
+        this.downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download PDF Report';
+        this.downloadBtn.disabled = false;
+    }
+}
+
+// Add this new method to reconstruct assessment from displayed data
+reconstructAssessmentFromDisplay() {
+    try {
+        const assessment = {
+            id: document.getElementById('assessmentId')?.textContent.replace('ID: ', '') || 
+                `MH-${new Date().getTime()}`,
+            timestamp: new Date().toISOString(),
+            assessment_timestamp: new Date().toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            patient_info: {
+                name: document.getElementById('patientName')?.value || 
+                      this.patientInfo.name || 
+                      'Unknown',
+                number: document.getElementById('patientNumber')?.value || 
+                       this.patientInfo.number || 
+                       '',
+                age: document.getElementById('patientAge')?.value || 
+                     this.patientInfo.age || 
+                     '',
+                gender: document.getElementById('patientGender')?.value || 
+                        this.patientInfo.gender || 
+                        ''
+            },
+            primary_diagnosis: document.getElementById('primaryDiagnosis')?.textContent || 
+                              'Unknown',
+            confidence_percentage: parseFloat(
+                document.querySelector('.confidence-text')?.textContent.replace('%', '') || 
+                document.getElementById('confidenceBadge')?.textContent.replace('%', '') || 
+                '85'
+            ),
+            all_diagnoses: [],
+            responses: this.responses || {},
+            processing_details: {},
+            technical_details: {}
+        };
+        
+        // Try to get all diagnoses from the list
+        const diagnosisItems = document.querySelectorAll('#diagnosesList .diagnosis-item');
+        diagnosisItems.forEach((item, index) => {
+            const name = item.querySelector('.diagnosis-name')?.textContent || '';
+            const prob = item.querySelector('.diagnosis-probability')?.textContent.replace('%', '') || '0';
+            
+            if (name && name !== assessment.primary_diagnosis) {
+                assessment.all_diagnoses.push({
+                    diagnosis: name,
+                    probability: parseFloat(prob) / 100,
+                    confidence_percentage: parseFloat(prob),
+                    rank: index + 1
+                });
+            }
+        });
+        
+        // Add primary diagnosis to the list
+        assessment.all_diagnoses.unshift({
+            diagnosis: assessment.primary_diagnosis,
+            probability: assessment.confidence_percentage / 100,
+            confidence_percentage: assessment.confidence_percentage,
+            rank: 0
+        });
+        
+        console.log('🔄 Reconstructed assessment from display:', assessment);
+        return assessment;
+        
+    } catch (error) {
+        console.error('❌ Failed to reconstruct assessment:', error);
+        return null;
+    }
+}
+
 
       // Enhanced method to generate the PDF report using backend
       async generatePDFReport(assessment) {
@@ -2515,6 +3029,7 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'X-API-Key': API_KEY
             },
             body: JSON.stringify({
               assessment_data: assessment
@@ -2621,17 +3136,21 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
       }
 
       // Core Assessment Methods
+      // In the MentalHealthAssessment class, update the startAssessment method:
       startAssessment() {
-          // Record assessment start time - THIS IS CRITICAL
+          // Record assessment start time with ISO format
           this.assessmentStartTime = new Date().toISOString();
           console.log('🕐 Assessment start time recorded:', this.assessmentStartTime);
           console.log('🕐 Local time:', new Date().toString());
+          console.log('🕐 UTC time:', new Date().toUTCString());
+          
+          // Also store a human-readable version for debugging
+          this.assessmentStartLocal = new Date().toLocaleString();
           
           this.showScreen(this.questionsScreen);
           this.updateProgress();
           this.displayCurrentQuestion();
           this.updateMobileNavActiveState('mobileAssessmentBtn'); 
-
           
           // Focus on first option for keyboard navigation
           setTimeout(() => {
@@ -2642,7 +3161,15 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
           }, 100);
       }
 
-      showScreen(screen) {
+      // Add this helper function to the frontend to format timestamps consistently
+       formatTimestampForBackend(date) {
+          if (!date) date = new Date();
+          return date.toISOString();
+      }
+
+    showScreen(screen) {
+        console.log('🖥️ Showing screen:', screen.id);
+        
         // Hide all screens
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         
@@ -2650,14 +3177,16 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         screen.classList.add('active');
 
         // Sync mobile navigation active state
-    if (screen === this.welcomeScreen) {
-        this.updateMobileNavActiveState('welcomeScreen');
-    } else if (screen === this.questionsScreen) {
-        this.updateMobileNavActiveState('mobileAssessmentBtn');
-    } else if (screen === this.historyScreen) {
-        this.updateMobileNavActiveState('mobileHistoryBtn');
+        if (screen === this.welcomeScreen) {
+            this.updateMobileNavActiveState('welcomeScreen');
+        } else if (screen === this.questionsScreen || screen === this.reviewScreen || screen === this.loadingScreen) {
+            this.updateMobileNavActiveState('mobileAssessmentBtn');
+        } else if (screen === this.historyScreen) {
+            this.updateMobileNavActiveState('mobileHistoryBtn');
+        } else if (screen === this.resultsScreen) {
+            this.updateMobileNavActiveState('mobileAssessmentBtn');
+        }
     }
-      }
 
       updateProgress() {
         const progress = ((this.currentQuestionIndex + 1) / ASSESSMENT_CONFIG.questions.length) * 100;
@@ -2763,16 +3292,23 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
       }
 
       updateNavigationButtons() {
-        this.prevBtn.disabled = this.currentQuestionIndex === 0;
-        
-        const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
-        const hasResponse = this.responses[currentQuestion.feature] !== undefined;
-        this.nextBtn.disabled = !hasResponse;
-        
-        // Update next button text for last question
-        this.nextBtn.textContent = this.currentQuestionIndex === ASSESSMENT_CONFIG.questions.length - 1 
-          ? 'Review Answers' 
-          : 'Next';
+          this.prevBtn.disabled = this.currentQuestionIndex === 0;
+          
+          const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+          const hasResponse = this.responses[currentQuestion.feature] !== undefined;
+          
+          const isLastQuestion = this.currentQuestionIndex === ASSESSMENT_CONFIG.questions.length - 1;
+          
+          if (isLastQuestion) {
+              // Only enable review button if ALL questions are answered
+              const allAnswered = this.checkAllQuestionsAnswered();
+              this.nextBtn.disabled = !allAnswered;
+              this.nextBtn.textContent = 'Review Answers';
+          } else {
+              // Enable next button if current question is answered
+              this.nextBtn.disabled = !hasResponse;
+              this.nextBtn.textContent = 'Next';
+          }
       }
 
       previousQuestion() {
@@ -2783,27 +3319,86 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         }
       }
 
-      nextQuestion() {
-        const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+nextQuestion() {
+    const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+    
+    // Get the user's response
+    const response = this.responses[currentQuestion.feature];
+    
+    // Check if response exists (including 0 which is a valid response for 'NO' or other options)
+    const hasResponse = response !== undefined;
+    
+    const isLastQuestion = this.currentQuestionIndex === ASSESSMENT_CONFIG.questions.length - 1;
+    
+    // If this is NOT the last question AND has no response, prevent continuing
+    if (!isLastQuestion && !hasResponse) {
+        alert('Please select an option before continuing.');
+        return;  // Stop execution here
+    }
+    
+    // If this IS the last question, check if ALL questions are answered
+    if (isLastQuestion) {
+        // Check ALL questions are answered before allowing review
+        const allAnswered = this.checkAllQuestionsAnswered();
         
-        if (!this.responses[currentQuestion.feature]) {
-          alert('Please select an option before continuing.');
-          return;
+        if (!allAnswered) {
+            // Find and go to first unanswered question
+            const firstUnanswered = this.findFirstUnansweredQuestion();
+            if (firstUnanswered !== -1) {
+                this.currentQuestionIndex = firstUnanswered;
+                this.updateProgress();
+                this.displayCurrentQuestion();
+                alert(`Please answer question ${firstUnanswered + 1} before reviewing.`);
+            }
+            return;
         }
+        
+        // All questions are answered, show review screen
+        this.showReviewScreen();
+        return;
+    }
+    
+    // This is not the last question, move to next question
+    this.currentQuestionIndex++;
+    this.updateProgress();
+    this.displayCurrentQuestion();
+}
 
-        if (this.currentQuestionIndex < ASSESSMENT_CONFIG.questions.length - 1) {
-          this.currentQuestionIndex++;
-          this.updateProgress();
-          this.displayCurrentQuestion();
-        } else {
-          this.showReviewScreen();
+checkAllQuestionsAnswered() {
+    return ASSESSMENT_CONFIG.questions.every(q => 
+        this.responses[q.feature] !== undefined
+    );
+}
+
+findFirstUnansweredQuestion() {
+    for (let i = 0; i < ASSESSMENT_CONFIG.questions.length; i++) {
+        if (this.responses[ASSESSMENT_CONFIG.questions[i].feature] === undefined) {
+            return i;
         }
-      }
+    }
+    return -1; // All answered
+}
 
-      showReviewScreen() {
-           this.showScreen(this.reviewScreen);
-          this.displayReviewResponses();
-      }
+
+showReviewScreen() {
+    // Double-check all questions are answered before showing review
+    const allAnswered = this.checkAllQuestionsAnswered();
+    
+    if (!allAnswered) {
+        const firstUnanswered = this.findFirstUnansweredQuestion();
+        if (firstUnanswered !== -1) {
+            this.currentQuestionIndex = firstUnanswered;
+            this.showScreen(this.questionsScreen);
+            this.updateProgress();
+            this.displayCurrentQuestion();
+            alert(`Please answer question ${firstUnanswered + 1} before reviewing.`);
+        }
+        return;
+    }
+    
+    this.showScreen(this.reviewScreen);
+    this.displayReviewResponses();
+}
 
       displayReviewResponses() {
         this.responsesList.innerHTML = '';
@@ -2849,86 +3444,113 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
 
 
 
-      async submitFinalAssessment() {
-        // Debug the submission flow
-        console.log('🔍 SUBMIT DEBUG - Starting submission process');
-        
-        // More flexible patient info validation
-        if (!this.patientInfo.name || !this.patientInfo.name.trim()) {
-          alert('Please enter patient name before submitting.');
-          console.error('❌ Validation failed: Patient name missing');
-          return;
-        }
-
-        // Optional: Make patient number optional or provide better feedback
-        if (!this.patientInfo.number || !this.patientInfo.number.trim()) {
-          if (!confirm('Patient number is not provided. Continue without saving to history?')) {
+        async submitFinalAssessment() {
+          // First validate all fields
+          if (!this.validateAllFields()) {
+            alert('Please correct the highlighted fields before submitting.');
             return;
           }
-        }
+          
+          // Store validated values
+          this.patientInfo.name = this.patientName.value.trim();
+          this.patientInfo.number = this.patientNumber.value.trim();
+          this.patientInfo.age = this.patientAge.value;
+          this.patientInfo.gender = this.patientGender.value;
+          
+          // Check if already submitting to prevent double submission
+          if (this.isSubmitting) {
+              console.log('⚠️ Already submitting, ignoring duplicate call');
+              return;
+          }
+          
+          this.isSubmitting = true; // Set flag immediately
+          
+          // More flexible patient info validation
+          if (!this.patientInfo.name || !this.patientInfo.name.trim()) {
+              alert('Please enter patient name before submitting.');
+              console.error('❌ Validation failed: Patient name missing');
+              this.isSubmitting = false; // Reset flag
+              return;
+          }
 
-        console.log('✅ Validation passed, proceeding with submission...');
-        
-        this.showScreen(this.loadingScreen);
-        this.isSubmitting = true;
+          // Optional: Make patient number optional or provide better feedback
+          if (!this.patientInfo.number || !this.patientInfo.number.trim()) {
+              if (!confirm('Patient number is not provided. Continue without saving to history?')) {
+                  this.isSubmitting = false; // Reset flag
+                  return;
+              }
+          }
 
-        try {
-            await this.simulateProcessing();
-            
-            console.log('🕐 FINAL TIMESTAMP CHECK before submission:');
-            console.log('  - Assessment started at:', this.assessmentStartTime);
-            console.log('  - Submitting at:', new Date().toISOString());
-            
-            // Get user's timezone
-            const userTimezone = getUserTimezone();
-            console.log('🌍 User timezone:', userTimezone);
-            
-            // CRITICAL: Use the original assessmentStartTime, don't overwrite it
-            const assessmentStartTimeToSend = this.assessmentStartTime;
-            
-            if (!assessmentStartTimeToSend) {
-                console.error('❌ CRITICAL: assessmentStartTime is missing!');
-                // Fallback: create a timestamp 2 minutes ago (approximate)
-                const fallbackTime = new Date(Date.now() - 2 * 60 * 1000).toISOString();
-                console.log('🔄 Using fallback timestamp:', fallbackTime);
-            }
-            
-            const response = await fetch(`${API_BASE_URL}/api/predict`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Client-Timezone': userTimezone
-                },
-                body: JSON.stringify({
-                    responses: this.responses,
-                    patientInfo: this.patientInfo,
-                    assessment_start_time: assessmentStartTimeToSend // Send the ORIGINAL start time
-                })
-            });
+          console.log('✅ Validation passed, proceeding with submission...');
+          
+          this.showScreen(this.loadingScreen);
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-            }
+          try {
+              await this.simulateProcessing();
+              
+              console.log('🕐 FINAL TIMESTAMP CHECK before submission:');
+              console.log('  - Assessment started at:', this.assessmentStartTime);
+              console.log('  - Submitting at:', new Date().toISOString());
+              
+              // Get user's timezone
+              const userTimezone = getUserTimezone();
+              console.log('🌍 User timezone:', userTimezone);
+              
+              // CRITICAL: Use the original assessmentStartTime, don't overwrite it
+              const assessmentStartTimeToSend = this.assessmentStartTime;
+              
+              if (!assessmentStartTimeToSend) {
+                  console.error('❌ CRITICAL: assessmentStartTime is missing!');
+                  // Fallback: create a timestamp 2 minutes ago (approximate)
+                  const fallbackTime = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+                  console.log('🔄 Using fallback timestamp:', fallbackTime);
+              }
+              
+              // DEBUG: Log what we're about to send
+              console.log('📤 Sending data to API:', {
+                  responsesCount: Object.keys(this.responses).length,
+                  patientInfo: this.patientInfo,
+                  assessmentStartTime: assessmentStartTimeToSend
+              });
+              
+              const response = await fetch(`${API_BASE_URL}/api/predict`, {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      'X-Client-Timezone': userTimezone,
+                      'X-API-Key': API_KEY
+                  },
+                  body: JSON.stringify({
+                      responses: this.responses,
+                      patientInfo: this.patientInfo,
+                      assessment_start_time: assessmentStartTimeToSend
+                  })
+              });
 
-            const result = await response.json();
-            result.patientInfo = this.patientInfo;
-            
-            // Ensure the original start time is preserved
-            if (assessmentStartTimeToSend && !result.assessment_timestamp) {
-                result.assessment_timestamp = assessmentStartTimeToSend;
-            }
-            
-            this.displayResults(result);
+              if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+              }
 
-        } catch (error) {
-            console.error('Error submitting assessment:', error);
-            this.showError(`Failed to process assessment: ${error.message}`);
-        } finally {
-            this.isSubmitting = false;
-        }
-    }
-    
+              const result = await response.json();
+              result.patientInfo = this.patientInfo;
+              
+              // Ensure the original start time is preserved
+              if (assessmentStartTimeToSend && !result.assessment_timestamp) {
+                  result.assessment_timestamp = assessmentStartTimeToSend;
+              }
+              
+              this.displayResults(result);
+
+          } catch (error) {
+              console.error('Error submitting assessment:', error);
+              this.showError(`Failed to process assessment: ${error.message}`);
+              this.isSubmitting = false; // Reset flag on error
+          }
+          // Note: Don't reset isSubmitting here - it should stay true until the assessment is complete
+      }
+
+
       async simulateProcessing() {
         const steps = document.querySelectorAll('.loading-step');
         
@@ -2988,6 +3610,9 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
             technical_details: result.technical_details,
             clinical_insights: result.clinical_insights || null
         };
+        
+        // Store the assessment data globally for PDF download
+        window.currentAssessmentData = result;
 
         // Save assessment to backend
         try {
@@ -3252,14 +3877,36 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
         }
       }
 
-      selectOptionByNumber(number) {
-        const options = this.optionsContainer.querySelectorAll('.option-btn');
-        if (number >= 1 && number <= options.length) {
-          const option = options[number - 1];
-          const optionData = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex].options[number - 1];
-          this.selectOption(option, optionData);
-        }
-      }
+selectOption(optionBtn, option) {
+    // Remove selected class from all options
+    this.optionsContainer.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked option
+    optionBtn.classList.add('selected');
+    
+    // Store response
+    const currentQuestion = ASSESSMENT_CONFIG.questions[this.currentQuestionIndex];
+    this.responses[currentQuestion.feature] = option.value;
+    
+    // Enable next button
+    this.nextBtn.disabled = false;
+    
+    // Update navigation button text if this is the last question
+    this.updateNavigationButtons();
+    
+    // Remove auto-advance for last question to prevent skipping review
+    const isLastQuestion = this.currentQuestionIndex === ASSESSMENT_CONFIG.questions.length - 1;
+    if (!isLastQuestion) {
+        // Auto-advance after short delay if this is not the last question
+        setTimeout(() => {
+            if (this.questionsScreen.classList.contains('active')) {
+                this.nextQuestion();
+            }
+        }, 500); // 0.5 second delay before auto-advance
+    }
+}
 
       removeSaveButton() {
         const saveButton = document.querySelector('.save-results-btn');
@@ -3321,6 +3968,36 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
           
           console.log('✅ Other diagnoses displayed (top 3 after primary):', otherDiagnoses.length);
       }
+
+      // Add this method to your MentalHealthAssessment class
+debugMobileNavigation() {
+    console.log('🔍 Debugging Mobile Navigation:');
+    console.log('Mobile Assessment Button:', document.getElementById('mobileAssessmentBtn'));
+    console.log('Mobile History Button:', document.getElementById('mobileHistoryBtn'));
+    console.log('Mobile Home Button:', document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]'));
+    
+    // Check if event listeners are attached
+    const assessmentBtn = document.getElementById('mobileAssessmentBtn');
+    const historyBtn = document.getElementById('mobileHistoryBtn');
+    const homeBtn = document.querySelector('.mobile-nav-item[data-screen="welcomeScreen"]');
+    
+    if (assessmentBtn) {
+        console.log('Assessment Button exists:', assessmentBtn);
+        console.log('Assessment Button HTML:', assessmentBtn.outerHTML);
+    }
+    
+    if (historyBtn) {
+        console.log('History Button exists:', historyBtn);
+        console.log('History Button HTML:', historyBtn.outerHTML);
+    }
+    
+    if (homeBtn) {
+        console.log('Home Button exists:', homeBtn);
+        console.log('Home Button HTML:', homeBtn.outerHTML);
+    }
+}
+
+
 
       displayAssessmentDetails(assessment) {
           try {
@@ -3405,13 +4082,75 @@ const API_BASE_URL = window.location.origin; // Automatically uses current domai
               alert('Error displaying assessment details. Please try again.');
           }
       }
+
+      // Add this method to the MentalHealthAssessment class
+debugButtonStatus() {
+  console.log('🔍 Button Debug Status:');
+  console.log('startBtn:', this.startBtn);
+  console.log('viewHistoryBtn:', this.viewHistoryBtn);
+  console.log('startBtn exists in DOM:', document.getElementById('startBtn'));
+  console.log('viewHistoryBtn exists in DOM:', document.getElementById('viewHistoryBtn'));
+  
+  // Check event listeners
+  if (this.startBtn) {
+    const listeners = getEventListeners(this.startBtn);
+    console.log('startBtn listeners:', listeners);
+  }
+}
   }
 
     // Initialize the assessment when the page loads
-    let mentalHealthAssessment;
-    document.addEventListener('DOMContentLoaded', () => {
-      mentalHealthAssessment = new MentalHealthAssessment();
-    });
+// Global variable for the assessment instance
+let mentalHealthAssessment = null;
+
+// Proper initialization function
+async function initializeApplication() {
+  try {
+    console.log('🚀 Starting application initialization...');
+    
+    // Wait for DOM to be fully loaded first
+    if (document.readyState === 'loading') {
+      await new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
+    }
+    
+    console.log('✅ DOM fully loaded');
+    
+    // Initialize the assessment system
+    mentalHealthAssessment = new MentalHealthAssessment();
+    
+    // Force button binding (safety check)
+    if (mentalHealthAssessment.startBtn) {
+      console.log('🔗 Re-binding start button listener');
+      mentalHealthAssessment.startBtn.addEventListener('click', () => {
+        console.log('🎯 startBtn clicked via direct binding');
+        mentalHealthAssessment.startAssessment();
+      });
+    }
+    
+    if (mentalHealthAssessment.viewHistoryBtn) {
+      console.log('🔗 Re-binding history button listener');
+      mentalHealthAssessment.viewHistoryBtn.addEventListener('click', () => {
+        console.log('📚 viewHistoryBtn clicked via direct binding');
+        mentalHealthAssessment.showHistoryScreen();
+      });
+    }
+    
+    console.log('✅ Application fully initialized');
+    
+    // Debug: Check if buttons are now working
+    setTimeout(() => {
+      console.log('🔍 Debug: Checking button status after initialization');
+      console.log('Start button exists:', document.getElementById('startBtn'));
+      console.log('History button exists:', document.getElementById('viewHistoryBtn'));
+    }, 500);
+    
+  } catch (error) {
+    console.error('❌ Failed to initialize application:', error);
+  }
+}
+
+// Start the application
+initializeApplication();
   </script>
 
 </body>

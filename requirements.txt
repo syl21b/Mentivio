@@ -29,3 +29,6 @@ bcrypt==5.0.0
 cffi==2.0.0 
 cryptography==46.0.3 
 pycparser==2.23
+itsdangerous==2.1.2
+python-dotenv==1.0.0  # Make sure this is here
+gunicorn==21.2.0  # For production on Render

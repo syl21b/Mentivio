@@ -25,266 +25,287 @@
 
     <style>
      /* ===== NAVIGATION ===== */
-             :root {
-            /* Color Palette */
-            --primary: #4f46e5;
-            --primary-light: #7c3aed;
-            --danger: #ef4444;
-            --light: #f8fafc;
-            --dark: #1e293b;
-            --darker: #0f172a;
-            --white: #ffffff;
-            --gray-light: #f1f5f9;
-            --gray: #94a3b8;
-            --gray-dark: #475569;
-            
-            /* Design Tokens */
-            --transition: all 0.2s ease;
-            --shadow: 0 1px 3px rgba(0,0,0,0.1);
-            --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
-            --radius: 8px;
-            --radius-lg: 12px;
-        }
+ /* ===== NAVIGATION ===== */
+:root {
+    /* Color Palette */
+    --primary: #4f46e5;
+    --primary-light: #7c3aed;
+    --danger: #ef4444;
+    --light: #f8fafc;
+    --dark: #1e293b;
+    --darker: #0f172a;
+    --white: #ffffff;
+    --gray-light: #f1f5f9;
+    --gray: #94a3b8;
+    --gray-dark: #475569;
+    
+    /* Design Tokens */
+    --transition: all 0.2s ease;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.08);
+    --radius: 8px;
+    --radius-lg: 12px;
 
-     .navbar {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: var(--white);
-            border-bottom: 1px solid var(--gray-light);
-            backdrop-filter: blur(10px);
-        }
+    /* --- Navbar Color Variables (Light Mode Defaults) --- */
+    --color-text-primary: var(--dark);          /* e.g., #1e293b */
+    --color-text-secondary: var(--gray-dark);   /* e.g., #475569 */
+    --color-background-primary: var(--white);   /* e.g., #ffffff */
+    --color-background-secondary: var(--gray-light); /* e.g., #f1f5f9 */
+    
+    /* 🔑 UPDATED FOR SEMI-TRANSPARENCY (LIGHT MODE) */
+    --navbar-bg: rgba(255, 255, 255, 0.9); /* White at 90% opacity */
+    --navbar-border: rgba(0, 0, 0, 0.1); 
+    --navbar-link: var(--color-text-secondary);
+    --navbar-logo: var(--color-text-primary);
+    --navbar-btn-bg: var(--color-background-secondary);
+    --navbar-btn-color: var(--color-text-primary);
+}
 
-        .nav-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            height: 70px;
-            max-width: 1280px;
-            margin: 0 auto;
-        }
+/*
+ * 1. Override the color variables for Dark Mode
+ */
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Base Colors for Dark Mode */
+        --color-text-primary: var(--white);           /* White text */
+        --color-text-secondary: #cccccc;            /* Lighter gray text */
+        --color-background-primary: var(--darker);    /* Darkest background */
+        --color-background-secondary: var(--dark);    /* Slightly lighter dark for accents */
 
-        /* Logo */
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .logo:hover {
-            transform: translateY(-1px);
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .logo-text {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark);
-            letter-spacing: -0.5px;
-        }
-
-        /* Desktop Navigation */
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .nav-links a {
-            padding: 8px 0;
-            font-weight: 500;
-            color: var(--gray-dark);
-            font-size: 0.95rem;
-            white-space: nowrap;
-            position: relative;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-
-        .nav-links a.active {
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .nav-links a.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-            border-radius: 2px;
-        }
-
-        /* Crisis Link */
-        .crisis-link {
-            background: linear-gradient(135deg, var(--danger), #f87171);
-            color: white !important;
-            padding: 8px 20px !important;
-            border-radius: var(--radius);
-            font-weight: 600 !important;
-            margin-left: 8px;
-            transition: var(--transition);
-        }
-
-        .crisis-link:hover {
-            background: linear-gradient(135deg, #dc2626, var(--danger));
-            transform: translateY(-2px);
-        }
+        /* 🔑 UPDATED FOR SEMI-TRANSPARENCY (DARK MODE) */
+        /* Using a very dark color (like #121212 or var(--darker)) at 90% opacity */
+        --navbar-bg: rgba(18, 18, 18, 0.9); 
+        --navbar-border: rgba(255, 255, 255, 0.15); /* White border for contrast */
+        --navbar-link: var(--color-text-secondary);
+        --navbar-logo: var(--color-text-primary);
+        --navbar-btn-bg: rgba(255, 255, 255, 0.1); 
+        --navbar-btn-color: var(--color-text-primary);
+    }
+}
 
 
-        /* Mobile Menu Button */
-        .mobile-menu-btn {
-            display: none;
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius);
-            border: 1px solid var(--gray-light);
-            background: var(--white);
-            color: var(--gray-dark);
-            font-size: 1.2rem;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    /* --- EFFICIENT COLOR USAGE --- */
+    background: var(--navbar-bg);
+    border-bottom: 1px solid var(--navbar-border);
+    /* This creates the 'frosted glass' look */
+    backdrop-filter: blur(10px); 
+}
 
-        .mobile-menu-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: var(--gray-light);
-        }
+.nav-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 70px;
+    max-width: 1280px;
+    margin: 0 auto;
+}
 
-        /* ===== RESPONSIVE DESIGN ===== */
+/* Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: var(--transition);
+}
 
-        /* Tablet */
-        @media (max-width: 1024px) {
-            .footer-top {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-            
-            .footer-brand-section {
-                max-width: 500px;
-            }
-        }
+.logo:hover {
+    transform: translateY(-1px);
+}
 
-        /* Mobile Navigation */
-        @media (max-width: 768px) {
-            .mobile-menu-btn {
-                display: flex;
-            }
-            
-            .nav-links {
-                position: fixed;
-                top: 70px;
-                left: 0;
-                width: 100%;
-                background: var(--white);
-                flex-direction: column;
-                padding: 20px;
-                gap: 0;
-                transform: translateY(-100%);
-                opacity: 0;
-                visibility: hidden;
-                transition: all 0.3s ease;
-                box-shadow: var(--shadow-lg);
-                border-top: 1px solid var(--gray-light);
-            }
-            
-            .nav-links.active {
-                transform: translateY(0);
-                opacity: 1;
-                visibility: visible;
-            }
-            
-            .nav-links a {
-                width: 100%;
-                padding: 16px 0;
-                border-bottom: 1px solid var(--gray-light);
-            }
-            
-            .nav-links a:last-child {
-                border-bottom: none;
-            }
-            
-            .nav-links a.active::after {
-                display: none;
-            }
-            
-            .crisis-link {
-                margin: 16px 0 0 0;
-                width: 100%;
-                text-align: center;
-            }
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.2rem;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    /* --- EFFICIENT COLOR USAGE --- */
+    color: var(--navbar-logo); 
+    letter-spacing: -0.5px;
+}
+
+/* Desktop Navigation */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+}
+
+.nav-links a {
+    padding: 8px 0;
+    font-weight: 500;
+    /* --- EFFICIENT COLOR USAGE --- */
+    color: var(--navbar-link); 
+    font-size: 0.95rem;
+    white-space: nowrap;
+    position: relative;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.nav-links a:hover {
+    color: var(--primary);
+}
+
+.nav-links a.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary);
+    border-radius: 2px;
+}
+
+/* Crisis Link */
+.crisis-link {
+    background: linear-gradient(135deg, var(--danger), #f87171);
+    color: var(--white) !important;
+    padding: 8px 20px !important;
+    border-radius: var(--radius);
+    font-weight: 600 !important;
+    margin-left: 8px;
+    transition: var(--transition);
+}
+
+.crisis-link:hover {
+    background: linear-gradient(135deg, #dc2626, var(--danger));
+    transform: translateY(-2px);
+}
 
 
-         
-        /* Large Screens */
-        @media (min-width: 1200px) {
-            .nav-container{
-            padding: 0 40px;
-            }
-          }
-        }
+/* Mobile Menu Button */
+.mobile-menu-btn {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    font-size: 1.2rem;
+    
+    /* --- EFFICIENT COLOR USAGE --- */
+    border: 1px solid var(--navbar-border);
+    background: var(--navbar-btn-bg);
+    color: var(--navbar-btn-color);
+}
 
-        /* Accessibility */
-        .nav-links a:focus,
-        .mobile-menu-btn:focus,
-        .social-icon:focus,
-        .link-group a:focus,
-        .newsletter-form input:focus,
-        .newsletter-form button:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
+.mobile-menu-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--color-background-secondary); 
+}
 
-        /* Reduced Motion */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                transition: none !important;
-            }
-        }
+/* ===== RESPONSIVE DESIGN ===== */
 
-        /* Dark Mode Support */
-        @media (prefers-color-scheme: dark) {
-            .navbar {
-                background: var(--darker);
-                border-bottom-color: rgba(255, 255, 255, 0.1);
-            }
-            
-            .logo-text {
-                color: rgb(255, 255, 255);
-            }
-            
-            .nav-links a {
-                color: rgba(0, 0, 0, 0.8);
-            }
-            
-            .mobile-menu-btn {
-                background: rgba(255, 255, 255, 0.1);
-                border-color: rgba(255, 255, 255, 0.1);
-                color: white;
-            }
-          }
+/* Tablet */
+@media (max-width: 1024px) {
+    .footer-top {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+    
+    .footer-brand-section {
+        max-width: 500px;
+    }
+}
+
+/* Mobile Navigation */
+@media (max-width: 768px) {
+    .mobile-menu-btn {
+        display: flex;
+    }
+    
+    .nav-links {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        /* Use the semi-transparent background */
+        background: var(--navbar-bg); 
+        flex-direction: column;
+        padding: 20px;
+        gap: 0;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-lg);
+        border-top: 1px solid var(--navbar-border); 
+    }
+    
+    .nav-links.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .nav-links a {
+        width: 100%;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--navbar-border); 
+    }
+    
+    .nav-links a:last-child {
+        border-bottom: none;
+    }
+    
+    .nav-links a.active::after {
+        display: none;
+    }
+    
+    .crisis-link {
+        margin: 16px 0 0 0;
+        width: 100%;
+        text-align: center;
+    }
+ 
+/* Large Screens */
+@media (min-width: 1200px) {
+    .nav-container{
+    padding: 0 40px;
+    }
+  }
+}
+
+/* Accessibility */
+.nav-links a:focus,
+.mobile-menu-btn:focus,
+.social-icon:focus,
+.link-group a:focus,
+.newsletter-form input:focus,
+.newsletter-form button:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+}
 
     </style>

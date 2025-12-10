@@ -25,38 +25,174 @@ import sys
 import re
 import secrets
 import time
+import hashlib
 from cryptography.fernet import Fernet
 import bcrypt
 from itsdangerous import URLSafeTimedSerializer
+import threading
+from functools import wraps
+import ipaddress
+import pytz
+from dotenv import load_dotenv
+load_dotenv() 
+
+# ==================== ENVIRONMENT VALIDATION ====================
+def validate_environment():
+    """Validate all required environment variables are set"""
+    required_vars = ['SECRET_KEY']
+    
+    missing = []
+    for var in required_vars:
+        if not os.environ.get(var):
+            missing.append(var)
+    
+    if missing:
+        raise EnvironmentError(f"Missing required environment variables: {', '.join(missing)}")
+    
+    # Validate SECRET_KEY length
+    secret_key = os.environ.get('SECRET_KEY', '')
+    if len(secret_key) < 32:
+        raise ValueError("SECRET_KEY must be at least 32 characters")
+    
+    # Validate encryption key
+    encryption_key = os.environ.get('ENCRYPTION_KEY')
+    if encryption_key:
+        try:
+            Fernet(encryption_key.encode())
+        except:
+            raise ValueError("ENCRYPTION_KEY must be a valid Fernet key")
+    
+    return True
 
 # ==================== SECURITY CONFIGURATION ====================
 class SecurityConfig:
-    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_urlsafe(32))
-    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key())
+    # REQUIRED - Will raise error if not set via environment
+    SECRET_KEY = os.environ.get('SECRET_KEY', '')
+    if not SECRET_KEY:
+        raise EnvironmentError("SECRET_KEY environment variable is required")
     
+    # ENCRYPTION - Generate if not provided but warn
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
+    if not ENCRYPTION_KEY:
+        ENCRYPTION_KEY = Fernet.generate_key().decode()
+        print("WARNING: ENCRYPTION_KEY not set, generating random key. SESSIONS WILL NOT PERSIST!")
+    
+    # API SECURITY
+    API_KEY = os.environ.get('API_KEY')
+    if not API_KEY:
+        API_KEY = secrets.token_urlsafe(32)
+        print("WARNING: API_KEY not set, generating random key. SET THIS FOR PRODUCTION!")
+    
+    # RATE LIMITING
     SESSION_TIMEOUT = int(os.environ.get('SESSION_TIMEOUT', 3600))
     MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', 16 * 1024 * 1024))
     RATE_LIMIT_REQUESTS = int(os.environ.get('RATE_LIMIT_REQUESTS', 100))
     RATE_LIMIT_WINDOW = int(os.environ.get('RATE_LIMIT_WINDOW', 3600))
     
+    # PASSWORD POLICY
+    MIN_PASSWORD_LENGTH = 12
+    PASSWORD_COMPLEXITY = {
+        'min_lowercase': 1,
+        'min_uppercase': 1,
+        'min_digits': 1,
+        'min_special': 1
+    }
+    
+    # INPUT VALIDATION
+    MAX_INPUT_LENGTH = 500
+    MAX_RESPONSES = 50
+    MAX_PATIENT_NAME_LENGTH = 100
+    MAX_PATIENT_NUMBER_LENGTH = 50
+    
+    # SECURITY HEADERS - FIXED CSP
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY', 
         'X-XSS-Protection': '1; mode=block',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': "default-src 'self'; "
-                                "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
-                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
-                                "img-src 'self' data: https:; "
-                                "font-src 'self' data: https: fonts.gstatic.com; "
-                                "connect-src 'self'",
+        'Content-Security-Policy': (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data: https: fonts.gstatic.com; "
+            "connect-src 'self' https://*.onrender.com; "
+            "frame-ancestors 'none';"
+        ),
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Permissions-Policy': 'geolocation=(), microphone=()'
+        'Permissions-Policy': 'geolocation=(), microphone=()',
+        'Cache-Control': 'no-store, max-age=0'
     }
     
+    # AUDIT LOGGING
+    AUDIT_LOG_FILE = os.environ.get('AUDIT_LOG_FILE', 'security_audit.log')
     
-    MAX_INPUT_LENGTH = 500
-    MAX_RESPONSES = 50
+    # SESSION SECURITY
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    
+    # DATABASE CONNECTION - USE ENVIRONMENT VARIABLES ONLY
+    @staticmethod
+    def get_database_url():
+        """Get database URL from environment variables"""
+        db_url = os.environ.get('DATABASE_URL')
+        if not db_url:
+            # Construct from individual environment variables
+            db_host = os.environ.get('DB_HOST')
+            db_name = os.environ.get('DB_NAME')
+            db_user = os.environ.get('DB_USER')
+            db_password = os.environ.get('DB_PASSWORD')
+            db_port = os.environ.get('DB_PORT', '5432')
+            
+            if all([db_host, db_name, db_user, db_password]):
+                db_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+            else:
+                # Fallback to SQLite for development
+                return 'sqlite:///mental_health_assessments.db'
+        
+        return db_url
+
+class AuditLogger:
+    """Security audit logging"""
+    
+    def __init__(self, log_file: str = None):
+        self.log_file = log_file or SecurityConfig.AUDIT_LOG_FILE
+        self.lock = threading.Lock()
+        
+    def log_event(self, event_type: str, user_id: str = None, ip: str = None, 
+                  details: str = None, severity: str = 'INFO'):
+        """Log security events"""
+        timestamp = datetime.now(timezone.utc).isoformat()
+        ip = ip or (request.remote_addr if request else '0.0.0.0')
+        
+        log_entry = {
+            'timestamp': timestamp,
+            'event_type': event_type,
+            'user_id': user_id,
+            'ip_address': ip,
+            'severity': severity,
+            'details': details,
+            'user_agent': request.headers.get('User-Agent') if request else None,
+            'endpoint': request.endpoint if request else None,
+            'method': request.method if request else None
+        }
+        
+        with self.lock:
+            # Log to file
+            try:
+                with open(self.log_file, 'a') as f:
+                    f.write(json.dumps(log_entry) + '\n')
+            except Exception as e:
+                print(f"Failed to write audit log: {e}")
+            
+            # Also log to console based on severity
+            if severity == 'CRITICAL':
+                logging.critical(f"AUDIT [{severity}]: {event_type} - {details}")
+            elif severity == 'WARNING':
+                logging.warning(f"AUDIT [{severity}]: {event_type} - {details}")
+            else:
+                logging.info(f"AUDIT [{severity}]: {event_type} - {details}")
 
 class SecurityUtils:
     @staticmethod
@@ -64,8 +200,11 @@ class SecurityUtils:
         return secrets.token_urlsafe(length)
     
     @staticmethod
-    def hash_password(password: str) -> str:
-        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    def hash_password(password: str) -> Tuple[str, str]:
+        """Hash password with salt, return hash and salt separately"""
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+        return hashed.decode('utf-8'), salt.decode('utf-8')
     
     @staticmethod
     def verify_password(password: str, hashed: str) -> bool:
@@ -77,560 +216,445 @@ class SecurityUtils:
         return bool(re.match(pattern, email))
     
     @staticmethod
-    def sanitize_input(user_input: str) -> str:
+    def validate_password(password: str) -> Tuple[bool, List[str]]:
+        """Validate password against security policy"""
+        errors = []
+        
+        if len(password) < SecurityConfig.MIN_PASSWORD_LENGTH:
+            errors.append(f"Password must be at least {SecurityConfig.MIN_PASSWORD_LENGTH} characters")
+        
+        # Check complexity
+        complexity = SecurityConfig.PASSWORD_COMPLEXITY
+        if sum(c.islower() for c in password) < complexity['min_lowercase']:
+            errors.append(f"At least {complexity['min_lowercase']} lowercase letter required")
+        if sum(c.isupper() for c in password) < complexity['min_uppercase']:
+            errors.append(f"At least {complexity['min_uppercase']} uppercase letter required")
+        if sum(c.isdigit() for c in password) < complexity['min_digits']:
+            errors.append(f"At least {complexity['min_digits']} digit required")
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            errors.append("At least 1 special character required")
+        
+        # Check common passwords
+        common_passwords = ['password', '123456', 'qwerty', 'letmein', 'welcome']
+        if password.lower() in common_passwords:
+            errors.append("Password is too common")
+        
+        return len(errors) == 0, errors
+    
+    @staticmethod
+    def sanitize_input(user_input: str, allow_html: bool = False) -> str:
+        """Sanitize user input to prevent XSS and injection attacks"""
         if not isinstance(user_input, str):
-            return str(user_input)
-        sanitized = re.sub(r'[<>"\']', '', user_input)
-        return sanitized.strip()[:SecurityConfig.MAX_INPUT_LENGTH]
+            user_input = str(user_input)
+        
+        # Trim and limit length
+        sanitized = user_input.strip()[:SecurityConfig.MAX_INPUT_LENGTH]
+        
+        if not allow_html:
+            # Remove HTML tags and dangerous characters
+            sanitized = re.sub(r'<[^>]*>', '', sanitized)
+            sanitized = re.sub(r'[<>"\']', '', sanitized)
+        
+        # Escape SQL special characters
+        sql_safe = re.sub(r'[\';]', '', sanitized)
+        
+        return sql_safe
+    
+    @staticmethod
+    def sanitize_json_input(data: Any) -> Any:
+        """Recursively sanitize JSON input"""
+        if isinstance(data, dict):
+            return {SecurityUtils.sanitize_input(k): SecurityUtils.sanitize_json_input(v) for k, v in data.items()}
+        elif isinstance(data, list):
+            return [SecurityUtils.sanitize_json_input(item) for item in data]
+        elif isinstance(data, str):
+            return SecurityUtils.sanitize_input(data)
+        else:
+            return data
     
     @staticmethod
     def validate_patient_data(patient_info: Dict) -> Tuple[bool, str]:
-        """Validate patient information for security"""
+        """Validate patient information with strict security checks"""
         try:
+            # Name validation
             name = patient_info.get('name', '').strip()
-            if not name or len(name) > 100:
-                return False, "Invalid patient name"
+            if not name:
+                return False, "Patient name is required"
+            if len(name) > SecurityConfig.MAX_PATIENT_NAME_LENGTH:
+                return False, f"Patient name too long (max {SecurityConfig.MAX_PATIENT_NAME_LENGTH} chars)"
+            if not re.match(r'^[A-Za-z\s\-\'\.]+$', name):
+                return False, "Invalid characters in patient name"
             
+            # Number validation - alphanumeric with hyphens/underscores only
             number = patient_info.get('number', '').strip()
-            if not re.match(r'^[a-zA-Z0-9\-_]+$', number):
-                return False, "Invalid patient number format"
+            if not number:
+                return False, "Patient number is required"
+            if len(number) > SecurityConfig.MAX_PATIENT_NUMBER_LENGTH:
+                return False, f"Patient number too long (max {SecurityConfig.MAX_PATIENT_NUMBER_LENGTH} chars)"
+            if not re.match(r'^[A-Za-z0-9\-_]+$', number):
+                return False, "Invalid patient number format (alphanumeric, hyphens, underscores only)"
             
+            # Age validation
             age = patient_info.get('age', '').strip()
-            if age and not re.match(r'^[0-9]+$', age):
-                return False, "Invalid age format"
+            if age:
+                if not re.match(r'^[0-9]{1,3}$', age):
+                    return False, "Invalid age format"
+                age_int = int(age)
+                if not (0 <= age_int <= 150):
+                    return False, "Age must be between 0 and 150"
             
+            # Gender validation
             gender = patient_info.get('gender', '').strip()
-            if gender and gender not in ['Male', 'Female', 'Other', 'Prefer not to say', '']:
+            valid_genders = ['Male', 'Female', 'Other', 'Prefer not to say', '']
+            if gender and gender not in valid_genders:
                 return False, "Invalid gender selection"
             
             return True, "Valid"
+            
         except Exception as e:
             return False, f"Validation error: {str(e)}"
+    
+    @staticmethod
+    def validate_ip_address(ip: str) -> bool:
+        """Validate IP address format"""
+        try:
+            ipaddress.ip_address(ip)
+            return True
+        except ValueError:
+            return False
+    
+    @staticmethod
+    def generate_request_id() -> str:
+        """Generate unique request ID for tracing"""
+        return f"req_{uuid.uuid4().hex[:16]}"
 
 class EncryptionService:
     def __init__(self):
-        self.fernet = Fernet(SecurityConfig.ENCRYPTION_KEY)
+        try:
+            self.fernet = Fernet(SecurityConfig.ENCRYPTION_KEY.encode())
+        except Exception as e:
+            logging.error(f"Failed to initialize encryption: {e}")
+            raise
     
     def encrypt_data(self, data: str) -> str:
+        """Encrypt sensitive data"""
         return self.fernet.encrypt(data.encode()).decode()
     
     def decrypt_data(self, encrypted_data: str) -> str:
+        """Decrypt sensitive data"""
         return self.fernet.decrypt(encrypted_data.encode()).decode()
     
     def encrypt_dict(self, data: Dict) -> str:
+        """Encrypt dictionary data"""
         return self.encrypt_data(json.dumps(data))
     
     def decrypt_dict(self, encrypted_data: str) -> Dict:
+        """Decrypt dictionary data"""
         return json.loads(self.decrypt_data(encrypted_data))
+    
+    def encrypt_field(self, field_value: Any) -> str:
+        """Encrypt a single field if it's sensitive"""
+        if isinstance(field_value, (dict, list)):
+            return self.encrypt_data(json.dumps(field_value))
+        return self.encrypt_data(str(field_value))
 
 class RateLimiter:
     def __init__(self):
         self.requests = {}
+        self.lock = threading.Lock()
+        self.audit_logger = AuditLogger()
     
-    def is_rate_limited(self, identifier: str, max_requests: int, window: int) -> bool:
+    def is_rate_limited(self, identifier: str, max_requests: int, window: int) -> Tuple[bool, str]:
+        """Check if request should be rate limited"""
         now = time.time()
         window_start = now - window
         
-        if identifier in self.requests:
-            self.requests[identifier] = [
-                req_time for req_time in self.requests[identifier] 
-                if req_time > window_start
-            ]
-        
-        if len(self.requests.get(identifier, [])) >= max_requests:
-            return True
-        
-        if identifier not in self.requests:
-            self.requests[identifier] = []
-        self.requests[identifier].append(now)
-        
-        return False
+        with self.lock:
+            if identifier in self.requests:
+                # Clean old requests
+                self.requests[identifier] = [
+                    req_time for req_time in self.requests[identifier] 
+                    if req_time > window_start
+                ]
+            
+            request_count = len(self.requests.get(identifier, []))
+            
+            if request_count >= max_requests:
+                # Log rate limit event
+                self.audit_logger.log_event(
+                    event_type='RATE_LIMIT_EXCEEDED',
+                    ip=identifier if SecurityUtils.validate_ip_address(identifier) else None,
+                    details=f"Rate limit exceeded: {request_count}/{max_requests} in {window}s",
+                    severity='WARNING'
+                )
+                return True, f"Rate limit exceeded. Try again in {window} seconds."
+            
+            # Add current request
+            if identifier not in self.requests:
+                self.requests[identifier] = []
+            self.requests[identifier].append(now)
+            
+            return False, ""
+
+class AdvancedRateLimiter(RateLimiter):
+    """Enhanced rate limiter with different limits per endpoint"""
+    
+    def __init__(self):
+        super().__init__()
+        self.endpoint_limits = {
+            'predict': {'max_requests': 50, 'window': 3600},
+            'save_assessment': {'max_requests': 20, 'window': 3600},
+            'get_patient_assessments': {'max_requests': 30, 'window': 3600},
+            'default': {'max_requests': SecurityConfig.RATE_LIMIT_REQUESTS, 'window': SecurityConfig.RATE_LIMIT_WINDOW}
+        }
+    
+    def get_endpoint_limit(self, endpoint: str) -> Dict[str, int]:
+        """Get rate limit for specific endpoint"""
+        return self.endpoint_limits.get(endpoint, self.endpoint_limits['default'])
+    
+    def is_endpoint_rate_limited(self, identifier: str, endpoint: str) -> Tuple[bool, str]:
+        """Check rate limit for specific endpoint"""
+        limits = self.get_endpoint_limit(endpoint)
+        return self.is_rate_limited(
+            f"{identifier}:{endpoint}",
+            limits['max_requests'],
+            limits['window']
+        )
 
 class AuthService:
     def __init__(self):
         self.serializer = URLSafeTimedSerializer(SecurityConfig.SECRET_KEY)
         self.active_sessions = {}
+        self.failed_attempts = {}
+        self.lock = threading.Lock()
+        self.audit_logger = AuditLogger()
+        self.max_failed_attempts = 5
+        self.lockout_time = 900  # 15 minutes
     
     def create_session(self, user_id: str, user_data: Dict) -> str:
+        """Create a new secure session"""
         session_id = SecurityUtils.generate_secure_token()
         session_data = {
             'user_id': user_id,
             'user_data': user_data,
             'created_at': time.time(),
-            'last_activity': time.time()
+            'last_activity': time.time(),
+            'ip_address': request.remote_addr if request else '0.0.0.0',
+            'user_agent': request.headers.get('User-Agent') if request else None
         }
-        self.active_sessions[session_id] = session_data
+        
+        with self.lock:
+            self.active_sessions[session_id] = session_data
+        
+        # Log session creation
+        self.audit_logger.log_event(
+            event_type='SESSION_CREATED',
+            user_id=user_id,
+            details=f"Session created for user {user_id}",
+            severity='INFO'
+        )
+        
         return session_id
     
     def validate_session(self, session_id: str) -> Optional[Dict]:
-        if session_id not in self.active_sessions:
+        """Validate session and check for security issues"""
+        if not session_id:
             return None
         
-        session_data = self.active_sessions[session_id]
-        
-        if time.time() - session_data['last_activity'] > SecurityConfig.SESSION_TIMEOUT:
-            del self.active_sessions[session_id]
-            return None
-        
-        session_data['last_activity'] = time.time()
-        return session_data
+        with self.lock:
+            if session_id not in self.active_sessions:
+                return None
+            
+            session_data = self.active_sessions[session_id]
+            
+            # Check session timeout
+            if time.time() - session_data['last_activity'] > SecurityConfig.SESSION_TIMEOUT:
+                self.audit_logger.log_event(
+                    event_type='SESSION_EXPIRED',
+                    user_id=session_data['user_id'],
+                    details="Session expired due to inactivity",
+                    severity='INFO'
+                )
+                del self.active_sessions[session_id]
+                return None
+            
+            # Check for IP change (session hijacking detection)
+            current_ip = request.remote_addr if request else '0.0.0.0'
+            if (session_data['ip_address'] != current_ip and 
+                session_data['ip_address'] != '0.0.0.0'):
+                self.audit_logger.log_event(
+                    event_type='SUSPICIOUS_SESSION',
+                    user_id=session_data['user_id'],
+                    details=f"IP changed from {session_data['ip_address']} to {current_ip}",
+                    severity='WARNING'
+                )
+                # Optionally: destroy session on IP change
+                # del self.active_sessions[session_id]
+                # return None
+            
+            # Update last activity
+            session_data['last_activity'] = time.time()
+            
+            return session_data
     
     def destroy_session(self, session_id: str):
-        if session_id in self.active_sessions:
-            del self.active_sessions[session_id]
+        """Destroy session securely"""
+        with self.lock:
+            if session_id in self.active_sessions:
+                user_id = self.active_sessions[session_id]['user_id']
+                self.audit_logger.log_event(
+                    event_type='SESSION_DESTROYED',
+                    user_id=user_id,
+                    details="Session destroyed",
+                    severity='INFO'
+                )
+                del self.active_sessions[session_id]
+    
+    def record_failed_attempt(self, identifier: str):
+        """Record failed login attempt"""
+        with self.lock:
+            if identifier not in self.failed_attempts:
+                self.failed_attempts[identifier] = []
+            
+            self.failed_attempts[identifier].append(time.time())
+            
+            # Clean old attempts
+            window_start = time.time() - self.lockout_time
+            self.failed_attempts[identifier] = [
+                t for t in self.failed_attempts[identifier]
+                if t > window_start
+            ]
+            
+            attempt_count = len(self.failed_attempts[identifier])
+            
+            if attempt_count >= self.max_failed_attempts:
+                self.audit_logger.log_event(
+                    event_type='ACCOUNT_LOCKED',
+                    ip=identifier if SecurityUtils.validate_ip_address(identifier) else None,
+                    details=f"Account locked after {attempt_count} failed attempts",
+                    severity='CRITICAL'
+                )
+    
+    def is_account_locked(self, identifier: str) -> bool:
+        """Check if account is locked due to failed attempts"""
+        with self.lock:
+            if identifier not in self.failed_attempts:
+                return False
+            
+            window_start = time.time() - self.lockout_time
+            recent_attempts = [
+                t for t in self.failed_attempts[identifier]
+                if t > window_start
+            ]
+            
+            return len(recent_attempts) >= self.max_failed_attempts
+    
+    def clear_failed_attempts(self, identifier: str):
+        """Clear failed attempts after successful login"""
+        with self.lock:
+            if identifier in self.failed_attempts:
+                del self.failed_attempts[identifier]
 
-# Initialize security services
-encryption_service = EncryptionService()
-rate_limiter = RateLimiter()
-auth_service = AuthService()
-
-# ==================== FLASK APP SETUP ====================
-assessment_storage: Dict[str, Dict[str, Any]] = {}
-
-app = Flask(__name__, 
-           static_folder='frontend',
-           template_folder='frontend')
-
-app.secret_key = SecurityConfig.SECRET_KEY
-
-# Security middleware
-@app.after_request
-def set_security_headers(response):
-    for header, value in SecurityConfig.SECURITY_HEADERS.items():
-        response.headers[header] = value
-    return response
-
-# Rate limiting middleware
-@app.before_request
-def check_rate_limit():
-    if request.endpoint and request.endpoint.startswith('api'):
-        client_ip = request.remote_addr
-        if rate_limiter.is_rate_limited(client_ip, SecurityConfig.RATE_LIMIT_REQUESTS, SecurityConfig.RATE_LIMIT_WINDOW):
-            return jsonify({
-                'error': 'Rate limit exceeded. Please try again later.',
-                'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
-            }), 429
-
-# Input validation middleware
-@app.before_request
-def validate_api_input():
-    if request.endpoint and request.endpoint.startswith('api') and request.method in ['POST', 'PUT']:
-        if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
-            return jsonify({'error': 'Request too large'}), 413
+# ==================== SECURITY MIDDLEWARE DECORATORS ====================
+def require_api_key(f):
+    """Decorator to require API key for endpoint"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Skip API key check for health endpoints
+        if request.endpoint in ['health_check', 'simple_ping', 'api_info']:
+            return f(*args, **kwargs)
         
+        api_key = request.headers.get('X-API-Key')
+        
+        if not api_key:
+            audit_logger.log_event(
+                event_type='API_KEY_MISSING',
+                ip=request.remote_addr,
+                details=f"Missing API key for {request.endpoint}",
+                severity='WARNING'
+            )
+            return jsonify({'error': 'API key required'}), 401
+        
+        # Validate API key
+        valid_key = SecurityConfig.API_KEY
+        
+        # Use constant-time comparison to prevent timing attacks
+        if not secrets.compare_digest(api_key, valid_key):
+            audit_logger.log_event(
+                event_type='INVALID_API_KEY',
+                ip=request.remote_addr,
+                details=f"Invalid API key for {request.endpoint}",
+                severity='WARNING'
+            )
+            return jsonify({'error': 'Invalid API key'}), 401
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+def validate_json_content(f):
+    """Decorator to validate JSON content and size"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.method in ['POST', 'PUT']:
+            # Check content length
+            if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
+                audit_logger.log_event(
+                    event_type='REQUEST_TOO_LARGE',
+                    ip=request.remote_addr,
+                    details=f"Request size: {request.content_length} bytes",
+                    severity='WARNING'
+                )
+                return jsonify({'error': 'Request too large'}), 413
+            
+            # Validate JSON
+            if request.is_json:
+                try:
+                    data = request.get_json()
+                    if not isinstance(data, (dict, list)):
+                        return jsonify({'error': 'Invalid JSON format'}), 400
+                except Exception as e:
+                    audit_logger.log_event(
+                        event_type='INVALID_JSON',
+                        ip=request.remote_addr,
+                        details=f"JSON parsing error: {str(e)}",
+                        severity='WARNING'
+                    )
+                    return jsonify({'error': 'Invalid JSON data'}), 400
+        
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+def sanitize_inputs(f):
+    """Decorator to sanitize all input parameters"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Sanitize URL parameters
+        sanitized_kwargs = {}
+        for key, value in kwargs.items():
+            if isinstance(value, str):
+                sanitized_kwargs[key] = SecurityUtils.sanitize_input(value)
+            else:
+                sanitized_kwargs[key] = value
+        
+        # Sanitize form data
+        if request.form:
+            for key in request.form:
+                request.form[key] = SecurityUtils.sanitize_input(request.form[key])
+        
+        # Sanitize JSON data
         if request.is_json:
             try:
                 data = request.get_json()
-                if not isinstance(data, (dict, list)):
-                    return jsonify({'error': 'Invalid JSON format'}), 400
-            except Exception as e:
-                return jsonify({'error': 'Invalid JSON data'}), 400
-
-# Configure CORS with security
-if os.environ.get('RENDER'):
-    CORS(app, origins=[
-        'https://mentivio.onrender.com',
-        'http://mentivio-MentalHealth.onrender.com',
-        'https://mentivio-web.onrender.com'
-    ])
-    app.debug = False
-    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
-else:
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# ==================== DATABASE SETUP ====================
-def get_postgres_connection():
-    """Get PostgreSQL database connection using psycopg"""
-    try:
-        database_url = os.environ.get('DATABASE_URL')
-        if database_url:
-            if database_url.startswith('postgresql://'):
-                conn = psycopg.connect(database_url, row_factory=dict_row)
-            else:
-                conn = psycopg.connect(
-                    host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
-                    dbname='assessment_data',
-                    user='assessment_data_user',
-                    password='QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA',
-                    port=5432,
-                    row_factory=dict_row
-                )
-        else:
-            conn = psycopg.connect(
-                host='dpg-d4j32vvgi27c739dfo1g-a.oregon-postgres.render.com',
-                dbname='assessment_data',
-                user='assessment_data_user',
-                password='QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA',
-                port=5432,
-                row_factory=dict_row
-            )
+                sanitized_data = SecurityUtils.sanitize_json_input(data)
+                request._cached_json = (sanitized_data, request._cached_json[1])
+            except:
+                pass
         
-        logger.info("PostgreSQL connection established successfully with psycopg")
-        return conn
-    except Exception as e:
-        logger.error(f"PostgreSQL connection failed: {e}")
-        try:
-            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
-            conn = sqlite3.connect(sqlite_path)
-            conn.row_factory = sqlite3.Row
-            logger.info("Fallback to SQLite connection")
-            return conn
-        except Exception as sqlite_error:
-            logger.error(f"SQLite fallback also failed: {sqlite_error}")
-            raise e
-
-def init_database():
-    """Initialize PostgreSQL database with required tables using psycopg"""
-    try:
-        conn = get_postgres_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                cur.execute('''
-                    CREATE TABLE IF NOT EXISTS assessments (
-                        id TEXT PRIMARY KEY,
-                        assessment_timestamp TEXT,
-                        report_timestamp TEXT,
-                        timezone TEXT,
-                        patient_name TEXT,
-                        patient_number TEXT,
-                        patient_age TEXT,
-                        patient_gender TEXT,
-                        primary_diagnosis TEXT,
-                        confidence REAL,
-                        confidence_percentage REAL,
-                        all_diagnoses_json TEXT,
-                        responses_json TEXT,
-                        processing_details_json TEXT,
-                        technical_details_json TEXT,
-                        clinical_insights_json TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                ''')
-                
-                cur.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
-                cur.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
-                
-            conn.commit()
-            logger.info("PostgreSQL database initialized successfully with psycopg")
-            
-        else:
-            c = conn.cursor()
-            
-            c.execute('''
-                CREATE TABLE IF NOT EXISTS assessments (
-                    id TEXT PRIMARY KEY,
-                    assessment_timestamp TEXT,
-                    report_timestamp TEXT,
-                    timezone TEXT,
-                    patient_name TEXT,
-                    patient_number TEXT,
-                    patient_age TEXT,
-                    patient_gender TEXT,
-                    primary_diagnosis TEXT,
-                    confidence REAL,
-                    confidence_percentage REAL,
-                    all_diagnoses_json TEXT,
-                    responses_json TEXT,
-                    processing_details_json TEXT,
-                    technical_details_json TEXT,
-                    clinical_insights_json TEXT,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            ''')
-            
-            c.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
-            c.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
-            
-            conn.commit()
-            logger.info("SQLite database initialized successfully")
-        
-        conn.close()
-        
-    except Exception as e:
-        logger.error(f"Database initialization failed: {e}")
-
-def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
-    """Save assessment data to PostgreSQL database using psycopg"""
-    try:
-        sanitized_data = assessment_data.copy()
-        if 'patient_info' in sanitized_data:
-            sanitized_data['patient_info'] = {
-                'name': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('name', '')),
-                'number': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('number', '')),
-                'age': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('age', '')),
-                'gender': SecurityUtils.sanitize_input(sanitized_data['patient_info'].get('gender', ''))
-            }
-        
-        conn = get_postgres_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                cur.execute('''
-                    INSERT INTO assessments (
-                        id, assessment_timestamp, report_timestamp, timezone,
-                        patient_name, patient_number, patient_age, patient_gender,
-                        primary_diagnosis, confidence, confidence_percentage,
-                        all_diagnoses_json, responses_json, processing_details_json,
-                        technical_details_json, clinical_insights_json
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (id) DO UPDATE SET
-                        assessment_timestamp = EXCLUDED.assessment_timestamp,
-                        report_timestamp = EXCLUDED.report_timestamp,
-                        timezone = EXCLUDED.timezone,
-                        patient_name = EXCLUDED.patient_name,
-                        patient_number = EXCLUDED.patient_number,
-                        patient_age = EXCLUDED.patient_age,
-                        patient_gender = EXCLUDED.patient_gender,
-                        primary_diagnosis = EXCLUDED.primary_diagnosis,
-                        confidence = EXCLUDED.confidence,
-                        confidence_percentage = EXCLUDED.confidence_percentage,
-                        all_diagnoses_json = EXCLUDED.all_diagnoses_json,
-                        responses_json = EXCLUDED.responses_json,
-                        processing_details_json = EXCLUDED.processing_details_json,
-                        technical_details_json = EXCLUDED.technical_details_json,
-                        clinical_insights_json = EXCLUDED.clinical_insights_json
-                ''', (
-                    sanitized_data.get('id'),
-                    sanitized_data.get('assessment_timestamp'),
-                    sanitized_data.get('timestamp'),
-                    sanitized_data.get('timezone', 'UTC'),
-                    sanitized_data.get('patient_info', {}).get('name', ''),
-                    sanitized_data.get('patient_info', {}).get('number', ''),
-                    sanitized_data.get('patient_info', {}).get('age', ''),
-                    sanitized_data.get('patient_info', {}).get('gender', ''),
-                    sanitized_data.get('primary_diagnosis', ''),
-                    sanitized_data.get('confidence', 0),
-                    sanitized_data.get('confidence_percentage', 0),
-                    json.dumps(sanitized_data.get('all_diagnoses', [])),
-                    json.dumps(sanitized_data.get('responses', {})),
-                    json.dumps(sanitized_data.get('processing_details', {})),
-                    json.dumps(sanitized_data.get('technical_details', {})),
-                    json.dumps(sanitized_data.get('clinical_insights', {}))
-                ))
-        else:
-            c = conn.cursor()
-            
-            c.execute('''
-                INSERT OR REPLACE INTO assessments (
-                    id, assessment_timestamp, report_timestamp, timezone,
-                    patient_name, patient_number, patient_age, patient_gender,
-                    primary_diagnosis, confidence, confidence_percentage,
-                    all_diagnoses_json, responses_json, processing_details_json,
-                    technical_details_json, clinical_insights_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                sanitized_data.get('id'),
-                sanitized_data.get('assessment_timestamp'),
-                sanitized_data.get('timestamp'),
-                sanitized_data.get('timezone', 'UTC'),
-                sanitized_data.get('patient_info', {}).get('name', ''),
-                sanitized_data.get('patient_info', {}).get('number', ''),
-                sanitized_data.get('patient_info', {}).get('age', ''),
-                sanitized_data.get('patient_info', {}).get('gender', ''),
-                sanitized_data.get('primary_diagnosis', ''),
-                sanitized_data.get('confidence', 0),
-                sanitized_data.get('confidence_percentage', 0),
-                json.dumps(sanitized_data.get('all_diagnoses', [])),
-                json.dumps(sanitized_data.get('responses', {})),
-                json.dumps(sanitized_data.get('processing_details', {})),
-                json.dumps(sanitized_data.get('technical_details', {})),
-                json.dumps(sanitized_data.get('clinical_insights', {}))
-            ))
-        
-        conn.commit()
-        conn.close()
-        
-        logger.info(f"Assessment saved to database: {sanitized_data.get('id')}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Error saving to database: {e}")
-        return False
-
-def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
-    """Load assessments from database using psycopg, optionally filtered by patient number"""
-    try:
-        conn = get_postgres_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                if patient_number:
-                    cur.execute('''
-                        SELECT * FROM assessments 
-                        WHERE patient_number = %s 
-                        ORDER BY report_timestamp DESC
-                    ''', (patient_number,))
-                else:
-                    cur.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
-                
-                rows = cur.fetchall()
-        else:
-            c = conn.cursor()
-            
-            if patient_number:
-                c.execute('''
-                    SELECT * FROM assessments 
-                    WHERE patient_number = ? 
-                    ORDER BY report_timestamp DESC
-                ''', (patient_number,))
-            else:
-                c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
-            
-            rows = c.fetchall()
-        
-        conn.close()
-        
-        assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
-        
-        for row in rows:
-            if isinstance(row, dict):
-                row_dict = row
-            else:
-                row_dict = dict(row)
-            
-            patient_num = row_dict['patient_number']
-            if patient_num not in assessments_by_patient:
-                assessments_by_patient[patient_num] = []
-            
-            all_diagnoses = json.loads(row_dict['all_diagnoses_json']) if row_dict['all_diagnoses_json'] else []
-            responses = json.loads(row_dict['responses_json']) if row_dict['responses_json'] else {}
-            processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
-            technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
-            clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict['clinical_insights_json'] else {}
-            
-            assessment: Dict[str, Any] = {
-                'id': row_dict['id'],
-                'timestamp': row_dict['report_timestamp'],
-                'assessment_timestamp': row_dict['assessment_timestamp'],
-                'timezone': row_dict['timezone'],
-                'patient_info': {
-                    'name': row_dict['patient_name'],
-                    'number': row_dict['patient_number'],
-                    'age': row_dict['patient_age'],
-                    'gender': row_dict['patient_gender']
-                },
-                'primary_diagnosis': row_dict['primary_diagnosis'],
-                'confidence': row_dict['confidence'],
-                'confidence_percentage': row_dict['confidence_percentage'],
-                'all_diagnoses': all_diagnoses,
-                'responses': responses,
-                'processing_details': processing_details,
-                'technical_details': technical_details,
-                'clinical_insights': clinical_insights
-            }
-            
-            assessments_by_patient[patient_num].append(assessment)
-        
-        logger.info(f"Loaded {len(rows)} assessments from database")
-        return assessments_by_patient
-        
-    except Exception as e:
-        logger.error(f"Error loading from database: {e}")
-        return {}
-
-def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
-    """Load a single specific assessment from database using psycopg"""
-    try:
-        conn = get_postgres_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                cur.execute('''
-                    SELECT * FROM assessments 
-                    WHERE patient_number = %s AND id = %s AND patient_name = %s
-                ''', (patient_number, assessment_id, patient_name))
-                
-                row = cur.fetchone()
-        else:
-            c = conn.cursor()
-            
-            c.execute('''
-                SELECT * FROM assessments 
-                WHERE patient_number = ? AND id = ? AND patient_name = ?
-            ''', (patient_number, assessment_id, patient_name))
-            
-            row = c.fetchone()
-        
-        conn.close()
-        
-        if not row:
-            return None
-        
-        if isinstance(row, dict):
-            row_dict = row
-        else:
-            row_dict = dict(row)
-        
-        all_diagnoses = json.loads(row_dict['all_diagnoses_json']) if row_dict['all_diagnoses_json'] else []
-        responses = json.loads(row_dict['responses_json']) if row_dict['responses_json'] else {}
-        processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
-        technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
-        clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict['clinical_insights_json'] else {}
-        
-        assessment: Dict[str, Any] = {
-            'id': row_dict['id'],
-            'timestamp': row_dict['report_timestamp'],
-            'assessment_timestamp': row_dict['assessment_timestamp'],
-            'timezone': row_dict['timezone'],
-            'patient_info': {
-                'name': row_dict['patient_name'],
-                'number': row_dict['patient_number'],
-                'age': row_dict['patient_age'],
-                'gender': row_dict['patient_gender']
-            },
-            'primary_diagnosis': row_dict['primary_diagnosis'],
-            'confidence': row_dict['confidence'],
-            'confidence_percentage': row_dict['confidence_percentage'],
-            'all_diagnoses': all_diagnoses,
-            'responses': responses,
-            'processing_details': processing_details,
-            'technical_details': technical_details,
-            'clinical_insights': clinical_insights
-        }
-        
-        logger.info(f"Loaded single assessment from database: {assessment_id}")
-        return assessment
-        
-    except Exception as e:
-        logger.error(f"Error loading single assessment from database: {e}")
-        return None
-
-def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
-    """Delete assessment from database using psycopg"""
-    try:
-        conn = get_postgres_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                cur.execute('''
-                    DELETE FROM assessments 
-                    WHERE patient_number = %s AND id = %s
-                ''', (patient_number, assessment_id))
-        else:
-            c = conn.cursor()
-            
-            c.execute('''
-                DELETE FROM assessments 
-                WHERE patient_number = ? AND id = ?
-            ''', (patient_number, assessment_id))
-        
-        conn.commit()
-        conn.close()
-        
-        logger.info(f"Assessment deleted from database: {assessment_id}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Error deleting from database: {e}")
-        return False
-
-# Initialize database at startup
-init_database()
+        return f(*args, **sanitized_kwargs)
+    
+    return decorated_function
 
 # ==================== MODEL COMPONENTS ====================
 model_package: Optional[Dict[str, Any]] = None
@@ -639,6 +663,7 @@ label_encoder: Optional[Any] = None
 feature_names: Optional[List[str]] = None
 category_mappings: Optional[Dict[str, Any]] = None
 clinical_enhancer: Optional[Any] = None
+preprocessor: Optional[Any] = None
 
 def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Optional[Any], Optional[List[str]], Optional[Dict[str, Any]]]:
     """Load all required model components"""
@@ -875,7 +900,7 @@ class ClinicalDecisionEnhancer:
                 enhanced_prediction['adjustment_reasons'].append(suggestion['reason'])
         
         return enhanced_prediction
-    
+
 def initialize_clinical_enhancer():
     """Initialize the clinical decision enhancer"""
     global clinical_enhancer
@@ -971,18 +996,21 @@ class ClinicalPreprocessor:
     def apply_feature_engineering(self, encoded_responses: Dict[str, Any]) -> Dict[str, Any]:
         responses = encoded_responses.copy()
         
+        # 1. Mood Emotion Composite (already exists)
         if 'Mood Swing' in responses and 'Sadness' in responses:
             mood_swing = float(responses.get('Mood Swing', 0))
             sadness = float(responses.get('Sadness', 0))
             responses['Mood_Emotion_Composite'] = mood_swing * 0.6 + sadness * 0.4
             self.log_step("Composite_Score", f"Mood_Emotion_Composite: {mood_swing}*0.6 + {sadness}*0.4 = {responses['Mood_Emotion_Composite']:.2f}")
         
+        # 2. Sleep Fatigue Composite (already exists)
         if 'Sleep disorder' in responses and 'Exhausted' in responses:
             sleep_disorder = float(responses.get('Sleep disorder', 0))
             exhausted = float(responses.get('Exhausted', 0))
             responses['Sleep_Fatigue_Composite'] = sleep_disorder * 0.7 + exhausted * 0.3
             self.log_step("Composite_Score", f"Sleep_Fatigue_Composite: {sleep_disorder}*0.7 + {exhausted}*0.3 = {responses['Sleep_Fatigue_Composite']:.2f}")
         
+        # 3. Behavioral Stress Composite (already exists)
         behavioral_features = ['Aggressive Response', 'Nervous Breakdown', 'Overthinking']
         behavioral_scores = []
         for feat in behavioral_features:
@@ -996,8 +1024,77 @@ class ClinicalPreprocessor:
             responses['Behavioral_Stress_Composite'] = sum(behavioral_scores) / len(behavioral_scores)
             self.log_step("Composite_Score", f"Behavioral_Stress_Composite: {behavioral_scores} = {responses['Behavioral_Stress_Composite']:.2f}")
         
+        # 4. Risk Assessment Score (NEW - based on high-risk indicators)
+        risk_indicators = ['Suicidal thoughts', 'Aggressive Response', 'Nervous Breakdown']
+        risk_scores = []
+        for feat in risk_indicators:
+            if feat in responses:
+                try:
+                    risk_scores.append(float(responses[feat]))
+                except (ValueError, TypeError):
+                    risk_scores.append(0.0)
+        
+        if risk_scores:
+            responses['Risk_Assessment_Score'] = sum(risk_scores) * 10  # Scale to 0-30 range
+            self.log_step("Composite_Score", f"Risk_Assessment_Score: {risk_scores} * 10 = {responses['Risk_Assessment_Score']:.2f}")
+        else:
+            responses['Risk_Assessment_Score'] = 0.0
+            self.log_step("Composite_Score", f"Risk_Assessment_Score: No risk indicators, set to 0")
+        
+        # 5. Cognitive Function Score (NEW - based on cognitive features)
+        cognitive_features = ['Concentration', 'Optimism']
+        cognitive_scores = []
+        for feat in cognitive_features:
+            if feat in responses:
+                try:
+                    # Normalize to 0-1 range (assuming Concentration and Optimism are 0-4 scale)
+                    normalized_score = float(responses[feat]) / 4.0
+                    cognitive_scores.append(normalized_score)
+                except (ValueError, TypeError):
+                    cognitive_scores.append(0.5)  # Default neutral
+        
+        if cognitive_scores:
+            responses['Cognitive_Function_Score'] = sum(cognitive_scores) / len(cognitive_scores) * 10  # Scale to 0-10
+            self.log_step("Composite_Score", f"Cognitive_Function_Score: {cognitive_scores} = {responses['Cognitive_Function_Score']:.2f}")
+        else:
+            responses['Cognitive_Function_Score'] = 5.0  # Default neutral
+            self.log_step("Composite_Score", f"Cognitive_Function_Score: No cognitive indicators, set to 5.0")
+        
+        # 6. Mood Stability Score (NEW - inverse of mood volatility)
+        mood_features = ['Mood Swing', 'Euphoric', 'Sadness']
+        stability_scores = []
+        
+        for feat in mood_features:
+            if feat in responses:
+                try:
+                    value = float(responses[feat])
+                    # Lower values indicate more stability
+                    if feat == 'Mood Swing':
+                        # Mood Swing: 0 = stable, 1 = volatile
+                        stability_scores.append(10 - (value * 10))  # Convert to stability score
+                    elif feat == 'Euphoric':
+                        # Euphoric: Extreme values (0 or 3) indicate instability, middle values indicate stability
+                        if value == 0 or value == 3:
+                            stability_scores.append(3.0)
+                        elif value == 1 or value == 2:
+                            stability_scores.append(7.0)
+                        else:
+                            stability_scores.append(5.0)
+                    elif feat == 'Sadness':
+                        # Sadness: Lower values indicate stability
+                        stability_scores.append(10 - (value * 3.33))  # Scale 0-3 to 0-10
+                except (ValueError, TypeError):
+                    stability_scores.append(5.0)  # Default neutral
+        
+        if stability_scores:
+            responses['Mood_Stability_Score'] = sum(stability_scores) / len(stability_scores)
+            self.log_step("Composite_Score", f"Mood_Stability_Score: {stability_scores} = {responses['Mood_Stability_Score']:.2f}")
+        else:
+            responses['Mood_Stability_Score'] = 5.0  # Default neutral
+            self.log_step("Composite_Score", f"Mood_Stability_Score: No mood indicators, set to 5.0")
+        
         return responses
-
+    
     def normalize_feature_names(self, raw_responses: Dict[str, Any]) -> Dict[str, Any]:
         normalized_responses: Dict[str, Any] = {}
         
@@ -1125,6 +1222,10 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
             logger.error("Feature names not loaded")
             return None
             
+        # Debug: Show expected vs actual features
+        logger.info(f"Expected features ({len(feature_names)}): {feature_names}")
+        logger.info(f"Actual features ({len(processed_responses)}): {list(processed_responses.keys())}")
+            
         feature_array = np.zeros(len(feature_names))
         
         missing_features: List[str] = []
@@ -1164,15 +1265,757 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
         import traceback
         logger.error(f"Traceback: {traceback.format_exc()}")
         return None
+# Initialize security services
+audit_logger = AuditLogger()
+encryption_service = EncryptionService()
+rate_limiter = AdvancedRateLimiter()
+auth_service = AuthService()
 
-# Load components at startup
+# ==================== FLASK APP SETUP ====================
+assessment_storage: Dict[str, Dict[str, Any]] = {}
+
+app = Flask(__name__, 
+           static_folder='frontend',
+           template_folder='frontend')
+
+# Configure Flask security
+app.secret_key = SecurityConfig.SECRET_KEY
+app.config['SESSION_COOKIE_SECURE'] = SecurityConfig.SESSION_COOKIE_SECURE
+app.config['SESSION_COOKIE_HTTPONLY'] = SecurityConfig.SESSION_COOKIE_HTTPONLY
+app.config['SESSION_COOKIE_SAMESITE'] = SecurityConfig.SESSION_COOKIE_SAMESITE
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Validate environment at startup
+try:
+    validate_environment()
+    logger.info("Environment validation passed")
+except Exception as e:
+    logger.error(f"CRITICAL: Environment validation failed: {e}")
+    sys.exit(1)
+
+# Load model components
 model_package, scaler, label_encoder, feature_names, category_mappings = load_model_components()
 initialize_clinical_enhancer()
 
 # Initialize preprocessor
 preprocessor = ClinicalPreprocessor(category_mappings)
 
+# ==================== SECURE DATABASE SETUP ====================
+def get_postgres_connection():
+    """Get PostgreSQL database connection using environment variables ONLY"""
+    try:
+        database_url = SecurityConfig.get_database_url()
+        
+        # Check if it's SQLite
+        if database_url.startswith('sqlite:///'):
+            sqlite_path = database_url.replace('sqlite:///', '')
+            if sqlite_path == 'mental_health_assessments.db':
+                sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+            
+            conn = sqlite3.connect(sqlite_path)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys = ON")
+            conn.execute("PRAGMA journal_mode = WAL")
+            logger.info("Development SQLite connection established")
+            return conn
+        
+        # Validate database URL doesn't contain hardcoded credentials
+        #if 'QkHhmkEwRn4UjlbskfKNvdcyCJs7YjFA' in database_url:
+        #    raise ValueError("Hardcoded credentials detected in database URL")
+        
+        # Connect with SSL in production
+        ssl_mode = 'require' if os.environ.get('RENDER') else 'prefer'
+        
+        conn = psycopg.connect(
+            database_url,
+            row_factory=dict_row,
+            sslmode=ssl_mode
+        )
+        
+        # Set statement timeout to prevent long-running queries
+        with conn.cursor() as cur:
+            cur.execute("SET statement_timeout = 30000")  # 30 seconds
+        
+        logger.info("Secure PostgreSQL connection established")
+        return conn
+        
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+        
+        # Fallback to SQLite ONLY in development
+        if os.environ.get('RENDER'):
+            raise e  # Don't fallback in production
+        
+        try:
+            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+            conn = sqlite3.connect(sqlite_path)
+            conn.row_factory = sqlite3.Row
+            conn.execute("PRAGMA foreign_keys = ON")
+            conn.execute("PRAGMA journal_mode = WAL")
+            logger.info("Development SQLite connection established")
+            return conn
+        except Exception as sqlite_error:
+            logger.error(f"SQLite fallback failed: {sqlite_error}")
+            raise e
+           
+        
+def init_database():
+    """Initialize database with security features"""
+    try:
+        conn = get_postgres_connection()
+        
+        # Determine if it's SQLite or PostgreSQL by checking cursor context manager support
+        # PostgreSQL psycopg cursors support context managers (__enter__/__exit__)
+        # SQLite cursors do not
+        
+        # Try to get a cursor and check if it has __enter__ method
+        try:
+            cursor = conn.cursor()
+            has_context_manager = hasattr(cursor, '__enter__')
+            
+            if has_context_manager:
+                # PostgreSQL
+                with cursor as cur:
+                    # Create assessments table with audit columns
+                    cur.execute('''
+                        CREATE TABLE IF NOT EXISTS assessments (
+                            id TEXT PRIMARY KEY,
+                            assessment_timestamp TEXT,
+                            report_timestamp TEXT,
+                            timezone TEXT,
+                            patient_name TEXT,
+                            patient_number TEXT,
+                            patient_age TEXT,
+                            patient_gender TEXT,
+                            primary_diagnosis TEXT,
+                            confidence REAL,
+                            confidence_percentage REAL,
+                            all_diagnoses_json TEXT,
+                            responses_json TEXT,
+                            processing_details_json TEXT,
+                            technical_details_json TEXT,
+                            clinical_insights_json TEXT,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            created_by_ip TEXT,
+                            updated_by_ip TEXT,
+                            audit_log TEXT DEFAULT '[]'
+                        )
+                    ''')
+                    
+                    # Create indexes
+                    cur.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
+                    cur.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
+                    cur.execute('CREATE INDEX IF NOT EXISTS idx_created_at ON assessments(created_at)')
+            else:
+                # SQLite
+                # Create assessments table with audit columns
+                cursor.execute('''
+                    CREATE TABLE IF NOT EXISTS assessments (
+                        id TEXT PRIMARY KEY,
+                        assessment_timestamp TEXT,
+                        report_timestamp TEXT,
+                        timezone TEXT,
+                        patient_name TEXT,
+                        patient_number TEXT,
+                        patient_age TEXT,
+                        patient_gender TEXT,
+                        primary_diagnosis TEXT,
+                        confidence REAL,
+                        confidence_percentage REAL,
+                        all_diagnoses_json TEXT,
+                        responses_json TEXT,
+                        processing_details_json TEXT,
+                        technical_details_json TEXT,
+                        clinical_insights_json TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        created_by_ip TEXT,
+                        updated_by_ip TEXT,
+                        audit_log TEXT DEFAULT '[]'
+                    )
+                ''')
+                
+                # Create indexes
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
+                cursor.execute('CREATE INDEX IF NOT EXISTS idx_created_at ON assessments(created_at)')
+                
+        finally:
+            cursor.close()
+        
+        conn.commit()
+        conn.close()
+        logger.info("Secure database initialized successfully")
+        
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        audit_logger.log_event(
+            event_type='DATABASE_INIT_FAILED',
+            details=str(e),
+            severity='CRITICAL'
+        )
+        
+         
+def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
+    """Save assessment data with audit trail"""
+    try:
+        # Deep copy and sanitize
+        sanitized_data = assessment_data.copy()
+        
+        # Sanitize patient info
+        if 'patient_info' in sanitized_data:
+            patient_info = sanitized_data['patient_info']
+            patient_info['name'] = SecurityUtils.sanitize_input(patient_info.get('name', ''))
+            patient_info['number'] = SecurityUtils.sanitize_input(patient_info.get('number', ''))
+            patient_info['age'] = SecurityUtils.sanitize_input(patient_info.get('age', ''))
+            patient_info['gender'] = SecurityUtils.sanitize_input(patient_info.get('gender', ''))
+        
+        # Prepare audit log
+        audit_entry = {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'action': 'CREATE',
+            'ip_address': request.remote_addr if request else '0.0.0.0',
+            'user_agent': request.headers.get('User-Agent') if request else None,
+            'changes': {}
+        }
+        
+        conn = get_postgres_connection()
+        
+        try:
+            cursor = conn.cursor()
+            has_context_manager = hasattr(cursor, '__enter__')
+            
+            if has_context_manager:
+                # PostgreSQL
+                with cursor as cur:
+                    # Check if assessment already exists
+                    # Check if assessment already exists
+                    cur.execute('SELECT id FROM assessments WHERE id = %s', (sanitized_data.get('id'),))
+                    existing = cur.fetchone()
+
+                    if existing:
+                        # UPDATE existing assessment
+                        audit_entry['action'] = 'UPDATE'
+                        cur.execute('''
+                            UPDATE assessments SET
+                                assessment_timestamp = %s,
+                                report_timestamp = %s,
+                                timezone = %s,
+                                patient_name = %s,
+                                patient_number = %s,
+                                patient_age = %s,
+                                patient_gender = %s,
+                                primary_diagnosis = %s,
+                                confidence = %s,
+                                confidence_percentage = %s,
+                                all_diagnoses_json = %s,
+                                responses_json = %s,
+                                processing_details_json = %s,
+                                technical_details_json = %s,
+                                clinical_insights_json = %s,
+                                updated_at = CURRENT_TIMESTAMP,
+                                updated_by_ip = %s,
+                                audit_log = audit_log || %s::jsonb
+                            WHERE id = %s
+                        ''', (
+                            sanitized_data.get('assessment_timestamp'),
+                            sanitized_data.get('timestamp'),
+                            sanitized_data.get('timezone', 'UTC'),
+                            sanitized_data.get('patient_info', {}).get('name', ''),
+                            sanitized_data.get('patient_info', {}).get('number', ''),
+                            sanitized_data.get('patient_info', {}).get('age', ''),
+                            sanitized_data.get('patient_info', {}).get('gender', ''),
+                            sanitized_data.get('primary_diagnosis', ''),
+                            sanitized_data.get('confidence', 0),
+                            sanitized_data.get('confidence_percentage', 0),
+                            json.dumps(sanitized_data.get('all_diagnoses', [])),
+                            json.dumps(sanitized_data.get('responses', {})),
+                            json.dumps(sanitized_data.get('processing_details', {})),
+                            json.dumps(sanitized_data.get('technical_details', {})),
+                            json.dumps(sanitized_data.get('clinical_insights', {})),
+                            request.remote_addr if request else '0.0.0.0',
+                            json.dumps([audit_entry]),
+                            sanitized_data.get('id')
+                        ))
+                    else:
+                        # INSERT new assessment
+                        audit_entry['action'] = 'CREATE'
+                        cur.execute('''
+                            INSERT INTO assessments (
+                                id, assessment_timestamp, report_timestamp, timezone,
+                                patient_name, patient_number, patient_age, patient_gender,
+                                primary_diagnosis, confidence, confidence_percentage,
+                                all_diagnoses_json, responses_json, processing_details_json,
+                                technical_details_json, clinical_insights_json,
+                                created_by_ip, updated_by_ip, audit_log
+                            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ''', (
+                            sanitized_data.get('id'),
+                            sanitized_data.get('assessment_timestamp'),
+                            sanitized_data.get('timestamp'),
+                            sanitized_data.get('timezone', 'UTC'),
+                            sanitized_data.get('patient_info', {}).get('name', ''),
+                            sanitized_data.get('patient_info', {}).get('number', ''),
+                            sanitized_data.get('patient_info', {}).get('age', ''),
+                            sanitized_data.get('patient_info', {}).get('gender', ''),
+                            sanitized_data.get('primary_diagnosis', ''),
+                            sanitized_data.get('confidence', 0),
+                            sanitized_data.get('confidence_percentage', 0),
+                            json.dumps(sanitized_data.get('all_diagnoses', [])),
+                            json.dumps(sanitized_data.get('responses', {})),
+                            json.dumps(sanitized_data.get('processing_details', {})),
+                            json.dumps(sanitized_data.get('technical_details', {})),
+                            json.dumps(sanitized_data.get('clinical_insights', {})),
+                            request.remote_addr if request else '0.0.0.0',
+                            request.remote_addr if request else '0.0.0.0',
+                            json.dumps([audit_entry])
+                        ))
+            else:
+                # SQLite
+                # Check if assessment already exists
+                cursor.execute('SELECT id FROM assessments WHERE id = ?', (sanitized_data.get('id'),))
+                existing = cursor.fetchone()
+                
+                if existing:
+                    audit_entry['action'] = 'UPDATE'
+                    # Update existing assessment
+                    cursor.execute('''
+                        UPDATE assessments SET
+                            assessment_timestamp = ?,
+                            report_timestamp = ?,
+                            timezone = ?,
+                            patient_name = ?,
+                            patient_number = ?,
+                            patient_age = ?,
+                            patient_gender = ?,
+                            primary_diagnosis = ?,
+                            confidence = ?,
+                            confidence_percentage = ?,
+                            all_diagnoses_json = ?,
+                            responses_json = ?,
+                            processing_details_json = ?,
+                            technical_details_json = ?,
+                            clinical_insights_json = ?,
+                            updated_at = CURRENT_TIMESTAMP,
+                            updated_by_ip = ?,
+                            audit_log = json_insert(audit_log, '$[#]', ?)
+                        WHERE id = ?
+                    ''', (
+                        sanitized_data.get('assessment_timestamp'),
+                        sanitized_data.get('timestamp'),
+                        sanitized_data.get('timezone', 'UTC'),
+                        sanitized_data.get('patient_info', {}).get('name', ''),
+                        sanitized_data.get('patient_info', {}).get('number', ''),
+                        sanitized_data.get('patient_info', {}).get('age', ''),
+                        sanitized_data.get('patient_info', {}).get('gender', ''),
+                        sanitized_data.get('primary_diagnosis', ''),
+                        sanitized_data.get('confidence', 0),
+                        sanitized_data.get('confidence_percentage', 0),
+                        json.dumps(sanitized_data.get('all_diagnoses', [])),
+                        json.dumps(sanitized_data.get('responses', {})),
+                        json.dumps(sanitized_data.get('processing_details', {})),
+                        json.dumps(sanitized_data.get('technical_details', {})),
+                        json.dumps(sanitized_data.get('clinical_insights', {})),
+                        request.remote_addr if request else '0.0.0.0',
+                        json.dumps(audit_entry),
+                        sanitized_data.get('id')
+                    ))
+                else:
+                    # Insert new assessment
+                    cursor.execute('''
+                        INSERT INTO assessments (
+                            id, assessment_timestamp, report_timestamp, timezone,
+                            patient_name, patient_number, patient_age, patient_gender,
+                            primary_diagnosis, confidence, confidence_percentage,
+                            all_diagnoses_json, responses_json, processing_details_json,
+                            technical_details_json, clinical_insights_json,
+                            created_by_ip, updated_by_ip, audit_log
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        sanitized_data.get('id'),
+                        sanitized_data.get('assessment_timestamp'),
+                        sanitized_data.get('timestamp'),
+                        sanitized_data.get('timezone', 'UTC'),
+                        sanitized_data.get('patient_info', {}).get('name', ''),
+                        sanitized_data.get('patient_info', {}).get('number', ''),
+                        sanitized_data.get('patient_info', {}).get('age', ''),
+                        sanitized_data.get('patient_info', {}).get('gender', ''),
+                        sanitized_data.get('primary_diagnosis', ''),
+                        sanitized_data.get('confidence', 0),
+                        sanitized_data.get('confidence_percentage', 0),
+                        json.dumps(sanitized_data.get('all_diagnoses', [])),
+                        json.dumps(sanitized_data.get('responses', {})),
+                        json.dumps(sanitized_data.get('processing_details', {})),
+                        json.dumps(sanitized_data.get('technical_details', {})),
+                        json.dumps(sanitized_data.get('clinical_insights', {})),
+                        request.remote_addr if request else '0.0.0.0',
+                        request.remote_addr if request else '0.0.0.0',
+                        json.dumps([audit_entry])
+                    ))
+            
+            conn.commit()
+            
+        finally:
+            cursor.close()
+            conn.close()
+        
+        # Log successful save
+        audit_logger.log_event(
+            event_type='ASSESSMENT_SAVED',
+            details=f"Assessment {sanitized_data.get('id')} saved successfully",
+            severity='INFO'
+        )
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error saving to database: {e}")
+        audit_logger.log_event(
+            event_type='ASSESSMENT_SAVE_FAILED',
+            details=f"Failed to save assessment: {str(e)}",
+            severity='ERROR'
+        )
+        return False
+    
+    
+def is_postgresql(conn):
+    """Determine if connection is PostgreSQL (psycopg) or SQLite"""
+    try:
+        cursor = conn.cursor()
+        is_pg = hasattr(cursor, '__enter__')
+        cursor.close()
+        return is_pg
+    except:
+        return False
+
+def execute_db_query(conn, query, params=None, fetch=False):
+    """Execute query with proper handling for SQLite and PostgreSQL"""
+    is_pg = is_postgresql(conn)
+    cursor = conn.cursor()
+    
+    try:
+        if params:
+            if is_pg:
+                cursor.execute(query, params)
+            else:
+                # SQLite uses ? placeholders, convert %s to ?
+                if '%s' in query:
+                    query = query.replace('%s', '?')
+                cursor.execute(query, params)
+        else:
+            cursor.execute(query)
+        
+        if fetch:
+            return cursor.fetchall()
+        return None
+    finally:
+        cursor.close()
+        
+            
+def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
+    """Load assessments from database, optionally filtered by patient number"""
+    try:
+        conn = get_postgres_connection()
+        
+        assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
+        
+        if hasattr(conn, 'cursor'):
+            # PostgreSQL
+            with conn.cursor() as cur:
+                if patient_number:
+                    cur.execute('''
+                        SELECT * FROM assessments 
+                        WHERE patient_number = %s 
+                        ORDER BY report_timestamp DESC
+                    ''', (patient_number,))
+                else:
+                    cur.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+                
+                rows = cur.fetchall()
+        else:
+            # SQLite
+            c = conn.cursor()
+            
+            if patient_number:
+                c.execute('''
+                    SELECT * FROM assessments 
+                    WHERE patient_number = ? 
+                    ORDER BY report_timestamp DESC
+                ''', (patient_number,))
+            else:
+                c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+            
+            rows = c.fetchall()
+        
+        conn.close()
+        
+        for row in rows:
+            if isinstance(row, dict):
+                row_dict = row
+            else:
+                row_dict = dict(row)
+            
+            patient_num = row_dict['patient_number']
+            if patient_num not in assessments_by_patient:
+                assessments_by_patient[patient_num] = []
+            
+            # Decrypt sensitive fields if needed
+            all_diagnoses_json = row_dict['all_diagnoses_json']
+            responses_json = row_dict['responses_json']
+            clinical_insights_json = row_dict['clinical_insights_json']
+            
+            if os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true':
+                try:
+                    all_diagnoses_json = encryption_service.decrypt_data(all_diagnoses_json) if all_diagnoses_json else '[]'
+                    responses_json = encryption_service.decrypt_data(responses_json) if responses_json else '{}'
+                    clinical_insights_json = encryption_service.decrypt_data(clinical_insights_json) if clinical_insights_json else '{}'
+                except:
+                    pass  # If decryption fails, use as-is (might be plain text)
+            
+            all_diagnoses = json.loads(all_diagnoses_json) if all_diagnoses_json else []
+            responses = json.loads(responses_json) if responses_json else {}
+            processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
+            technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
+            clinical_insights = json.loads(clinical_insights_json) if clinical_insights_json else {}
+            
+            assessment: Dict[str, Any] = {
+                'id': row_dict['id'],
+                'timestamp': row_dict['report_timestamp'],
+                'assessment_timestamp': row_dict['assessment_timestamp'],
+                'timezone': row_dict['timezone'],
+                'patient_info': {
+                    'name': row_dict['patient_name'],
+                    'number': row_dict['patient_number'],
+                    'age': row_dict['patient_age'],
+                    'gender': row_dict['patient_gender']
+                },
+                'primary_diagnosis': row_dict['primary_diagnosis'],
+                'confidence': row_dict['confidence'],
+                'confidence_percentage': row_dict['confidence_percentage'],
+                'all_diagnoses': all_diagnoses,
+                'responses': responses,
+                'processing_details': processing_details,
+                'technical_details': technical_details,
+                'clinical_insights': clinical_insights
+            }
+            
+            assessments_by_patient[patient_num].append(assessment)
+        
+        logger.info(f"Loaded {len(rows)} assessments from database")
+        return assessments_by_patient
+        
+    except Exception as e:
+        logger.error(f"Error loading from database: {e}")
+        return {}
+
+def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
+    """Load a single specific assessment from database"""
+    try:
+        conn = get_postgres_connection()
+        
+        if hasattr(conn, 'cursor'):
+            # PostgreSQL
+            with conn.cursor() as cur:
+                cur.execute('''
+                    SELECT * FROM assessments 
+                    WHERE patient_number = %s AND id = %s AND patient_name = %s
+                ''', (patient_number, assessment_id, patient_name))
+                
+                row = cur.fetchone()
+        else:
+            # SQLite
+            c = conn.cursor()
+            
+            c.execute('''
+                SELECT * FROM assessments 
+                WHERE patient_number = ? AND id = ? AND patient_name = ?
+            ''', (patient_number, assessment_id, patient_name))
+            
+            row = c.fetchone()
+        
+        conn.close()
+        
+        if not row:
+            return None
+        
+        if isinstance(row, dict):
+            row_dict = row
+        else:
+            row_dict = dict(row)
+        
+        # Decrypt sensitive fields if needed
+        all_diagnoses_json = row_dict['all_diagnoses_json']
+        responses_json = row_dict['responses_json']
+        clinical_insights_json = row_dict['clinical_insights_json']
+        
+        if os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true':
+            try:
+                all_diagnoses_json = encryption_service.decrypt_data(all_diagnoses_json) if all_diagnoses_json else '[]'
+                responses_json = encryption_service.decrypt_data(responses_json) if responses_json else '{}'
+                clinical_insights_json = encryption_service.decrypt_data(clinical_insights_json) if clinical_insights_json else '{}'
+            except:
+                pass  # If decryption fails, use as-is
+        
+        all_diagnoses = json.loads(all_diagnoses_json) if all_diagnoses_json else []
+        responses = json.loads(responses_json) if responses_json else {}
+        processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
+        technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
+        clinical_insights = json.loads(clinical_insights_json) if clinical_insights_json else {}
+        
+        assessment: Dict[str, Any] = {
+            'id': row_dict['id'],
+            'timestamp': row_dict['report_timestamp'],
+            'assessment_timestamp': row_dict['assessment_timestamp'],
+            'timezone': row_dict['timezone'],
+            'patient_info': {
+                'name': row_dict['patient_name'],
+                'number': row_dict['patient_number'],
+                'age': row_dict['patient_age'],
+                'gender': row_dict['patient_gender']
+            },
+            'primary_diagnosis': row_dict['primary_diagnosis'],
+            'confidence': row_dict['confidence'],
+            'confidence_percentage': row_dict['confidence_percentage'],
+            'all_diagnoses': all_diagnoses,
+            'responses': responses,
+            'processing_details': processing_details,
+            'technical_details': technical_details,
+            'clinical_insights': clinical_insights
+        }
+        
+        logger.info(f"Loaded single assessment from database: {assessment_id}")
+        return assessment
+        
+    except Exception as e:
+        logger.error(f"Error loading single assessment from database: {e}")
+        return None
+
+def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
+    """Delete assessment from database"""
+    try:
+        conn = get_postgres_connection()
+        
+        if hasattr(conn, 'cursor'):
+            # PostgreSQL
+            with conn.cursor() as cur:
+                cur.execute('''
+                    DELETE FROM assessments 
+                    WHERE patient_number = %s AND id = %s
+                ''', (patient_number, assessment_id))
+        else:
+            # SQLite
+            c = conn.cursor()
+            
+            c.execute('''
+                DELETE FROM assessments 
+                WHERE patient_number = ? AND id = ?
+            ''', (patient_number, assessment_id))
+        
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"Assessment deleted from database: {assessment_id}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error deleting from database: {e}")
+        return False
+
+# Initialize database at startup
+init_database()
+
+# Security middleware
+@app.after_request
+def set_security_headers(response):
+    """Set security headers on all responses"""
+    for header, value in SecurityConfig.SECURITY_HEADERS.items():
+        response.headers[header] = value
+    
+    # Add request ID for tracing
+    request_id = getattr(request, 'request_id', None)
+    if request_id:
+        response.headers['X-Request-ID'] = request_id
+    
+    return response
+
+@app.before_request
+def security_middleware():
+    """Comprehensive security middleware"""
+    # Generate request ID for tracing
+    request.request_id = SecurityUtils.generate_request_id()
+    
+    # Log request for auditing
+    audit_logger.log_event(
+        event_type='REQUEST_START',
+        ip=request.remote_addr,
+        details=f"{request.method} {request.path}",
+        severity='INFO'
+    )
+    
+    # Validate request size early
+    if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
+        audit_logger.log_event(
+            event_type='REQUEST_TOO_LARGE',
+            ip=request.remote_addr,
+            details=f"Request size: {request.content_length} bytes",
+            severity='WARNING'
+        )
+        return jsonify({'error': 'Request too large'}), 413
+    
+    # Rate limiting
+    if request.endpoint and request.endpoint.startswith('api'):
+        client_ip = request.remote_addr
+        endpoint = request.endpoint.replace('api_', '').replace('_', '-')
+        
+        limited, message = rate_limiter.is_endpoint_rate_limited(client_ip, endpoint)
+        if limited:
+            return jsonify({
+                'error': 'Rate limit exceeded',
+                'retry_after': SecurityConfig.RATE_LIMIT_WINDOW,
+                'message': message
+            }), 429
+
+# Configure CORS with security
+if os.environ.get('RENDER'):
+    CORS(app, origins=[
+        'https://mentivio.onrender.com',
+        'http://mentivio-MentalHealth.onrender.com',
+        'https://mentivio-web.onrender.com'
+    ], supports_credentials=True)
+    app.debug = False
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+else:
+    CORS(app, resources={r"/api/*": {
+        "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
+        "supports_credentials": True,
+        "allow_headers": ["Content-Type", "X-API-Key", "X-Client-Timezone"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    }})
+
 # ==================== ROUTES ====================
+@app.route('/api/config', methods=['GET'])
+def get_config():
+    """Provide frontend configuration including API key"""
+    return jsonify({
+        'api_key': SecurityConfig.API_KEY,
+        'features': {
+            'assessment': True,
+            'history': True,
+            'pdf_export': True,
+            'security': True
+        },
+        'version': '3.0',
+        'timestamp': datetime.now(timezone.utc).isoformat()
+    })
+    
 @app.route('/')
 def serve_index():
     return send_from_directory('frontend', 'Home.html')
@@ -1254,6 +2097,7 @@ def debug_path():
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
+    """Security health check endpoint"""
     try:
         db_healthy = False
         db_type = "Unknown"
@@ -1282,29 +2126,45 @@ def health_check():
             category_mappings is not None
         ])
         
+        # Check security configuration
+        security_checks = {
+            'secret_key_set': bool(os.environ.get('SECRET_KEY')),
+            'secret_key_length': len(os.environ.get('SECRET_KEY', '')) >= 32,
+            'api_key_set': bool(os.environ.get('API_KEY')),
+            'encryption_key_set': bool(os.environ.get('ENCRYPTION_KEY')),
+            'database_configured': True,
+            'rate_limiting_enabled': True,
+            'security_headers_enabled': True,
+            'audit_logging_enabled': True,
+            'debug_mode_disabled': not app.debug,
+            'https_enforced': os.environ.get('RENDER') is not None
+        }
+        
+        all_security_passed = all(security_checks.values())
         overall_healthy = components_loaded and db_healthy
         
         health_info = {
             'status': 'healthy' if overall_healthy else 'degraded',
             'timestamp': datetime.now(timezone.utc).isoformat(),
-            'components_loaded': components_loaded,
-            'database_healthy': db_healthy,
-            'database_type': db_type,
-            'model_loaded': model_package is not None,
-            'scaler_loaded': scaler is not None,
-            'encoder_loaded': label_encoder is not None,
-            'features_loaded': feature_names is not None,
-            'category_mappings_loaded': category_mappings is not None,
-            'total_features': len(feature_names) if feature_names else 0,
-            'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
-            'clinical_enhancer_available': clinical_enhancer is not None,
-            'security': {
-                'rate_limiting': True,
-                'input_validation': True,
-                'headers_security': True,
-                'encryption_available': True
+            'database': {
+                'healthy': db_healthy,
+                'type': db_type
             },
-            'message': 'Service is ready' if overall_healthy else 'Service is starting up'
+            'security': {
+                'checks_passed': all_security_passed,
+                'details': security_checks
+            },
+            'components': {
+                'model_loaded': model_package is not None,
+                'scaler_loaded': scaler is not None,
+                'encoder_loaded': label_encoder is not None,
+                'features_loaded': feature_names is not None,
+                'category_mappings_loaded': category_mappings is not None,
+                'clinical_enhancer_available': clinical_enhancer is not None,
+                'total_features': len(feature_names) if feature_names else 0,
+                'available_classes': label_encoder.classes_.tolist() if label_encoder else []
+            },
+            'message': 'Service is secure and ready' if all_security_passed else 'Security improvements needed'
         }
         
         return jsonify(health_info)
@@ -1326,34 +2186,89 @@ def simple_ping():
         'service': 'Mental Health Assessment API'
     })
 
+def parse_assessment_timestamp(timestamp_str: str) -> datetime:
+    try:
+        if not timestamp_str or timestamp_str == 'N/A':
+            logger.warning("Empty or N/A timestamp provided, using current UTC time")
+            return datetime.now(timezone.utc)
+        
+        if 'T' in timestamp_str:
+            if timestamp_str.endswith('Z'):
+                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif '+' in timestamp_str or '-' in timestamp_str[-6:]:
+                dt = datetime.fromisoformat(timestamp_str)
+            else:
+                dt = datetime.fromisoformat(timestamp_str).replace(tzinfo=timezone.utc)
+        else:
+            try:
+                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            except ValueError:
+                try:
+                    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                except ValueError:
+                    logger.warning(f"Could not parse timestamp format: {timestamp_str}, using current time")
+                    return datetime.now(timezone.utc)
+        
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+            
+        logger.info(f"Successfully parsed timestamp: {timestamp_str} -> {dt.isoformat()}")
+        return dt
+        
+    except (ValueError, TypeError) as e:
+        logger.warning(f"Could not parse timestamp '{timestamp_str}': {e}, using current UTC time")
+        return datetime.now(timezone.utc)
+
 @app.route('/api/predict', methods=['POST'])
+@require_api_key
+@validate_json_content
+@sanitize_inputs
 def predict():
+    """Secure prediction endpoint with all security checks"""
     try:
         data = request.json
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         
+        # Validate inputs
         user_responses = data.get('responses', {})
         patient_info = data.get('patientInfo', {})
         assessment_start_time = data.get('assessment_start_time')
         
-        if not user_responses:
-            return jsonify({'error': 'No responses provided'}), 400
-        
+        # Input validation
         responses_valid, responses_msg = validate_assessment_responses(user_responses)
         if not responses_valid:
+            audit_logger.log_event(
+                event_type='INVALID_RESPONSES',
+                ip=request.remote_addr,
+                details=responses_msg,
+                severity='WARNING'
+            )
             return jsonify({'error': f'Invalid responses: {responses_msg}'}), 400
         
         patient_valid, patient_msg = SecurityUtils.validate_patient_data(patient_info)
         if not patient_valid:
+            audit_logger.log_event(
+                event_type='INVALID_PATIENT_DATA',
+                ip=request.remote_addr,
+                details=patient_msg,
+                severity='WARNING'
+            )
             return jsonify({'error': f'Invalid patient data: {patient_msg}'}), 400
+        
+        # Log prediction request
+        audit_logger.log_event(
+            event_type='PREDICTION_REQUEST',
+            ip=request.remote_addr,
+            details=f"Prediction for patient: {patient_info.get('name', 'Unknown')}",
+            severity='INFO'
+        )
         
         logger.info(f"Received {len(user_responses)} validated responses for patient: {patient_info.get('name', 'Unknown')}")
         
         client_timezone = request.headers.get('X-Client-Timezone', 'UTC')
        
         try:
-            import pytz
             tz = pytz.timezone(client_timezone)
         except:
             tz = pytz.UTC
@@ -1373,9 +2288,11 @@ def predict():
             except Exception as e:
                 logger.warning(f"Could not parse assessment start time: {e}, using current time")
                 assessment_date_str = client_now.isoformat()
+                time_diff = timedelta(0)
         else:
             logger.warning("No assessment start time provided, using current time")
             assessment_date_str = client_now.isoformat()
+            time_diff = timedelta(0)
 
         try:
             processed_responses, processing_log, safety_warnings = preprocessor.preprocess(user_responses)
@@ -1511,58 +2428,57 @@ def predict():
             }
         
         logger.info(f"Secure assessment completed successfully for patient: {patient_info.get('name', 'Unknown')}")
-        return jsonify(response_data)
+        
+        # Return response with security headers
+        response = jsonify(response_data)
+        response.headers['X-Content-Security-Policy'] = SecurityConfig.SECURITY_HEADERS['Content-Security-Policy']
+        return response
         
     except Exception as e:
         logger.error(f"Secure prediction endpoint error: {e}")
+        audit_logger.log_event(
+            event_type='PREDICTION_ERROR',
+            ip=request.remote_addr,
+            details=f"Prediction failed: {str(e)}",
+            severity='ERROR'
+        )
         return jsonify({'error': 'Assessment failed. Please try again.'}), 500
 
-def parse_assessment_timestamp(timestamp_str: str) -> datetime:
-    try:
-        if not timestamp_str or timestamp_str == 'N/A':
-            logger.warning("Empty or N/A timestamp provided, using current UTC time")
-            return datetime.now(timezone.utc)
-        
-        if 'T' in timestamp_str:
-            if timestamp_str.endswith('Z'):
-                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif '+' in timestamp_str or '-' in timestamp_str[-6:]:
-                dt = datetime.fromisoformat(timestamp_str)
-            else:
-                dt = datetime.fromisoformat(timestamp_str).replace(tzinfo=timezone.utc)
-        else:
-            try:
-                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-            except ValueError:
-                try:
-                    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
-                except ValueError:
-                    logger.warning(f"Could not parse timestamp format: {timestamp_str}, using current time")
-                    return datetime.now(timezone.utc)
-        
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-            
-        logger.info(f"Successfully parsed timestamp: {timestamp_str} -> {dt.isoformat()}")
-        return dt
-        
-    except (ValueError, TypeError) as e:
-        logger.warning(f"Could not parse timestamp '{timestamp_str}': {e}, using current UTC time")
-        return datetime.now(timezone.utc)
-
 @app.route('/api/save-assessment', methods=['POST'])
+@require_api_key
+@validate_json_content
 def save_assessment():
+    """Secure assessment saving"""
     try:
         data = request.json
         if not data:
+            logger.warning("No data provided to save_assessment")
             return jsonify({'error': 'No data provided'}), 400
             
         assessment_data = data.get('assessment_data', {})
         if not assessment_data:
+            logger.warning("No assessment_data in request")
             return jsonify({'error': 'No assessment data provided'}), 400
         
         if not isinstance(assessment_data, dict):
+            logger.warning(f"Invalid assessment data type: {type(assessment_data)}")
             return jsonify({'error': 'Invalid assessment data format'}), 400
+        
+        # Log what we received
+        logger.info(f"Save assessment received - ID: {assessment_data.get('id', 'NO_ID')}, "
+                   f"Responses: {len(assessment_data.get('responses', {}))}, "
+                   f"Patient: {assessment_data.get('patient_info', {}).get('name', 'NO_NAME')}")
+        
+        # Validate we have responses
+        if 'responses' not in assessment_data or not assessment_data['responses']:
+            logger.warning(f"No responses in assessment data for ID: {assessment_data.get('id', 'NO_ID')}")
+        
+        # Add security metadata
+        assessment_data['_security'] = {
+            'saved_at': datetime.now(timezone.utc).isoformat(),
+            'saved_by_ip': request.remote_addr,
+            'request_id': getattr(request, 'request_id', 'unknown')
+        }
         
         if 'id' not in assessment_data:
             if 'timestamp' in assessment_data:
@@ -1579,19 +2495,38 @@ def save_assessment():
         
         if save_assessment_to_db(assessment_data):
             logger.info(f"Secure assessment saved to database: {assessment_data['id']}")
+            audit_logger.log_event(
+                event_type='ASSESSMENT_SAVED_SUCCESS',
+                ip=request.remote_addr,
+                details=f"Assessment {assessment_data['id']} saved",
+                severity='INFO'
+            )
+            
             return jsonify({
                 'success': True,
                 'assessment_id': assessment_data['id'],
-                'message': 'Assessment saved successfully'
+                'message': 'Assessment saved securely',
+                'security': {
+                    'encrypted': os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true',
+                    'audit_trail': True
+                }
             })
         else:
-            return jsonify({'error': 'Failed to save assessment data to database'}), 500
+            return jsonify({'error': 'Failed to save assessment data securely'}), 500
         
     except Exception as e:
         logger.error(f"Error saving assessment: {e}")
-        return jsonify({'error': f'Failed to save assessment: {str(e)}'}), 500
+        audit_logger.log_event(
+            event_type='ASSESSMENT_SAVE_ERROR',
+            ip=request.remote_addr,
+            details=f"Save failed: {str(e)}",
+            severity='ERROR'
+        )
+        return jsonify({'error': 'Failed to save assessment securely'}), 500
 
 @app.route('/api/get-patient-assessments', methods=['POST'])
+@require_api_key
+@validate_json_content
 def get_patient_assessments():
     try:
         data = request.json
@@ -1621,35 +2556,6 @@ def get_patient_assessments():
     except Exception as e:
         logger.error(f"Error retrieving assessments: {e}")
         return jsonify({'error': f'Failed to retrieve assessments: {str(e)}'}), 500
-
-@app.route('/api/get-single-assessment', methods=['POST'])
-def get_single_assessment():
-    try:
-        data = request.json
-        patient_name = data.get('name', '').strip()
-        patient_number = data.get('number', '').strip()
-        assessment_id = data.get('assessment_id', '').strip()
-        
-        if not patient_name or not patient_number or not assessment_id:
-            return jsonify({'error': 'Patient name, number, and assessment ID required'}), 400
-        
-        target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id)
-        
-        if not target_assessment:
-            logger.warning(f"Assessment not found: {assessment_id} for {patient_name} (#{patient_number})")
-            return jsonify({'error': 'Assessment not found'}), 404
-        
-        enhanced_assessment = enhance_assessment_data(target_assessment)
-        
-        logger.info(f"Single assessment retrieved: {assessment_id}")
-        return jsonify({
-            'success': True,
-            'assessment': enhanced_assessment
-        })
-        
-    except Exception as e:
-        logger.error(f"Error retrieving single assessment: {e}")
-        return jsonify({'error': f'Failed to retrieve assessment: {str(e)}'}), 500
 
 def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
     try:
@@ -1710,7 +2616,40 @@ def get_diagnosis_description(diagnosis: str) -> str:
     }
     return descriptions.get(diagnosis, 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.')
 
+@app.route('/api/get-single-assessment', methods=['POST'])
+@require_api_key
+@validate_json_content
+def get_single_assessment():
+    try:
+        data = request.json
+        patient_name = data.get('name', '').strip()
+        patient_number = data.get('number', '').strip()
+        assessment_id = data.get('assessment_id', '').strip()
+        
+        if not patient_name or not patient_number or not assessment_id:
+            return jsonify({'error': 'Patient name, number, and assessment ID required'}), 400
+        
+        target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id)
+        
+        if not target_assessment:
+            logger.warning(f"Assessment not found: {assessment_id} for {patient_name} (#{patient_number})")
+            return jsonify({'error': 'Assessment not found'}), 404
+        
+        enhanced_assessment = enhance_assessment_data(target_assessment)
+        
+        logger.info(f"Single assessment retrieved: {assessment_id}")
+        return jsonify({
+            'success': True,
+            'assessment': enhanced_assessment
+        })
+        
+    except Exception as e:
+        logger.error(f"Error retrieving single assessment: {e}")
+        return jsonify({'error': f'Failed to retrieve assessment: {str(e)}'}), 500
+
 @app.route('/api/delete-assessment', methods=['POST'])
+@require_api_key
+@validate_json_content
 def delete_assessment():
     try:
         data = request.json
@@ -1722,6 +2661,12 @@ def delete_assessment():
         
         if delete_assessment_from_db(patient_number, assessment_id):
             logger.info(f"Assessment {assessment_id} deleted for patient #{patient_number}")
+            audit_logger.log_event(
+                event_type='ASSESSMENT_DELETED',
+                ip=request.remote_addr,
+                details=f"Assessment {assessment_id} deleted for patient #{patient_number}",
+                severity='INFO'
+            )
             return jsonify({'success': True, 'message': 'Assessment deleted successfully'})
         else:
             return jsonify({'error': 'Failed to delete assessment from database'}), 500
@@ -1731,10 +2676,11 @@ def delete_assessment():
         return jsonify({'error': f'Failed to delete assessment: {str(e)}'}), 500
 
 @app.route('/api')
+@require_api_key
 def api_info():
     return jsonify({
         'message': 'Enhanced Mental Health Assessment API is running!',
-        'version': '3.0',
+        'version': '4.0',
         'features': {
             'complete_preprocessing': True,
             'clinical_validation': True,
@@ -1757,35 +2703,168 @@ def api_info():
     })
 
 @app.route('/api/security-status', methods=['GET'])
+@require_api_key
 def security_status():
-    return jsonify({
-        'security': {
-            'rate_limiting': True,
-            'input_validation': True,
-            'security_headers': True,
-            'encryption_available': True,
+    """Comprehensive security status endpoint"""
+    security_info = {
+        'authentication': {
+            'api_key_required': True,
             'session_management': True,
-            'cors_protection': True
+            'failed_attempt_tracking': True,
+            'account_lockout': True
         },
-        'config': {
+        'data_protection': {
+            'encryption_enabled': True,
+            'sensitive_data_encrypted': os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true',
+            'password_hashing': 'bcrypt'
+        },
+        'network_security': {
+            'rate_limiting': True,
+            'cors_restricted': True,
+            'ip_validation': True,
+            'https_required': os.environ.get('RENDER') is not None
+        },
+        'input_validation': {
+            'sanitization_enabled': True,
             'max_input_length': SecurityConfig.MAX_INPUT_LENGTH,
-            'max_responses': SecurityConfig.MAX_RESPONSES,
-            'rate_limit_requests': SecurityConfig.RATE_LIMIT_REQUESTS,
-            'rate_limit_window': SecurityConfig.RATE_LIMIT_WINDOW,
-            'session_timeout': SecurityConfig.SESSION_TIMEOUT
-        }
-    })
+            'sql_injection_protection': True,
+            'xss_protection': True
+        },
+        'audit_logging': {
+            'enabled': True,
+            'file': SecurityConfig.AUDIT_LOG_FILE,
+            'events_tracked': [
+                'SESSION_CREATED', 'SESSION_DESTROYED', 'RATE_LIMIT_EXCEEDED',
+                'INVALID_API_KEY', 'PREDICTION_REQUEST', 'ASSESSMENT_SAVED'
+            ]
+        },
+        'headers': {
+            'csp_enabled': True,
+            'hsts_enabled': True,
+            'xss_protection': True,
+            'content_type_options': True
+        },
+        'configuration': {
+            'secret_key_set': bool(os.environ.get('SECRET_KEY')),
+            'api_key_set': bool(os.environ.get('API_KEY')),
+            'encryption_key_set': bool(os.environ.get('ENCRYPTION_KEY')),
+            'database_secured': not SecurityConfig.get_database_url().startswith('sqlite')
+        },
+        'recommendations': []
+    }
+    
+    # Generate recommendations
+    if not security_info['configuration']['api_key_set']:
+        security_info['recommendations'].append('Set API_KEY environment variable')
+    if not security_info['configuration']['encryption_key_set']:
+        security_info['recommendations'].append('Set ENCRYPTION_KEY environment variable')
+    if not security_info['network_security']['https_required']:
+        security_info['recommendations'].append('Enable HTTPS in production')
+    
+    security_info['overall_score'] = calculate_security_score(security_info)
+    
+    return jsonify(security_info)
 
-def format_timestamp(timestamp_str):
-    if not timestamp_str:
-        return "N/A"
+def calculate_security_score(security_info: Dict) -> int:
+    """Calculate security score (0-100)"""
+    score = 0
+    max_score = 0
+    
+    # Check authentication
+    auth_items = security_info['authentication']
+    for key, value in auth_items.items():
+        max_score += 10
+        if value:
+            score += 10
+    
+    # Check data protection
+    data_items = security_info['data_protection']
+    for key, value in data_items.items():
+        max_score += 10
+        if value:
+            score += 10
+    
+    # Check configuration
+    config_items = security_info['configuration']
+    for key, value in config_items.items():
+        max_score += 10
+        if value:
+            score += 10
+    
+    return int((score / max_score) * 100) if max_score > 0 else 0
+
+@app.route('/api/audit-logs', methods=['GET'])
+@require_api_key
+def get_audit_logs():
+    """Get recent audit logs (admin only)"""
     try:
-        dt = parse_assessment_timestamp(timestamp_str)
-        return dt.strftime("%B %d, %Y at %H:%M %Z")
+        # Check admin API key
+        admin_key = request.headers.get('X-Admin-Key')
+        expected_admin_key = os.environ.get('ADMIN_API_KEY')
+        
+        if not admin_key or not secrets.compare_digest(admin_key, expected_admin_key or ''):
+            return jsonify({'error': 'Admin access required'}), 403
+        
+        # Read audit logs
+        try:
+            with open(SecurityConfig.AUDIT_LOG_FILE, 'r') as f:
+                logs = [json.loads(line) for line in f.readlines()[-100:]]  # Last 100 entries
+        except FileNotFoundError:
+            logs = []
+        
+        return jsonify({
+            'logs': logs,
+            'count': len(logs),
+            'file': SecurityConfig.AUDIT_LOG_FILE
+        })
+        
+    except Exception as e:
+        logger.error(f"Error reading audit logs: {e}")
+        return jsonify({'error': 'Failed to read audit logs'}), 500
+
+# Add this new endpoint for CSP violation reports
+@app.route('/csp-violation-report-endpoint', methods=['POST'])
+def csp_violation_report():
+    """Endpoint to receive CSP violation reports"""
+    try:
+        report = request.get_json(force=True)
+        audit_logger.log_event(
+            event_type='CSP_VIOLATION',
+            ip=request.remote_addr,
+            details=json.dumps(report),
+            severity='WARNING'
+        )
+        return jsonify({'status': 'ok'})
     except:
-        return timestamp_str
+        return jsonify({'status': 'ok'})
+
+def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: str = "") -> str:
+    try:
+        if not timestamp_str or timestamp_str == 'N/A':
+            return "N/A"
+        
+        dt = parse_assessment_timestamp(timestamp_str)
+        
+        try:
+            if timezone_used and timezone_used != 'UTC':
+                patient_tz = pytz.timezone(timezone_used)
+                local_dt = dt.astimezone(patient_tz)
+            else:
+                local_dt = dt
+            
+            formatted = local_dt.strftime("%B %d, %Y at %H:%M %Z")
+            return formatted
+            
+        except Exception as tz_error:
+            fallback = dt.strftime("%B %d, %Y at %H:%M UTC")
+            return fallback
+            
+    except Exception as e:
+        return timestamp_str or "Timestamp unavailable"
 
 @app.route('/api/generate-pdf-report', methods=['POST'])
+@require_api_key
+@validate_json_content
 def generate_pdf_report():
     try:
         data = request.json
@@ -2069,133 +3148,172 @@ def generate_pdf_report():
         logger.error(f"Error generating PDF report: {e}")
         return jsonify({'error': f'Failed to generate PDF report: {str(e)}'}), 500
 
-def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: str = "") -> str:
-    try:
-        if not timestamp_str or timestamp_str == 'N/A':
-            return "N/A"
-        
-        dt = parse_assessment_timestamp(timestamp_str)
-        
-        try:
-            import pytz
-            if timezone_used and timezone_used != 'UTC':
-                patient_tz = pytz.timezone(timezone_used)
-                local_dt = dt.astimezone(patient_tz)
-            else:
-                local_dt = dt
-            
-            formatted = local_dt.strftime("%B %d, %Y at %H:%M %Z")
-            return formatted
-            
-        except Exception as tz_error:
-            fallback = dt.strftime("%B %d, %Y at %H:%M UTC")
-            return fallback
-            
-    except Exception as e:
-        return timestamp_str or "Timestamp unavailable"
-
+# ==================== ERROR HANDLERS ====================
 @app.errorhandler(404)
 def not_found(error):
+    """Secure 404 handler"""
+    audit_logger.log_event(
+        event_type='PAGE_NOT_FOUND',
+        ip=request.remote_addr,
+        details=f"404 for {request.path}",
+        severity='INFO'
+    )
+    
     if request.path.startswith('/api/'):
         return jsonify({'error': 'API endpoint not found'}), 404
     else:
         try:
-            return send_from_directory('frontend', 'Home.html')  
+            return send_from_directory('frontend', 'Home.html')
         except:
             return jsonify({'error': 'Page not found'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
+    """Secure 500 handler - don't leak internal errors"""
     logger.error(f"Internal server error: {error}")
+    audit_logger.log_event(
+        event_type='INTERNAL_SERVER_ERROR',
+        ip=request.remote_addr,
+        details=f"500 error at {request.path}",
+        severity='ERROR'
+    )
     return jsonify({'error': 'Internal server error'}), 500
 
 @app.errorhandler(413)
 def too_large(error):
+    audit_logger.log_event(
+        event_type='REQUEST_TOO_LARGE',
+        ip=request.remote_addr,
+        details=f"413 for {request.path}",
+        severity='WARNING'
+    )
     return jsonify({'error': 'File too large'}), 413
 
 @app.errorhandler(429)
 def too_many_requests(error):
+    audit_logger.log_event(
+        event_type='RATE_LIMIT_TRIGGERED',
+        ip=request.remote_addr,
+        details=f"429 for {request.path}",
+        severity='WARNING'
+    )
     return jsonify({
         'error': 'Too many requests',
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
 
+# ==================== DEPLOYMENT SETUP ====================
+def create_env_template():
+    """Create .env.template with required variables"""
+    template = """# REQUIRED: Security
+SECRET_KEY=your-32-character-minimum-secret-key-here
+API_KEY=your-api-key-for-client-applications
 
-@app.after_request
-def set_security_headers(response):
-    # TEMPORARY: Add reporting to see what's being blocked
-    csp_header = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline'; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data: https:; "
-        "font-src 'self' data: https:; "
-        "report-uri /csp-violation-report-endpoint"  # This will show us what's being blocked
-    )
-    
-    headers = {
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY', 
-        'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': csp_header,
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Permissions-Policy': 'geolocation=(), microphone=()'
-    }
-    
-    for header, value in headers.items():
-        response.headers[header] = value
-    return response
+# OPTIONAL but RECOMMENDED: Encryption
+ENCRYPTION_KEY=your-fernet-encryption-key-base64
+ENCRYPT_SENSITIVE_DATA=true
 
+# REQUIRED: Database (PostgreSQL)
+DATABASE_URL=postgresql://user:password@host:port/database
+# OR individual variables:
+# DB_HOST=your-db-host
+# DB_NAME=your-db-name
+# DB_USER=your-db-user
+# DB_PASSWORD=your-db-password
+# DB_PORT=5432
+
+# OPTIONAL: Security tuning
+SESSION_TIMEOUT=3600
+RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_WINDOW=3600
+MAX_FILE_SIZE=16777216
+
+# OPTIONAL: Admin
+ADMIN_API_KEY=your-admin-api-key-for-audit-logs
+
+# RENDER specific
+RENDER=true
+PORT=10000
+"""
     
+    with open('.env.template', 'w') as f:
+        f.write(template)
     
+    logger.info("Created .env.template with required variables")
+
 # ==================== MAIN EXECUTION ====================
 if __name__ == '__main__':
+    # Create environment template on first run
+    if not os.path.exists('.env.template'):
+        create_env_template()
+    
+    # Initialize all components
+    logger.info("=" * 60)
+    logger.info("MENTAL HEALTH ASSESSMENT API - SECURE EDITION v4.0")
+    logger.info("=" * 60)
+    
+    # Load model components
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
-        logger.info("All model components loaded successfully!")
-        logger.info(f"Features: {len(feature_names)}")
-        logger.info(f"Classes: {label_encoder.classes_.tolist()}")
-        logger.info("Enhanced preprocessing pipeline: ACTIVE")
-        logger.info("EXACT training pipeline replication: VERIFIED")
-        logger.info("Confidence calibration: ENABLED")
-        logger.info("SECURITY FEATURES: ACTIVE")
-        logger.info(f"Rate limiting: {SecurityConfig.RATE_LIMIT_REQUESTS} requests per {SecurityConfig.RATE_LIMIT_WINDOW}s")
-        logger.info(f"Input validation: MAX {SecurityConfig.MAX_INPUT_LENGTH} chars")
-        
-        try:
-            conn = get_postgres_connection()
-            if hasattr(conn, 'cursor'):
-                logger.info("Database: PostgreSQL (Production) with psycopg")
-            else:
-                logger.info("Database: SQLite (Development Fallback)")
-            conn.close()
-        except Exception as e:
-            logger.error(f"Database connection test failed: {e}")
-            
-        if clinical_enhancer:
-            logger.info("Clinical Decision Enhancer: ACTIVE")
-        else:
-            logger.warning("Clinical Decision Enhancer: NOT AVAILABLE")
+        logger.info("✓ All model components loaded")
+        logger.info(f"  Features: {len(feature_names)}")
+        logger.info(f"  Classes: {label_encoder.classes_.tolist()}")
     else:
-        logger.error("Failed to load model components!")
-        if not os.environ.get('RENDER'):
+        logger.error("✗ Failed to load model components!")
+        if os.environ.get('RENDER'):
             sys.exit(1)
     
+    # Initialize database
+    try:
+        init_database()
+        logger.info("✓ Secure database initialized")
+    except Exception as e:
+        logger.error(f"✗ Database initialization failed: {e}")
+    
+    # Security configuration check
+    logger.info("🔒 SECURITY CONFIGURATION:")
+    logger.info(f"  API Key Required: {'✓' if SecurityConfig.API_KEY else '✗'}")
+    logger.info(f"  Encryption: {'✓' if os.environ.get('ENCRYPTION_KEY') else '✗ (generated)'}")
+    logger.info(f"  Audit Logging: ✓ ({SecurityConfig.AUDIT_LOG_FILE})")
+    logger.info(f"  Rate Limiting: ✓ ({SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}s)")
+    logger.info(f"  CORS Restrictions: ✓")
+    logger.info(f"  Security Headers: ✓")
+    
+    if clinical_enhancer:
+        logger.info("✓ Clinical Decision Enhancer: ACTIVE")
+    
+    # Pre-warm application
     def pre_warm_app():
-        logger.info("Pre-warming application components...")
+        logger.info("Pre-warming application...")
         with app.test_client() as client:
             try:
+                # Test health endpoint
                 response = client.get('/api/health')
-                logger.info(f"Pre-warm completed with status: {response.status_code}")
+                logger.info(f"Pre-warm status: {response.status_code}")
+                
+                # Test security endpoint
+                client.headers = {'X-API-Key': SecurityConfig.API_KEY}
+                response = client.get('/api/security-status')
+                logger.info(f"Security status: {response.status_code}")
+                
             except Exception as e:
                 logger.warning(f"Pre-warm warning: {e}")
-
     
     if os.environ.get('RENDER'):
         pre_warm_app()
     
-    port = int(os.environ.get('PORT', 5001))
+    port = int(os.environ.get('PORT', 5000))
     debug_mode = not bool(os.environ.get('RENDER'))
     
-    #app.run(host='0.0.0.0', port=port, debug=debug_mode)
-    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False)
+    logger.info("=" * 60)
+    logger.info(f"Starting server on port {port} (Debug: {debug_mode})")
+    logger.info("=" * 60)
+    
+    # IMPORTANT: In production, use a proper WSGI server like gunicorn
+    # For Render, they'll use gunicorn automatically if gunicorn is in requirements.txt
+    if os.environ.get('RENDER'):
+        # Render will use gunicorn if specified in render.yaml
+        app.run(host='0.0.0.0', port=port, debug=False)
+    else:
+        # Local development
+        app.run(host='0.0.0.0', port=port, debug=debug_mode)
+        
