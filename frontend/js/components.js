@@ -249,11 +249,20 @@ class UnifiedI18n {
         
         navLinks.forEach(link => {
             link.classList.remove('active');
-            // Check if href contains the filename rather than exact matching
-            if (link.getAttribute('href') && link.getAttribute('href').includes(currentPage)) {
+            const href = link.getAttribute('href');
+            
+            // Check for resources directory
+            const isInResourcesDir = window.location.pathname.includes('/resources/');
+            
+            if (href && (href.includes(currentPage) || 
+                (currentPage === '' && href.includes('Home.html')) ||
+                (currentPage === 'index.html' && href.includes('Home.html')) ||
+                (isInResourcesDir && href.includes('resources.html')))) {
                 link.classList.add('active');
             }
         });
+        
+        this.log(`Active nav set for: ${currentPage}`);
     }
 
     changeLanguage(lang) {

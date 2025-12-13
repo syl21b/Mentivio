@@ -47,7 +47,7 @@
 </nav>
 
     <style>
-        /* =========================================
+/* =========================================
    ROOT VARIABLES & BLURRED GLASS COLORS
 ========================================= */
 :root {
@@ -163,6 +163,12 @@
     color: var(--primary);
 }
 
+/* SIMPLE ACTIVE PAGE STYLING - JUST COLOR CHANGE */
+.nav-links a.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
 /* Crisis Button */
 .crisis-link {
     background: linear-gradient(135deg, var(--danger), #f87171);
@@ -183,7 +189,7 @@
 ========================================= */
 /* MOBILE MENU BUTTON — default hidden on desktop */
 .mobile-menu-btn {
-    display: none;               /* keep hidden by default */
+    display: none;
     width: 44px;
     height: 44px;
     border-radius: var(--radius);
@@ -289,7 +295,6 @@
     .nav-links.active {
         transform: translateY(0);
         opacity: 1;
-        visibility: visible;
     }
 
     .nav-links a {
