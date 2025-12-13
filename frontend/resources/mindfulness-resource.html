@@ -2,11 +2,34 @@
 <html lang="en">
 <head>
 
-  <title>Mindfulness & Meditation - Mentivio</title>
-    <!-- Load component script with defer -->
+  <title id = "page-title" > </title>
+
     <script src="../js/components.js" defer></script>
-  <style>
-    /* Base Styles */
+
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
+    :root {
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -14,183 +37,255 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--dark);
+      background-color: var(--white);
     }
     
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
     
-    /* Resource Detail Styles */
+    /* Resource Detail Container - Updated style */
     .resource-detail-container {
       padding: 40px 0;
     }
     
+    /* Resource Header - Updated with requested gradient */
     .resource-header {
       text-align: center;
-      margin-bottom: 50px;
-      padding: 30px;
-      background: linear-gradient(135deg, #00f2fe 0%, #28b2f1 100%);
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--success), var(--primary));
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     
     .resource-icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
     }
     
     .resource-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 700;
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
     }
     
     .resource-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     
+    /* Content Section - Updated style */
     .content-section {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
     }
     
     .content-section h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .content-section h2 i {
-      color: #00f2fe;
+      color: var(--success);
     }
     
     .content-section p {
-      margin-bottom: 15px;
-      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.6;
     }
     
-    /* Mindfulness-specific styles */
+    /* Benefits Grid - Updated style */
     .benefits-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .benefit-item {
       display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 20px;
-      background: #f0fff4;
-      border-radius: 8px;
-      border-left: 4px solid #00f2fe;
-      transition: transform 0.3s;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--success);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .benefit-item:hover {
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
+      background: rgba(76, 175, 80, 0.15);
     }
     
     .benefit-item i {
       font-size: 1.5rem;
-      color: #00f2fe;
+      color: var(--success);
       width: 30px;
       text-align: center;
+      flex-shrink: 0;
+      margin-top: 0.25rem;
     }
     
+    .benefit-text {
+      flex: 1;
+    }
+    
+    .benefit-text h3 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    
+    .benefit-text p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--gray);
+    }
+    
+    /* Meditation Steps - Updated style */
     .meditation-steps {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .step {
-      padding: 25px;
-      background: #f0fff4;
-      border-radius: 10px;
-      border-top: 4px solid #00f2fe;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--success);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .step:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      background: rgba(76, 175, 80, 0.15);
     }
     
     .step h3 {
-      color: #2d3748;
-      margin-bottom: 10px;
+      color: var(--dark);
+      margin-bottom: 0.75rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
+    .step p {
+      margin-bottom: 0;
+      color: var(--gray);
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    
+    /* Exercises Grid - Updated style */
     .exercises-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .exercise-card {
-      padding: 25px;
-      background: #f0fff4;
-      border-radius: 10px;
-      border-left: 4px solid #00f2fe;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: rgba(76, 175, 80, 0.1);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--success);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .exercise-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      background: rgba(76, 175, 80, 0.15);
     }
     
     .exercise-card h3 {
-      color: #2d3748;
-      margin-bottom: 10px;
+      color: var(--dark);
+      margin-bottom: 0.75rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
+    .exercise-card p {
+      margin-bottom: 1rem;
+      color: var(--gray);
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    
+    /* Try Exercise Button - Updated to match prediction.css button style */
     .try-exercise {
-      background: #00f2fe;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--success);
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
+      border-radius: 50px;
       cursor: pointer;
-      margin-top: 15px;
-      transition: background 0.3s;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+      margin-top: auto;
     }
     
     .try-exercise:hover {
-      background: #28b2f1;
+      background-color: var(--primary);
+      transform: translateY(-2px);
     }
     
+    /* Mindfulness Tips - Updated style */
     .mindfulness-tips {
       list-style-type: none;
-      margin-top: 15px;
+      margin-top: 1.5rem;
     }
     
     .mindfulness-tips li {
-      padding: 12px 0;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-light);
       position: relative;
-      padding-left: 30px;
+      padding-left: 1.75rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .mindfulness-tips li:last-child {
@@ -201,108 +296,230 @@
       content: "🌱";
       position: absolute;
       left: 0;
+      font-size: 1rem;
     }
     
-    .source-info {
-      margin-top: 40px;
-      padding: 20px;
-      background: #edf2f7;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-    
-    .quick-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 30px 0;
-      justify-content: center;
-    }
-    
-    .nav-btn {
-      padding: 10px 20px;
-      background: #00f2fe;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s;
-    }
-    
-    .nav-btn:hover {
-      background: #28b2f1;
-    }
-    
+    /* Research Highlight - Updated style */
     .research-highlight {
-      background: #ebf8ff;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #4299e1;
+      background: rgba(74, 111, 165, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--primary);
+      border: 1px solid var(--gray-light);
     }
     
     .research-highlight p {
-      color: #2b6cb0;
+      color: var(--primary);
       font-weight: 500;
+      margin-bottom: 0;
+      font-size: 1.1rem;
     }
     
+    /* Practice Tip - Updated style */
     .practice-tip {
-      background: #fffaf0;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #ed8936;
+      background: rgba(255, 152, 0, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--warning);
+      border: 1px solid var(--gray-light);
     }
     
     .practice-tip p {
-      color: #c05621;
+      color: var(--warning);
       font-weight: 500;
+      margin-bottom: 0;
+      font-size: 1.1rem;
     }
     
+    /* Breathing Exercise - Updated style */
     .breathing-exercise {
-      background: #f0fff4;
-      padding: 25px;
-      border-radius: 10px;
-      margin: 20px 0;
+      background: rgba(76, 175, 80, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
       text-align: center;
+      border: 1px solid var(--gray-light);
     }
     
     .breathing-exercise h3 {
-      color: #2d3748;
-      margin-bottom: 15px;
+      color: var(--dark);
+      margin-bottom: 1rem;
+      font-weight: 500;
     }
     
     .breathing-steps {
       display: flex;
       justify-content: center;
-      gap: 20px;
-      margin: 20px 0;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
       flex-wrap: wrap;
     }
     
     .breathing-step {
-      padding: 15px;
-      background: white;
-      border-radius: 8px;
+      padding: 1.25rem;
+      background: var(--white);
+      border-radius: var(--radius);
       min-width: 120px;
+      border: 1px solid var(--gray-light);
+      transition: var(--transition);
+    }
+    
+    .breathing-step:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
     }
     
     .breathing-step .number {
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: bold;
-      color: #00f2fe;
-      margin-bottom: 5px;
+      color: var(--success);
+      margin-bottom: 0.5rem;
     }
     
+    .breathing-step p {
+      margin-bottom: 0;
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+    
+    /* Source Info - Updated style */
+    .source-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .source-info h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Quick Navigation - Updated style */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      justify-content: center;
+    }
+    
+    /* Navigation Buttons - Updated to match prediction.css button style */
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--success);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    /* Action Buttons - For consistency with prediction.css */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--success);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--success);
+      border: 2px solid var(--success);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(76, 175, 80, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Focus states - Matched to prediction.css */
+    .nav-btn:focus,
+    .btn:focus,
+    .try-exercise:focus {
+      outline: 2px solid var(--success);
+      outline-offset: 2px;
+    }
+    
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
       .resource-header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       
-      .benefits-grid, .meditation-steps, .exercises-grid {
+      .benefits-grid,
+      .meditation-steps,
+      .exercises-grid {
         grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .benefit-item,
+      .step,
+      .exercise-card,
+      .research-highlight,
+      .practice-tip,
+      .breathing-exercise {
+        padding: 1.25rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
       }
       
       .quick-nav {
@@ -312,9 +529,82 @@
       .breathing-steps {
         flex-direction: column;
         align-items: center;
+        gap: 1rem;
+      }
+      
+      .breathing-step {
+        width: 100%;
+        max-width: 200px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .nav-btn,
+      .try-exercise {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+      
+      .benefit-item,
+      .step,
+      .exercise-card {
+        padding: 1rem;
+      }
+      
+      .benefit-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .benefit-item i {
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .benefit-item:hover,
+      .step:hover,
+      .exercise-card:hover,
+      .breathing-step:hover,
+      .nav-btn:hover,
+      .btn:hover,
+      .try-exercise:hover {
+        transform: none;
+      }
+      
+      .benefit-item:active,
+      .step:active,
+      .exercise-card:active,
+      .nav-btn:active,
+      .btn:active,
+      .try-exercise:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
+
 </head>
 <body>
   <div class="container">
@@ -323,183 +613,182 @@
         <div class="resource-icon">
           <i class="fas fa-spa"></i>
         </div>
-        <h1>Mindfulness & Meditation</h1>
-        <p class="resource-subtitle">Practical techniques for stress management and improving mental wellbeing</p>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
       </div>
 
       <div class="quick-nav">
-        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Mindfulness?</button>
-        <button class="nav-btn" onclick="scrollToSection('benefits')">Benefits</button>
-        <button class="nav-btn" onclick="scrollToSection('getting-started')">Getting Started</button>
-        <button class="nav-btn" onclick="scrollToSection('exercises')">Mindfulness Exercises</button>
-        <button class="nav-btn" onclick="scrollToSection('daily-tips')">Daily Tips</button>
+        <button class="nav-btn" onclick="scrollToSection('what-is')" id="nav-what-is"></button>
+        <button class="nav-btn" onclick="scrollToSection('benefits')" id="nav-benefits"></button>
+        <button class="nav-btn" onclick="scrollToSection('getting-started')" id="nav-getting-started"></button>
+        <button class="nav-btn" onclick="scrollToSection('exercises')" id="nav-exercises"></button>
+        <button class="nav-btn" onclick="scrollToSection('daily-tips')" id="nav-daily-tips"></button>
       </div>
 
       <div class="resource-content">
         <div class="content-section" id="what-is">
-          <h2><i class="fas fa-info-circle"></i> What is Mindfulness?</h2>
-          <p>Mindfulness is the practice of purposely focusing your attention on the present moment—and accepting it without judgment. It's about being fully aware of what's happening right now, both inside you and around you.</p>
+          <h2><i class="fas fa-info-circle"></i> <span id="section1-title"></span></h2>
+          <p id="section1-p1"></p>
           
           <div class="practice-tip">
-            <p><i class="fas fa-lightbulb"></i> <strong>Simple but not easy:</strong> While mindfulness seems simple, it takes practice to develop this skill. The goal isn't to empty your mind, but to observe your thoughts and feelings without getting carried away by them.</p>
+            <p><i class="fas fa-lightbulb"></i> <strong id="section1-tip-strong"></strong> <span id="section1-tip-text"></span></p>
           </div>
           
-          <p>You can practice mindfulness during meditation by focusing on your breath, or you can bring mindfulness to everyday activities like walking, eating, or even talking with others.</p>
+          <p id="section1-p2"></p>
         </div>
 
         <div class="content-section" id="benefits">
-          <h2><i class="fas fa-medal"></i> Health Benefits of Mindfulness</h2>
-          <p>Research shows that practicing mindfulness regularly can have significant positive effects on both mental and physical health:</p>
+          <h2><i class="fas fa-medal"></i> <span id="section2-title"></span></h2>
+          <p id="section2-p1"></p>
           
           <div class="benefits-grid">
             <div class="benefit-item">
               <i class="fas fa-heartbeat"></i>
-              <span>Reduces stress, anxiety, and depression symptoms</span>
+              <span id="benefit1"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-tint"></i>
-              <span>Lowers blood pressure and improves heart health</span>
+              <span id="benefit2"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-bed"></i>
-              <span>Improves sleep quality and reduces insomnia</span>
+              <span id="benefit3"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-brain"></i>
-              <span>Enhances focus, concentration, and memory</span>
+              <span id="benefit4"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-heart"></i>
-              <span>Helps manage chronic pain conditions</span>
+              <span id="benefit5"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-utensils"></i>
-              <span>Supports healthier eating habits and weight management</span>
+              <span id="benefit6"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-users"></i>
-              <span>Improves relationships and communication skills</span>
+              <span id="benefit7"></span>
             </div>
             <div class="benefit-item">
               <i class="fas fa-shield-alt"></i>
-              <span>Strengthens immune system function</span>
+              <span id="benefit8"></span>
             </div>
           </div>
           
           <div class="research-highlight">
-            <p><i class="fas fa-search"></i> <strong>Research shows:</strong> Mindfulness-based treatments have been proven effective for reducing anxiety and depression. Studies also show it can help prevent relapse of depression by helping people "de-center" from negative thoughts.</p>
+            <p><i class="fas fa-search"></i> <strong id="research-highlight-strong"></strong> <span id="research-highlight-text"></span></p>
           </div>
         </div>
 
         <div class="content-section" id="getting-started">
-          <h2><i class="fas fa-play-circle"></i> Getting Started with Meditation</h2>
-          <p>Beginning a meditation practice is simpler than you might think. Here's a step-by-step guide to help you start:</p>
+          <h2><i class="fas fa-play-circle"></i> <span id="section3-title"></span></h2>
+          <p id="section3-p1"></p>
           
           <div class="meditation-steps">
             <div class="step">
-              <h3>1. Find a Quiet Space</h3>
-              <p>Choose a comfortable place where you won't be interrupted. You can sit on a chair, cushion, or even lie down.</p>
+              <h3 id="step1-title"></h3>
+              <p id="step1-desc"></p>
             </div>
             <div class="step">
-              <h3>2. Set a Time Limit</h3>
-              <p>Start with just 5-10 minutes daily. Even short, consistent practice can make a difference.</p>
+              <h3 id="step2-title"></h3>
+              <p id="step2-desc"></p>
             </div>
             <div class="step">
-              <h3>3. Focus on Your Breath</h3>
-              <p>Notice the sensation of breathing in and out. Don't try to change your breathing—just observe it.</p>
+              <h3 id="step3-title"></h3>
+              <p id="step3-desc"></p>
             </div>
             <div class="step">
-              <h3>4. Notice When Your Mind Wanders</h3>
-              <p>When thoughts arise (and they will!), gently acknowledge them and return your attention to your breath.</p>
+              <h3 id="step4-title"></h3>
+              <p id="step4-desc"></p>
             </div>
             <div class="step">
-              <h3>5. Be Kind to Yourself</h3>
-              <p>Don't judge your experience. There's no "right" way to meditate. The practice is in returning your attention.</p>
+              <h3 id="step5-title"></h3>
+              <p id="step5-desc"></p>
             </div>
           </div>
           
           <div class="breathing-exercise">
-            <h3><i class="fas fa-wind"></i> Simple Breathing Exercise</h3>
-            <p>Try this 4-7-8 breathing technique to calm your nervous system:</p>
+            <h3><i class="fas fa-wind"></i> <span id="breathing-title"></span></h3>
+            <p id="breathing-p1"></p>
             <div class="breathing-steps">
               <div class="breathing-step">
-                <div class="number">4</div>
-                <div>Breathe in through your nose</div>
+                <div class="number" id="breathing-step1-num"></div>
+                <div id="breathing-step1-desc"></div>
               </div>
               <div class="breathing-step">
-                <div class="number">7</div>
-                <div>Hold your breath</div>
+                <div class="number" id="breathing-step2-num"></div>
+                <div id="breathing-step2-desc"></div>
               </div>
               <div class="breathing-step">
-                <div class="number">8</div>
-                <div>Exhale through your mouth</div>
+                <div class="number" id="breathing-step3-num"></div>
+                <div id="breathing-step3-desc"></div>
               </div>
             </div>
-            <p>Repeat this cycle 4-5 times whenever you feel stressed or anxious.</p>
+            <p id="breathing-p2"></p>
           </div>
         </div>
 
         <div class="content-section" id="exercises">
-          <h2><i class="fas fa-tools"></i> Mindfulness Exercises</h2>
-          <p>You can practice mindfulness in many different ways. Here are some effective exercises to try:</p>
+          <h2><i class="fas fa-tools"></i> <span id="section4-title"></span></h2>
+          <p id="section4-p1"></p>
           
           <div class="exercises-grid">
             <div class="exercise-card">
-              <h3>Body Scan Meditation</h3>
-              <p>Systematically focus attention on different parts of your body from head to toe, noticing any sensations without judgment.</p>
-              <button class="try-exercise" onclick="showExercise('body-scan')">Try This Exercise</button>
+              <h3 id="ex1-title"></h3>
+              <p id="ex1-desc"></p>
+              <button class="try-exercise" onclick="showExercise('body-scan')" id="ex1-btn"></button>
             </div>
             <div class="exercise-card">
-              <h3>Walking Meditation</h3>
-              <p>Focus on the physical sensations of walking—the movement of your feet, the air on your skin, the sights and sounds around you.</p>
-              <button class="try-exercise" onclick="showExercise('walking')">Try This Exercise</button>
+              <h3 id="ex2-title"></h3>
+              <p id="ex2-desc"></p>
+              <button class="try-exercise" onclick="showExercise('walking')" id="ex2-btn"></button>
             </div>
             <div class="exercise-card">
-              <h3>Loving-Kindness Meditation</h3>
-              <p>Develop feelings of goodwill and kindness toward yourself and others by repeating positive phrases and wishes.</p>
-              <button class="try-exercise" onclick="showExercise('loving-kindness')">Try This Exercise</button>
+              <h3 id="ex3-title"></h3>
+              <p id="ex3-desc"></p>
+              <button class="try-exercise" onclick="showExercise('loving-kindness')" id="ex3-btn"></button>
             </div>
             <div class="exercise-card">
-              <h3>Mindful Eating</h3>
-              <p>Pay close attention to the taste, texture, and smell of your food. Notice when you feel hungry and when you feel full.</p>
-              <button class="try-exercise" onclick="showExercise('eating')">Try This Exercise</button>
+              <h3 id="ex4-title"></h3>
+              <p id="ex4-desc"></p>
+              <button class="try-exercise" onclick="showExercise('eating')" id="ex4-btn"></button>
             </div>
             <div class="exercise-card">
-              <h3>Five Senses Exercise</h3>
-              <p>Notice one thing you can see, hear, smell, taste, and feel. This quickly brings you into the present moment.</p>
-              <button class="try-exercise" onclick="showExercise('senses')">Try This Exercise</button>
+              <h3 id="ex5-title"></h3>
+              <p id="ex5-desc"></p>
+              <button class="try-exercise" onclick="showExercise('senses')" id="ex5-btn"></button>
             </div>
             <div class="exercise-card">
-              <h3>RAIN Technique</h3>
-              <p>Recognize, Allow, Investigate, and Nurture difficult emotions as they arise without getting overwhelmed by them.</p>
-              <button class="try-exercise" onclick="showExercise('rain')">Try This Exercise</button>
+              <h3 id="ex6-title"></h3>
+              <p id="ex6-desc"></p>
+              <button class="try-exercise" onclick="showExercise('rain')" id="ex6-btn"></button>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="daily-tips">
-          <h2><i class="fas fa-lightbulb"></i> Daily Mindfulness Tips</h2>
-          <p>Incorporate mindfulness into your daily routine with these simple practices:</p>
+          <h2><i class="fas fa-lightbulb"></i> <span id="section5-title"></span></h2>
+          <p id="section5-p1"></p>
           
           <ul class="mindfulness-tips">
-            <li><strong>Practice mindful eating</strong> - pay attention to taste, texture, and smell of your food without distractions</li>
-            <li><strong>Take mindful breaks</strong> during your workday - just 60 seconds of focused breathing can reset your mind</li>
-            <li><strong>Use mindfulness apps</strong> for guided practice - look for evidence-based programs from reputable sources</li>
-            <li><strong>Incorporate mindfulness into routine activities</strong> like brushing teeth, showering, or washing dishes</li>
-            <li><strong>Notice your body</strong> throughout the day - check in with physical sensations and tension</li>
-            <li><strong>Practice single-tasking</strong> instead of multitasking - give your full attention to one thing at a time</li>
-            <li><strong>Keep a mindfulness journal</strong> to track your practice and notice patterns</li>
-            <li><strong>Join a mindfulness group or class</strong> for support and guidance from experienced practitioners</li>
+            <li><strong id="tip1"></strong></li>
+            <li><strong id="tip2"></strong></li>
+            <li><strong id="tip3"></strong></li>
+            <li><strong id="tip4"></strong></li>
+            <li><strong id="tip5"></strong></li>
+            <li><strong id="tip6"></strong></li>
+            <li><strong id="tip7"></strong></li>
+            <li><strong id="tip8"></strong></li>
           </ul>
           
           <div class="practice-tip">
-            <p><i class="fas fa-graduation-cap"></i> <strong>Learning resources:</strong> Look for mindfulness programs from medical schools and universities. If you struggle with apps or self-guided practice, consider finding a qualified teacher to guide you.</p>
+            <p><i class="fas fa-graduation-cap"></i> <strong id="learning-tip-strong"></strong> <span id="learning-tip-text"></span></p>
           </div>
         </div>
 
-        
         <div class="source-info">
-          <p><strong>Source Information:</strong> This content is based on information from the National Institutes of Health (NIH). For more detailed information, visit <a href="https://newsinhealth.nih.gov/2021/06/mindfulness-your-health" target="_blank">NIH Mindfulness for Your Health</a>.</p>
+          <p><strong id="source-info-text"></strong> <a href="https://newsinhealth.nih.gov/2021/06/mindfulness-your-health" target="_blank" id="source-link-text"></a>.</p>
         </div>
       </div>
     </div>
@@ -512,22 +801,47 @@
       });
     }
     
-    function showExercise(exerciseType) {
-      const exercises = {
-        'body-scan': 'Body Scan: Lie down comfortably. Slowly bring attention to each part of your body from toes to head, noticing sensations without judgment.',
-        'walking': 'Walking Meditation: Walk slowly, noticing the sensation of your feet touching ground, the movement of your body, and your surroundings.',
-        'loving-kindness': 'Loving-Kindness: Repeat phrases like "May I be happy, may I be healthy" for yourself, then for others.',
-        'eating': 'Mindful Eating: Choose one piece of food. Examine it closely, smell it, taste it slowly, noticing all sensations.',
-        'senses': 'Five Senses: Notice 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, 1 thing you taste.',
-        'rain': 'RAIN: Recognize the emotion, Allow it to be there, Investigate it with curiosity, Nurture yourself with kindness.'
-      };
-      
-      alert(exercises[exerciseType]);
+    // NOTE: In a real application, these alert messages would also be loaded from the JSON
+    // based on the selected language, but for simplicity in this example, we keep the original text
+    // with added data-i18n attributes for the future.
+function showExercise(exerciseType) {
+    if (!window.i18n || !window.i18n.translations) {
+        alert('Language system not ready. Please try again.');
+        return;
     }
-  </script>
-
-
     
+    const currentLang = window.i18n.currentLang;
+    const page = window.i18n.getCurrentPage();
+    const translations = window.i18n.translations[currentLang];
+    
+    if (!translations || !translations[page] || !translations[page].exercises) {
+        alert('Exercise data not available.');
+        return;
+    }
+    
+    const exercises = translations[page].exercises;
+    
+    // Get the exercise text based on exerciseType
+    if (exercises[exerciseType]) {
+        alert(exercises[exerciseType]);
+    } else {
+        alert('Exercise not found');
+    }
+}
+    
+function showExercise(exerciseType) {
 
+    const currentLang = window.i18n.currentLang;
+    const page = window.i18n.getCurrentPage();
+    const translations = window.i18n.translations[currentLang];
+    const exercises = translations[page].exercises;
+    
+    // Get the exercise text based on exerciseType
+    if (exercises[exerciseType]) {
+        alert(exercises[exerciseType]);
+}
+}
+
+  </script>
 </body>
 </html>

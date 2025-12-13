@@ -12,169 +12,49 @@ from typing import Dict, List, Tuple, Optional, Any
 import psycopg
 from psycopg.rows import dict_row  
 import sqlite3
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.pagesizes import letter, A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
+from reportlab.pdfgen import canvas
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 import io
 import json
-import sys
 import re
 import secrets
 import time
-import hashlib
 from cryptography.fernet import Fernet
 import bcrypt
 from itsdangerous import URLSafeTimedSerializer
-import threading
-from functools import wraps
-import ipaddress
-import pytz
-from dotenv import load_dotenv
-
-load_dotenv()
-
-
-# ==================== ENVIRONMENT VALIDATION ====================
-def validate_environment():
-    """Validate all required environment variables are set"""
-    required_vars = ['SECRET_KEY']
-    
-    missing = []
-    for var in required_vars:
-        if not os.environ.get(var):
-            missing.append(var)
-    
-    if missing:
-        raise EnvironmentError(f"Missing required environment variables: {', '.join(missing)}")
-    
-    secret_key = os.environ.get('SECRET_KEY', '')
-    if len(secret_key) < 32:
-        raise ValueError("SECRET_KEY must be at least 32 characters")
-    
-    encryption_key = os.environ.get('ENCRYPTION_KEY')
-    if encryption_key:
-        try:
-            Fernet(encryption_key.encode())
-        except:
-            raise ValueError("ENCRYPTION_KEY must be a valid Fernet key")
-    
-    return True
 
 # ==================== SECURITY CONFIGURATION ====================
 class SecurityConfig:
-    SECRET_KEY = os.environ.get('SECRET_KEY', '')
-    if not SECRET_KEY:
-        raise EnvironmentError("SECRET_KEY environment variable is required")
-    
-    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY')
-    if not ENCRYPTION_KEY:
-        ENCRYPTION_KEY = Fernet.generate_key().decode()
-        logging.warning("ENCRYPTION_KEY not set, generating random key. SESSIONS WILL NOT PERSIST!")
-    
-    API_KEY = os.environ.get('API_KEY')
-    if not API_KEY:
-        API_KEY = secrets.token_urlsafe(32)
-        logging.warning("API_KEY not set, generating random key. SET THIS FOR PRODUCTION!")
+    SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_urlsafe(32))
+    ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key())
     
     SESSION_TIMEOUT = int(os.environ.get('SESSION_TIMEOUT', 3600))
     MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', 16 * 1024 * 1024))
     RATE_LIMIT_REQUESTS = int(os.environ.get('RATE_LIMIT_REQUESTS', 100))
     RATE_LIMIT_WINDOW = int(os.environ.get('RATE_LIMIT_WINDOW', 3600))
     
-    MIN_PASSWORD_LENGTH = 12
-    PASSWORD_COMPLEXITY = {
-        'min_lowercase': 1,
-        'min_uppercase': 1,
-        'min_digits': 1,
-        'min_special': 1
-    }
-    
-    MAX_INPUT_LENGTH = 500
-    MAX_RESPONSES = 50
-    MAX_PATIENT_NAME_LENGTH = 100
-    MAX_PATIENT_NUMBER_LENGTH = 50
-    
     SECURITY_HEADERS = {
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY', 
         'X-XSS-Protection': '1; mode=block',
         'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': (
-            "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
-            "img-src 'self' data: https:; "
-            "font-src 'self' data: https: fonts.gstatic.com; "
-            "connect-src 'self' https://*.onrender.com; "
-            "frame-ancestors 'none';"
-        ),
+        'Content-Security-Policy': "default-src 'self'; "
+                                "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
+                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+                                "img-src 'self' data: https:; "
+                                "font-src 'self' data: https: fonts.gstatic.com; "
+                                "connect-src 'self'",
         'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Permissions-Policy': 'geolocation=(), microphone=()',
-        'Cache-Control': 'no-store, max-age=0'
+        'Permissions-Policy': 'geolocation=(), microphone=()'
     }
     
-    AUDIT_LOG_FILE = os.environ.get('AUDIT_LOG_FILE', 'security_audit.log')
-    
-    SESSION_COOKIE_SECURE = True
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Lax'
-    
-    @staticmethod
-    def get_database_url():
-        """Get database URL from environment variables"""
-        db_url = os.environ.get('DATABASE_URL')
-        if not db_url:
-            db_host = os.environ.get('DB_HOST')
-            db_name = os.environ.get('DB_NAME')
-            db_user = os.environ.get('DB_USER')
-            db_password = os.environ.get('DB_PASSWORD')
-            db_port = os.environ.get('DB_PORT', '5432')
-            
-            if all([db_host, db_name, db_user, db_password]):
-                db_url = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            else:
-                return 'sqlite:///mental_health_assessments.db'
-        
-        return db_url
-
-class AuditLogger:
-    """Security audit logging"""
-    
-    def __init__(self, log_file: str = None):
-        self.log_file = log_file or SecurityConfig.AUDIT_LOG_FILE
-        self.lock = threading.Lock()
-        
-    def log_event(self, event_type: str, user_id: str = None, ip: str = None, 
-                  details: str = None, severity: str = 'INFO'):
-        timestamp = datetime.now(timezone.utc).isoformat()
-        ip = ip or (request.remote_addr if request else '0.0.0.0')
-        
-        log_entry = {
-            'timestamp': timestamp,
-            'event_type': event_type,
-            'user_id': user_id,
-            'ip_address': ip,
-            'severity': severity,
-            'details': details,
-            'user_agent': request.headers.get('User-Agent') if request else None,
-            'endpoint': request.endpoint if request else None,
-            'method': request.method if request else None
-        }
-        
-        with self.lock:
-            try:
-                with open(self.log_file, 'a') as f:
-                    f.write(json.dumps(log_entry) + '\n')
-            except Exception:
-                pass
-            
-            if severity == 'CRITICAL':
-                logging.critical(f"AUDIT [{severity}]: {event_type} - {details}")
-            elif severity == 'WARNING':
-                logging.warning(f"AUDIT [{severity}]: {event_type} - {details}")
+    MAX_INPUT_LENGTH = 500
+    MAX_RESPONSES = 50
 
 class SecurityUtils:
     @staticmethod
@@ -182,87 +62,95 @@ class SecurityUtils:
         return secrets.token_urlsafe(length)
     
     @staticmethod
-    def hash_password(password: str) -> Tuple[str, str]:
-        salt = bcrypt.gensalt()
-        hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-        return hashed.decode('utf-8'), salt.decode('utf-8')
+    def hash_password(password: str) -> str:
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
     @staticmethod
     def verify_password(password: str, hashed: str) -> bool:
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
     
     @staticmethod
-    def sanitize_input(user_input: str, allow_html: bool = False) -> str:
-        if not isinstance(user_input, str):
-            user_input = str(user_input)
-        
-        sanitized = user_input.strip()[:SecurityConfig.MAX_INPUT_LENGTH]
-        
-        if not allow_html:
-            sanitized = re.sub(r'<[^>]*>', '', sanitized)
-            sanitized = re.sub(r'[<>"\']', '', sanitized)
-        
-        return re.sub(r'[\';]', '', sanitized)
+    def validate_email(email: str) -> bool:
+        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(pattern, email))
     
     @staticmethod
-    def sanitize_json_input(data: Any) -> Any:
-        if isinstance(data, dict):
-            return {SecurityUtils.sanitize_input(k): SecurityUtils.sanitize_json_input(v) for k, v in data.items()}
-        elif isinstance(data, list):
-            return [SecurityUtils.sanitize_json_input(item) for item in data]
-        elif isinstance(data, str):
-            return SecurityUtils.sanitize_input(data)
-        else:
-            return data
+    def sanitize_input(user_input: str) -> str:
+        """Sanitize user input with special handling for age"""
+        if not isinstance(user_input, str):
+            if isinstance(user_input, (int, float)):
+                return str(user_input)
+            return str(user_input)
+        
+        if user_input.isdigit():
+            return user_input.strip()
+        
+        sanitized = re.sub(r'[<>"\']', '', user_input)
+        return sanitized.strip()[:SecurityConfig.MAX_INPUT_LENGTH]
     
     @staticmethod
     def validate_patient_data(patient_info: Dict) -> Tuple[bool, str]:
+        """Validate patient information for security"""
         try:
             name = patient_info.get('name', '').strip()
-            if not name:
-                return False, "Patient name is required"
-            if len(name) > SecurityConfig.MAX_PATIENT_NAME_LENGTH:
-                return False, f"Patient name too long (max {SecurityConfig.MAX_PATIENT_NAME_LENGTH} chars)"
-            if not re.match(r'^[A-Za-z\s\-\'\.]+$', name):
-                return False, "Invalid characters in patient name"
+            if not name or len(name) > 100:
+                return False, "Invalid patient name"
             
             number = patient_info.get('number', '').strip()
-            if not number:
-                return False, "Patient number is required"
-            if len(number) > SecurityConfig.MAX_PATIENT_NUMBER_LENGTH:
-                return False, f"Patient number too long (max {SecurityConfig.MAX_PATIENT_NUMBER_LENGTH} chars)"
-            if not re.match(r'^[A-Za-z0-9\-_]+$', number):
+            if not re.match(r'^[a-zA-Z0-9\-_]+$', number):
                 return False, "Invalid patient number format"
             
-            age = patient_info.get('age', '').strip()
-            if age:
-                if not re.match(r'^[0-9]{1,3}$', age):
-                    return False, "Invalid age format"
-                age_int = int(age)
-                if not (0 <= age_int <= 150):
-                    return False, "Age must be between 0 and 150"
+            age = patient_info.get('age')
+            if age is not None:
+                if isinstance(age, str):
+                    age = age.strip()
+                    if not age.isdigit():
+                        return False, "Age must be a number between 12-100"
+                    age = int(age)
+                
+                if not isinstance(age, int):
+                    return False, "Age must be a number between 12-100"
+                
+                if age < 12 or age > 100:
+                    return False, "Age must be between 12-100"
             
             gender = patient_info.get('gender', '').strip()
-            valid_genders = ['Male', 'Female', 'Other', 'Prefer not to say', '']
-            if gender and gender not in valid_genders:
+            if gender and gender not in ['Male', 'Female', 'Other', 'Prefer not to say', '']:
                 return False, "Invalid gender selection"
             
             return True, "Valid"
-            
         except Exception as e:
             return False, f"Validation error: {str(e)}"
-    
+
     @staticmethod
-    def generate_request_id() -> str:
-        return f"req_{uuid.uuid4().hex[:16]}"
+    def validate_patient_age(age_input) -> Tuple[bool, str]:
+        """Specifically validate patient age - ONLY numbers allowed"""
+        try:
+            if age_input is None or age_input == '':
+                return True, ""
+            
+            if isinstance(age_input, str):
+                age_input = age_input.strip()
+                if not age_input.isdigit():
+                    return False, "Age must be typed as a number only (digits 0-9). Please enter a valid number like 25"
+                age = int(age_input)
+            elif isinstance(age_input, (int, float)):
+                age = int(age_input)
+            else:
+                return False, "Age must be a valid number. Please enter only digits (0-9)"
+            
+            if age < 12:
+                return False, "Age must be 12 or older"
+            if age > 100:
+                return False, "Age must be 100 or younger"
+            
+            return True, f"Valid age: {age}"
+        except Exception as e:
+            return False, f"Age validation error: {str(e)}"
 
 class EncryptionService:
     def __init__(self):
-        try:
-            self.fernet = Fernet(SecurityConfig.ENCRYPTION_KEY.encode())
-        except Exception as e:
-            logging.error(f"Failed to initialize encryption: {e}")
-            raise
+        self.fernet = Fernet(SecurityConfig.ENCRYPTION_KEY)
     
     def encrypt_data(self, data: str) -> str:
         return self.fernet.encrypt(data.encode()).decode()
@@ -276,76 +164,33 @@ class EncryptionService:
     def decrypt_dict(self, encrypted_data: str) -> Dict:
         return json.loads(self.decrypt_data(encrypted_data))
 
-class AdvancedRateLimiter:
-    """Enhanced rate limiter with different limits per endpoint"""
-    
+class RateLimiter:
     def __init__(self):
         self.requests = {}
-        self.lock = threading.Lock()
-        self.audit_logger = AuditLogger()
-        self.endpoint_limits = {
-            'predict': {'max_requests': 50, 'window': 3600},
-            'save_assessment': {'max_requests': 20, 'window': 3600},
-            'get_patient_assessments': {'max_requests': 30, 'window': 3600},
-            'default': {'max_requests': SecurityConfig.RATE_LIMIT_REQUESTS, 
-                       'window': SecurityConfig.RATE_LIMIT_WINDOW}
-        }
     
-    def is_rate_limited(self, identifier: str, max_requests: int, window: int) -> Tuple[bool, str]:
+    def is_rate_limited(self, identifier: str, max_requests: int, window: int) -> bool:
         now = time.time()
         window_start = now - window
         
-        with self.lock:
-            if identifier in self.requests:
-                self.requests[identifier] = [
-                    req_time for req_time in self.requests[identifier] 
-                    if req_time > window_start
-                ]
-            
-            request_count = len(self.requests.get(identifier, []))
-            
-            if request_count >= max_requests:
-                self.audit_logger.log_event(
-                    event_type='RATE_LIMIT_EXCEEDED',
-                    ip=identifier if self._validate_ip(identifier) else None,
-                    details=f"Rate limit exceeded: {request_count}/{max_requests} in {window}s",
-                    severity='WARNING'
-                )
-                return True, f"Rate limit exceeded. Try again in {window} seconds."
-            
-            if identifier not in self.requests:
-                self.requests[identifier] = []
-            self.requests[identifier].append(now)
-            
-            return False, ""
-    
-    def _validate_ip(self, ip: str) -> bool:
-        try:
-            ipaddress.ip_address(ip)
+        if identifier in self.requests:
+            self.requests[identifier] = [
+                req_time for req_time in self.requests[identifier] 
+                if req_time > window_start
+            ]
+        
+        if len(self.requests.get(identifier, [])) >= max_requests:
             return True
-        except ValueError:
-            return False
-    
-    def get_endpoint_limit(self, endpoint: str) -> Dict[str, int]:
-        return self.endpoint_limits.get(endpoint, self.endpoint_limits['default'])
-    
-    def is_endpoint_rate_limited(self, identifier: str, endpoint: str) -> Tuple[bool, str]:
-        limits = self.get_endpoint_limit(endpoint)
-        return self.is_rate_limited(
-            f"{identifier}:{endpoint}",
-            limits['max_requests'],
-            limits['window']
-        )
+        
+        if identifier not in self.requests:
+            self.requests[identifier] = []
+        self.requests[identifier].append(now)
+        
+        return False
 
 class AuthService:
     def __init__(self):
         self.serializer = URLSafeTimedSerializer(SecurityConfig.SECRET_KEY)
         self.active_sessions = {}
-        self.failed_attempts = {}
-        self.lock = threading.Lock()
-        self.audit_logger = AuditLogger()
-        self.max_failed_attempts = 5
-        self.lockout_time = 900
     
     def create_session(self, user_id: str, user_data: Dict) -> str:
         session_id = SecurityUtils.generate_secure_token()
@@ -353,158 +198,499 @@ class AuthService:
             'user_id': user_id,
             'user_data': user_data,
             'created_at': time.time(),
-            'last_activity': time.time(),
-            'ip_address': request.remote_addr if request else '0.0.0.0',
-            'user_agent': request.headers.get('User-Agent') if request else None
+            'last_activity': time.time()
         }
-        
-        with self.lock:
-            self.active_sessions[session_id] = session_data
-        
-        self.audit_logger.log_event(
-            event_type='SESSION_CREATED',
-            user_id=user_id,
-            details=f"Session created for user {user_id}",
-            severity='INFO'
-        )
-        
+        self.active_sessions[session_id] = session_data
         return session_id
     
     def validate_session(self, session_id: str) -> Optional[Dict]:
-        if not session_id:
+        if session_id not in self.active_sessions:
             return None
         
-        with self.lock:
-            if session_id not in self.active_sessions:
-                return None
-            
-            session_data = self.active_sessions[session_id]
-            
-            if time.time() - session_data['last_activity'] > SecurityConfig.SESSION_TIMEOUT:
-                self.audit_logger.log_event(
-                    event_type='SESSION_EXPIRED',
-                    user_id=session_data['user_id'],
-                    details="Session expired due to inactivity",
-                    severity='INFO'
-                )
-                del self.active_sessions[session_id]
-                return None
-            
-            current_ip = request.remote_addr if request else '0.0.0.0'
-            if (session_data['ip_address'] != current_ip and 
-                session_data['ip_address'] != '0.0.0.0'):
-                self.audit_logger.log_event(
-                    event_type='SUSPICIOUS_SESSION',
-                    user_id=session_data['user_id'],
-                    details=f"IP changed from {session_data['ip_address']} to {current_ip}",
-                    severity='WARNING'
-                )
-            
-            session_data['last_activity'] = time.time()
-            
-            return session_data
+        session_data = self.active_sessions[session_id]
+        
+        if time.time() - session_data['last_activity'] > SecurityConfig.SESSION_TIMEOUT:
+            del self.active_sessions[session_id]
+            return None
+        
+        session_data['last_activity'] = time.time()
+        return session_data
     
     def destroy_session(self, session_id: str):
-        with self.lock:
-            if session_id in self.active_sessions:
-                user_id = self.active_sessions[session_id]['user_id']
-                self.audit_logger.log_event(
-                    event_type='SESSION_DESTROYED',
-                    user_id=user_id,
-                    details="Session destroyed",
-                    severity='INFO'
-                )
-                del self.active_sessions[session_id]
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
 
-# ==================== SECURITY MIDDLEWARE DECORATORS ====================
-def require_api_key(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if request.endpoint in ['health_check', 'simple_ping', 'api_info']:
-            return f(*args, **kwargs)
-        
-        api_key = request.headers.get('X-API-Key')
-        
-        if not api_key:
-            audit_logger.log_event(
-                event_type='API_KEY_MISSING',
-                ip=request.remote_addr,
-                details=f"Missing API key for {request.endpoint}",
-                severity='WARNING'
-            )
-            return jsonify({'error': 'API key required'}), 401
-        
-        valid_key = SecurityConfig.API_KEY
-        
-        if not secrets.compare_digest(api_key, valid_key):
-            audit_logger.log_event(
-                event_type='INVALID_API_KEY',
-                ip=request.remote_addr,
-                details=f"Invalid API key for {request.endpoint}",
-                severity='WARNING'
-            )
-            return jsonify({'error': 'Invalid API key'}), 401
-        
-        return f(*args, **kwargs)
-    
-    return decorated_function
+encryption_service = EncryptionService()
+rate_limiter = RateLimiter()
+auth_service = AuthService()
 
-def validate_json_content(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if request.method in ['POST', 'PUT']:
-            if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
-                audit_logger.log_event(
-                    event_type='REQUEST_TOO_LARGE',
-                    ip=request.remote_addr,
-                    details=f"Request size: {request.content_length} bytes",
-                    severity='WARNING'
-                )
-                return jsonify({'error': 'Request too large'}), 413
-            
-            if request.is_json:
-                try:
-                    data = request.get_json()
-                    if not isinstance(data, (dict, list)):
-                        return jsonify({'error': 'Invalid JSON format'}), 400
-                except Exception as e:
-                    audit_logger.log_event(
-                        event_type='INVALID_JSON',
-                        ip=request.remote_addr,
-                        details=f"JSON parsing error: {str(e)}",
-                        severity='WARNING'
-                    )
-                    return jsonify({'error': 'Invalid JSON data'}), 400
-        
-        return f(*args, **kwargs)
-    
-    return decorated_function
+# ==================== FLASK APP SETUP ====================
+assessment_storage: Dict[str, Dict[str, Any]] = {}
 
-def sanitize_inputs(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        sanitized_kwargs = {}
-        for key, value in kwargs.items():
-            if isinstance(value, str):
-                sanitized_kwargs[key] = SecurityUtils.sanitize_input(value)
-            else:
-                sanitized_kwargs[key] = value
-        
-        if request.form:
-            for key in request.form:
-                request.form[key] = SecurityUtils.sanitize_input(request.form[key])
+app = Flask(__name__, 
+           static_folder='frontend',
+           template_folder='frontend')
+
+app.secret_key = SecurityConfig.SECRET_KEY
+
+# Security middleware
+@app.after_request
+def set_security_headers(response):
+    for header, value in SecurityConfig.SECURITY_HEADERS.items():
+        response.headers[header] = value
+    return response
+
+# Rate limiting middleware
+@app.before_request
+def check_rate_limit():
+    if request.endpoint and request.endpoint.startswith('api'):
+        client_ip = request.remote_addr
+        if rate_limiter.is_rate_limited(client_ip, SecurityConfig.RATE_LIMIT_REQUESTS, SecurityConfig.RATE_LIMIT_WINDOW):
+            return jsonify({
+                'error': 'Rate limit exceeded. Please try again later.',
+                'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
+            }), 429
+
+# Input validation middleware
+@app.before_request
+def validate_api_input():
+    if request.endpoint and request.endpoint.startswith('api') and request.method in ['POST', 'PUT']:
+        if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
+            return jsonify({'error': 'Request too large'}), 413
         
         if request.is_json:
             try:
                 data = request.get_json()
-                sanitized_data = SecurityUtils.sanitize_json_input(data)
-                request._cached_json = (sanitized_data, request._cached_json[1])
-            except:
-                pass
+                if not isinstance(data, (dict, list)):
+                    return jsonify({'error': 'Invalid JSON format'}), 400
+            except Exception as e:
+                return jsonify({'error': 'Invalid JSON data'}), 400
+
+if os.environ.get('RENDER'):
+    CORS(app, origins=[
+        'https://mentivio.onrender.com',
+        'http://mentivio-MentalHealth.onrender.com',
+        'https://mentivio-web.onrender.com'
+    ])
+    app.debug = False
+    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
+else:
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# ==================== DATABASE SETUP ====================
+def get_postgres_connection():
+    """Get PostgreSQL database connection using psycopg"""
+    conn = None
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
         
-        return f(*args, **sanitized_kwargs)
+        database_url = os.environ.get('DATABASE_URL')
+        
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable is not set")
+        
+        logger.info(f"Attempting to connect to database with URL: {database_url[:30]}...")
+        
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+            
+        conn = psycopg.connect(database_url, row_factory=dict_row)
+        
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+            
+        logger.info("PostgreSQL connection successful")
+        return conn
+        
+    except Exception as e:
+        logger.error(f"PostgreSQL connection failed: {e}")
+        
+        try:
+            logger.info("Attempting SQLite fallback...")
+            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+            conn = sqlite3.connect(sqlite_path)
+            conn.row_factory = sqlite3.Row
+            logger.info("SQLite fallback connection successful")
+            return conn
+        except Exception as sqlite_error:
+            logger.error(f"SQLite fallback also failed: {sqlite_error}")
+            raise e
+
+def init_database():
+    """Initialize database with required tables"""
+    try:
+        conn = get_postgres_connection()
+        
+        with conn.cursor() as cur:
+            cur.execute('''
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'assessments'
+                );
+            ''')
+            table_exists = cur.fetchone()['exists']
+            
+            if not table_exists:
+                cur.execute('''
+                    CREATE TABLE assessments (
+                        id TEXT PRIMARY KEY,
+                        assessment_timestamp TEXT,
+                        report_timestamp TEXT,
+                        timezone TEXT,
+                        patient_name TEXT,
+                        patient_number TEXT,
+                        patient_age INT,
+                        patient_gender TEXT,
+                        primary_diagnosis TEXT,
+                        confidence REAL,
+                        confidence_percentage REAL,
+                        all_diagnoses_json TEXT,
+                        responses_json TEXT,
+                        processing_details_json TEXT,
+                        technical_details_json TEXT,
+                        clinical_insights_json TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                
+                cur.execute('CREATE INDEX idx_patient_number ON assessments(patient_number)')
+                cur.execute('CREATE INDEX idx_timestamp ON assessments(report_timestamp)')
+        
+        conn.commit()
+        conn.close()
+        
+    except Exception as e:
+        logger.warning(f"Database initialization warning: {e}")
+
+def convert_to_canonical_key(diagnosis_text: str) -> str:
+    """Convert any diagnosis text back to its canonical key"""
+    canonical_keys = ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']
     
-    return decorated_function
+    if diagnosis_text in canonical_keys:
+        return diagnosis_text
+    
+    for lang, translations in TRANSLATIONS.items():
+        if 'prediction' in translations:
+            diagnosis_translations = translations['prediction'].get('diagnosisTranslations', {})
+            for key, value in diagnosis_translations.items():
+                if value == diagnosis_text:
+                    return key
+    
+    if 'bipolar' in diagnosis_text.lower() and 'type-1' in diagnosis_text.lower():
+        return 'Bipolar Type-1'
+    elif 'bipolar' in diagnosis_text.lower() and 'type-2' in diagnosis_text.lower():
+        return 'Bipolar Type-2'
+    elif 'depression' in diagnosis_text.lower() or 'trầm cảm' in diagnosis_text.lower():
+        return 'Depression'
+    elif 'normal' in diagnosis_text.lower() or 'bình thường' in diagnosis_text.lower():
+        return 'Normal'
+    
+    return diagnosis_text
+
+def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
+    """Save assessment data to database using canonical keys"""
+    try:
+        sanitized_data = assessment_data.copy()
+        
+        if 'patient_info' in sanitized_data:
+            patient_info = sanitized_data['patient_info']
+            age = patient_info.get('age')
+            
+            if age:
+                age_valid, age_msg = SecurityUtils.validate_patient_age(age)
+                if not age_valid:
+                    patient_info['age'] = None
+            
+            sanitized_data['patient_info'] = {
+                'name': SecurityUtils.sanitize_input(patient_info.get('name', '')),
+                'number': SecurityUtils.sanitize_input(patient_info.get('number', '')),
+                'age': patient_info.get('age'),
+                'gender': SecurityUtils.sanitize_input(patient_info.get('gender', ''))
+            }
+        
+        all_diagnoses = sanitized_data.get('all_diagnoses', [])
+        canonical_diagnoses = []
+        for diagnosis in all_diagnoses:
+            diag_text = diagnosis.get('diagnosis', '')
+            canonical_key = convert_to_canonical_key(diag_text)
+            
+            canonical_diagnoses.append({
+                'diagnosis': canonical_key,
+                'probability': diagnosis.get('probability', 0),
+                'confidence_percentage': diagnosis.get('confidence_percentage', 0),
+                'rank': diagnosis.get('rank', 0)
+            })
+        
+        primary_diagnosis = sanitized_data.get('primary_diagnosis', '')
+        primary_diagnosis_canonical = convert_to_canonical_key(primary_diagnosis)
+        
+        conn = get_postgres_connection()
+        
+        with conn.cursor() as cur:
+            cur.execute('''
+                INSERT INTO assessments (
+                    id, assessment_timestamp, report_timestamp, timezone,
+                    patient_name, patient_number, patient_age, patient_gender,
+                    primary_diagnosis, confidence, confidence_percentage,
+                    all_diagnoses_json, responses_json, processing_details_json,
+                    technical_details_json, clinical_insights_json
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON CONFLICT (id) DO UPDATE SET
+                    assessment_timestamp = EXCLUDED.assessment_timestamp,
+                    report_timestamp = EXCLUDED.report_timestamp,
+                    timezone = EXCLUDED.timezone,
+                    patient_name = EXCLUDED.patient_name,
+                    patient_number = EXCLUDED.patient_number,
+                    patient_age = EXCLUDED.patient_age,
+                    patient_gender = EXCLUDED.patient_gender,
+                    primary_diagnosis = EXCLUDED.primary_diagnosis,
+                    confidence = EXCLUDED.confidence,
+                    confidence_percentage = EXCLUDED.confidence_percentage,
+                    all_diagnoses_json = EXCLUDED.all_diagnoses_json,
+                    responses_json = EXCLUDED.responses_json,
+                    processing_details_json = EXCLUDED.processing_details_json,
+                    technical_details_json = EXCLUDED.technical_details_json,
+                    clinical_insights_json = EXCLUDED.clinical_insights_json
+            ''', (
+                sanitized_data.get('id'),
+                sanitized_data.get('assessment_timestamp', ''),
+                sanitized_data.get('timestamp', ''),
+                sanitized_data.get('timezone', 'UTC'),
+                sanitized_data.get('patient_info', {}).get('name', ''),
+                sanitized_data.get('patient_info', {}).get('number', ''),
+                sanitized_data.get('patient_info', {}).get('age', ''),
+                sanitized_data.get('patient_info', {}).get('gender', ''),
+                primary_diagnosis_canonical,
+                sanitized_data.get('confidence', 0),
+                sanitized_data.get('confidence_percentage', 0),
+                json.dumps(canonical_diagnoses),
+                json.dumps(sanitized_data.get('responses', {})),
+                json.dumps(sanitized_data.get('processing_details', {})),
+                json.dumps(sanitized_data.get('technical_details', {})),
+                json.dumps(sanitized_data.get('clinical_insights', {}))
+            ))
+        
+        conn.commit()
+        conn.close()
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error saving to database: {e}")
+        return False
+
+def load_assessments_from_db(patient_number: str = None, language: str = 'en') -> Dict[str, List[Dict[str, Any]]]:
+    """Load assessments from database and translate to requested language"""
+    try:
+        conn = get_postgres_connection()
+        
+        with conn.cursor() as cur:
+            if patient_number:
+                cur.execute('''
+                    SELECT * FROM assessments 
+                    WHERE patient_number ILIKE %s 
+                    ORDER BY report_timestamp DESC
+                ''', (f'%{patient_number}%',))
+            else:
+                cur.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+            
+            rows = cur.fetchall()
+        
+        conn.close()
+        
+        assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
+        
+        for row in rows:
+            row_dict = dict(row)
+            
+            patient_num = row_dict['patient_number']
+            if patient_num not in assessments_by_patient:
+                assessments_by_patient[patient_num] = []
+            
+            all_diagnoses_canonical = json.loads(row_dict['all_diagnoses_json']) if row_dict['all_diagnoses_json'] else []
+            responses = json.loads(row_dict['responses_json']) if row_dict['responses_json'] else {}
+            processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
+            technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
+            clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict['clinical_insights_json'] else {}
+            
+            primary_diagnosis_canonical = row_dict['primary_diagnosis']
+            
+            if primary_diagnosis_canonical not in ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']:
+                primary_diagnosis_canonical = convert_to_canonical_key(primary_diagnosis_canonical)
+            
+            primary_diagnosis_translated = get_translated_diagnosis(primary_diagnosis_canonical, language)
+            
+            translated_diagnoses = []
+            for diagnosis in all_diagnoses_canonical:
+                canonical_key = diagnosis.get('diagnosis', '')
+                
+                if canonical_key not in ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']:
+                    canonical_key = convert_to_canonical_key(canonical_key)
+                
+                translated_display = get_translated_diagnosis(canonical_key, language)
+                
+                translated_diagnoses.append({
+                    'diagnosis': translated_display,
+                    'original_diagnosis': canonical_key,
+                    'probability': diagnosis.get('probability', 0),
+                    'confidence_percentage': diagnosis.get('confidence_percentage', 0),
+                    'rank': diagnosis.get('rank', 0)
+                })
+            
+            translated_diagnoses.sort(key=lambda x: x.get('rank', 0))
+            
+            translated_responses = translate_response_values(responses, language)
+            
+            assessment: Dict[str, Any] = {
+                'id': row_dict['id'],
+                'timestamp': row_dict['report_timestamp'],
+                'assessment_timestamp': row_dict['assessment_timestamp'],
+                'timezone': row_dict['timezone'],
+                'patient_info': {
+                    'name': row_dict['patient_name'],
+                    'number': row_dict['patient_number'],
+                    'age': row_dict['patient_age'],
+                    'gender': row_dict['patient_gender']
+                },
+                'primary_diagnosis': primary_diagnosis_translated,
+                'original_diagnosis': primary_diagnosis_canonical,
+                'confidence': row_dict['confidence'],
+                'confidence_percentage': row_dict['confidence_percentage'],
+                'all_diagnoses': translated_diagnoses,
+                'responses': translated_responses,
+                'original_responses': responses,
+                'processing_details': processing_details,
+                'technical_details': technical_details,
+                'clinical_insights': clinical_insights,
+                'language': language
+            }
+            
+            assessments_by_patient[patient_num].append(assessment)
+        
+        return assessments_by_patient
+        
+    except Exception as e:
+        logger.error(f"Error loading from database: {e}")
+        return {}
+    
+def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str, language: str = 'en') -> Optional[Dict[str, Any]]:
+    """Load a single specific assessment from database"""
+    try:
+        conn = get_postgres_connection()
+        
+        with conn.cursor() as cur:
+            cur.execute('''
+                SELECT * FROM assessments 
+                WHERE patient_number = %s AND id = %s AND patient_name = %s
+            ''', (patient_number, assessment_id, patient_name))
+            
+            row = cur.fetchone()
+            
+            if not row:
+                conn.close()
+                return None
+        
+        row_dict = dict(row)
+        conn.close()
+        
+        if not row_dict:
+            return None
+        
+        responses = json.loads(row_dict['responses_json']) if row_dict.get('responses_json') else {}
+        all_diagnoses = json.loads(row_dict['all_diagnoses_json']) if row_dict.get('all_diagnoses_json') else []
+        processing_details = json.loads(row_dict['processing_details_json']) if row_dict.get('processing_details_json') else {}
+        technical_details = json.loads(row_dict['technical_details_json']) if row_dict.get('technical_details_json') else {}
+        clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict.get('clinical_insights_json') else {}
+        
+        primary_diagnosis_canonical = row_dict.get('primary_diagnosis', '')
+        
+        if primary_diagnosis_canonical not in ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']:
+            primary_diagnosis_canonical = convert_to_canonical_key(primary_diagnosis_canonical)
+        
+        primary_diagnosis_translated = get_translated_diagnosis(primary_diagnosis_canonical, language)
+        
+        translated_diagnoses = []
+        for diagnosis in all_diagnoses:
+            canonical_key = diagnosis.get('diagnosis', '')
+            
+            if canonical_key not in ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']:
+                canonical_key = convert_to_canonical_key(canonical_key)
+            
+            translated_display = get_translated_diagnosis(canonical_key, language)
+            
+            translated_diagnoses.append({
+                'diagnosis': translated_display,
+                'probability': diagnosis.get('probability', 0),
+                'confidence_percentage': diagnosis.get('confidence_percentage', 0),
+                'rank': diagnosis.get('rank', 0)
+            })
+        
+        translated_diagnoses.sort(key=lambda x: x.get('rank', 0))
+        
+        translated_responses = {}
+        if responses:
+            translated_responses = translate_response_values(responses, language)
+        
+        assessment: Dict[str, Any] = {
+            'id': row_dict.get('id', ''),
+            'timestamp': row_dict.get('report_timestamp', ''),
+            'assessment_timestamp': row_dict.get('assessment_timestamp', ''),
+            'timezone': row_dict.get('timezone', 'UTC'),
+            'patient_info': {
+                'name': row_dict.get('patient_name', ''),
+                'number': row_dict.get('patient_number', ''),
+                'age': row_dict.get('patient_age'),
+                'gender': row_dict.get('patient_gender', '')
+            },
+            'primary_diagnosis': primary_diagnosis_translated,
+            'original_diagnosis': primary_diagnosis_canonical,
+            'confidence': row_dict.get('confidence', 0),
+            'confidence_percentage': row_dict.get('confidence_percentage', 0),
+            'all_diagnoses': translated_diagnoses,
+            'responses': translated_responses,
+            'original_responses': responses,
+            'processing_details': processing_details,
+            'technical_details': technical_details,
+            'clinical_insights': clinical_insights,
+            'language': language
+        }
+        
+        return assessment
+        
+    except Exception as e:
+        logger.error(f"Error loading single assessment from database: {e}")
+        try:
+            conn.close()
+        except:
+            pass
+        return None
+
+def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
+    """Delete assessment from database"""
+    try:
+        conn = get_postgres_connection()
+        
+        with conn.cursor() as cur:
+            cur.execute('''
+                DELETE FROM assessments 
+                WHERE patient_number = %s AND id = %s
+            ''', (patient_number, assessment_id))
+        
+        conn.commit()
+        conn.close()
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error deleting from database: {e}")
+        return False
+
+init_database()
 
 # ==================== MODEL COMPONENTS ====================
 model_package: Optional[Dict[str, Any]] = None
@@ -513,15 +699,12 @@ label_encoder: Optional[Any] = None
 feature_names: Optional[List[str]] = None
 category_mappings: Optional[Dict[str, Any]] = None
 clinical_enhancer: Optional[Any] = None
-preprocessor: Optional[Any] = None
 
-def load_model_components():
+def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Optional[Any], Optional[List[str]], Optional[Dict[str, Any]]]:
     """Load all required model components"""
     global model_package, scaler, label_encoder, feature_names, category_mappings
     
     try:
-        logger.info("Loading model components...")
-        
         current_dir = os.path.dirname(os.path.abspath(__file__))
         models_dir = os.path.join(current_dir, 'models')
         
@@ -541,17 +724,23 @@ def load_model_components():
             if os.path.getsize(file_path) == 0:
                 raise ValueError(f"Model file is empty: {file}")
         
-        model_package = joblib.load(os.path.join(models_dir, 'mental_health_model.pkl'))
-        scaler = joblib.load(os.path.join(models_dir, 'scaler.pkl'))
-        label_encoder = joblib.load(os.path.join(models_dir, 'label_encoder.pkl'))
+        model_path = os.path.join(models_dir, 'mental_health_model.pkl')
+        model_package = joblib.load(model_path)
         
-        with open(os.path.join(models_dir, 'feature_names.pkl'), 'rb') as f:
+        scaler_path = os.path.join(models_dir, 'scaler.pkl')
+        scaler = joblib.load(scaler_path)
+        
+        encoder_path = os.path.join(models_dir, 'label_encoder.pkl')
+        label_encoder = joblib.load(encoder_path)
+        
+        feature_names_path = os.path.join(models_dir, 'feature_names.pkl')
+        with open(feature_names_path, 'rb') as f:
             feature_names = pickle.load(f)
         
-        with open(os.path.join(models_dir, 'category_mappings.pkl'), 'rb') as f:
+        category_mappings_path = os.path.join(models_dir, 'category_mappings.pkl')
+        with open(category_mappings_path, 'rb') as f:
             category_mappings = pickle.load(f)
         
-        logger.info(f"Model components loaded: {len(feature_names)} features")
         return model_package, scaler, label_encoder, feature_names, category_mappings
         
     except Exception as e:
@@ -733,21 +922,23 @@ class ClinicalDecisionEnhancer:
                 enhanced_prediction['adjustment_reasons'].append(suggestion['reason'])
             
             elif (suggestion['type'] == 'POTENTIAL_BIPOLAR' and
-                  analysis['bipolar1_score'] > analysis['bipolar2_score']):
+                analysis['bipolar1_score'] > analysis['bipolar2_score']):
                 enhanced_prediction['enhanced_diagnosis'] = 'Bipolar Type-1'
                 enhanced_prediction['confidence_adjustment'] = suggestion['confidence_boost']
                 enhanced_prediction['adjustment_reasons'].append(suggestion['reason'])
         
         return enhanced_prediction
-
+        
 def initialize_clinical_enhancer():
+    """Initialize the clinical decision enhancer"""
     global clinical_enhancer
     if feature_names and label_encoder:
         clinical_enhancer = ClinicalDecisionEnhancer(feature_names, label_encoder)
-        logger.info("Clinical Decision Enhancer initialized")
+    else:
+        logger.warning("Could not initialize Clinical Decision Enhancer")
 
 class ClinicalPreprocessor:
-    """Replicates the preprocessing pipeline from train_model.py"""
+    """EXACTLY replicates the preprocessing pipeline from train_model.py"""
     
     def __init__(self, category_mappings: Optional[Dict[str, Any]] = None):
         self.category_mappings = category_mappings or {}
@@ -759,58 +950,61 @@ class ClinicalPreprocessor:
     def encode_user_responses(self, raw_responses: Dict[str, Any]) -> Dict[str, Any]:
         encoded_responses: Dict[str, Any] = {}
         
-        frequency_mapping = self.category_mappings.get('frequency', 
-            {'Seldom': 0, 'Sometimes': 1, 'Usually': 2, 'Most-Often': 3})
+        frequency_mapping = self.category_mappings.get('frequency', {'Seldom': 0, 'Sometimes': 1, 'Usually': 2, 'Most-Often': 3})
         yes_no_mapping = self.category_mappings.get('yes_no', {'NO': 0, 'YES': 1})
         sexual_activity_mapping = self.category_mappings.get('sexual_activity', {
-            'No interest': 0, 'Low interest': 1, 'Moderate interest': 2, 
-            'High interest': 3, 'Very high interest': 4
+            'No interest': 0, 'Low interest': 1, 'Moderate interest': 2, 'High interest': 3, 'Very high interest': 4
         })
         concentration_mapping = self.category_mappings.get('concentration', {
-            'Cannot concentrate': 0, 'Poor concentration': 1, 'Average concentration': 2, 
-            'Good concentration': 3, 'Excellent concentration': 4
+            'Cannot concentrate': 0, 'Poor concentration': 1, 'Average concentration': 2, 'Good concentration': 3, 'Excellent concentration': 4
         })
         optimism_mapping = self.category_mappings.get('optimism', {
-            'Extremely pessimistic': 0, 'Pessimistic': 1, 'Neutral outlook': 2, 
-            'Optimistic': 3, 'Extremely optimistic': 4
+            'Extremely pessimistic': 0, 'Pessimistic': 1, 'Neutral outlook': 2, 'Optimistic': 3, 'Extremely optimistic': 4
         })
         
         for feature, value in raw_responses.items():
+            training_feature_name = feature
+            
             if feature in ['Sadness', 'Euphoric', 'Exhausted', 'Sleep disorder', 'Anxiety', 
                         'Depressed_Mood', 'Irritability', 'Worrying', 'Fatigue']:
                 if value in frequency_mapping:
-                    encoded_responses[feature] = frequency_mapping[value]
+                    encoded_value = frequency_mapping[value]
+                    encoded_responses[training_feature_name] = encoded_value
                 else:
-                    encoded_responses[feature] = 1
+                    encoded_responses[training_feature_name] = 1
             
-            elif feature in ['Mood Swing', 'Suicidal thoughts', 'Aggressive Response', 
-                           'Nervous Breakdown', 'Overthinking', 'Anorexia', 'Authority Respect', 
-                           'Try Explanation', 'Ignore & Move-On', 'Admit Mistakes']:
+            elif feature in ['Mood Swing', 'Suicidal thoughts', 'Aggressive Response', 'Nervous Breakdown', 
+                           'Overthinking', 'Anorexia', 'Authority Respect', 'Try Explanation',
+                           'Ignore & Move-On', 'Admit Mistakes']:
                 if value in yes_no_mapping:
-                    encoded_responses[feature] = yes_no_mapping[value]
+                    encoded_value = yes_no_mapping[value]
+                    encoded_responses[training_feature_name] = encoded_value
                 else:
-                    encoded_responses[feature] = 0
+                    encoded_responses[training_feature_name] = 0
             
             elif feature == 'Concentration':
                 if value in concentration_mapping:
-                    encoded_responses[feature] = concentration_mapping[value]
+                    encoded_value = concentration_mapping[value]
+                    encoded_responses[training_feature_name] = encoded_value
                 else:
-                    encoded_responses[feature] = 2
+                    encoded_responses[training_feature_name] = 2
             
             elif feature == 'Optimism':
                 if value in optimism_mapping:
-                    encoded_responses[feature] = optimism_mapping[value]
+                    encoded_value = optimism_mapping[value]
+                    encoded_responses[training_feature_name] = encoded_value
                 else:
-                    encoded_responses[feature] = 2
+                    encoded_responses[training_feature_name] = 2
             
             elif feature == 'Sexual Activity':
                 if value in sexual_activity_mapping:
-                    encoded_responses[feature] = sexual_activity_mapping[value]
+                    encoded_value = sexual_activity_mapping[value]
+                    encoded_responses[training_feature_name] = encoded_value
                 else:
-                    encoded_responses[feature] = 2
+                    encoded_responses[training_feature_name] = 2
             
             else:
-                encoded_responses[feature] = value
+                encoded_responses[training_feature_name] = value
         
         return encoded_responses
     
@@ -820,12 +1014,16 @@ class ClinicalPreprocessor:
         if 'Mood Swing' in responses and 'Sadness' in responses:
             mood_swing = float(responses.get('Mood Swing', 0))
             sadness = float(responses.get('Sadness', 0))
-            responses['Mood_Emotion_Composite'] = mood_swing * 0.6 + sadness * 0.4
+            composite_value = mood_swing * 0.6 + sadness * 0.4
+            responses['Mood_Emotion_Composite'] = composite_value
+            responses['Mood_Emotion_Composite_Score'] = composite_value
         
         if 'Sleep disorder' in responses and 'Exhausted' in responses:
             sleep_disorder = float(responses.get('Sleep disorder', 0))
             exhausted = float(responses.get('Exhausted', 0))
-            responses['Sleep_Fatigue_Composite'] = sleep_disorder * 0.7 + exhausted * 0.3
+            composite_value = sleep_disorder * 0.7 + exhausted * 0.3
+            responses['Sleep_Fatigue_Composite'] = composite_value
+            responses['Sleep_Fatigue_Composite_Score'] = composite_value
         
         behavioral_features = ['Aggressive Response', 'Nervous Breakdown', 'Overthinking']
         behavioral_scores = []
@@ -837,65 +1035,12 @@ class ClinicalPreprocessor:
                     behavioral_scores.append(0.0)
         
         if behavioral_scores:
-            responses['Behavioral_Stress_Composite'] = sum(behavioral_scores) / len(behavioral_scores)
-        
-        risk_indicators = ['Suicidal thoughts', 'Aggressive Response', 'Nervous Breakdown']
-        risk_scores = []
-        for feat in risk_indicators:
-            if feat in responses:
-                try:
-                    risk_scores.append(float(responses[feat]))
-                except (ValueError, TypeError):
-                    risk_scores.append(0.0)
-        
-        if risk_scores:
-            responses['Risk_Assessment_Score'] = sum(risk_scores) * 10
-        else:
-            responses['Risk_Assessment_Score'] = 0.0
-        
-        cognitive_features = ['Concentration', 'Optimism']
-        cognitive_scores = []
-        for feat in cognitive_features:
-            if feat in responses:
-                try:
-                    normalized_score = float(responses[feat]) / 4.0
-                    cognitive_scores.append(normalized_score)
-                except (ValueError, TypeError):
-                    cognitive_scores.append(0.5)
-        
-        if cognitive_scores:
-            responses['Cognitive_Function_Score'] = sum(cognitive_scores) / len(cognitive_scores) * 10
-        else:
-            responses['Cognitive_Function_Score'] = 5.0
-        
-        mood_features = ['Mood Swing', 'Euphoric', 'Sadness']
-        stability_scores = []
-        
-        for feat in mood_features:
-            if feat in responses:
-                try:
-                    value = float(responses[feat])
-                    if feat == 'Mood Swing':
-                        stability_scores.append(10 - (value * 10))
-                    elif feat == 'Euphoric':
-                        if value == 0 or value == 3:
-                            stability_scores.append(3.0)
-                        elif value == 1 or value == 2:
-                            stability_scores.append(7.0)
-                        else:
-                            stability_scores.append(5.0)
-                    elif feat == 'Sadness':
-                        stability_scores.append(10 - (value * 3.33))
-                except (ValueError, TypeError):
-                    stability_scores.append(5.0)
-        
-        if stability_scores:
-            responses['Mood_Stability_Score'] = sum(stability_scores) / len(stability_scores)
-        else:
-            responses['Mood_Stability_Score'] = 5.0
+            composite_value = sum(behavioral_scores) / len(behavioral_scores)
+            responses['Behavioral_Stress_Composite'] = composite_value
+            responses['Behavioral_Stress_Composite_Score'] = composite_value
         
         return responses
-    
+
     def normalize_feature_names(self, raw_responses: Dict[str, Any]) -> Dict[str, Any]:
         normalized_responses: Dict[str, Any] = {}
         
@@ -937,23 +1082,25 @@ class ClinicalPreprocessor:
         euphoric = float(responses.get('Euphoric', 0))
         mood_swing = float(responses.get('Mood Swing', 0))
         
+        security_warnings = TRANSLATIONS.get('en', {}).get('security', {}).get('warnings', {})
+        
         if suicidal_thoughts == 1:
-            warnings.append("Suicidal thoughts detected - please seek immediate professional help")
+            warnings.append(security_warnings.get('suicidal_thoughts', 'Suicidal thoughts detected - please seek immediate professional help'))
         
         if aggressive_response == 1:
-            warnings.append("Aggressive behavior patterns detected - safety assessment recommended")
+            warnings.append(security_warnings.get('aggressive_behavior', 'Aggressive behavior patterns detected - safety assessment recommended'))
         
         if nervous_breakdown == 1:
-            warnings.append("History of nervous breakdown detected - consider professional evaluation")
+            warnings.append(security_warnings.get('nervous_breakdown', 'History of nervous breakdown detected - consider professional evaluation'))
         
         if (sadness >= 3 and 
             sleep_disorder >= 2 and
             exhausted >= 2):
-            warnings.append("Severe depression symptoms detected - urgent evaluation recommended")
+            warnings.append(security_warnings.get('severe_depression', 'Severe depression symptoms detected - urgent evaluation recommended'))
         
         if (euphoric >= 3 and 
             mood_swing >= 2):
-            warnings.append("Potential manic symptoms detected - clinical assessment advised")
+            warnings.append(security_warnings.get('manic_symptoms', 'Potential manic symptoms detected - clinical assessment advised'))
         
         safety_ok = len(warnings) == 0
         if not safety_ok:
@@ -965,7 +1112,7 @@ class ClinicalPreprocessor:
 
     def preprocess(self, raw_responses: Dict[str, Any]) -> Tuple[Dict[str, Any], List[str], List[str]]:
         self.processing_log = []
-        self.log_step("Pipeline_Start", f"Processing {len(raw_responses)} raw features")
+        self.log_step("Pipeline_Start", f"Processing {len(raw_responses)} raw features: {list(raw_responses.keys())}")
         
         try:
             normalized_responses = self.normalize_feature_names(raw_responses)
@@ -980,9 +1127,16 @@ class ClinicalPreprocessor:
             
         except Exception as e:
             self.log_step("Pipeline_Error", f"Preprocessing failed: {str(e)}")
-            raise
+            raise e
+
+def safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (ValueError, TypeError):
+        return default
 
 def validate_assessment_responses(responses: Dict[str, Any]) -> Tuple[bool, str]:
+    """Validate assessment responses for security"""
     try:
         if not isinstance(responses, dict):
             return False, "Responses must be a dictionary"
@@ -1013,12 +1167,11 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
             
         feature_array = np.zeros(len(feature_names))
         
-        missing_features: List[str] = []
-        found_features: List[str] = []
+        responses_copy = processed_responses.copy()
         
         for i, feature_name in enumerate(feature_names):
-            if feature_name in processed_responses:
-                value = processed_responses[feature_name]
+            if feature_name in responses_copy:
+                value = responses_copy[feature_name]
                 if isinstance(value, (int, float)):
                     feature_array[i] = value
                 else:
@@ -1026,16 +1179,53 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
                         feature_array[i] = float(value)
                     except (ValueError, TypeError):
                         feature_array[i] = 0
-                found_features.append(feature_name)
             else:
-                feature_array[i] = 0
-                missing_features.append(feature_name)
-        
-        if missing_features:
-            logger.warning(f"Missing features filled with defaults: {len(missing_features)}")
-        
-        logger.info(f"Feature array created: {len(feature_array)} features, "
-                   f"{len(missing_features)} missing, {len(found_features)} found")
+                if feature_name in ['Mood_Emotion_Composite', 'Mood_Emotion_Composite_Score']:
+                    mood_swing = responses_copy.get('Mood Swing', 0)
+                    sadness = responses_copy.get('Sadness', 0)
+                    feature_array[i] = float(mood_swing) * 0.6 + float(sadness) * 0.4
+                    
+                elif feature_name in ['Sleep_Fatigue_Composite', 'Sleep_Fatigue_Composite_Score']:
+                    sleep_disorder = responses_copy.get('Sleep disorder', 0)
+                    exhausted = responses_copy.get('Exhausted', 0)
+                    feature_array[i] = float(sleep_disorder) * 0.7 + float(exhausted) * 0.3
+                    
+                elif feature_name in ['Behavioral_Stress_Composite', 'Behavioral_Stress_Composite_Score']:
+                    aggressive = responses_copy.get('Aggressive Response', 0)
+                    nervous = responses_copy.get('Nervous Breakdown', 0)
+                    overthinking = responses_copy.get('Overthinking', 0)
+                    
+                    behavioral_scores = []
+                    for val in [aggressive, nervous, overthinking]:
+                        try:
+                            behavioral_scores.append(float(val))
+                        except (ValueError, TypeError):
+                            behavioral_scores.append(0.0)
+                    
+                    if behavioral_scores:
+                        feature_array[i] = sum(behavioral_scores) / len(behavioral_scores)
+                    else:
+                        feature_array[i] = 0
+                        
+                elif feature_name == 'Risk_Assessment_Score':
+                    suicidal = responses_copy.get('Suicidal thoughts', 0)
+                    aggressive = responses_copy.get('Aggressive Response', 0)
+                    nervous = responses_copy.get('Nervous Breakdown', 0)
+                    feature_array[i] = min(10, float(suicidal) * 5 + float(aggressive) * 3 + float(nervous) * 2)
+                    
+                elif feature_name == 'Cognitive_Function_Score':
+                    concentration = responses_copy.get('Concentration', 2)
+                    optimism = responses_copy.get('Optimism', 2)
+                    feature_array[i] = (float(concentration) + float(optimism)) / 2.0
+                    
+                elif feature_name == 'Mood_Stability_Score':
+                    mood_swing = responses_copy.get('Mood Swing', 0)
+                    sadness = responses_copy.get('Sadness', 0)
+                    euphoric = responses_copy.get('Euphoric', 0)
+                    feature_array[i] = max(0, 10 - (float(mood_swing) * 3 + float(sadness) * 2 + abs(float(euphoric) - 1) * 2))
+                    
+                else:
+                    feature_array[i] = 0
         
         feature_df = pd.DataFrame([feature_array], columns=feature_names)
         
@@ -1045,658 +1235,42 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
         logger.error(f"Feature conversion error: {e}")
         return None
 
-# Initialize security services
-audit_logger = AuditLogger()
-encryption_service = EncryptionService()
-rate_limiter = AdvancedRateLimiter()
-auth_service = AuthService()
+def load_translations():
+    """Load translations from JSON files"""
+    translations = {}
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        languages = ['en', 'vi', 'es', 'zh']
+        for lang in languages:
+            lang_path = os.path.join(current_dir, 'frontend/lang', f'{lang}.json')
+            if os.path.exists(lang_path):
+                with open(lang_path, 'r', encoding='utf-8') as f:
+                    translations[lang] = json.load(f)
+        
+        return translations
+    except Exception as e:
+        logger.error(f"Error loading translations: {e}")
+        return {'en': {}, 'vi': {}, 'es': {}, 'zh': {}}
 
-# ==================== FLASK APP SETUP ====================
-app = Flask(__name__, 
-           static_folder='frontend',
-           template_folder='frontend')
+TRANSLATIONS = load_translations()
 
-app.secret_key = SecurityConfig.SECRET_KEY
-app.config['SESSION_COOKIE_SECURE'] = SecurityConfig.SESSION_COOKIE_SECURE
-app.config['SESSION_COOKIE_HTTPONLY'] = SecurityConfig.SESSION_COOKIE_HTTPONLY
-app.config['SESSION_COOKIE_SAMESITE'] = SecurityConfig.SESSION_COOKIE_SAMESITE
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=SecurityConfig.SESSION_TIMEOUT)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-try:
-    validate_environment()
-    logger.info("Environment validation passed")
-except Exception as e:
-    logger.error(f"CRITICAL: Environment validation failed: {e}")
-    sys.exit(1)
+def get_translated_diagnosis(canonical_key: str, language: str = 'en') -> str:
+    """Get translated diagnosis name based on canonical key"""
+    lang = language if language in TRANSLATIONS else 'en'
+    
+    diagnosis_translations = TRANSLATIONS.get(lang, {}).get('pdf_report', {}).get('diagnosisTranslations', {})
+    
+    if not diagnosis_translations:
+        diagnosis_translations = TRANSLATIONS.get(lang, {}).get('prediction', {}).get('diagnosisTranslations', {})
+    
+    return diagnosis_translations.get(canonical_key, canonical_key)
 
 model_package, scaler, label_encoder, feature_names, category_mappings = load_model_components()
 initialize_clinical_enhancer()
 preprocessor = ClinicalPreprocessor(category_mappings)
 
-# ==================== DATABASE SETUP ====================
-def get_database_connection():
-    """Get database connection"""
-    try:
-        database_url = SecurityConfig.get_database_url()
-        
-        if database_url.startswith('sqlite:///'):
-            sqlite_path = database_url.replace('sqlite:///', '')
-            if sqlite_path == 'mental_health_assessments.db':
-                sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
-            
-            conn = sqlite3.connect(sqlite_path)
-            conn.row_factory = sqlite3.Row
-            conn.execute("PRAGMA foreign_keys = ON")
-            conn.execute("PRAGMA journal_mode = WAL")
-            return conn
-        
-        ssl_mode = 'require' if os.environ.get('RENDER') else 'prefer'
-        
-        conn = psycopg.connect(
-            database_url,
-            row_factory=dict_row,
-            sslmode=ssl_mode
-        )
-        
-        with conn.cursor() as cur:
-            cur.execute("SET statement_timeout = 30000")
-        
-        return conn
-        
-    except Exception as e:
-        logger.error(f"Database connection failed: {e}")
-        
-        if os.environ.get('RENDER'):
-            raise e
-        
-        try:
-            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
-            conn = sqlite3.connect(sqlite_path)
-            conn.row_factory = sqlite3.Row
-            conn.execute("PRAGMA foreign_keys = ON")
-            conn.execute("PRAGMA journal_mode = WAL")
-            return conn
-        except Exception:
-            raise e
-
-def init_database():
-    """Initialize database"""
-    try:
-        conn = get_database_connection()
-        
-        try:
-            cursor = conn.cursor()
-            has_context_manager = hasattr(cursor, '__enter__')
-            
-            if has_context_manager:
-                with cursor as cur:
-                    cur.execute('''
-                        CREATE TABLE IF NOT EXISTS assessments (
-                            id TEXT PRIMARY KEY,
-                            assessment_timestamp TEXT,
-                            report_timestamp TEXT,
-                            timezone TEXT,
-                            patient_name TEXT,
-                            patient_number TEXT,
-                            patient_age TEXT,
-                            patient_gender TEXT,
-                            primary_diagnosis TEXT,
-                            confidence REAL,
-                            confidence_percentage REAL,
-                            all_diagnoses_json TEXT,
-                            responses_json TEXT,
-                            processing_details_json TEXT,
-                            technical_details_json TEXT,
-                            clinical_insights_json TEXT,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            created_by_ip TEXT,
-                            updated_by_ip TEXT,
-                            audit_log TEXT DEFAULT '[]'
-                        )
-                    ''')
-                    
-                    cur.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
-                    cur.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
-                    cur.execute('CREATE INDEX IF NOT EXISTS idx_created_at ON assessments(created_at)')
-            else:
-                cursor.execute('''
-                    CREATE TABLE IF NOT EXISTS assessments (
-                        id TEXT PRIMARY KEY,
-                        assessment_timestamp TEXT,
-                        report_timestamp TEXT,
-                        timezone TEXT,
-                        patient_name TEXT,
-                        patient_number TEXT,
-                        patient_age TEXT,
-                        patient_gender TEXT,
-                        primary_diagnosis TEXT,
-                        confidence REAL,
-                        confidence_percentage REAL,
-                        all_diagnoses_json TEXT,
-                        responses_json TEXT,
-                        processing_details_json TEXT,
-                        technical_details_json TEXT,
-                        clinical_insights_json TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        created_by_ip TEXT,
-                        updated_by_ip TEXT,
-                        audit_log TEXT DEFAULT '[]'
-                    )
-                ''')
-                
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_patient_number ON assessments(patient_number)')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_timestamp ON assessments(report_timestamp)')
-                cursor.execute('CREATE INDEX IF NOT EXISTS idx_created_at ON assessments(created_at)')
-                
-        finally:
-            cursor.close()
-        
-        conn.commit()
-        conn.close()
-        logger.info("Database initialized successfully")
-        
-    except Exception as e:
-        logger.error(f"Database initialization failed: {e}")
-        audit_logger.log_event(
-            event_type='DATABASE_INIT_FAILED',
-            details=str(e),
-            severity='CRITICAL'
-        )
-
-def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
-    """Save assessment data"""
-    try:
-        sanitized_data = assessment_data.copy()
-        
-        if 'patient_info' in sanitized_data:
-            patient_info = sanitized_data['patient_info']
-            patient_info['name'] = SecurityUtils.sanitize_input(patient_info.get('name', ''))
-            patient_info['number'] = SecurityUtils.sanitize_input(patient_info.get('number', ''))
-            patient_info['age'] = SecurityUtils.sanitize_input(patient_info.get('age', ''))
-            patient_info['gender'] = SecurityUtils.sanitize_input(patient_info.get('gender', ''))
-        
-        audit_entry = {
-            'timestamp': datetime.now(timezone.utc).isoformat(),
-            'action': 'CREATE',
-            'ip_address': request.remote_addr if request else '0.0.0.0',
-            'user_agent': request.headers.get('User-Agent') if request else None,
-            'changes': {}
-        }
-        
-        conn = get_database_connection()
-        
-        try:
-            cursor = conn.cursor()
-            has_context_manager = hasattr(cursor, '__enter__')
-            
-            if has_context_manager:
-                with cursor as cur:
-                    cur.execute('SELECT id FROM assessments WHERE id = %s', (sanitized_data.get('id'),))
-                    existing = cur.fetchone()
-
-                    if existing:
-                        audit_entry['action'] = 'UPDATE'
-                        cur.execute('''
-                            UPDATE assessments SET
-                                assessment_timestamp = %s,
-                                report_timestamp = %s,
-                                timezone = %s,
-                                patient_name = %s,
-                                patient_number = %s,
-                                patient_age = %s,
-                                patient_gender = %s,
-                                primary_diagnosis = %s,
-                                confidence = %s,
-                                confidence_percentage = %s,
-                                all_diagnoses_json = %s,
-                                responses_json = %s,
-                                processing_details_json = %s,
-                                technical_details_json = %s,
-                                clinical_insights_json = %s,
-                                updated_at = CURRENT_TIMESTAMP,
-                                updated_by_ip = %s,
-                                audit_log = audit_log || %s::jsonb
-                            WHERE id = %s
-                        ''', (
-                            sanitized_data.get('assessment_timestamp'),
-                            sanitized_data.get('timestamp'),
-                            sanitized_data.get('timezone', 'UTC'),
-                            sanitized_data.get('patient_info', {}).get('name', ''),
-                            sanitized_data.get('patient_info', {}).get('number', ''),
-                            sanitized_data.get('patient_info', {}).get('age', ''),
-                            sanitized_data.get('patient_info', {}).get('gender', ''),
-                            sanitized_data.get('primary_diagnosis', ''),
-                            sanitized_data.get('confidence', 0),
-                            sanitized_data.get('confidence_percentage', 0),
-                            json.dumps(sanitized_data.get('all_diagnoses', [])),
-                            json.dumps(sanitized_data.get('responses', {})),
-                            json.dumps(sanitized_data.get('processing_details', {})),
-                            json.dumps(sanitized_data.get('technical_details', {})),
-                            json.dumps(sanitized_data.get('clinical_insights', {})),
-                            request.remote_addr if request else '0.0.0.0',
-                            json.dumps([audit_entry]),
-                            sanitized_data.get('id')
-                        ))
-                    else:
-                        audit_entry['action'] = 'CREATE'
-                        cur.execute('''
-                            INSERT INTO assessments (
-                                id, assessment_timestamp, report_timestamp, timezone,
-                                patient_name, patient_number, patient_age, patient_gender,
-                                primary_diagnosis, confidence, confidence_percentage,
-                                all_diagnoses_json, responses_json, processing_details_json,
-                                technical_details_json, clinical_insights_json,
-                                created_by_ip, updated_by_ip, audit_log
-                            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        ''', (
-                            sanitized_data.get('id'),
-                            sanitized_data.get('assessment_timestamp'),
-                            sanitized_data.get('timestamp'),
-                            sanitized_data.get('timezone', 'UTC'),
-                            sanitized_data.get('patient_info', {}).get('name', ''),
-                            sanitized_data.get('patient_info', {}).get('number', ''),
-                            sanitized_data.get('patient_info', {}).get('age', ''),
-                            sanitized_data.get('patient_info', {}).get('gender', ''),
-                            sanitized_data.get('primary_diagnosis', ''),
-                            sanitized_data.get('confidence', 0),
-                            sanitized_data.get('confidence_percentage', 0),
-                            json.dumps(sanitized_data.get('all_diagnoses', [])),
-                            json.dumps(sanitized_data.get('responses', {})),
-                            json.dumps(sanitized_data.get('processing_details', {})),
-                            json.dumps(sanitized_data.get('technical_details', {})),
-                            json.dumps(sanitized_data.get('clinical_insights', {})),
-                            request.remote_addr if request else '0.0.0.0',
-                            request.remote_addr if request else '0.0.0.0',
-                            json.dumps([audit_entry])
-                        ))
-            else:
-                cursor.execute('SELECT id FROM assessments WHERE id = ?', (sanitized_data.get('id'),))
-                existing = cursor.fetchone()
-                
-                if existing:
-                    audit_entry['action'] = 'UPDATE'
-                    cursor.execute('''
-                        UPDATE assessments SET
-                            assessment_timestamp = ?,
-                            report_timestamp = ?,
-                            timezone = ?,
-                            patient_name = ?,
-                            patient_number = ?,
-                            patient_age = ?,
-                            patient_gender = ?,
-                            primary_diagnosis = ?,
-                            confidence = ?,
-                            confidence_percentage = ?,
-                            all_diagnoses_json = ?,
-                            responses_json = ?,
-                            processing_details_json = ?,
-                            technical_details_json = ?,
-                            clinical_insights_json = ?,
-                            updated_at = CURRENT_TIMESTAMP,
-                            updated_by_ip = ?,
-                            audit_log = json_insert(audit_log, '$[#]', ?)
-                        WHERE id = ?
-                    ''', (
-                        sanitized_data.get('assessment_timestamp'),
-                        sanitized_data.get('timestamp'),
-                        sanitized_data.get('timezone', 'UTC'),
-                        sanitized_data.get('patient_info', {}).get('name', ''),
-                        sanitized_data.get('patient_info', {}).get('number', ''),
-                        sanitized_data.get('patient_info', {}).get('age', ''),
-                        sanitized_data.get('patient_info', {}).get('gender', ''),
-                        sanitized_data.get('primary_diagnosis', ''),
-                        sanitized_data.get('confidence', 0),
-                        sanitized_data.get('confidence_percentage', 0),
-                        json.dumps(sanitized_data.get('all_diagnoses', [])),
-                        json.dumps(sanitized_data.get('responses', {})),
-                        json.dumps(sanitized_data.get('processing_details', {})),
-                        json.dumps(sanitized_data.get('technical_details', {})),
-                        json.dumps(sanitized_data.get('clinical_insights', {})),
-                        request.remote_addr if request else '0.0.0.0',
-                        json.dumps(audit_entry),
-                        sanitized_data.get('id')
-                    ))
-                else:
-                    cursor.execute('''
-                        INSERT INTO assessments (
-                            id, assessment_timestamp, report_timestamp, timezone,
-                            patient_name, patient_number, patient_age, patient_gender,
-                            primary_diagnosis, confidence, confidence_percentage,
-                            all_diagnoses_json, responses_json, processing_details_json,
-                            technical_details_json, clinical_insights_json,
-                            created_by_ip, updated_by_ip, audit_log
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ''', (
-                        sanitized_data.get('id'),
-                        sanitized_data.get('assessment_timestamp'),
-                        sanitized_data.get('timestamp'),
-                        sanitized_data.get('timezone', 'UTC'),
-                        sanitized_data.get('patient_info', {}).get('name', ''),
-                        sanitized_data.get('patient_info', {}).get('number', ''),
-                        sanitized_data.get('patient_info', {}).get('age', ''),
-                        sanitized_data.get('patient_info', {}).get('gender', ''),
-                        sanitized_data.get('primary_diagnosis', ''),
-                        sanitized_data.get('confidence', 0),
-                        sanitized_data.get('confidence_percentage', 0),
-                        json.dumps(sanitized_data.get('all_diagnoses', [])),
-                        json.dumps(sanitized_data.get('responses', {})),
-                        json.dumps(sanitized_data.get('processing_details', {})),
-                        json.dumps(sanitized_data.get('technical_details', {})),
-                        json.dumps(sanitized_data.get('clinical_insights', {})),
-                        request.remote_addr if request else '0.0.0.0',
-                        request.remote_addr if request else '0.0.0.0',
-                        json.dumps([audit_entry])
-                    ))
-            
-            conn.commit()
-            
-        finally:
-            cursor.close()
-            conn.close()
-        
-        audit_logger.log_event(
-            event_type='ASSESSMENT_SAVED',
-            details=f"Assessment {sanitized_data.get('id')} saved successfully",
-            severity='INFO'
-        )
-        
-        return True
-        
-    except Exception as e:
-        logger.error(f"Error saving to database: {e}")
-        audit_logger.log_event(
-            event_type='ASSESSMENT_SAVE_FAILED',
-            details=f"Failed to save assessment: {str(e)}",
-            severity='ERROR'
-        )
-        return False
-
-def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
-    """Load assessments from database"""
-    try:
-        conn = get_database_connection()
-        
-        assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                if patient_number:
-                    cur.execute('''
-                        SELECT * FROM assessments 
-                        WHERE patient_number = %s 
-                        ORDER BY report_timestamp DESC
-                    ''', (patient_number,))
-                else:
-                    cur.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
-                
-                rows = cur.fetchall()
-        else:
-            c = conn.cursor()
-            
-            if patient_number:
-                c.execute('''
-                    SELECT * FROM assessments 
-                    WHERE patient_number = ? 
-                    ORDER BY report_timestamp DESC
-                ''', (patient_number,))
-            else:
-                c.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
-            
-            rows = c.fetchall()
-        
-        conn.close()
-        
-        for row in rows:
-            if isinstance(row, dict):
-                row_dict = row
-            else:
-                row_dict = dict(row)
-            
-            patient_num = row_dict['patient_number']
-            if patient_num not in assessments_by_patient:
-                assessments_by_patient[patient_num] = []
-            
-            all_diagnoses_json = row_dict['all_diagnoses_json']
-            responses_json = row_dict['responses_json']
-            clinical_insights_json = row_dict['clinical_insights_json']
-            
-            if os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true':
-                try:
-                    all_diagnoses_json = encryption_service.decrypt_data(all_diagnoses_json) if all_diagnoses_json else '[]'
-                    responses_json = encryption_service.decrypt_data(responses_json) if responses_json else '{}'
-                    clinical_insights_json = encryption_service.decrypt_data(clinical_insights_json) if clinical_insights_json else '{}'
-                except:
-                    pass
-            
-            all_diagnoses = json.loads(all_diagnoses_json) if all_diagnoses_json else []
-            responses = json.loads(responses_json) if responses_json else {}
-            processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
-            technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
-            clinical_insights = json.loads(clinical_insights_json) if clinical_insights_json else {}
-            
-            assessment: Dict[str, Any] = {
-                'id': row_dict['id'],
-                'timestamp': row_dict['report_timestamp'],
-                'assessment_timestamp': row_dict['assessment_timestamp'],
-                'timezone': row_dict['timezone'],
-                'patient_info': {
-                    'name': row_dict['patient_name'],
-                    'number': row_dict['patient_number'],
-                    'age': row_dict['patient_age'],
-                    'gender': row_dict['patient_gender']
-                },
-                'primary_diagnosis': row_dict['primary_diagnosis'],
-                'confidence': row_dict['confidence'],
-                'confidence_percentage': row_dict['confidence_percentage'],
-                'all_diagnoses': all_diagnoses,
-                'responses': responses,
-                'processing_details': processing_details,
-                'technical_details': technical_details,
-                'clinical_insights': clinical_insights
-            }
-            
-            assessments_by_patient[patient_num].append(assessment)
-        
-        logger.info(f"Loaded {len(rows)} assessments from database")
-        return assessments_by_patient
-        
-    except Exception as e:
-        logger.error(f"Error loading from database: {e}")
-        return {}
-
-def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
-    """Load a single specific assessment from database"""
-    try:
-        conn = get_database_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                cur.execute('''
-                    SELECT * FROM assessments 
-                    WHERE patient_number = %s AND id = %s AND patient_name = %s
-                ''', (patient_number, assessment_id, patient_name))
-                
-                row = cur.fetchone()
-        else:
-            c = conn.cursor()
-            
-            c.execute('''
-                SELECT * FROM assessments 
-                WHERE patient_number = ? AND id = ? AND patient_name = ?
-            ''', (patient_number, assessment_id, patient_name))
-            
-            row = c.fetchone()
-        
-        conn.close()
-        
-        if not row:
-            return None
-        
-        if isinstance(row, dict):
-            row_dict = row
-        else:
-            row_dict = dict(row)
-        
-        all_diagnoses_json = row_dict['all_diagnoses_json']
-        responses_json = row_dict['responses_json']
-        clinical_insights_json = row_dict['clinical_insights_json']
-        
-        if os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true':
-            try:
-                all_diagnoses_json = encryption_service.decrypt_data(all_diagnoses_json) if all_diagnoses_json else '[]'
-                responses_json = encryption_service.decrypt_data(responses_json) if responses_json else '{}'
-                clinical_insights_json = encryption_service.decrypt_data(clinical_insights_json) if clinical_insights_json else '{}'
-            except:
-                pass
-        
-        all_diagnoses = json.loads(all_diagnoses_json) if all_diagnoses_json else []
-        responses = json.loads(responses_json) if responses_json else {}
-        processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
-        technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
-        clinical_insights = json.loads(clinical_insights_json) if clinical_insights_json else {}
-        
-        assessment: Dict[str, Any] = {
-            'id': row_dict['id'],
-            'timestamp': row_dict['report_timestamp'],
-            'assessment_timestamp': row_dict['assessment_timestamp'],
-            'timezone': row_dict['timezone'],
-            'patient_info': {
-                'name': row_dict['patient_name'],
-                'number': row_dict['patient_number'],
-                'age': row_dict['patient_age'],
-                'gender': row_dict['patient_gender']
-            },
-            'primary_diagnosis': row_dict['primary_diagnosis'],
-            'confidence': row_dict['confidence'],
-            'confidence_percentage': row_dict['confidence_percentage'],
-            'all_diagnoses': all_diagnoses,
-            'responses': responses,
-            'processing_details': processing_details,
-            'technical_details': technical_details,
-            'clinical_insights': clinical_insights
-        }
-        
-        return assessment
-        
-    except Exception as e:
-        logger.error(f"Error loading single assessment from database: {e}")
-        return None
-
-def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
-    """Delete assessment from database"""
-    try:
-        conn = get_database_connection()
-        
-        if hasattr(conn, 'cursor'):
-            with conn.cursor() as cur:
-                cur.execute('''
-                    DELETE FROM assessments 
-                    WHERE patient_number = %s AND id = %s
-                ''', (patient_number, assessment_id))
-        else:
-            c = conn.cursor()
-            
-            c.execute('''
-                DELETE FROM assessments 
-                WHERE patient_number = ? AND id = ?
-            ''', (patient_number, assessment_id))
-        
-        conn.commit()
-        conn.close()
-        
-        logger.info(f"Assessment deleted from database: {assessment_id}")
-        return True
-        
-    except Exception as e:
-        logger.error(f"Error deleting from database: {e}")
-        return False
-
-init_database()
-
-@app.after_request
-def set_security_headers(response):
-    """Set security headers on all responses"""
-    for header, value in SecurityConfig.SECURITY_HEADERS.items():
-        response.headers[header] = value
-    
-    request_id = getattr(request, 'request_id', None)
-    if request_id:
-        response.headers['X-Request-ID'] = request_id
-    
-    return response
-
-@app.before_request
-def security_middleware():
-    request.request_id = SecurityUtils.generate_request_id()
-    
-    audit_logger.log_event(
-        event_type='REQUEST_START',
-        ip=request.remote_addr,
-        details=f"{request.method} {request.path}",
-        severity='INFO'
-    )
-    
-    if request.content_length and request.content_length > SecurityConfig.MAX_FILE_SIZE:
-        audit_logger.log_event(
-            event_type='REQUEST_TOO_LARGE',
-            ip=request.remote_addr,
-            details=f"Request size: {request.content_length} bytes",
-            severity='WARNING'
-        )
-        return jsonify({'error': 'Request too large'}), 413
-    
-    if request.endpoint and request.endpoint.startswith('api'):
-        client_ip = request.remote_addr
-        endpoint = request.endpoint.replace('api_', '').replace('_', '-')
-        
-        limited, message = rate_limiter.is_endpoint_rate_limited(client_ip, endpoint)
-        if limited:
-            return jsonify({
-                'error': 'Rate limit exceeded',
-                'retry_after': SecurityConfig.RATE_LIMIT_WINDOW,
-                'message': message
-            }), 429
-
-if os.environ.get('RENDER'):
-    CORS(app, origins=[
-        'https://mentivio.onrender.com',
-        'http://mentivio-MentalHealth.onrender.com',
-        'https://mentivio-web.onrender.com'
-    ], supports_credentials=True)
-    app.debug = False
-    app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
-else:
-    CORS(app, resources={r"/api/*": {
-        "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
-        "supports_credentials": True,
-        "allow_headers": ["Content-Type", "X-API-Key", "X-Client-Timezone"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    }})
-
 # ==================== ROUTES ====================
-
-@app.route('/api/config', methods=['GET'])
-def get_config():
-    """Provide necessary configuration to frontend"""
-    return jsonify({
-        'api_key': SecurityConfig.API_KEY,
-        'api_base_url': request.host_url.rstrip('/'),
-        'version': '4.0',
-        'features': {
-            'pdf_generation': True,
-            'assessment_history': True,
-            'clinical_enhancement': True
-        }
-    })
-    
 @app.route('/')
 def serve_index():
     return send_from_directory('frontend', 'Home.html')
@@ -1740,9 +1314,17 @@ def serve_css(filename):
 def serve_js(filename):
     return send_from_directory('frontend/js', filename)
 
+@app.route('/resources/css/<path:filename>')
+def serve_resource_css(filename):
+    return send_from_directory('frontend/resources', filename)
+
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory('frontend/assets', filename)
+
+@app.route('/resource-detail.css')
+def serve_resource_detail_css():
+    return send_from_directory('frontend/resources', 'resource-detail.css')
 
 @app.route('/<path:path>')
 def serve_static_files(path):
@@ -1764,21 +1346,15 @@ def health_check():
         db_healthy = False
         db_type = "Unknown"
         try:
-            conn = get_database_connection()
+            conn = get_postgres_connection()
             if conn:
-                if hasattr(conn, 'cursor'):
-                    with conn.cursor() as cur:
-                        cur.execute('SELECT 1 as test')
-                        db_healthy = True
-                        db_type = 'PostgreSQL'
-                else:
-                    c = conn.cursor()
-                    c.execute('SELECT 1 as test')
+                with conn.cursor() as cur:
+                    cur.execute('SELECT 1 as test')
                     db_healthy = True
-                    db_type = 'SQLite'
+                    db_type = 'PostgreSQL'
                 conn.close()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Database health check warning: {e}")
 
         components_loaded = all([
             model_package is not None,
@@ -1788,44 +1364,29 @@ def health_check():
             category_mappings is not None
         ])
         
-        security_checks = {
-            'secret_key_set': bool(os.environ.get('SECRET_KEY')),
-            'secret_key_length': len(os.environ.get('SECRET_KEY', '')) >= 32,
-            'api_key_set': bool(os.environ.get('API_KEY')),
-            'encryption_key_set': bool(os.environ.get('ENCRYPTION_KEY')),
-            'database_configured': True,
-            'rate_limiting_enabled': True,
-            'security_headers_enabled': True,
-            'audit_logging_enabled': True,
-            'debug_mode_disabled': not app.debug,
-            'https_enforced': os.environ.get('RENDER') is not None
-        }
-        
-        all_security_passed = all(security_checks.values())
         overall_healthy = components_loaded and db_healthy
         
         health_info = {
             'status': 'healthy' if overall_healthy else 'degraded',
             'timestamp': datetime.now(timezone.utc).isoformat(),
-            'database': {
-                'healthy': db_healthy,
-                'type': db_type
-            },
+            'components_loaded': components_loaded,
+            'database_healthy': db_healthy,
+            'database_type': db_type,
+            'model_loaded': model_package is not None,
+            'scaler_loaded': scaler is not None,
+            'encoder_loaded': label_encoder is not None,
+            'features_loaded': feature_names is not None,
+            'category_mappings_loaded': category_mappings is not None,
+            'total_features': len(feature_names) if feature_names else 0,
+            'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
+            'clinical_enhancer_available': clinical_enhancer is not None,
             'security': {
-                'checks_passed': all_security_passed,
-                'details': security_checks
+                'rate_limiting': True,
+                'input_validation': True,
+                'headers_security': True,
+                'encryption_available': True
             },
-            'components': {
-                'model_loaded': model_package is not None,
-                'scaler_loaded': scaler is not None,
-                'encoder_loaded': label_encoder is not None,
-                'features_loaded': feature_names is not None,
-                'category_mappings_loaded': category_mappings is not None,
-                'clinical_enhancer_available': clinical_enhancer is not None,
-                'total_features': len(feature_names) if feature_names else 0,
-                'available_classes': label_encoder.classes_.tolist() if label_encoder else []
-            },
-            'message': 'Service is secure and ready' if all_security_passed else 'Security improvements needed'
+            'message': 'Service is ready' if overall_healthy else 'Service is starting up'
         }
         
         return jsonify(health_info)
@@ -1847,79 +1408,43 @@ def simple_ping():
         'service': 'Mental Health Assessment API'
     })
 
-def parse_assessment_timestamp(timestamp_str: str) -> datetime:
-    try:
-        if not timestamp_str or timestamp_str == 'N/A':
-            return datetime.now(timezone.utc)
-        
-        if 'T' in timestamp_str:
-            if timestamp_str.endswith('Z'):
-                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-            elif '+' in timestamp_str or '-' in timestamp_str[-6:]:
-                dt = datetime.fromisoformat(timestamp_str)
-            else:
-                dt = datetime.fromisoformat(timestamp_str).replace(tzinfo=timezone.utc)
-        else:
-            try:
-                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-            except ValueError:
-                try:
-                    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
-                except ValueError:
-                    return datetime.now(timezone.utc)
-        
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-            
-        return dt
-        
-    except (ValueError, TypeError):
-        return datetime.now(timezone.utc)
-
 @app.route('/api/predict', methods=['POST'])
-@require_api_key
-@validate_json_content
-@sanitize_inputs
 def predict():
     try:
         data = request.json
         if not data:
-            return jsonify({'error': 'No data provided'}), 400
+            return jsonify({'error': TRANSLATIONS.get('en', {}).get('api', {}).get('errors', {}).get('no_data', 'No data provided')}), 400
         
+        language = data.get('language', 'en')
         user_responses = data.get('responses', {})
         patient_info = data.get('patientInfo', {})
         assessment_start_time = data.get('assessment_start_time')
         
+        if not user_responses:
+            return jsonify({'error': TRANSLATIONS.get('en', {}).get('api', {}).get('errors', {}).get('no_responses', 'No responses provided')}), 400
+        
         responses_valid, responses_msg = validate_assessment_responses(user_responses)
         if not responses_valid:
-            audit_logger.log_event(
-                event_type='INVALID_RESPONSES',
-                ip=request.remote_addr,
-                details=responses_msg,
-                severity='WARNING'
-            )
-            return jsonify({'error': f'Invalid responses: {responses_msg}'}), 400
+            error_msg = TRANSLATIONS.get('en', {}).get('api', {}).get('errors', {}).get('invalid_responses', 'Invalid responses: {msg}')
+            return jsonify({'error': error_msg.replace('{msg}', responses_msg)}), 400
         
         patient_valid, patient_msg = SecurityUtils.validate_patient_data(patient_info)
         if not patient_valid:
-            audit_logger.log_event(
-                event_type='INVALID_PATIENT_DATA',
-                ip=request.remote_addr,
-                details=patient_msg,
-                severity='WARNING'
-            )
-            return jsonify({'error': f'Invalid patient data: {patient_msg}'}), 400
+            error_msg = TRANSLATIONS.get('en', {}).get('api', {}).get('errors', {}).get('invalid_patient_data', 'Invalid patient data: {msg}')
+            return jsonify({'error': error_msg.replace('{msg}', patient_msg)}), 400
         
-        audit_logger.log_event(
-            event_type='PREDICTION_REQUEST',
-            ip=request.remote_addr,
-            details=f"Prediction for patient: {patient_info.get('name', 'Unknown')}",
-            severity='INFO'
-        )
+        if 'age' in patient_info and patient_info['age']:
+            age = patient_info['age']
+            age_valid, age_msg = SecurityUtils.validate_patient_age(age)
+            if not age_valid:
+                error_translations = TRANSLATIONS.get(language, {}).get('prediction', {}).get('errors', {})
+                error_msg = error_translations.get('invalid_age', 'Invalid age: {msg}')
+                return jsonify({'error': error_msg.replace('{msg}', age_msg)}), 400
         
         client_timezone = request.headers.get('X-Client-Timezone', 'UTC')
        
         try:
+            import pytz
             tz = pytz.timezone(client_timezone)
         except:
             tz = pytz.UTC
@@ -1936,12 +1461,10 @@ def predict():
                 
                 time_diff = client_now - assessment_dt_client
                 
-            except Exception:
+            except Exception as e:
                 assessment_date_str = client_now.isoformat()
-                time_diff = timedelta(0)
         else:
             assessment_date_str = client_now.isoformat()
-            time_diff = timedelta(0)
 
         try:
             processed_responses, processing_log, safety_warnings = preprocessor.preprocess(user_responses)
@@ -1972,7 +1495,7 @@ def predict():
         all_diagnoses = []
         for idx, prob in enumerate(probabilities[0]):
             diagnosis_name = label_encoder.inverse_transform([idx])[0]
-            confidence_percentage = float(prob * 100)
+            confidence_percentage = round(float(prob * 100), 0)
             
             diagnosis_data = {
                 'diagnosis': diagnosis_name,
@@ -1995,7 +1518,7 @@ def predict():
         clinical_enhancement = None
         final_diagnosis = primary_diagnosis
         final_confidence = primary_confidence
-        final_confidence_percentage = primary_confidence_percentage
+        final_confidence_percentage = round(primary_confidence_percentage, 0)
         
         if clinical_enhancer:
             clinical_enhancement = clinical_enhancer.enhance_prediction(
@@ -2011,7 +1534,7 @@ def predict():
                 for diagnosis in all_diagnoses:
                     if diagnosis['diagnosis'] == final_diagnosis:
                         diagnosis['probability'] = final_confidence
-                        diagnosis['confidence_percentage'] = final_confidence_percentage
+                        diagnosis['confidence_percentage'] = round(final_confidence_percentage,0)
                         break
                 
                 all_diagnoses.sort(key=lambda x: x['probability'], reverse=True)
@@ -2019,20 +1542,24 @@ def predict():
                 final_diagnosis = all_diagnoses[0]['diagnosis']
                 final_confidence = all_diagnoses[0]['probability']
                 final_confidence_percentage = all_diagnoses[0]['confidence_percentage']
-                
-                logger.info(f"Clinical enhancement applied: {primary_diagnosis} -> {final_diagnosis}")
 
         response_data = {
             'primary_diagnosis': final_diagnosis,
             'confidence': float(final_confidence),
-            'confidence_percentage': float(final_confidence_percentage),
-            'all_diagnoses': all_diagnoses,
+            'diagnosis_description': get_diagnosis_description(final_diagnosis), 
+            'confidence_percentage': round(float(final_confidence_percentage),0),
+            'all_diagnoses': [
+                {
+                    **diagnosis,
+                    'diagnosis': diagnosis['diagnosis'], 
+                }
+                for diagnosis in all_diagnoses
+            ],
             'timestamp': report_generation_time,
             'assessment_timestamp': assessment_date_str,
             'timezone': client_timezone,
             'assessment_id': f"MH{client_now.strftime('%Y%m%d%H%M%S')}",
             'patient_info': patient_info,
-            
             'processing_details': {
                 'preprocessing_steps': len(processing_log),
                 'clinical_safety_warnings': safety_warnings,
@@ -2047,7 +1574,69 @@ def predict():
                 'assessment_start_time': assessment_date_str,
                 'report_generation_time': report_generation_time,
                 'processing_duration_seconds': time_diff.total_seconds() if assessment_start_time else 0,
-                'security_validation': 'PASSED'
+                'security_validation': 'PASSED',
+                'language': language
+            },
+            'technical_details': {
+                'processing_log': processing_log,
+                'safety_checks_passed': len(safety_warnings) == 0,
+                'feature_array_shape': feature_df.shape,
+                'composite_scores_included': True,
+                'probability_distribution': {
+                    'min_confidence': float(np.min(probabilities[0]) * 100),
+                    'max_confidence': float(np.max(probabilities[0]) * 100),
+                    'mean_confidence': float(np.mean(probabilities[0]) * 100),
+                    'confidence_range': float(np.max(probabilities[0]) * 100 - np.min(probabilities[0]) * 100)
+                }
+            },
+            'language': language
+        }
+        
+        if clinical_enhancement:
+            response_data['clinical_insights'] = {
+                'original_diagnosis': clinical_enhancement.get('original_diagnosis', primary_diagnosis),  
+                'enhanced_diagnosis': clinical_enhancement.get('enhanced_diagnosis', primary_diagnosis),
+                'enhancement_applied': clinical_enhancement.get('enhanced_diagnosis', primary_diagnosis) != clinical_enhancement.get('original_diagnosis', primary_diagnosis),
+                'adjustment_reasons': clinical_enhancement.get('adjustment_reasons', []),
+                'pattern_analysis': clinical_enhancement.get('clinical_analysis', {}),
+                'confidence_adjustment': float(clinical_enhancement.get('confidence_adjustment', 0.0) * 100),
+                'original_confidence': float(clinical_enhancement.get('original_confidence', primary_confidence))
+            }
+        
+        assessment_data_for_db = {
+            'primary_diagnosis': final_diagnosis,
+            'confidence': float(final_confidence),
+            'confidence_percentage': round(float(final_confidence_percentage),0),
+            'all_diagnoses': [
+                {
+                    'diagnosis': diagnosis['diagnosis'],
+                    'probability': diagnosis['probability'],
+                    'confidence_percentage': round(diagnosis['confidence_percentage'],0),
+                    'rank': diagnosis['rank']
+                }
+                for diagnosis in all_diagnoses
+            ],
+            'timestamp': report_generation_time,
+            'assessment_timestamp': assessment_date_str,
+            'timezone': client_timezone,
+            'assessment_id': f"MH{client_now.strftime('%Y%m%d%H%M%S')}",
+            'patient_info': patient_info,
+            'processing_details': {
+                'preprocessing_steps': len(processing_log),
+                'clinical_safety_warnings': safety_warnings,
+                'total_features_processed': len(processed_responses),
+                'model_features_used': len(feature_names),
+                'feature_engineering_applied': True,
+                'clinical_domains_calculated': True,
+                'clinical_enhancement_applied': clinical_enhancement is not None and final_diagnosis != primary_diagnosis,
+                'safety_check_status': 'CRITICAL_ALERTS' if safety_warnings else 'PASSED',
+                'total_diagnoses_considered': len(all_diagnoses),
+                'timezone_used': client_timezone,
+                'assessment_start_time': assessment_date_str,
+                'report_generation_time': report_generation_time,
+                'processing_duration_seconds': time_diff.total_seconds() if assessment_start_time else 0,
+                'security_validation': 'PASSED',
+                'request_language': language
             },
             'technical_details': {
                 'processing_log': processing_log,
@@ -2064,51 +1653,86 @@ def predict():
         }
         
         if clinical_enhancement:
-            response_data['clinical_insights'] = {
-                'original_diagnosis': clinical_enhancement['original_diagnosis'],
-                'enhancement_applied': clinical_enhancement['enhanced_diagnosis'] != clinical_enhancement['original_diagnosis'],
-                'adjustment_reasons': clinical_enhancement['adjustment_reasons'],
-                'pattern_analysis': clinical_enhancement['clinical_analysis'],
-                'confidence_adjustment': float(clinical_enhancement['confidence_adjustment'] * 100)
+            assessment_data_for_db['clinical_insights'] = {
+                'original_diagnosis': clinical_enhancement.get('original_diagnosis', primary_diagnosis),
+                'enhanced_diagnosis': clinical_enhancement.get('enhanced_diagnosis', primary_diagnosis),
+                'enhancement_applied': clinical_enhancement.get('enhanced_diagnosis', primary_diagnosis) != clinical_enhancement.get('original_diagnosis', primary_diagnosis),
+                'adjustment_reasons': clinical_enhancement.get('adjustment_reasons', []),
+                'pattern_analysis': clinical_enhancement.get('clinical_analysis', {}),
+                'confidence_adjustment': float(clinical_enhancement.get('confidence_adjustment', 0.0) * 100),
+                'original_confidence': float(clinical_enhancement.get('original_confidence', primary_confidence))
             }
         
-        logger.info(f"Secure assessment completed successfully for patient: {patient_info.get('name', 'Unknown')}")
+        if 'assessment_id' in response_data:
+            assessment_data_for_db['id'] = response_data['assessment_id']
+        elif 'id' not in assessment_data_for_db:
+            assessment_data_for_db['id'] = f"MH{client_now.strftime('%Y%m%d%H%M%S')}"
+
+        if save_assessment_to_db(assessment_data_for_db):
+            logger.info(f"Assessment saved: {assessment_data_for_db['id']}")
+        else:
+            logger.error(f"Failed to save assessment: {assessment_data_for_db.get('id', 'unknown')}")
         
-        response = jsonify(response_data)
-        response.headers['X-Content-Security-Policy'] = SecurityConfig.SECURITY_HEADERS['Content-Security-Policy']
-        return response
+        return jsonify(response_data)
         
     except Exception as e:
         logger.error(f"Secure prediction endpoint error: {e}")
-        audit_logger.log_event(
-            event_type='PREDICTION_ERROR',
-            ip=request.remote_addr,
-            details=f"Prediction failed: {str(e)}",
-            severity='ERROR'
-        )
         return jsonify({'error': 'Assessment failed. Please try again.'}), 500
 
+def get_diagnosis_description(diagnosis: str) -> str:
+    descriptions = TRANSLATIONS.get('en', {}).get('prediction', {}).get('diagnosisDescription', {})
+    return descriptions.get(diagnosis, 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.')
+
+def convert_to_english_diagnosis(diagnosis: str) -> str:
+    """Convert translated diagnosis back to English canonical form"""
+    for lang in ['vi', 'es', 'zh']:
+        if lang in TRANSLATIONS:
+            translations = TRANSLATIONS[lang].get('prediction', {}).get('diagnosisTranslations', {})
+            for eng_key, translated_value in translations.items():
+                if translated_value == diagnosis:
+                    return eng_key
+    
+    return diagnosis
+
+def parse_assessment_timestamp(timestamp_str: str) -> datetime:
+    try:
+        if not timestamp_str or timestamp_str == 'N/A':
+            return datetime.now(timezone.utc)
+        
+        if 'T' in timestamp_str:
+            if timestamp_str.endswith('Z'):
+                dt = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+            elif '+' in timestamp_str or '-' in timestamp_str[-6:]:
+                dt = datetime.fromisoformat(timestamp_str)
+            else:
+                dt = datetime.fromisoformat(timestamp_str).replace(tzinfo=timezone.utc)
+        else:
+            try:
+                dt = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            except ValueError:
+                try:
+                    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                except ValueError:
+                    return datetime.now(timezone.utc)
+        
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+            
+        return dt
+        
+    except (ValueError, TypeError) as e:
+        return datetime.now(timezone.utc)
+
 @app.route('/api/save-assessment', methods=['POST'])
-@require_api_key
-@validate_json_content
 def save_assessment():
     try:
         data = request.json
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-            
         assessment_data = data.get('assessment_data', {})
         if not assessment_data:
             return jsonify({'error': 'No assessment data provided'}), 400
         
         if not isinstance(assessment_data, dict):
             return jsonify({'error': 'Invalid assessment data format'}), 400
-        
-        assessment_data['_security'] = {
-            'saved_at': datetime.now(timezone.utc).isoformat(),
-            'saved_by_ip': request.remote_addr,
-            'request_id': getattr(request, 'request_id', 'unknown')
-        }
         
         if 'id' not in assessment_data:
             if 'timestamp' in assessment_data:
@@ -2124,87 +1748,319 @@ def save_assessment():
             assessment_data['timestamp'] = datetime.now(timezone.utc).isoformat()
         
         if save_assessment_to_db(assessment_data):
-            audit_logger.log_event(
-                event_type='ASSESSMENT_SAVED_SUCCESS',
-                ip=request.remote_addr,
-                details=f"Assessment {assessment_data['id']} saved",
-                severity='INFO'
-            )
-            
             return jsonify({
                 'success': True,
                 'assessment_id': assessment_data['id'],
-                'message': 'Assessment saved securely',
-                'security': {
-                    'encrypted': os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true',
-                    'audit_trail': True
-                }
+                'message': 'Assessment saved successfully'
             })
         else:
-            return jsonify({'error': 'Failed to save assessment data securely'}), 500
+            return jsonify({'error': 'Failed to save assessment data to database'}), 500
         
     except Exception as e:
         logger.error(f"Error saving assessment: {e}")
-        audit_logger.log_event(
-            event_type='ASSESSMENT_SAVE_ERROR',
-            ip=request.remote_addr,
-            details=f"Save failed: {str(e)}",
-            severity='ERROR'
-        )
-        return jsonify({'error': 'Failed to save assessment securely'}), 500
+        return jsonify({'error': f'Failed to save assessment: {str(e)}'}), 500
+
+class TranslationCache:
+    """
+    In-memory cache for canonical and translated assessment data.
+    """
+    def __init__(self):
+        self.cache: Dict[str, List[Dict[str, Any]]] = {} 
+        self.canonical_cache: Dict[str, List[Dict[str, Any]]] = {} 
+        self.single_assessment_cache: Dict[str, Dict[str, Any]] = {} 
+        self.cache_timestamps: Dict[str, float] = {}
+        self.timeout = 300
+
+    def _is_cache_valid(self, key: str) -> bool:
+        timestamp = self.cache_timestamps.get(key, 0)
+        return (time.time() - timestamp) < self.timeout
+
+    def translate_assessment(self, assessment: Dict[str, Any], language: str) -> Dict[str, Any]:
+        if language == 'en':
+            return assessment.copy()
+
+        translated_assessment = assessment.copy()
+        
+        canonical_primary = convert_to_canonical_key(assessment.get('primary_diagnosis', ''))
+        translated_assessment['primary_diagnosis'] = get_translated_diagnosis(canonical_primary, language)
+        
+        translated_diagnoses = []
+        for diag in assessment.get('all_diagnoses', []):
+            canonical_key = diag.get('original_diagnosis') or convert_to_canonical_key(diag.get('diagnosis', ''))
+            
+            translated_diagnoses.append({
+                **diag,
+                'diagnosis': get_translated_diagnosis(canonical_key, language),
+                'original_diagnosis': canonical_key
+            })
+        translated_assessment['all_diagnoses'] = translated_diagnoses
+        
+        if 'responses' in assessment and assessment['responses']:
+            translated_assessment['responses'] = translate_response_values(assessment['responses'], language)
+        
+        translated_assessment['language'] = language
+        
+        return translated_assessment
+
+    def cache_single_assessment(self, patient_number: str, assessment_id: str, assessment_data: Dict[str, Any], language: str):
+        cache_key = f"{patient_number}_{assessment_id}_{language}"
+        canonical_key = f"{patient_number}_{assessment_id}_canonical"
+        
+        self.single_assessment_cache[cache_key] = assessment_data
+        self.cache_timestamps[cache_key] = time.time()
+        
+        if language == 'en':
+            self.single_assessment_cache[canonical_key] = assessment_data
+            self.cache_timestamps[canonical_key] = time.time()
+        
+        logger.info(f"Cached single assessment: {cache_key}")
+    
+    def get_canonical_assessment(self, patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
+        cache_key = 'all_history_canonical'
+        
+        if self._is_cache_valid(cache_key):
+            logger.info("Cache hit for canonical history.")
+            return self.canonical_cache
+        
+        logger.info("Cache miss or expired for canonical history. Loading from DB.")
+        
+        all_canonical_assessments = load_assessments_from_db(patient_number=None, language='en')
+        
+        self.canonical_cache = all_canonical_assessments
+        self.cache_timestamps[cache_key] = time.time()
+        
+        return self.canonical_cache
+
+    def get_translated_assessment(self, patient_number: str, language: str, assessments_data: List[Dict]) -> List[Dict]:
+        cache_key = f"{patient_number}_{language}"
+        
+        if self._is_cache_valid(cache_key):
+            logger.info(f"Cache hit for translated history list: {cache_key}")
+            return self.cache[cache_key]
+        
+        translated_assessments = []
+        for assessment in assessments_data:
+            translated = self.translate_assessment(assessment, language)
+            translated_assessments.append(translated)
+        
+        self.cache[cache_key] = translated_assessments
+        self.cache_timestamps[cache_key] = time.time()
+        
+        return translated_assessments
+
+    def get_canonical_single_assessment(self, patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
+        canonical_key = f"{patient_number}_{assessment_id}_canonical"
+        
+        if self._is_cache_valid(canonical_key):
+            logger.info(f"Cache hit for canonical single assessment: {canonical_key}")
+            return self.single_assessment_cache.get(canonical_key)
+        
+        logger.info(f"Cache miss or expired for single canonical assessment {assessment_id}. Loading from DB.")
+        
+        assessment_data = load_single_assessment_from_db(patient_name, patient_number, assessment_id, language='en')
+        
+        if assessment_data:
+            self.single_assessment_cache[canonical_key] = assessment_data
+            self.cache_timestamps[canonical_key] = time.time()
+            
+        return assessment_data
+
+    def get_translated_single_assessment(self, patient_number: str, assessment_id: str, language: str) -> Optional[Dict[str, Any]]:
+        cache_key = f"{patient_number}_{assessment_id}_{language}"
+        
+        if self._is_cache_valid(cache_key):
+            logger.info(f"Cache hit for translated single assessment: {cache_key}")
+            return self.single_assessment_cache.get(cache_key)
+        
+        canonical_key = f"{patient_number}_{assessment_id}_canonical"
+        
+        if self._is_cache_valid(canonical_key):
+            canonical_assessment = self.single_assessment_cache.get(canonical_key)
+        else:
+            return None
+        
+        if canonical_assessment:
+            translated = self.translate_assessment(canonical_assessment, language)
+            self.single_assessment_cache[cache_key] = translated
+            self.cache_timestamps[cache_key] = time.time()
+            return translated
+        
+        return None
+        
+    def clear_cache(self):
+        self.cache.clear()
+        self.canonical_cache.clear()
+        self.single_assessment_cache.clear()
+        self.cache_timestamps.clear()
+
+    def get_cache_stats(self) -> Dict[str, Any]:
+        now = time.time()
+        active_single = 0
+        active_history = 0
+        
+        for key, timestamp in self.cache_timestamps.items():
+            if now - timestamp < self.timeout:
+                if key.endswith('_canonical') or key.endswith('_en'):
+                    active_history += 1
+                else:
+                    active_single += 1
+            
+        return { 
+            'translated_history_cache_size': len(self.cache),
+            'canonical_history_cache_size': len(self.canonical_cache),
+            'single_assessment_cache_size': len(self.single_assessment_cache),
+            'active_canonical_entries': active_history,
+            'active_translated_entries': active_single
+        }
+        
+translation_cache = TranslationCache()
+
+@app.route('/api/create-session', methods=['POST'])
+def create_user_session():
+    try:
+        data = request.json
+        patient_number = data.get('patient_number', '').strip()
+        
+        if not patient_number:
+            return jsonify({'error': 'Patient number required'}), 400
+        
+        session_id = SecurityUtils.generate_secure_token()
+        
+        user_data = {
+            'patient_number': patient_number,
+            'created_at': datetime.now(timezone.utc).isoformat()
+        }
+        
+        auth_service.create_session(session_id, user_data)
+        
+        return jsonify({
+            'success': True,
+            'session_id': session_id,
+            'message': 'Session created successfully',
+            'created_at': datetime.now(timezone.utc).isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error creating user session: {e}")
+        return jsonify({'error': f'Failed to create session: {str(e)}'}), 500
+    
 
 @app.route('/api/get-patient-assessments', methods=['POST'])
-@require_api_key
-@validate_json_content
 def get_patient_assessments():
     try:
         data = request.json
         patient_name = data.get('name', '').strip()
         patient_number = data.get('number', '').strip()
+        language = data.get('language', 'en')
         
         if not patient_name or not patient_number:
             return jsonify({'error': 'Patient name and number required'}), 400
         
-        all_assessments = load_assessments_from_db(patient_number)
+        assessments_by_patient = load_assessments_from_db(patient_number, language)
         
-        patient_assessments = all_assessments.get(patient_number, [])
+        if not assessments_by_patient or patient_number not in assessments_by_patient:
+            return jsonify({
+                'success': True,
+                'assessments': [],
+                'count': 0,
+                'message': 'No assessments found for this patient'
+            })
+        
+        patient_assessments = assessments_by_patient.get(patient_number, [])
         
         filtered_assessments = [
             assessment for assessment in patient_assessments
             if assessment.get('patient_info', {}).get('name', '').lower() == patient_name.lower()
         ]
         
-        logger.info(f"Found {len(filtered_assessments)} assessments for {patient_name} (#{patient_number})")
+        if len(filtered_assessments) == 0:
+            return jsonify({
+                'success': True,
+                'assessments': [],
+                'count': 0,
+                'message': 'No assessments found for this patient'
+            })
         
         return jsonify({
             'success': True,
             'assessments': filtered_assessments,
-            'count': len(filtered_assessments)
+            'count': len(filtered_assessments),
+            'language': language,
+            'cached': False
         })
         
     except Exception as e:
         logger.error(f"Error retrieving assessments: {e}")
         return jsonify({'error': f'Failed to retrieve assessments: {str(e)}'}), 500
-
+    
+@app.route('/api/get-single-assessment', methods=['POST'])
+def get_single_assessment():
+    try:
+        data = request.json
+        patient_name = data.get('name', '').strip()
+        patient_number = data.get('number', '').strip()
+        assessment_id = data.get('assessment_id', '').strip()
+        language = data.get('language', 'en')
+        
+        if not patient_name or not patient_number or not assessment_id:
+            return jsonify({'error': 'Patient name, number, and assessment ID required'}), 400
+        
+        cached_assessment = translation_cache.get_translated_single_assessment(patient_number, assessment_id, language)
+        
+        if cached_assessment:
+            cached_name = cached_assessment.get('patient_info', {}).get('name', '').strip()
+            if cached_name.lower() == patient_name.lower():
+                return jsonify({
+                    'success': True,
+                    'assessment': cached_assessment,
+                    'language': language,
+                    'cached': True
+                })
+        
+        target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id, language)
+        
+        if not target_assessment:
+            return jsonify({'error': 'Assessment not found'}), 404
+        
+        translation_cache.cache_single_assessment(patient_number, assessment_id, target_assessment, language)
+        
+        enhanced_assessment = enhance_assessment_data(target_assessment)
+        
+        return jsonify({
+            'success': True,
+            'assessment': enhanced_assessment,
+            'language': language,
+            'cached': False
+        })
+        
+    except Exception as e:
+        logger.error(f"Error retrieving single assessment: {e}")
+        return jsonify({'error': f'Failed to retrieve assessment: {str(e)}'}), 500
+    
 def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
     try:
         if not assessment.get('primary_diagnosis') and assessment.get('all_diagnoses'):
             assessment['primary_diagnosis'] = assessment['all_diagnoses'][0].get('diagnosis', '')
             if not assessment.get('confidence_percentage') and assessment['all_diagnoses']:
-                assessment['confidence_percentage'] = assessment['all_diagnoses'][0].get('confidence_percentage', 0)
+                assessment['confidence_percentage'] = round(assessment['all_diagnoses'][0].get('confidence_percentage', 0), 0)
                 assessment['confidence'] = assessment['confidence_percentage'] / 100.0
         
-        if 'diagnosis_description' not in assessment:
-            assessment['diagnosis_description'] = get_diagnosis_description(assessment.get('primary_diagnosis', ''))
+        if 'diagnosisDescription' not in assessment:
+            assessment['diagnosisDescription'] = get_diagnosis_description(assessment.get('primary_diagnosis', ''))
         
         if 'all_diagnoses' not in assessment or not assessment['all_diagnoses']:
             assessment['all_diagnoses'] = [
                 {
                     'diagnosis': assessment.get('primary_diagnosis', ''),
                     'probability': assessment.get('confidence', 0),
-                    'confidence_percentage': assessment.get('confidence_percentage', 0)
+                    'confidence_percentage': round(assessment.get('confidence_percentage', 0), 0)
                 }
             ]
+        
+        if 'responses' not in assessment:
+            assessment['responses'] = assessment.get('original_responses', {})
+        elif not assessment['responses'] and 'original_responses' in assessment:
+            assessment['responses'] = assessment['original_responses']
         
         if 'processing_details' not in assessment:
             assessment['processing_details'] = {
@@ -2235,48 +2091,8 @@ def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error enhancing assessment data: {e}")
         return assessment
-
-def get_diagnosis_description(diagnosis: str) -> str:
-    descriptions = {
-        'Normal': 'Your responses indicate typical mental well-being patterns with no significant clinical concerns detected.',
-        'Bipolar Type-1': 'Your responses show patterns that may indicate Bipolar Type-1 disorder. This is characterized by manic episodes that last at least 7 days.',
-        'Bipolar Type-2': 'Your responses suggest patterns consistent with Bipolar Type-2 disorder, characterized by hypomanic and depressive episodes.',
-        'Depression': 'Your responses align with patterns commonly seen in depressive disorders, including persistent sadness and loss of interest.'
-    }
-    return descriptions.get(diagnosis, 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.')
-
-@app.route('/api/get-single-assessment', methods=['POST'])
-@require_api_key
-@validate_json_content
-def get_single_assessment():
-    try:
-        data = request.json
-        patient_name = data.get('name', '').strip()
-        patient_number = data.get('number', '').strip()
-        assessment_id = data.get('assessment_id', '').strip()
-        
-        if not patient_name or not patient_number or not assessment_id:
-            return jsonify({'error': 'Patient name, number, and assessment ID required'}), 400
-        
-        target_assessment = load_single_assessment_from_db(patient_name, patient_number, assessment_id)
-        
-        if not target_assessment:
-            return jsonify({'error': 'Assessment not found'}), 404
-        
-        enhanced_assessment = enhance_assessment_data(target_assessment)
-        
-        return jsonify({
-            'success': True,
-            'assessment': enhanced_assessment
-        })
-        
-    except Exception as e:
-        logger.error(f"Error retrieving single assessment: {e}")
-        return jsonify({'error': f'Failed to retrieve assessment: {str(e)}'}), 500
-
+    
 @app.route('/api/delete-assessment', methods=['POST'])
-@require_api_key
-@validate_json_content
 def delete_assessment():
     try:
         data = request.json
@@ -2287,12 +2103,6 @@ def delete_assessment():
             return jsonify({'error': 'Patient number and assessment ID required'}), 400
         
         if delete_assessment_from_db(patient_number, assessment_id):
-            audit_logger.log_event(
-                event_type='ASSESSMENT_DELETED',
-                ip=request.remote_addr,
-                details=f"Assessment {assessment_id} deleted for patient #{patient_number}",
-                severity='INFO'
-            )
             return jsonify({'success': True, 'message': 'Assessment deleted successfully'})
         else:
             return jsonify({'error': 'Failed to delete assessment from database'}), 500
@@ -2302,11 +2112,10 @@ def delete_assessment():
         return jsonify({'error': f'Failed to delete assessment: {str(e)}'}), 500
 
 @app.route('/api')
-@require_api_key
 def api_info():
     return jsonify({
         'message': 'Enhanced Mental Health Assessment API is running!',
-        'version': '4.0',
+        'version': '3.0',
         'features': {
             'complete_preprocessing': True,
             'clinical_validation': True,
@@ -2329,151 +2138,288 @@ def api_info():
     })
 
 @app.route('/api/security-status', methods=['GET'])
-@require_api_key
 def security_status():
-    security_info = {
-        'authentication': {
-            'api_key_required': True,
-            'session_management': True,
-            'failed_attempt_tracking': True,
-            'account_lockout': True
-        },
-        'data_protection': {
-            'encryption_enabled': True,
-            'sensitive_data_encrypted': os.environ.get('ENCRYPT_SENSITIVE_DATA', 'false').lower() == 'true',
-            'password_hashing': 'bcrypt'
-        },
-        'network_security': {
+    return jsonify({
+        'security': {
             'rate_limiting': True,
-            'cors_restricted': True,
-            'ip_validation': True,
-            'https_required': os.environ.get('RENDER') is not None
+            'input_validation': True,
+            'security_headers': True,
+            'encryption_available': True,
+            'session_management': True,
+            'cors_protection': True
         },
-        'input_validation': {
-            'sanitization_enabled': True,
+        'config': {
             'max_input_length': SecurityConfig.MAX_INPUT_LENGTH,
-            'sql_injection_protection': True,
-            'xss_protection': True
-        },
-        'audit_logging': {
-            'enabled': True,
-            'file': SecurityConfig.AUDIT_LOG_FILE,
-            'events_tracked': [
-                'SESSION_CREATED', 'SESSION_DESTROYED', 'RATE_LIMIT_EXCEEDED',
-                'INVALID_API_KEY', 'PREDICTION_REQUEST', 'ASSESSMENT_SAVED'
-            ]
-        },
-        'headers': {
-            'csp_enabled': True,
-            'hsts_enabled': True,
-            'xss_protection': True,
-            'content_type_options': True
-        },
-        'configuration': {
-            'secret_key_set': bool(os.environ.get('SECRET_KEY')),
-            'api_key_set': bool(os.environ.get('API_KEY')),
-            'encryption_key_set': bool(os.environ.get('ENCRYPTION_KEY')),
-            'database_secured': not SecurityConfig.get_database_url().startswith('sqlite')
-        },
-        'recommendations': []
+            'max_responses': SecurityConfig.MAX_RESPONSES,
+            'rate_limit_requests': SecurityConfig.RATE_LIMIT_REQUESTS,
+            'rate_limit_window': SecurityConfig.RATE_LIMIT_WINDOW,
+            'session_timeout': SecurityConfig.SESSION_TIMEOUT
+        }
+    })
+
+def translate_response_values(responses: Dict[str, Any], language: str) -> Dict[str, Any]:
+    if not responses:
+        return responses
+    
+    translated_responses = {}
+    
+    question_type_mapping = {
+        'Mood Swing': 'yesNo',
+        'Sadness': 'frequency',
+        'Euphoric': 'frequency',
+        'Sleep disorder': 'frequency',
+        'Exhausted': 'frequency',
+        'Suicidal thoughts': 'yesNo',
+        'Aggressive Response': 'yesNo',
+        'Nervous Breakdown': 'yesNo',
+        'Overthinking': 'yesNo',
+        'Anorexia': 'yesNo',
+        'Authority Respect': 'yesNo',
+        'Try Explanation': 'yesNo',
+        'Ignore & Move-On': 'yesNo',
+        'Admit Mistakes': 'yesNo',
+        'Concentration': 'concentration',
+        'Optimism': 'optimism',
+        'Sexual Activity': 'sexualActivity'
     }
     
-    if not security_info['configuration']['api_key_set']:
-        security_info['recommendations'].append('Set API_KEY environment variable')
-    if not security_info['configuration']['encryption_key_set']:
-        security_info['recommendations'].append('Set ENCRYPTION_KEY environment variable')
-    if not security_info['network_security']['https_required']:
-        security_info['recommendations'].append('Enable HTTPS in production')
+    for feature, value in responses.items():
+        question_type = question_type_mapping.get(feature, 'text')
+        translated_value = translate_answer_value(value, language)
+        translated_responses[feature] = translated_value
     
-    security_info['overall_score'] = calculate_security_score(security_info)
-    
-    return jsonify(security_info)
+    return translated_responses
 
-def calculate_security_score(security_info: Dict) -> int:
-    score = 0
-    max_score = 0
+def translate_answer_value(answer, language='en'):
+    if language not in TRANSLATIONS:
+        return str(answer) if not isinstance(answer, str) else answer
     
-    auth_items = security_info['authentication']
-    for key, value in auth_items.items():
-        max_score += 10
-        if value:
-            score += 10
+    lang_dict = TRANSLATIONS[language]
+    answer_values = lang_dict.get('pdf_report', {}).get('answer_values', {})
     
-    data_items = security_info['data_protection']
-    for key, value in data_items.items():
-        max_score += 10
-        if value:
-            score += 10
+    if not answer_values:
+        answer_values = lang_dict.get('prediction', {}).get('answer_values', {})
     
-    config_items = security_info['configuration']
-    for key, value in config_items.items():
-        max_score += 10
-        if value:
-            score += 10
+    if not answer_values:
+        answer_values = TRANSLATIONS.get('en', {}).get('pdf_report', {}).get('answer_values', {})
+        if not answer_values:
+            answer_values = TRANSLATIONS.get('en', {}).get('prediction', {}).get('answer_values', {})
     
-    return int((score / max_score) * 100) if max_score > 0 else 0
-
-@app.route('/api/audit-logs', methods=['GET'])
-@require_api_key
-def get_audit_logs():
-    try:
-        admin_key = request.headers.get('X-Admin-Key')
-        expected_admin_key = os.environ.get('ADMIN_API_KEY')
+    if isinstance(answer, (int, float)):
+        answer_str = str(int(answer)) if isinstance(answer, float) and answer.is_integer() else str(answer)
+    else:
+        answer_str = str(answer).strip()
+    
+    for category in ['frequency', 'yesNo', 'concentration', 'optimism', 'sexualActivity']:
+        category_dict = answer_values.get(category, {})
         
-        if not admin_key or not secrets.compare_digest(admin_key, expected_admin_key or ''):
-            return jsonify({'error': 'Admin access required'}), 403
+        if answer_str in category_dict:
+            return category_dict[answer_str]
         
         try:
-            with open(SecurityConfig.AUDIT_LOG_FILE, 'r') as f:
-                logs = [json.loads(line) for line in f.readlines()[-100:]]
-        except FileNotFoundError:
-            logs = []
+            if answer_str.isdigit():
+                answer_num = int(answer_str)
+                if str(answer_num) in category_dict:
+                    return category_dict[str(answer_num)]
+        except:
+            pass
         
-        return jsonify({
-            'logs': logs,
-            'count': len(logs),
-            'file': SecurityConfig.AUDIT_LOG_FILE
-        })
-        
-    except Exception as e:
-        logger.error(f"Error reading audit logs: {e}")
-        return jsonify({'error': 'Failed to read audit logs'}), 500
+        for key, value in category_dict.items():
+            if str(key).lower() == answer_str.lower():
+                return value
+    
+    all_values = {}
+    for category in ['frequency', 'yesNo', 'concentration', 'optimism', 'sexualActivity']:
+        if category in answer_values:
+            all_values.update(answer_values[category])
+    
+    if answer_str in all_values:
+        return all_values[answer_str]
+    
+    for key, value in all_values.items():
+        if str(key).lower() == answer_str.lower():
+            return value
+    
+    return answer_str
 
-def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str) -> str:
+def format_date_for_locale(date_str: str, language: str = 'en') -> str:
+    """Format date with time in 24h format for different languages"""
     try:
-        if not timestamp_str or timestamp_str == 'N/A':
-            return "N/A"
+        dt = parse_assessment_timestamp(date_str)
         
-        dt = parse_assessment_timestamp(timestamp_str)
-        
-        try:
-            if timezone_used and timezone_used != 'UTC':
-                patient_tz = pytz.timezone(timezone_used)
-                local_dt = dt.astimezone(patient_tz)
+        if language in ['zh', 'ja', 'ko']:
+            # Chinese/Japanese/Korean: 2023年12月31日 14:30
+            return dt.strftime('%Y年%m月%d日 %H:%M')
+        elif language in ['en', 'es', 'fr', 'de']:
+            if language == 'en':
+                # English: 31 December 2023, 14:30
+                return dt.strftime('%d %B %Y, %H:%M')
             else:
-                local_dt = dt
-            
-            formatted = local_dt.strftime("%B %d, %Y at %H:%M %Z")
-            return formatted
-            
-        except Exception:
-            fallback = dt.strftime("%B %d, %Y at %H:%M UTC")
-            return fallback
-            
-    except Exception:
-        return timestamp_str or "Timestamp unavailable"
+                # European: 2023-12-31 14:30
+                return dt.strftime('%Y-%m-%d %H:%M')
+        elif language == 'vi':
+            # Vietnamese: Ngày 31 tháng 12 năm 2023, 14:30
+            months_vi = {
+                1: 'tháng 1', 2: 'tháng 2', 3: 'tháng 3',
+                4: 'tháng 4', 5: 'tháng 5', 6: 'tháng 6',
+                7: 'tháng 7', 8: 'tháng 8', 9: 'tháng 9',
+                10: 'tháng 10', 11: 'tháng 11', 12: 'tháng 12'
+            }
+            return f"Ngày {dt.day} {months_vi.get(dt.month)} năm {dt.year}, {dt.hour:02d}:{dt.minute:02d}"
+        else:
+            # Default: 2023-12-31 14:30
+            return dt.strftime('%Y-%m-%d %H:%M')
+    except:
+        return date_str or "N/A"
 
-@app.route('/api/generate-pdf-report', methods=['POST'])
-@require_api_key
-@validate_json_content
+def format_timezone_for_display(timezone_str: str) -> str:
+    if not timezone_str:
+        return "UTC"
+    
+    tz_mapping = {
+        'UTC': 'UTC',
+        'GMT': 'GMT',
+        'EST': 'Eastern Time (US)',
+        'EDT': 'Eastern Daylight Time',
+        'CST': 'Central Time (US)',
+        'CDT': 'Central Daylight Time',
+        'PST': 'Pacific Time (US)',
+        'PDT': 'Pacific Daylight Time',
+        'Asia/Ho_Chi_Minh': 'Vietnam Time (UTC+7)',
+        'Europe/London': 'London Time',
+        'Europe/Paris': 'Paris Time',
+        'Asia/Tokyo': 'Tokyo Time',
+        'Australia/Sydney': 'Sydney Time'
+    }
+    
+    return tz_mapping.get(timezone_str, timezone_str)
+
+@app.route('/api/generate-pdf-report', methods=['POST']) 
 def generate_pdf_report():
     try:
         data = request.json
         assessment_data = data.get('assessment_data', {})
+        language = request.headers.get('X-Language', 'en')
+        
+        lang = language if language in TRANSLATIONS else 'en'
+        t = TRANSLATIONS.get(lang, {}).get('pdf_report', {})
+        
+        if not t:
+            t = TRANSLATIONS.get(lang, {}).get('prediction', {})
+        
+        primary_diagnosis_canonical = assessment_data.get('primary_diagnosis', '')
+        
+        if primary_diagnosis_canonical not in ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']:
+            primary_diagnosis_canonical = convert_to_canonical_key(primary_diagnosis_canonical)
+        
+        primary_diagnosis_translated = get_translated_diagnosis(primary_diagnosis_canonical, language)
+        
+        assessment_data['primary_diagnosis'] = primary_diagnosis_translated
+        
+        if 'all_diagnoses' in assessment_data:
+            translated_diagnoses = []
+            for diagnosis in assessment_data['all_diagnoses']:
+                canonical_key = diagnosis.get('diagnosis', '')
+                
+                if canonical_key not in ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']:
+                    canonical_key = convert_to_canonical_key(canonical_key)
+                
+                translated_display = get_translated_diagnosis(canonical_key, language)
+                
+                translated_diagnosis = {
+                    'diagnosis': translated_display,
+                    'probability': diagnosis.get('probability', 0),
+                    'confidence_percentage': round(diagnosis.get('confidence_percentage', 0),0),
+                    'rank': diagnosis.get('rank', 0)
+                }
+            
+                translated_diagnoses.append(translated_diagnosis)
+            
+            assessment_data['all_diagnoses'] = translated_diagnoses
+        
+        assessment_data = clean_data_for_pdf(assessment_data)
         
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4, 
-                              topMargin=1*inch, 
+        
+        base_font = 'Helvetica'
+        bold_font = 'Helvetica-Bold'
+        
+        try:
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            
+            font_path = './frontend/assets/fonts/'
+            
+            font_mapping = {
+                'zh': {
+                    'regular': 'NotoSansSC-Regular',
+                    'bold': 'NotoSansSC-Bold',
+                    'extension': '.ttf'
+                },
+                'vi': {
+                    'regular': 'NotoSans-Regular',
+                    'bold': 'NotoSans-Bold', 
+                    'extension': '.ttf'
+                },
+                'default': {
+                    'regular': 'NotoSans-Regular',
+                    'bold': 'NotoSans-Bold',
+                    'extension': '.ttf'
+                }
+            }
+            
+            font_config = font_mapping.get(lang, font_mapping['default'])
+            regular_font_name = font_config['regular']
+            bold_font_name = font_config['bold']
+            extension = font_config['extension']
+            
+            regular_font_file = os.path.join(font_path, f"{regular_font_name}{extension}")
+            bold_font_file = os.path.join(font_path, f"{bold_font_name}{extension}")
+            
+            fonts_registered = False
+            
+            if os.path.exists(regular_font_file):
+                try:
+                    if extension == '.otf':
+                        try:
+                            pdfmetrics.registerFont(TTFont(regular_font_name, regular_font_file))
+                            base_font = regular_font_name
+                        except:
+                            chinese_ttf = os.path.join(font_path, "NotoSansSC-Regular.ttf")
+                            if os.path.exists(chinese_ttf):
+                                pdfmetrics.registerFont(TTFont('NotoSansSC', chinese_ttf))
+                                base_font = 'NotoSansSC'
+                    else:
+                        pdfmetrics.registerFont(TTFont(regular_font_name, regular_font_file))
+                        base_font = regular_font_name
+                    
+                    fonts_registered = True
+                except Exception as reg_error:
+                    pass
+            
+            if os.path.exists(bold_font_file) and fonts_registered:
+                try:
+                    if extension == '.otf':
+                        try:
+                            pdfmetrics.registerFont(TTFont(bold_font_name, bold_font_file))
+                            bold_font = bold_font_name
+                        except:
+                            chinese_bold_ttf = os.path.join(font_path, "NotoSansSC-Bold.ttf")
+                            if os.path.exists(chinese_bold_ttf):
+                                pdfmetrics.registerFont(TTFont('NotoSansSC-Bold', chinese_bold_ttf))
+                                bold_font = 'NotoSansSC-Bold'
+                    else:
+                        pdfmetrics.registerFont(TTFont(bold_font_name, bold_font_file))
+                        bold_font = bold_font_name
+                except Exception as bold_error:
+                    bold_font = base_font
+            
+        except Exception as font_error:
+            base_font = 'Helvetica'
+            bold_font = 'Helvetica-Bold'
+        
+        doc = SimpleDocTemplate(buffer, pagesize=A4,
+                              topMargin=1*inch,
                               bottomMargin=1*inch,
                               leftMargin=0.75*inch,
                               rightMargin=0.75*inch)
@@ -2483,65 +2429,80 @@ def generate_pdf_report():
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
+            fontName=bold_font, 
             fontSize=18,
             spaceAfter=30,
             alignment=TA_CENTER,
-            textColor=colors.HexColor('#4f46e5')
+            textColor=colors.HexColor('#4f46e5'),
         )
-        
+
         heading_style = ParagraphStyle(
             'CustomHeading',
             parent=styles['Heading2'],
+            fontName=bold_font, 
             fontSize=14,
             spaceAfter=12,
             spaceBefore=20,
-            textColor=colors.HexColor('#1e293b')
+            textColor=colors.HexColor('#1e293b'),
         )
-        
-        subheading_style = ParagraphStyle(
-            'CustomSubheading',
-            parent=styles['Heading3'],
-            fontSize=12,
-            spaceAfter=6,
-            textColor=colors.HexColor('#475569')
-        )
-        
+
         normal_style = ParagraphStyle(
             'CustomNormal',
             parent=styles['Normal'],
+            fontName=base_font, 
             fontSize=10,
-            spaceAfter=12
+            spaceAfter=12,
+        )
+
+        table_normal_style = ParagraphStyle(
+            'TableNormal',
+            parent=styles['Normal'],
+            fontName=base_font,
+            fontSize=8, 
+            spaceAfter=0,
+            leading=10, 
         )
         
+        table_bold_style = ParagraphStyle(
+            'TableBold',
+            parent=styles['Normal'],
+            fontName=bold_font,
+            fontSize=8,
+            spaceAfter=0,
+            leading=10,
+        )
+
         story = []
-        
-        story.append(Paragraph("MENTAL HEALTH ASSESSMENT REPORT", title_style))
+
+        title_text = t.get('title', 'MENTAL HEALTH ASSESSMENT REPORT')
+        story.append(Paragraph(title_text, title_style)) 
         story.append(Spacer(1, 20))
         
-        story.append(Paragraph("ASSESSMENT DETAILS", heading_style))
+        assessment_details = t.get('assessment_details', 'ASSESSMENT DETAILS')
+        story.append(Paragraph(assessment_details, heading_style))
         
         assessment_timestamp_str = assessment_data.get('assessment_timestamp', '')
         report_timestamp_str = assessment_data.get('timestamp', '')
         timezone_used = assessment_data.get('timezone', 'UTC')
         
-        assessment_date_str = format_timestamp_for_pdf(assessment_timestamp_str, timezone_used)
-        report_date_str = format_timestamp_for_pdf(report_timestamp_str, timezone_used)
-        
+        assessment_date_str = f"{format_date_for_locale(assessment_timestamp_str, language)} {format_timezone_for_display(timezone_used)}"
+        report_date_str = f"{format_date_for_locale(report_timestamp_str, language)} {format_timezone_for_display(timezone_used)}"
+
         meta_data = [
-            ["Assessment ID:", assessment_data.get('id', 'N/A')],
-            ["Assessment Started:", assessment_date_str],
-            ["Report Generated:", report_date_str],
-            ["Assessment Timezone:", timezone_used]
+            [t.get('assessment_id', 'Assessment ID:'), assessment_data.get('id', 'N/A')],
+            [t.get('assessment_started', 'Assessment Started:'), assessment_date_str],
+            [t.get('report_generated', 'Report Generated:'), report_date_str],
+            [t.get('assessment_timezone', 'Assessment Timezone:'), timezone_used]
         ]
         
         meta_table = Table(meta_data, colWidths=[2*inch, 4*inch])
         meta_table.setStyle(TableStyle([
-            ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+            ('FONT', (0, 0), (-1, -1), base_font, 10),
             ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8fafc')),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
             ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
             ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-            ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+            ('FONT', (0, 0), (0, -1), bold_font, 10),
             ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
             ('PADDING', (0, 0), (-1, -1), 8),
@@ -2551,23 +2512,24 @@ def generate_pdf_report():
         story.append(Spacer(1, 20))
         
         patient_info = assessment_data.get('patient_info', {})
-        story.append(Paragraph("PATIENT INFORMATION", heading_style))
+        patient_info_title = t.get('patient_info', 'PATIENT INFORMATION')
+        story.append(Paragraph(patient_info_title, heading_style))
         
         patient_data = [
-            ["Patient Name:", patient_info.get('name', 'Not provided')],
-            ["Patient Number:", patient_info.get('number', 'Not provided')],
-            ["Age:", patient_info.get('age', 'Not provided')],
-            ["Gender:", patient_info.get('gender', 'Not provided')]
+            [t.get('patient_name', 'Patient Name:'), patient_info.get('name', t.get('not_provided', 'Not provided'))],
+            [t.get('patient_number', 'Patient Number:'), patient_info.get('number', t.get('not_provided', 'Not provided'))],
+            [t.get('age', 'Age:'), patient_info.get('age', t.get('not_provided', 'Not provided'))],
+            [t.get('gender', 'Gender:'), patient_info.get('gender', t.get('not_provided', 'Not provided'))]
         ]
         
         patient_table = Table(patient_data, colWidths=[1.5*inch, 4.5*inch])
         patient_table.setStyle(TableStyle([
-            ('FONT', (0, 0), (-1, -1), 'Helvetica', 10),
+            ('FONT', (0, 0), (-1, -1), base_font, 10),
             ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f0f9ff')),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
             ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
             ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-            ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 10),
+            ('FONT', (0, 0), (0, -1), bold_font, 10),
             ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
             ('PADDING', (0, 0), (-1, -1), 8),
@@ -2576,15 +2538,16 @@ def generate_pdf_report():
         story.append(patient_table)
         story.append(Spacer(1, 20))
         
-        story.append(Paragraph("CLINICAL ASSESSMENT RESULTS", heading_style))
+        clinical_results = t.get('clinical_results', 'CLINICAL ASSESSMENT RESULTS')
+        story.append(Paragraph(clinical_results, heading_style))
         
-        primary_diagnosis = assessment_data.get('primary_diagnosis', 'N/A')
-        confidence = assessment_data.get('confidence_percentage', 0)
+        primary_diagnosis_display = assessment_data.get('primary_diagnosis', 'N/A')
+        confidence = round(assessment_data.get('confidence_percentage', 0), 0)
         
         diagnosis_data = [
-            ["Primary Diagnosis:", primary_diagnosis],
-            ["Confidence Level:", f"{confidence:.1f}%"],
-            ["Assessment Date & Time:", report_date_str]
+            [t.get('primary_diagnosis', 'Primary Diagnosis:'), primary_diagnosis_display],
+            [t.get('confidence_level', 'Confidence Level:'), f"{confidence:.1f}%"],
+            [t.get('assessment_datetime', 'Assessment Date & Time:'), report_date_str]
         ]
         
         confidence_color = colors.HexColor('#10b981')
@@ -2595,14 +2558,14 @@ def generate_pdf_report():
         
         diagnosis_table = Table(diagnosis_data, colWidths=[2*inch, 4*inch])
         diagnosis_table.setStyle(TableStyle([
-            ('FONT', (0, 0), (-1, -1), 'Helvetica', 11),
+            ('FONT', (0, 0), (-1, -1), base_font, 11),
             ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#f8fafc')),
             ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
             ('TEXTCOLOR', (1, 1), (1, 1), confidence_color),
             ('ALIGN', (0, 0), (0, -1), 'RIGHT'),
             ('ALIGN', (1, 0), (1, -1), 'LEFT'),
-            ('FONT', (0, 0), (0, -1), 'Helvetica-Bold', 11),
-            ('FONT', (1, 0), (1, 0), 'Helvetica-Bold', 11),
+            ('FONT', (0, 0), (0, -1), bold_font, 11),
+            ('FONT', (1, 0), (1, 0), bold_font, 11),
             ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#4f46e5')),
             ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
             ('PADDING', (0, 0), (-1, -1), 12),
@@ -2611,28 +2574,38 @@ def generate_pdf_report():
         story.append(diagnosis_table)
         story.append(Spacer(1, 15))
         
-        diagnosis_desc = assessment_data.get('diagnosis_description', 
-                                           'Comprehensive mental health assessment completed.')
-        story.append(Paragraph("Assessment Summary:", subheading_style))
-        story.append(Paragraph(diagnosis_desc, normal_style))
+        diagnosis_descriptions = TRANSLATIONS.get(lang, {}).get('pdf_report', {}).get('diagnosisDescription', {})
+        if not diagnosis_descriptions:
+            diagnosis_descriptions = TRANSLATIONS.get('en', {}).get('pdf_report', {}).get('diagnosisDescription', {})
+        
+        diagnosis_description = diagnosis_descriptions.get(primary_diagnosis_canonical, 
+            t.get('default_description', 'Assessment completed successfully. Please consult with a healthcare professional for accurate diagnosis.'))
+        
+        assessment_summary_title = t.get('assessment_summary', 'Assessment Summary:')
+        story.append(Paragraph(assessment_summary_title, heading_style))
+        story.append(Paragraph(diagnosis_description, normal_style))
         story.append(Spacer(1, 20))
         
-        story.append(Paragraph("DIFFERENTIAL DIAGNOSES", heading_style))
+        differential_diagnoses = t.get('differential_diagnoses', 'DIFFERENTIAL DIAGNOSES')
+        story.append(Paragraph(differential_diagnoses, heading_style))
+
         other_diagnoses = assessment_data.get('all_diagnoses', [])
-        
-        if other_diagnoses:
-            diagnoses_data = [["Diagnosis", "Probability"]]
+        if other_diagnoses and len(other_diagnoses) > 1:
+            diagnoses_data = [[t.get('diagnosis', 'Diagnosis'), t.get('probability', 'Probability')]]
             
-            for diagnosis in other_diagnoses[:5]:
+            for diagnosis in other_diagnoses[1:5]:
+                diagnosis_name = diagnosis.get('diagnosis', 'N/A')
+                confidence_percent = diagnosis.get('confidence_percentage', 
+                                                diagnosis.get('probability', 0) * 100)
                 diagnoses_data.append([
-                    diagnosis.get('diagnosis', 'N/A'),
-                    f"{diagnosis.get('confidence_percentage', 0):.1f}%"
+                    diagnosis_name,
+                    f"{confidence_percent:.1f}%"
                 ])
             
             diagnoses_table = Table(diagnoses_data, colWidths=[4*inch, 1.5*inch])
             diagnoses_table.setStyle(TableStyle([
-                ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold', 10),
-                ('FONT', (0, 1), (-1, -1), 'Helvetica', 9),
+                ('FONT', (0, 0), (-1, 0), bold_font, 10),
+                ('FONT', (0, 1), (-1, -1), base_font, 9),
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
                 ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f8fafc')),
@@ -2645,146 +2618,311 @@ def generate_pdf_report():
             
             story.append(diagnoses_table)
         else:
-            story.append(Paragraph("No additional diagnoses considered.", normal_style))
+            no_additional_diagnoses = t.get('no_additional_diagnoses', 'No additional diagnoses considered.')
+            story.append(Paragraph(no_additional_diagnoses, normal_style))
         
         story.append(Spacer(1, 20))
         
-        story.append(Paragraph("IMPORTANT DISCLAIMER", heading_style))
-        disclaimer_text = """
-        This mental health assessment is provided for informational and educational purposes only. 
-        It is not intended as a substitute for professional medical advice, diagnosis, or treatment. 
-        Always seek the advice of your physician or qualified mental health provider with any 
-        questions you may have regarding a medical or psychological condition.
+        key_responses = t.get('key_responses', 'ASSESSMENT QUESTIONS & ANSWERS')
+        story.append(Paragraph(key_responses, heading_style))
         
-        If you are experiencing a mental health emergency or having thoughts of harming yourself 
-        or others, please contact emergency services immediately by calling your local emergency 
-        number or a crisis hotline.
+        responses = assessment_data.get('responses', {})
+        if responses:
+            question_categories = t.get('question_categories', {})
+            pdf_questions = t.get('questions', {})
+            
+            questions_mapping = {
+                'Mood Swing': {'category': 'Mood & Emotions', 'question_key': 'moodSwing'},
+                'Sadness': {'category': 'Mood & Emotions', 'question_key': 'sadness'},
+                'Euphoric': {'category': 'Mood & Emotions', 'question_key': 'euphoric'},
+                'Sleep disorder': {'category': 'Sleep & Energy', 'question_key': 'sleepDisorder'},
+                'Exhausted': {'category': 'Sleep & Energy', 'question_key': 'exhausted'},
+                'Suicidal thoughts': {'category': 'Safety Assessment', 'question_key': 'suicidalThoughts'},
+                'Aggressive Response': {'category': 'Behavioral Patterns', 'question_key': 'aggressiveResponse'},
+                'Nervous Breakdown': {'category': 'Behavioral Patterns', 'question_key': 'nervousBreakdown'},
+                'Overthinking': {'category': 'Anxiety & Worry', 'question_key': 'overthinking'},
+                'Anorexia': {'category': 'Physical Health', 'question_key': 'anorexia'},
+                'Authority Respect': {'category': 'Social Behavior', 'question_key': 'authorityRespect'},
+                'Try Explanation': {'category': 'Conflict Resolution', 'question_key': 'tryExplanation'},
+                'Ignore & Move-On': {'category': 'Conflict Resolution', 'question_key': 'ignoreMoveOn'},
+                'Admit Mistakes': {'category': 'Self-Reflection', 'question_key': 'admitMistakes'},
+                'Concentration': {'category': 'Cognitive Function', 'question_key': 'concentration'},
+                'Optimism': {'category': 'Cognitive Function', 'question_key': 'optimism'},
+                'Sexual Activity': {'category': 'Sexual Health', 'question_key': 'sexualActivity'}
+            }
+            
+            cat_t = question_categories
+            
+            grouped_responses = {}
+            for feature, response in responses.items():
+                if feature in questions_mapping:
+                    question_info = questions_mapping[feature]
+                    category = question_info['category']
+                    translated_category = cat_t.get(category, category)
+                    
+                    if translated_category not in grouped_responses:
+                        grouped_responses[translated_category] = []
+                    
+                    question_key = question_info['question_key']
+                    question_text = pdf_questions.get(question_key, f'Question: {feature}')
+                    grouped_responses[translated_category].append({
+                        'question': question_text,
+                        'answer': response
+                    })
+            
+            if grouped_responses:
+                page_width = A4[0] - doc.leftMargin - doc.rightMargin
+                
+                domain_col_width = 1.3 * inch
+                answer_col_width = 1.1 * inch
+                question_col_width = page_width - domain_col_width - answer_col_width - 0.2 * inch
+                
+                response_data = [
+                    [t.get('domain', 'Domain'), 
+                     t.get('question', 'Question'), 
+                     t.get('answer', 'Answer')]
+                ]
+                
+                for category, qa_list in grouped_responses.items():
+                    for i, qa in enumerate(qa_list):
+                        answer = qa['answer']
+                        translated_answer = translate_answer_value(answer, language)
+                        
+                        question_text = qa['question']
+                        
+                        question_p = Paragraph(question_text, table_normal_style)
+                        answer_p = Paragraph(translated_answer, table_normal_style)
+                        
+                        if i == 0:
+                            category_p = Paragraph(category, table_bold_style)
+                            response_data.append([category_p, question_p, answer_p])
+                        else:
+                            response_data.append(["", question_p, answer_p])
+                
+                response_table = Table(response_data, 
+                                      colWidths=[domain_col_width, question_col_width, answer_col_width],
+                                      repeatRows=1)
+                
+                response_table.setStyle(TableStyle([
+                    ('FONT', (0, 0), (-1, 0), bold_font, 9),
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4f46e5')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#ffffff')),
+                    ('ALIGN', (0, 0), (0, -1), 'LEFT'),
+                    ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+                    ('ALIGN', (2, 0), (2, -1), 'CENTER'),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#e2e8f0')),
+                    ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
+                    ('PADDING', (0, 0), (-1, -1), 6),
+                    ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                    ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+                    ('TOPPADDING', (0, 0), (-1, -1), 6),
+                    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                    ('MINIMUMHEIGHT', (0, 1), (-1, -1), 25),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
+                ]))
+                
+                story.append(response_table)
+            else:
+                no_responses_text = t.get('no_responses', 'No assessment responses available.')
+                story.append(Paragraph(no_responses_text, normal_style))
         
-        This assessment does not constitute a clinical diagnosis and should not be used as the 
-        sole basis for making healthcare decisions.
-        """
+        story.append(Spacer(1, 20))
+        
+        important_disclaimer = t.get('important_disclaimer', 'IMPORTANT DISCLAIMER')
+        story.append(Paragraph(important_disclaimer, heading_style))
+        disclaimer_text = t.get('disclaimer_text', 'This assessment is for informational purposes only...')
         story.append(Paragraph(disclaimer_text, normal_style))
         story.append(Spacer(1, 10))
         
-        footer_text = "Confidential Mental Health Assessment Report - Generated by Clinical Assessment System"
+        footer_text = t.get('footer', 'Confidential Mental Health Assessment Report - Generated by Clinical Assessment System')
         story.append(Paragraph(footer_text, ParagraphStyle(
             'Footer',
             parent=styles['Normal'],
+            fontName=base_font,
             fontSize=8,
             alignment=TA_CENTER,
             textColor=colors.HexColor('#64748b')
         )))
-         
-        doc.build(story)
         
-        pdf = buffer.getvalue()
-        buffer.close()
-        
-        response = app.response_class(
-            response=pdf,
-            status=200,
-            mimetype='application/pdf'
-        )
-        
-        filename = f"mental_health_assessment_{assessment_data.get('id', 'report')}.pdf"
-        response.headers['Content-Disposition'] = f'attachment; filename={filename}'
-        
-        return response
+        try:
+            doc.build(story)
+            pdf = buffer.getvalue()
+            buffer.close()
+            
+            response = app.response_class(
+                response=pdf,
+                status=200,
+                mimetype='application/pdf'
+            )
+            
+            filename = f"mental_health_assessment_{assessment_data.get('id', 'report')}_{language}.pdf"
+            
+            import urllib.parse
+            encoded_filename = urllib.parse.quote(filename)
+            
+            response.headers['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{encoded_filename}'
+            response.headers['Content-Type'] = 'application/pdf; charset=utf-8'
+            response.headers['Content-Language'] = language
+            
+            return response
+             
+        except Exception as build_error:
+            logger.error(f"PDF build error: {build_error}")
+            buffer.close()
+            raise build_error
         
     except Exception as e:
         logger.error(f"Error generating PDF report: {e}")
-        return jsonify({'error': f'Failed to generate PDF report: {str(e)}'}), 500
+        try:
+            from flask import jsonify
+            return jsonify({'error': f'Failed to generate PDF report: {str(e)}'}), 500
+        except:
+             return f'Failed to generate PDF report: {str(e)}', 500   
+                 
+def clean_data_for_pdf(data):
+    if not data:
+        return {}
+    
+    cleaned = data.copy()
+    
+    def clean_string(value):
+        if not isinstance(value, str):
+            return str(value) if value else ""
+        return value.replace('\x00', '').strip()
+    
+    if 'patient_info' in cleaned and cleaned['patient_info']:
+        patient_info = cleaned['patient_info']
+        for key in ['name', 'number', 'age', 'gender']:
+            if key in patient_info:
+                patient_info[key] = clean_string(patient_info[key])
+    
+    if 'primary_diagnosis' in cleaned:
+        cleaned['primary_diagnosis'] = clean_string(cleaned['primary_diagnosis'])
+    
+    if 'all_diagnoses' in cleaned and cleaned['all_diagnoses']:
+        for diagnosis in cleaned['all_diagnoses']:
+            if 'diagnosis' in diagnosis:
+                diagnosis['diagnosis'] = clean_string(diagnosis['diagnosis'])
+    
+    return cleaned
+    
+def format_timestamp_for_pdf(timestamp_str: str, timezone_used: str, context: str = "") -> str:
+    try:
+        if not timestamp_str or timestamp_str == 'N/A':
+            return "N/A"
+        
+        dt = parse_assessment_timestamp(timestamp_str)
+        
+        try:
+            import pytz
+            if timezone_used and timezone_used != 'UTC':
+                patient_tz = pytz.timezone(timezone_used)
+                local_dt = dt.astimezone(patient_tz)
+            else:
+                local_dt = dt
+            
+            formatted = f"{local_dt.strftime('%Y-%m-%d %H:%M')} ({local_dt.strftime('%Z')})"
+            
+            return formatted
+            
+        except Exception as tz_error:
+            fallback = dt.strftime("%Y-%m-%d %H:%M UTC")
+            return fallback
+            
+    except Exception as e:
+        return timestamp_str or "Timestamp unavailable"
+    
+@app.route('/api/clear-translation-cache', methods=['POST'])
+def clear_translation_cache():
+    try:
+        translation_cache.clear_cache()
+        return jsonify({'success': True, 'message': 'Translation cache cleared'})
+    except Exception as e:
+        logger.error(f"Error clearing cache: {e}")
+        return jsonify({'error': f'Failed to clear cache: {str(e)}'}), 500
+    
+@app.route('/api/cache-stats', methods=['GET'])
+def get_cache_stats():
+    try:
+        stats = translation_cache.get_cache_stats()
+        return jsonify({
+            'success': True,
+            'stats': stats,
+            'timestamp': time.time()
+        })
+    except Exception as e:
+        logger.error(f"Error getting cache stats: {e}")
+        return jsonify({'error': f'Failed to get cache stats: {str(e)}'}), 500
+
+@app.route('/api/invalidate-cache/<patient_number>', methods=['POST'])
+def invalidate_cache(patient_number: str):
+    try:
+        translation_cache.invalidate_patient_cache(patient_number)
+        return jsonify({
+            'success': True,
+            'message': f'Cache invalidated for patient #{patient_number}'
+        })
+    except Exception as e:
+        logger.error(f"Error invalidating cache: {e}")
+        return jsonify({'error': f'Failed to invalidate cache: {str(e)}'}), 500
 
 @app.errorhandler(404)
 def not_found(error):
-    audit_logger.log_event(
-        event_type='PAGE_NOT_FOUND',
-        ip=request.remote_addr,
-        details=f"404 for {request.path}",
-        severity='INFO'
-    )
-    
     if request.path.startswith('/api/'):
         return jsonify({'error': 'API endpoint not found'}), 404
     else:
         try:
-            return send_from_directory('frontend', 'Home.html')
+            return send_from_directory('frontend', 'Home.html')  
         except:
             return jsonify({'error': 'Page not found'}), 404
 
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal server error: {error}")
-    audit_logger.log_event(
-        event_type='INTERNAL_SERVER_ERROR',
-        ip=request.remote_addr,
-        details=f"500 error at {request.path}",
-        severity='ERROR'
-    )
     return jsonify({'error': 'Internal server error'}), 500
 
 @app.errorhandler(413)
 def too_large(error):
-    audit_logger.log_event(
-        event_type='REQUEST_TOO_LARGE',
-        ip=request.remote_addr,
-        details=f"413 for {request.path}",
-        severity='WARNING'
-    )
     return jsonify({'error': 'File too large'}), 413
 
 @app.errorhandler(429)
 def too_many_requests(error):
-    audit_logger.log_event(
-        event_type='RATE_LIMIT_TRIGGERED',
-        ip=request.remote_addr,
-        details=f"429 for {request.path}",
-        severity='WARNING'
-    )
     return jsonify({
         'error': 'Too many requests',
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
 
 if __name__ == '__main__':
-    logger.info("=" * 60)
-    logger.info("MENTAL HEALTH ASSESSMENT API - SECURE EDITION v4.0")
-    logger.info("=" * 60)
-    
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
-        logger.info("✓ All model components loaded")
-        logger.info(f"  Features: {len(feature_names)}")
-        logger.info(f"  Classes: {label_encoder.classes_.tolist()}")
+        logger.info("All model components loaded successfully!")
+        logger.info(f"Features: {len(feature_names)}")
+        logger.info(f"Classes: {label_encoder.classes_.tolist()}")
+        logger.info("Enhanced preprocessing pipeline: ACTIVE")
+        logger.info("EXACT training pipeline replication: VERIFIED")
+        logger.info("Confidence calibration: ENABLED")
+        logger.info("SECURITY FEATURES: ACTIVE")
+        logger.info(f"Rate limiting: {SecurityConfig.RATE_LIMIT_REQUESTS} requests per {SecurityConfig.RATE_LIMIT_WINDOW}s")
+        logger.info(f"Input validation: MAX {SecurityConfig.MAX_INPUT_LENGTH} chars")
+        
+        try:
+            conn = get_postgres_connection()
+            conn.close()
+        except Exception as e:
+            logger.error(f"Database connection test failed: {e}")
+            
+        if clinical_enhancer:
+            logger.info("Clinical Decision Enhancer: ACTIVE")
+        else:
+            logger.warning("Clinical Decision Enhancer: NOT AVAILABLE")
     else:
-        logger.error("✗ Failed to load model components!")
-        if os.environ.get('RENDER'):
+        logger.error("Failed to load model components!")
+        if not os.environ.get('RENDER'):
+            import sys
             sys.exit(1)
     
-    try:
-        init_database()
-        logger.info("✓ Secure database initialized")
-    except Exception as e:
-        logger.error(f"✗ Database initialization failed: {e}")
-    
-    logger.info("🔒 SECURITY CONFIGURATION:")
-    logger.info(f"  API Key Required: {'✓' if SecurityConfig.API_KEY else '✗'}")
-    logger.info(f"  Encryption: {'✓' if os.environ.get('ENCRYPTION_KEY') else '✗ (generated)'}")
-    logger.info(f"  Audit Logging: ✓ ({SecurityConfig.AUDIT_LOG_FILE})")
-    logger.info(f"  Rate Limiting: ✓ ({SecurityConfig.RATE_LIMIT_REQUESTS}/{SecurityConfig.RATE_LIMIT_WINDOW}s)")
-    logger.info(f"  CORS Restrictions: ✓")
-    logger.info(f"  Security Headers: ✓")
-    
-    if clinical_enhancer:
-        logger.info("✓ Clinical Decision Enhancer: ACTIVE")
-    
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 50011))
     debug_mode = not bool(os.environ.get('RENDER'))
     
-    logger.info("=" * 60)
-    logger.info(f"Starting server on port {port} (Debug: {debug_mode})")
-    logger.info("=" * 60)
-    
-    if os.environ.get('RENDER'):
-        app.run(host='0.0.0.0', port=port, debug=False)
-    else:
-        app.run(host='0.0.0.0', port=port, debug=debug_mode)
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

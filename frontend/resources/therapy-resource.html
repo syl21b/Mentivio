@@ -1,13 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <title>Therapy - Mentivio</title>
-    <!-- Load component script with defer -->
-    <script src="../js/components.js" defer></script>
-     
-  <style>
-    /* Base Styles */
+  <title id="page-title"></title>
+    
+  <!-- Load component script with defer -->
+  <script src="../js/components.js" defer></script>
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
+    :root {
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -15,248 +36,449 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--dark);
+      background-color: var(--white);
     }
     
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
     
-    /* Resource Detail Styles */
+    /* Resource Detail Container - Updated style */
     .resource-detail-container {
       padding: 40px 0;
     }
     
+    /* Resource Header - Updated with requested gradient */
     .resource-header {
       text-align: center;
-      margin-bottom: 50px;
-      padding: 30px;
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--secondary), var(--success));
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     
     .resource-icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
     }
     
     .resource-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 700;
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
     }
     
     .resource-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     
+    /* Content Section - Updated style */
     .content-section {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
     }
     
     .content-section h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .content-section h2 i {
-      color: #4facfe;
+      color: var(--secondary);
     }
     
     .content-section p {
-      margin-bottom: 15px;
-      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.6;
     }
     
-    /* Therapy-specific styles */
+    /* Therapy Types - Updated style */
     .therapy-types {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .therapy-card {
-      padding: 25px;
-      background: #f7fafc;
-      border-radius: 10px;
-      border-left: 4px solid #4facfe;
-      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--secondary);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .therapy-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--success);
     }
     
     .therapy-card h3 {
-      color: #2c5282;
-      margin-bottom: 15px;
+      color: var(--secondary);
+      margin-bottom: 0.75rem;
       font-size: 1.3rem;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
     }
     
     .therapy-card h3 i {
-      color: #4facfe;
+      color: var(--secondary);
     }
     
+    .therapy-card p {
+      margin-bottom: 1rem;
+      color: var(--gray);
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    
+    /* Therapy Features - Updated style */
     .therapy-features {
       list-style-type: none;
-      margin: 15px 0;
+      margin: 1rem 0;
     }
     
     .therapy-features li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 25px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .therapy-features li:before {
       content: "•";
-      color: #4facfe;
+      color: var(--secondary);
       font-weight: bold;
       position: absolute;
       left: 0;
+      font-size: 1.2rem;
     }
     
+    /* Therapy Meta - Updated style */
     .therapy-meta {
       display: flex;
       flex-wrap: wrap;
-      gap: 15px;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid #e2e8f0;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-light);
     }
     
     .meta-item {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 0.5rem;
       font-size: 0.9rem;
-      color: #4a5568;
+      color: var(--gray);
     }
     
     .meta-item i {
-      color: #4facfe;
+      color: var(--secondary);
     }
     
+    /* Choosing Tips - Updated style */
     .choosing-tips {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .tip-card {
-      padding: 20px;
-      background: #f0f9ff;
-      border-radius: 8px;
-      border-top: 4px solid #4facfe;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--secondary);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .tip-card:hover {
       transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: var(--success);
     }
     
     .tip-card h3 {
-      color: #2c5282;
-      margin-bottom: 10px;
+      color: var(--secondary);
+      margin-bottom: 0.75rem;
       font-size: 1.1rem;
-    }
-    
-    .what-is-therapy {
-      background: #ebf8ff;
-      padding: 25px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #4facfe;
-    }
-    
-    .what-is-therapy h3 {
-      color: #2c5282;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .source-info {
-      margin-top: 40px;
-      padding: 20px;
-      background: #edf2f7;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-    
-    .quick-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 30px 0;
-      justify-content: center;
-    }
-    
-    .nav-btn {
-      padding: 10px 20px;
-      background: #4facfe;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s;
-    }
-    
-    .nav-btn:hover {
-      background: #5a6fd8;
-    }
-    
-    .effectiveness-note {
-      background: #f0fff4;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #48bb78;
-    }
-    
-    .effectiveness-note p {
-      color: #2f855a;
       font-weight: 500;
     }
     
+    .tip-card p {
+      margin-bottom: 0;
+      color: var(--gray);
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    
+    /* What Is Therapy Section - Updated style */
+    .what-is-therapy {
+      background: rgba(123, 160, 91, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--secondary);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .what-is-therapy h3 {
+      color: var(--secondary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 500;
+    }
+    
+    /* Effectiveness Note - Updated style */
+    .effectiveness-note {
+      background: rgba(76, 175, 80, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--success);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .effectiveness-note p {
+      color: var(--success);
+      font-weight: 500;
+      margin-bottom: 0;
+      font-size: 1.1rem;
+    }
+    
+    /* Source Info - Updated style */
+    .source-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .source-info h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Quick Navigation - Updated style */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      justify-content: center;
+    }
+    
+    /* Navigation Buttons - Updated to match prediction.css button style */
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--secondary);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--success);
+      transform: translateY(-2px);
+    }
+    
+    /* Action Buttons - For consistency with prediction.css */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--secondary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--success);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--secondary);
+      border: 2px solid var(--secondary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(123, 160, 91, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Focus states - Matched to prediction.css */
+    .nav-btn:focus,
+    .btn:focus {
+      outline: 2px solid var(--secondary);
+      outline-offset: 2px;
+    }
+    
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
       .resource-header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       
-      .therapy-types, .choosing-tips {
+      .therapy-types,
+      .choosing-tips {
         grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .therapy-card,
+      .tip-card,
+      .what-is-therapy,
+      .effectiveness-note {
+        padding: 1.25rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
       }
       
       .quick-nav {
         justify-content: center;
+      }
+      
+      .therapy-meta {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+      
+      .therapy-card h3,
+      .tip-card h3 {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .therapy-card:hover,
+      .tip-card:hover,
+      .nav-btn:hover,
+      .btn:hover {
+        transform: none;
+      }
+      
+      .therapy-card:active,
+      .tip-card:active,
+      .nav-btn:active,
+      .btn:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -268,139 +490,138 @@
         <div class="resource-icon">
           <i class="fas fa-hand-holding-heart"></i>
         </div>
-        <h1>Types of Therapy</h1>
-        <p class="resource-subtitle">Understanding different therapeutic approaches and finding what works best for you</p>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
       </div>
 
       <div class="quick-nav">
-        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Therapy?</button>
-        <button class="nav-btn" onclick="scrollToSection('cbt')">CBT</button>
-        <button class="nav-btn" onclick="scrollToSection('dbt')">DBT</button>
-        <button class="nav-btn" onclick="scrollToSection('psychodynamic')">Psychodynamic</button>
-        <button class="nav-btn" onclick="scrollToSection('other')">Other Types</button>
-        <button class="nav-btn" onclick="scrollToSection('choosing')">Choosing Therapy</button>
-
+        <button class="nav-btn" onclick="scrollToSection('what-is')" id="nav-what-is"></button>
+        <button class="nav-btn" onclick="scrollToSection('cbt')" id="nav-cbt"></button>
+        <button class="nav-btn" onclick="scrollToSection('dbt')" id="nav-dbt"></button>
+        <button class="nav-btn" onclick="scrollToSection('psychodynamic')" id="nav-psychodynamic"></button>
+        <button class="nav-btn" onclick="scrollToSection('other')" id="nav-other"></button>
+        <button class="nav-btn" onclick="scrollToSection('choosing')" id="nav-choosing"></button>
       </div>
 
       <div class="resource-content">
         <div class="content-section" id="what-is">
-          <h2><i class="fas fa-info-circle"></i> What is Psychotherapy?</h2>
-          <p>Psychotherapy, often called "talk therapy," is when you work with a trained therapist in a safe, confidential environment to explore your feelings, thoughts, and behaviors while learning new coping skills.</p>
+          <h2><i class="fas fa-info-circle"></i> <span id="section1-title"></span></h2>
+          <p id="section1-p1"></p>
           
           <div class="what-is-therapy">
-            <h3><i class="fas fa-comments"></i> How Therapy Works</h3>
-            <p>During therapy sessions, you'll discuss past or current problems, experiences, thoughts, feelings, or relationships. Your therapist helps you make connections and gain insights that can lead to positive changes in your life.</p>
+            <h3><i class="fas fa-comments"></i> <span id="section1-how-title"></span></h3>
+            <p id="section1-how-desc"></p>
           </div>
           
           <div class="effectiveness-note">
-            <p><i class="fas fa-check-circle"></i> Research shows psychotherapy is effective for improving symptoms across many mental health conditions. Many people find the best results come from combining therapy with medication when appropriate.</p>
+            <p><i class="fas fa-check-circle"></i> <span id="effectiveness-note"></span></p>
           </div>
         </div>
 
         <div class="content-section" id="cbt">
-          <h2><i class="fas fa-brain"></i> Cognitive Behavioral Therapy (CBT)</h2>
-          <p>CBT focuses on the connections between your thoughts, feelings, and behaviors. It helps you identify and change negative thinking patterns that contribute to emotional distress.</p>
+          <h2><i class="fas fa-brain"></i> <span id="section2-title"></span></h2>
+          <p id="section2-p1"></p>
           
           <div class="therapy-types">
             <div class="therapy-card">
-              <h3><i class="fas fa-lightbulb"></i> How It Works</h3>
+              <h3><i class="fas fa-lightbulb"></i> <span id="cbt-how-title"></span></h3>
               <ul class="therapy-features">
-                <li>Identifies unhealthy thought patterns</li>
-                <li>Challenges negative beliefs</li>
-                <li>Develops constructive thinking habits</li>
-                <li>Often includes homework between sessions</li>
+                <li id="cbt-how-item1"></li>
+                <li id="cbt-how-item2"></li>
+                <li id="cbt-how-item3"></li>
+                <li id="cbt-how-item4"></li>
               </ul>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: Depression, Anxiety, PTSD</span>
+                  <span id="cbt-meta1"></span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-clock"></i>
-                  <span>Duration: 12-20 sessions</span>
+                  <span id="cbt-meta2"></span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-chart-line"></i>
-                  <span>Strong research support</span>
+                  <span id="cbt-meta3"></span>
                 </div>
               </div>
             </div>
             
             <div class="therapy-card">
-              <h3><i class="fas fa-tasks"></i> What to Expect</h3>
+              <h3><i class="fas fa-tasks"></i> <span id="cbt-expect-title"></span></h3>
               <ul class="therapy-features">
-                <li>Structured sessions with clear goals</li>
-                <li>Practical skills you can use daily</li>
-                <li>Focus on current problems and solutions</li>
-                <li>Active collaboration with your therapist</li>
+                <li id="cbt-expect-item1"></li>
+                <li id="cbt-expect-item2"></li>
+                <li id="cbt-expect-item3"></li>
+                <li id="cbt-expect-item4"></li>
               </ul>
-              <p style="margin-top: 10px; font-style: italic;">CBT has been shown to create positive changes in brain activity, improving overall functioning.</p>
+              <p style="margin-top: 10px; font-style: italic;" id="cbt-note"></p>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="dbt">
-          <h2><i class="fas fa-balance-scale"></i> Dialectical Behavior Therapy (DBT)</h2>
-          <p>DBT combines CBT techniques with mindfulness practices, focusing on accepting difficult feelings while working to change unhealthy behaviors.</p>
+          <h2><i class="fas fa-balance-scale"></i> <span id="section3-title"></span></h2>
+          <p id="section3-p1"></p>
           
           <div class="therapy-types">
             <div class="therapy-card">
-              <h3><i class="fas fa-compass"></i> Core Components</h3>
+              <h3><i class="fas fa-compass"></i> <span id="dbt-components-title"></span></h3>
               <ul class="therapy-features">
-                <li>Mindfulness and emotional regulation</li>
-                <li>Distress tolerance skills</li>
-                <li>Interpersonal effectiveness</li>
-                <li>Balance of acceptance and change</li>
+                <li id="dbt-components-item1"></li>
+                <li id="dbt-components-item2"></li>
+                <li id="dbt-components-item3"></li>
+                <li id="dbt-components-item4"></li>
               </ul>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: BPD, Self-harm, Suicidal thoughts</span>
+                  <span id="dbt-meta1"></span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-clock"></i>
-                  <span>Duration: Longer-term</span>
+                  <span id="dbt-meta2"></span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-users"></i>
-                  <span>Often includes group therapy</span>
+                  <span id="dbt-meta3"></span>
                 </div>
               </div>
             </div>
             
             <div class="therapy-card">
-              <h3><i class="fas fa-hands-helping"></i> Unique Features</h3>
+              <h3><i class="fas fa-hands-helping"></i> <span id="dbt-features-title"></span></h3>
               <ul class="therapy-features">
-                <li>Emphasis on validation and acceptance</li>
-                <li>Skills training for real-life situations</li>
-                <li>Phone coaching between sessions</li>
-                <li>Therapist consultation team support</li>
+                <li id="dbt-features-item1"></li>
+                <li id="dbt-features-item2"></li>
+                <li id="dbt-features-item3"></li>
+                <li id="dbt-features-item4"></li>
               </ul>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="psychodynamic">
-          <h2><i class="fas fa-history"></i> Psychodynamic Therapy</h2>
-          <p>This approach explores how past experiences and unconscious thoughts influence your current behavior and relationships.</p>
+          <h2><i class="fas fa-history"></i> <span id="section4-title"></span></h2>
+          <p id="section4-p1"></p>
           
           <div class="therapy-types">
             <div class="therapy-card">
-              <h3><i class="fas fa-search"></i> Approach</h3>
+              <h3><i class="fas fa-search"></i> <span id="psychodynamic-approach-title"></span></h3>
               <ul class="therapy-features">
-                <li>Explores unconscious patterns</li>
-                <li>Examines childhood experiences</li>
-                <li>Focuses on relationship patterns</li>
-                <li>Uses free association and dream analysis</li>
+                <li id="psychodynamic-approach-item1"></li>
+                <li id="psychodynamic-approach-item2"></li>
+                <li id="psychodynamic-approach-item3"></li>
+                <li id="psychodynamic-approach-item4"></li>
               </ul>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: Deep-seated patterns, Personality disorders</span>
+                  <span id="psychodynamic-meta1"></span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-clock"></i>
-                  <span>Duration: Often longer-term</span>
+                  <span id="psychodynamic-meta2"></span>
                 </div>
               </div>
             </div>
@@ -408,54 +629,54 @@
         </div>
 
         <div class="content-section" id="other">
-          <h2><i class="fas fa-layer-group"></i> Other Therapy Approaches</h2>
-          <p>There are many effective therapy approaches. The best one depends on your individual needs and preferences.</p>
+          <h2><i class="fas fa-layer-group"></i> <span id="section5-title"></span></h2>
+          <p id="section5-p1"></p>
           
           <div class="therapy-types">
             <div class="therapy-card">
-              <h3><i class="fas fa-eye"></i> EMDR Therapy</h3>
-              <p>Eye Movement Desensitization and Reprocessing helps process traumatic memories through bilateral stimulation.</p>
+              <h3><i class="fas fa-eye"></i> <span id="emdr-title"></span></h3>
+              <p id="emdr-desc"></p>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: PTSD, Trauma</span>
+                  <span id="emdr-meta"></span>
                 </div>
               </div>
             </div>
             
             <div class="therapy-card">
-              <h3><i class="fas fa-user-friends"></i> Interpersonal Therapy</h3>
-              <p>Focuses on improving relationships and social functioning to relieve symptoms.</p>
+              <h3><i class="fas fa-user-friends"></i> <span id="interpersonal-title"></span></h3>
+              <p id="interpersonal-desc"></p>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: Depression, Relationship issues</span>
+                  <span id="interpersonal-meta1"></span>
                 </div>
                 <div class="meta-item">
                   <i class="fas fa-clock"></i>
-                  <span>Duration: 12-16 weeks</span>
+                  <span id="interpersonal-meta2"></span>
                 </div>
               </div>
             </div>
             
             <div class="therapy-card">
-              <h3><i class="fas fa-dog"></i> Animal-Assisted Therapy</h3>
-              <p>Uses trained therapy animals to reduce anxiety, depression, and provide comfort.</p>
+              <h3><i class="fas fa-dog"></i> <span id="animal-title"></span></h3>
+              <p id="animal-desc"></p>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: Anxiety, PTSD, Hospital settings</span>
+                  <span id="animal-meta"></span>
                 </div>
               </div>
             </div>
             
             <div class="therapy-card">
-              <h3><i class="fas fa-leaf"></i> Mindfulness Therapies</h3>
-              <p>Combines meditation and awareness practices with traditional therapy techniques.</p>
+              <h3><i class="fas fa-leaf"></i> <span id="mindfulness-title"></span></h3>
+              <p id="mindfulness-desc"></p>
               <div class="therapy-meta">
                 <div class="meta-item">
                   <i class="fas fa-heart"></i>
-                  <span>Best for: Stress, Anxiety, Depression prevention</span>
+                  <span id="mindfulness-meta"></span>
                 </div>
               </div>
             </div>
@@ -463,37 +684,35 @@
         </div>
 
         <div class="content-section" id="choosing">
-          <h2><i class="fas fa-question-circle"></i> How to Choose the Right Therapy</h2>
-          <p>Finding the right therapy approach and therapist is key to successful treatment. Consider these factors:</p>
+          <h2><i class="fas fa-question-circle"></i> <span id="section6-title"></span></h2>
+          <p id="section6-p1"></p>
           
           <div class="choosing-tips">
             <div class="tip-card">
-              <h3><i class="fas fa-bullseye"></i> Your Goals</h3>
-              <p>What do you want to achieve? Symptom relief? Personal growth? Better relationships? Different therapies focus on different outcomes.</p>
+              <h3><i class="fas fa-bullseye"></i> <span id="tip1-title"></span></h3>
+              <p id="tip1-desc"></p>
             </div>
             <div class="tip-card">
-              <h3><i class="fas fa-book"></i> Evidence Base</h3>
-              <p>Look for therapies with research support for your specific concerns. CBT and DBT have strong evidence for many conditions.</p>
+              <h3><i class="fas fa-book"></i> <span id="tip2-title"></span></h3>
+              <p id="tip2-desc"></p>
             </div>
             <div class="tip-card">
-              <h3><i class="fas fa-handshake"></i> Therapist Fit</h3>
-              <p>The relationship with your therapist is crucial. You should feel comfortable, understood, and respected.</p>
+              <h3><i class="fas fa-handshake"></i> <span id="tip3-title"></span></h3>
+              <p id="tip3-desc"></p>
             </div>
             <div class="tip-card">
-              <h3><i class="fas fa-calendar"></i> Practical Factors</h3>
-              <p>Consider cost, location, availability, insurance coverage, and time commitment when making your decision.</p>
+              <h3><i class="fas fa-calendar"></i> <span id="tip4-title"></span></h3>
+              <p id="tip4-desc"></p>
             </div>
           </div>
           
           <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px;">
-            <p><strong>Remember:</strong> It's okay to try different therapists or approaches until you find what works best for you. Good therapy should feel like a collaborative partnership.</p>
+            <p><strong id="choosing-note"></strong></p>
           </div>
         </div>
         
-   
-
         <div class="source-info">
-          <p><strong>Source Information:</strong> This content is based on information from the National Alliance on Mental Illness (NAMI). For more detailed information, visit <a href="https://www.nami.org/about-mental-illness/treatments/psychotherapy/" target="_blank">NAMI Psychotherapy Information</a>.</p>
+          <p><strong id="source-text"></strong> <a href="https://www.nami.org/about-mental-illness/treatments/psychotherapy/" target="_blank" id="source-link"></a>.</p>
         </div>
       </div>
     </div>
@@ -506,9 +725,5 @@
       });
     }
   </script>
-
-   
-
-
 </body>
 </html>

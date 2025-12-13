@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <title>Crisis Support - Mentivio</title>
+  <title id="page-title"></title>
   <!-- Load component script with defer -->
   <script src="../js/components.js" defer></script>
 
-  <style>
+<style>
     :root {
       --primary: #4f46e5;
       --primary-light: #7c3aed;
@@ -38,31 +37,28 @@
     }
     
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
       color: var(--dark);
-      background-color: #f5f7fa;
+      background-color: #fafafa;
       overflow-x: hidden;
     }
 
-    /* Main Container - Enhanced Responsiveness */
+    /* Main Container - Clean and Professional */
     .crisis-container {
       max-width: 1200px;
-      margin: 2rem auto;
-      padding: 0 clamp(1rem, 3vw, 1.5rem);
+      margin: 0 auto;
+      padding: 0 1.5rem;
     }
 
-    /* Page Header - Enhanced for Mobile */
+    /* Page Header - Professional but Urgent */
     .page-header {
       text-align: center;
-      margin-bottom: 3rem;
-      padding: clamp(3rem, 8vw, 5rem) 1.5rem;
+      padding: 4rem 1.5rem;
       background: linear-gradient(135deg, var(--danger) 0%, var(--danger-dark) 100%);
       color: white;
-      border-radius: 0 0 20px 20px;
-      box-shadow: 0 10px 30px rgba(229, 62, 62, 0.2);
-      position: relative;
-      overflow: hidden;
+      margin-bottom: 3rem;
+      border-radius: 0 0 12px 12px;
     }
     
     .page-header::before {
@@ -77,43 +73,40 @@
     }
     
     .page-icon {
-      font-size: clamp(3rem, 8vw, 4rem);
+      font-size: 2.5rem;
       margin-bottom: 1.5rem;
       position: relative;
       z-index: 1;
+      opacity: 0.9;
     }
     
     .page-header h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
+      font-size: 2.8rem;
       margin-bottom: 1rem;
-      font-weight: 700;
+      font-weight: 600;
       position: relative;
       z-index: 1;
       line-height: 1.2;
     }
     
     .page-subtitle {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-size: 1.2rem;
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
-      line-height: 1.6;
+      line-height: 1.8;
       position: relative;
       z-index: 1;
     }
 
-    /* Content Sections - Enhanced for Mobile */
+    /* Content Sections - Clean Design */
     .content-section {
       background: white;
-      border-radius: 16px;
-      padding: clamp(2rem, 5vw, 3rem);
+      border-radius: 12px;
+      padding: 2.5rem;
       margin-bottom: 2rem;
-      box-shadow: var(--shadow);
-      transition: var(--transition);
-    }
-
-    .content-section:hover {
-      box-shadow: var(--shadow-lg);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gray-light);
     }
 
     .section-header {
@@ -122,31 +115,29 @@
     }
 
     .section-header h2 {
-      font-size: clamp(1.8rem, 4vw, 2.2rem);
+      font-size: 2rem;
       color: var(--dark);
       margin-bottom: 1rem;
-      font-weight: 700;
-      line-height: 1.2;
+      font-weight: 600;
     }
 
     .section-header p {
-      font-size: clamp(1rem, 2vw, 1.1rem);
+      font-size: 1.1rem;
       color: var(--gray);
       max-width: 700px;
       margin: 0 auto;
       line-height: 1.6;
     }
 
-    /* Emergency Alert Section - Enhanced for Mobile */
+    /* Emergency Alert - Clean and Clear */
     .emergency-alert {
       background: linear-gradient(135deg, #fff5f5 0%, var(--danger-light) 100%);
       border: 2px solid var(--danger);
-      border-left: 6px solid var(--danger);
-      padding: clamp(1.5rem, 4vw, 2.5rem);
-      border-radius: 16px;
+      border-left: 4px solid var(--danger);
+      padding: 2rem;
+      border-radius: 8px;
       margin-bottom: 2rem;
       position: relative;
-      overflow: hidden;
     }
 
     .emergency-alert::before {
@@ -168,43 +159,42 @@
     .emergency-header {
       display: flex;
       align-items: flex-start;
-      gap: clamp(1rem, 3vw, 1.5rem);
-      margin-bottom: 2rem;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
     }
 
     .emergency-icon {
       background: var(--danger);
       color: white;
-      width: clamp(50px, 8vw, 60px);
-      height: clamp(50px, 8vw, 60px);
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(1.5rem, 3vw, 1.8rem);
+      font-size: 1.5rem;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
     }
 
     .emergency-title h3 {
       color: var(--danger-dark);
       margin: 0 0 0.5rem 0;
-      font-size: clamp(1.3rem, 3vw, 1.6rem);
-      font-weight: 700;
+      font-size: 1.4rem;
+      font-weight: 600;
     }
 
     .emergency-subtitle {
       color: #742a2a;
-      font-size: clamp(1rem, 2vw, 1.1rem);
+      font-size: 1.1rem;
       margin: 0;
       font-weight: 500;
       line-height: 1.5;
     }
 
-    /* Emergency Resources Grid - Enhanced for Mobile */
+    /* Emergency Resources Grid - Clean Cards */
     .emergency-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
       margin-bottom: 2rem;
     }
@@ -212,15 +202,14 @@
     .emergency-card {
       background: white;
       padding: 1.5rem;
-      border-radius: 12px;
+      border-radius: 8px;
       display: flex;
       align-items: flex-start;
       gap: 1rem;
       transition: var(--transition);
-      border: 2px solid transparent;
-      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       position: relative;
-      overflow: hidden;
     }
 
     .emergency-card::before {
@@ -245,18 +234,19 @@
     }
 
     .emergency-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-light);
     }
 
     .card-icon {
-      width: clamp(45px, 7vw, 50px);
-      height: clamp(45px, 7vw, 50px);
-      border-radius: 12px;
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+      font-size: 1.4rem;
       flex-shrink: 0;
     }
 
@@ -278,21 +268,21 @@
     .card-content h4 {
       color: var(--dark);
       margin: 0 0 0.5rem 0;
-      font-size: clamp(1rem, 2vw, 1.1rem);
+      font-size: 1.1rem;
       font-weight: 600;
     }
 
     .card-content p {
       color: #4a5568;
       margin: 0;
-      font-size: clamp(0.9rem, 1.8vw, 0.95rem);
+      font-size: 0.95rem;
       line-height: 1.5;
     }
 
-    /* Quick Action Buttons - Enhanced for Mobile */
+    /* Quick Action Buttons - Professional Style */
     .action-buttons {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 1rem;
       margin-top: 1.5rem;
     }
@@ -301,15 +291,17 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: clamp(1.2rem, 3vw, 1.5rem) 1rem;
-      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      border-radius: 8px;
       text-decoration: none;
       transition: var(--transition);
       text-align: center;
       border: 2px solid transparent;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      background: none;
+      font-family: inherit;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gray-light);
       min-height: 120px;
       justify-content: center;
     }
@@ -317,55 +309,59 @@
     .action-btn.primary {
       background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
+      border: none;
     }
 
     .action-btn.secondary {
       background: linear-gradient(135deg, #ed8936, #dd6b20);
       color: white;
+      border: none;
     }
 
     .action-btn.tertiary {
-      background: #f7fafc;
+      background: white;
       color: var(--dark);
       border-color: var(--gray-light);
     }
 
     .action-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
     .action-btn i {
-      font-size: clamp(1.5rem, 3vw, 1.8rem);
-      margin-bottom: 0.5rem;
+      font-size: 1.8rem;
+      margin-bottom: 0.8rem;
     }
 
     .action-btn span {
       font-weight: 600;
-      font-size: clamp(1rem, 2vw, 1.1rem);
-      margin-bottom: 0.25rem;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
     }
 
     .action-btn small {
       opacity: 0.9;
-      font-size: clamp(0.8rem, 1.8vw, 0.85rem);
+      font-size: 0.9rem;
       line-height: 1.4;
     }
 
-    /* Crisis Information Grid - Enhanced for Mobile */
+    /* Crisis Information Grid - Clean Cards */
     .info-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-      gap: clamp(1.5rem, 3vw, 2rem);
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
       margin-top: 2rem;
     }
 
     .info-card {
       text-align: center;
-      padding: clamp(1.5rem, 3vw, 2rem) 1.5rem;
-      border-radius: 12px;
+      padding: 2rem 1.5rem;
+      border-radius: 8px;
       transition: var(--transition);
-      background: var(--light);
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--gray-light);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -373,13 +369,13 @@
     }
 
     .info-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
 
     .info-icon {
-      width: clamp(60px, 10vw, 70px);
-      height: clamp(60px, 10vw, 70px);
+      width: 70px;
+      height: 70px;
       background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       border-radius: 50%;
       display: flex;
@@ -387,13 +383,13 @@
       justify-content: center;
       margin: 0 auto 1.5rem;
       color: white;
-      font-size: clamp(1.5rem, 3vw, 1.8rem);
+      font-size: 1.8rem;
     }
 
     .info-card h3 {
       color: var(--dark);
       margin-bottom: 1rem;
-      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+      font-size: 1.3rem;
       font-weight: 600;
     }
 
@@ -403,16 +399,15 @@
       flex-grow: 1;
     }
 
-    /* Call to Action - Enhanced for Mobile */
+    /* Call to Action - Professional Style */
     .cta-section {
       background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
-      border-radius: 16px;
-      padding: clamp(2.5rem, 5vw, 3rem);
+      border-radius: 12px;
+      padding: 3rem;
       text-align: center;
       margin: 3rem 0;
       position: relative;
-      overflow: hidden;
     }
 
     .cta-section::before {
@@ -428,8 +423,8 @@
 
     .cta-section h2 {
       margin-bottom: 1rem;
-      font-size: clamp(1.6rem, 4vw, 2rem);
-      font-weight: 700;
+      font-size: 2rem;
+      font-weight: 600;
       position: relative;
       z-index: 1;
     }
@@ -440,7 +435,7 @@
       max-width: 600px;
       margin-left: auto;
       margin-right: auto;
-      font-size: clamp(1rem, 2vw, 1.1rem);
+      font-size: 1.1rem;
       line-height: 1.6;
       position: relative;
       z-index: 1;
@@ -458,7 +453,7 @@
     .cta-btn {
       padding: 0.75rem 1.5rem;
       border: 2px solid white;
-      border-radius: 8px;
+      border-radius: 6px;
       background: transparent;
       color: white;
       font-weight: 500;
@@ -468,10 +463,8 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
       font-size: 1rem;
-      min-width: 160px;
-      justify-content: center;
     }
 
     .cta-btn.primary {
@@ -488,7 +481,7 @@
       background: rgba(255, 255, 255, 0.9);
     }
 
-    /* Modal Styles - Enhanced for Mobile */
+    /* Modal Styles - Clean Professional */
     .modal {
       display: none;
       position: fixed;
@@ -498,18 +491,17 @@
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      padding: 1rem;
+      backdrop-filter: blur(3px);
     }
 
     .modal-content {
       background-color: white;
-      margin: 5% auto;
+      margin: 10% auto;
       padding: 0;
-      border-radius: 16px;
+      border-radius: 12px;
       width: 90%;
       max-width: 500px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
       animation: modalSlideIn 0.3s ease;
       max-height: 90vh;
       overflow-y: auto;
@@ -523,8 +515,8 @@
     .modal-header {
       background: linear-gradient(135deg, var(--danger), var(--danger-dark));
       color: white;
-      padding: 20px;
-      border-radius: 16px 16px 0 0;
+      padding: 1.5rem;
+      border-radius: 12px 12px 0 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -535,7 +527,8 @@
 
     .modal-header h3 {
       margin: 0;
-      font-size: clamp(1.2rem, 3vw, 1.4rem);
+      font-size: 1.4rem;
+      font-weight: 600;
     }
 
     .close-modal {
@@ -554,28 +547,28 @@
     }
 
     .close-modal:hover {
-      transform: scale(1.1);
+      opacity: 0.8;
     }
 
     .modal-body {
-      padding: clamp(1.5rem, 3vw, 2rem);
+      padding: 2rem;
     }
 
     .location-options {
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      margin-bottom: 20px;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
       align-items: center;
     }
 
     .option-card {
       display: flex;
       align-items: center;
-      gap: 15px;
-      padding: clamp(1rem, 3vw, 1.25rem);
+      gap: 1rem;
+      padding: 1.25rem;
       border: 2px solid var(--gray-light);
-      border-radius: 12px;
+      border-radius: 8px;
       cursor: pointer;
       transition: var(--transition);
       background: none;
@@ -585,82 +578,83 @@
     }
 
     .option-card:hover {
-      border-color: #3182ce;
+      border-color: var(--primary-light);
       background: #f7fafc;
-      transform: translateY(-2px);
     }
 
     .option-icon {
-      width: clamp(45px, 7vw, 50px);
-      height: clamp(45px, 7vw, 50px);
+      width: 50px;
+      height: 50px;
       background: #ebf8ff;
-      border-radius: 12px;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #3182ce;
-      font-size: clamp(1.2rem, 2.5vw, 1.4rem);
+      font-size: 1.4rem;
       flex-shrink: 0;
     }
 
     .option-content h4 {
-      margin: 0 0 5px 0;
+      margin: 0 0 0.25rem 0;
       color: var(--dark);
-      font-size: clamp(1rem, 2vw, 1.1rem);
+      font-size: 1.1rem;
+      font-weight: 600;
     }
 
     .option-content p {
-      margin: 0 0 5px 0;
+      margin: 0 0 0.25rem 0;
       color: #4a5568;
-      font-size: clamp(0.9rem, 1.8vw, 0.95rem);
+      font-size: 0.95rem;
     }
 
     .option-content small {
       color: #718096;
-      font-size: clamp(0.8rem, 1.8vw, 0.85rem);
+      font-size: 0.85rem;
     }
 
     .manual-search {
-      margin-top: 20px;
+      margin-top: 1.5rem;
     }
 
     .search-input-group {
       display: flex;
-      gap: 10px;
+      gap: 0.5rem;
     }
 
     #locationInput {
       flex: 1;
-      padding: 12px 15px;
+      padding: 0.75rem 1rem;
       border: 2px solid var(--gray-light);
-      border-radius: 8px;
+      border-radius: 6px;
       font-size: 1rem;
       transition: border-color 0.3s ease;
-      font-family: 'Inter', sans-serif;
+      font-family: inherit;
     }
 
     #locationInput:focus {
       outline: none;
-      border-color: #3182ce;
+      border-color: var(--primary);
     }
 
     .search-btn {
-      background: #3182ce;
+      background: var(--primary);
       color: white;
       border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 1rem;
       display: flex;
       align-items: center;
-      gap: 8px;
-      transition: background 0.3s ease;
-      font-family: 'Inter', sans-serif;
+      gap: 0.5rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
     }
 
     .search-btn:hover {
-      background: #2c5aa0;
+      background: var(--primary-dark);
     }
 
     /* Loading Animation */
@@ -682,7 +676,19 @@
     /* Responsive Design */
     @media (max-width: 768px) {
       .crisis-container {
-        margin: 1.5rem auto;
+        padding: 0 1rem;
+      }
+      
+      .page-header {
+        padding: 3rem 1rem;
+      }
+      
+      .page-header h1 {
+        font-size: 2.2rem;
+      }
+      
+      .page-subtitle {
+        font-size: 1.1rem;
       }
       
       .emergency-header {
@@ -709,10 +715,6 @@
         flex-direction: column;
       }
       
-      .modal {
-        padding: 0.5rem;
-      }
-      
       .modal-content {
         margin: 10% auto;
         width: 95%;
@@ -720,18 +722,18 @@
     }
 
     @media (max-width: 480px) {
+      .content-section {
+        padding: 1.5rem 1rem;
+      }
+      
       .emergency-card {
         flex-direction: column;
         text-align: center;
         gap: 1rem;
       }
       
-      .page-header {
-        padding: 2.5rem 1rem;
-      }
-      
-      .content-section {
-        padding: 1.5rem 1rem;
+      .cta-section {
+        padding: 2rem 1rem;
       }
       
       .option-card {
@@ -740,30 +742,12 @@
       }
     }
 
-    @media (max-width: 360px) {
-      .crisis-container {
-        padding: 0 0.8rem;
-      }
-      
-      .content-section {
-        padding: 1.2rem 0.8rem;
-      }
-      
-      .emergency-alert {
-        padding: 1.2rem;
-      }
-      
-      .action-btn {
-        padding: 1rem 0.8rem;
-      }
-    }
-
-    /* High DPI Screens */
-    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-      .page-header::before,
-      .cta-section::before {
-        background-size: 1200px 800px;
-      }
+    /* Focus States for Accessibility */
+    button:focus,
+    a:focus,
+    input:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
 
     /* Reduced Motion */
@@ -800,15 +784,17 @@
       }
     }
   </style>
+  
 </head>
 <body>
+
   <!-- Page Header -->
   <div class="page-header">
     <div class="page-icon">
       <i class="fas fa-life-ring"></i>
     </div>
-    <h1>Crisis Support</h1>
-    <p class="page-subtitle">Immediate help and resources when you need them most. Your safety and well-being are our priority.</p>
+    <h1 id="header-title"></h1>
+    <p class="page-subtitle" id="header-subtitle"></p>
   </div>
 
   <div class="crisis-container">
@@ -820,28 +806,28 @@
             <i class="fas fa-exclamation-triangle"></i>
           </div>
           <div class="emergency-title">
-            <h3>Immediate Crisis Support</h3>
-            <p class="emergency-subtitle">If you're experiencing severe symptoms or having thoughts of harming yourself or others, seek help immediately.</p>
+            <h3 id="emergency-title"></h3>
+            <p class="emergency-subtitle" id="emergency-subtitle"></p>
           </div>
         </div>
         
         <div class="action-buttons emergency-actions">
           <button class="action-btn primary" onclick="window.open('tel:988')">
             <i class="fas fa-phone-alt"></i>
-            <span>988 Suicide & Crisis Lifeline</span>
-            <small>Call or text 988 — available 24/7 for free, confidential support</small>
+            <span id="lifeline-title"></span>
+            <small id="lifeline-desc"></small>
           </button>
 
           <button class="action-btn secondary" onclick="window.open('sms:741741&body=HOME')">
             <i class="fas fa-comment-medical"></i>
-            <span>Crisis Text Line</span>
-            <small>Text HOME to 741741 to connect with a trained crisis counselor</small>
+            <span id="textline-title"></span>
+            <small id="textline-desc"></small>
           </button>
 
           <button class="action-btn tertiary" onclick="findEmergencyRooms()">
             <i class="fas fa-ambulance"></i>
-            <span>Emergency Services</span>
-            <small>Call 911 or go to your nearest emergency room if in immediate danger</small>
+            <span id="emergency-services-title"></span>
+            <small id="emergency-services-desc"></small>
           </button>
         </div>
       </div>
@@ -850,8 +836,8 @@
     <!-- Crisis Information Section -->
     <section class="content-section fade-in">
       <div class="section-header">
-        <h2>What to Do in a Crisis</h2>
-        <p>Recognizing the signs and knowing how to respond can make a critical difference in a mental health emergency</p>
+        <h2 id="crisis-info-title"></h2>
+        <p id="crisis-info-subtitle"></p>
       </div>
       
       <div class="info-grid">
@@ -859,62 +845,64 @@
           <div class="info-icon">
             <i class="fas fa-exclamation-circle"></i>
           </div>
-          <h3>Recognize the Signs</h3>
-          <p>Extreme mood swings, talking about suicide, severe anxiety, inability to perform daily tasks, or expressing hopelessness.</p>
+          <h3 id="recognize-title"></h3>
+          <p id="recognize-content"></p>
         </div>
         
         <div class="info-card">
           <div class="info-icon">
             <i class="fas fa-wind"></i>
           </div>
-          <h3>Stay Calm</h3>
-          <p>Take deep breaths and try to remain calm. Your calm presence can help the person in crisis feel more secure.</p>
+          <h3 id="calm-title"></h3>
+          <p id="calm-content"></p>
         </div>
         
         <div class="info-card">
           <div class="info-icon">
             <i class="fas fa-ear-listen"></i>
           </div>
-          <h3>Listen Without Judgment</h3>
-          <p>Let the person express their feelings without interrupting or offering unsolicited advice.</p>
+          <h3 id="listen-title"></h3>
+          <p id="listen-content"></p>
         </div>
         
         <div class="info-card">
           <div class="info-icon">
             <i class="fas fa-shield-alt"></i>
           </div>
-          <h3>Remove Immediate Dangers</h3>
-          <p>If possible, remove any items that could be used for self-harm from the immediate environment.</p>
+          <h3 id="remove-title"></h3>
+          <p id="remove-content"></p>
         </div>
         
         <div class="info-card">
           <div class="info-icon">
             <i class="fas fa-user-friends"></i>
           </div>
-          <h3>Don't Leave Them Alone</h3>
-          <p>Stay with the person until professional help arrives or the crisis passes.</p>
+          <h3 id="stay-title"></h3>
+          <p id="stay-content"></p>
         </div>
         
         <div class="info-card">
           <div class="info-icon">
             <i class="fas fa-phone-alt"></i>
           </div>
-          <h3>Follow Up</h3>
-          <p>After the immediate crisis, check in regularly and encourage ongoing professional support.</p>
+          <h3 id="followup-title"></h3>
+          <p id="followup-content"></p>
         </div>
       </div>
     </section>
 
     <!-- Call to Action Section -->
     <section class="cta-section fade-in">
-      <h2>Your Mental Health Matters</h2>
-      <p>Reaching out for help is a sign of strength, not weakness. Whether you're in crisis or just need someone to talk to, support is available.</p>
+      <h2 id="cta-title"></h2>
+      <p id="cta-subtitle"></p>
       <div class="cta-buttons">
         <a href="MenHel_prediction.html" class="cta-btn primary">
-          <i class="fas fa-clipboard-check"></i> Take Self-Assessment
+          <i class="fas fa-clipboard-check"></i>
+          <span id="assessment-btn"></span>
         </a>
         <a href="resources.html" class="cta-btn">
-          <i class="fas fa-book-medical"></i> View All Resources
+          <i class="fas fa-book-medical"></i>
+          <span id="resources-btn"></span>
         </a>
       </div>
     </section>
@@ -924,7 +912,7 @@
   <div id="crisisModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Find Emergency Rooms Near You</h3>
+        <h3 id="modal-title"></h3>
         <button class="close-modal" onclick="closeCrisisModal()">&times;</button>
       </div>
       <div class="modal-body">
@@ -934,28 +922,30 @@
               <i class="fas fa-location-arrow"></i>
             </div>
             <div class="option-content">
-              <h4>Use Current Location</h4>
-              <p>Find emergency rooms near you</p>
-              <small>We'll use your current location</small>
+              <h4 id="current-location-title"></h4>
+              <p id="current-location-desc"></p>
+              <small id="current-location-note"></small>
             </div>
           </div>
+
           <div class="option-card" onclick="enableManualSearch()">
             <div class="option-icon">
               <i class="fas fa-search-location"></i>
             </div>
             <div class="option-content">
-              <h4>Search by Location</h4>
-              <p>Enter your city or zip code</p>
-              <small>Find help in any area</small>
+              <h4 id="search-location-title"></h4>
+              <p id="search-location-desc"></p>
+              <small id="search-location-note"></small>
             </div>
           </div>
         </div>
+
         <div class="manual-search" id="manualSearch" style="display: none;">
           <div class="search-input-group">
-            <input type="text" id="locationInput" placeholder="Enter your city or zip code">
+            <input type="text" id="locationInput" placeholder="" id="search-placeholder" />
             <button class="search-btn" onclick="searchEmergencyRooms()">
               <i class="fas fa-search"></i>
-              Search
+              <span id="search-btn"></span>
             </button>
           </div>
         </div>
@@ -963,7 +953,11 @@
     </div>
   </div>
 
+  <!-- JSON Injection Script -->
   <script>
+   
+   
+
     // Crisis Support Functions
     function openCrisisModal() {
       document.getElementById('crisisModal').style.display = 'block';

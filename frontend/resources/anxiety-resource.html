@@ -2,11 +2,34 @@
 <html lang="en">
 <head>
 
-  <title>Anxiety Disorders Guide - Mentivio</title>
+  <title id="page-title"></title>
+
     <!-- Load component script with defer -->
     <script src="../js/components.js" defer></script>
-  <style>
-    /* Base Styles */
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
+    :root {
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -14,168 +37,225 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--dark);
+      background-color: var(--white);
     }
     
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
     
-    /* Resource Detail Styles */
+    /* Resource Detail Container - Updated style */
     .resource-detail-container {
       padding: 40px 0;
     }
     
+    /* Resource Header - Updated with requested gradient */
     .resource-header {
       text-align: center;
-      margin-bottom: 50px;
-      padding: 30px;
-      background: linear-gradient(135deg, #764ba2 0%, #4facfe 100%);
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     
     .resource-icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
     }
     
     .resource-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 700;
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
     }
     
     .resource-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     
+    /* Content Section - Updated style */
     .content-section {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
     }
     
     .content-section h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .content-section h2 i {
-      color: #764ba2;
+      color: var(--primary-dark);
     }
     
     .content-section p {
-      margin-bottom: 15px;
-      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.6;
     }
     
-    /* Anxiety-specific styles */
+    /* Disorder Types - Updated style */
     .disorder-types {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .disorder-card {
-      padding: 25px;
-      background: #f0f9ff;
-      border-radius: 10px;
-      border-left: 4px solid #764ba2;
-      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary-dark);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .disorder-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary-light);
     }
     
     .disorder-card h3 {
-      color: #2c5282;
-      margin-bottom: 10px;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
+    .disorder-card p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--gray);
+      flex: 1;
+    }
+    
+    /* Symptoms Grid - Updated style */
     .symptoms-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
     }
     
     .symptom-item {
       display: flex;
       align-items: center;
-      gap: 15px;
-      padding: 15px;
-      background: #f0f9ff;
-      border-radius: 8px;
-      transition: transform 0.3s;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .symptom-item:hover {
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
+      border-color: var(--primary-dark);
     }
     
     .symptom-item i {
       font-size: 1.5rem;
-      color: #764ba2;
+      color: var(--primary-dark);
       width: 30px;
       text-align: center;
+      flex-shrink: 0;
     }
     
+    .symptom-text {
+      flex: 1;
+    }
+    
+    .symptom-text h4 {
+      color: var(--dark);
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+    
+    .symptom-text p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    
+    /* Coping Strategies - Updated style */
     .coping-strategies {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .strategy-card {
-      padding: 25px;
-      background: #f0f9ff;
-      border-radius: 10px;
-      border-top: 4px solid #764ba2;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--primary-dark);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .strategy-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
     }
     
     .strategy-card h3 {
-      color: #2c5282;
-      margin-bottom: 10px;
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
+    /* Treatment List - Updated style */
     .treatment-list {
       list-style-type: none;
-      margin-top: 15px;
+      margin-top: 1rem;
+      flex: 1;
     }
     
     .treatment-list li {
-      padding: 12px 0;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-light);
       position: relative;
-      padding-left: 25px;
+      padding-left: 1.75rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .treatment-list li:last-child {
@@ -184,98 +264,261 @@
     
     .treatment-list li:before {
       content: "✓";
-      color: #764ba2;
+      color: var(--primary-dark);
       font-weight: bold;
       position: absolute;
       left: 0;
     }
     
+    /* Emergency Alert - Updated style */
     .emergency-alert {
-      background: #fff5f5;
-      border-left: 4px solid #e53e3e;
-      padding: 25px;
-      border-radius: 10px;
-      margin-top: 30px;
+      background: var(--danger-light);
+      border-left: 4px solid var(--danger);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-top: 1.5rem;
+      border: 1px solid rgba(244, 67, 54, 0.2);
     }
     
     .emergency-alert h3 {
-      color: #c53030;
-      margin-bottom: 15px;
+      color: var(--danger);
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .emergency-alert ul {
       list-style-type: none;
-      margin-top: 15px;
+      margin-top: 1rem;
     }
     
     .emergency-alert li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
+      color: var(--dark);
+      line-height: 1.5;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .emergency-alert li:before {
+      content: "•";
+      color: var(--danger);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
     }
     
     .emergency-alert strong {
-      color: #c53030;
+      color: var(--danger-dark);
     }
     
-    .source-info {
-      margin-top: 40px;
-      padding: 20px;
-      background: #edf2f7;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-    
-    .quick-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 30px 0;
-      justify-content: center;
-    }
-    
-    .nav-btn {
-      padding: 10px 20px;
-      background: #764ba2;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s;
-    }
-    
-    .nav-btn:hover {
-      background: #3ba0fd;
-    }
-    
+    /* Stat Highlight - Updated style */
     .stat-highlight {
-      background: #ebf8ff;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #764ba2;
+      background: rgba(74, 111, 165, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--primary-dark);
+      border: 1px solid var(--gray-light);
     }
     
     .stat-highlight p {
       font-size: 1.1rem;
       font-weight: 500;
-      color: #2c5282;
+      color: var(--primary-dark);
+      margin-bottom: 0;
     }
     
+    /* Source Info - Updated style */
+    .source-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .source-info h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Quick Navigation - Updated style */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      justify-content: center;
+    }
+    
+    /* Navigation Buttons - Updated to match prediction.css button style */
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--primary-dark);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    /* Action Buttons - For consistency with prediction.css */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary-dark);
+      border: 2px solid var(--primary-dark);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(58, 90, 128, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Focus states - Matched to prediction.css */
+    .nav-btn:focus,
+    .btn:focus {
+      outline: 2px solid var(--primary-dark);
+      outline-offset: 2px;
+    }
+    
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
       .resource-header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       
-      .disorder-types, .symptoms-grid, .coping-strategies {
+      .disorder-types,
+      .symptoms-grid,
+      .coping-strategies {
         grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .disorder-card,
+      .strategy-card,
+      .emergency-alert,
+      .stat-highlight {
+        padding: 1.25rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
       }
       
       .quick-nav {
         justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .symptom-item {
+        padding: 1rem;
+      }
+      
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .disorder-card:hover,
+      .symptom-item:hover,
+      .strategy-card:hover,
+      .nav-btn:hover,
+      .btn:hover {
+        transform: none;
+      }
+      
+      .disorder-card:active,
+      .symptom-item:active,
+      .strategy-card:active,
+      .nav-btn:active,
+      .btn:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -287,168 +530,166 @@
         <div class="resource-icon">
           <i class="fas fa-wind"></i>
         </div>
-        <h1>Anxiety Disorders Guide</h1>
-        <p class="resource-subtitle">Understanding different types of anxiety disorders and effective management strategies</p>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
       </div>
 
       <div class="quick-nav">
-        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Anxiety?</button>
-        <button class="nav-btn" onclick="scrollToSection('types')">Types of Anxiety</button>
-        <button class="nav-btn" onclick="scrollToSection('symptoms')">Symptoms</button>
-        <button class="nav-btn" onclick="scrollToSection('coping')">Coping Strategies</button>
-        <button class="nav-btn" onclick="scrollToSection('treatment')">Treatment Options</button>
-        <button class="nav-btn" onclick="scrollToSection('help')">Getting Help</button>
+        <button class="nav-btn" onclick="scrollToSection('what-is')" id="nav-what-is"></button>
+        <button class="nav-btn" onclick="scrollToSection('types')" id="nav-types"></button>
+        <button class="nav-btn" onclick="scrollToSection('symptoms')" id="nav-symptoms"></button>
+        <button class="nav-btn" onclick="scrollToSection('coping')" id="nav-coping"></button>
+        <button class="nav-btn" onclick="scrollToSection('treatment')" id="nav-treatment"></button>
+        <button class="nav-btn" onclick="scrollToSection('help')" id="nav-help"></button>
       </div>
 
       <div class="resource-content">
         <div class="content-section" id="what-is">
-          <h2><i class="fas fa-info-circle"></i> What is Anxiety?</h2>
-          <p>Feeling anxious sometimes is a normal part of life. Many people worry about health, money, work, or family issues. But anxiety disorders involve more than temporary worry or fear.</p>
-          <p>For people with anxiety disorders, the anxiety doesn't go away and can get worse over time. The feelings can interfere with daily activities like job performance, schoolwork, and relationships.</p>
+          <h2><i class="fas fa-info-circle"></i> <span id="section1-title"></span></h2>
+          <p id="section1-p1"></p>
+          <p id="section1-p2"></p>
           
           <div class="stat-highlight">
-            <p><i class="fas fa-chart-line"></i> About one-third of U.S. adolescents and adults experience an anxiety disorder at some point in their lives.</p>
+            <p><i class="fas fa-chart-line"></i> <span id="stat-text"></span></p>
           </div>
         </div>
 
         <div class="content-section" id="types">
-          <h2><i class="fas fa-list"></i> Types of Anxiety Disorders</h2>
-          <p>Anxiety disorders come in different forms, each with unique characteristics:</p>
+          <h2><i class="fas fa-list"></i> <span id="section2-title"></span></h2>
+          <p id="section2-p1"></p>
           <div class="disorder-types">
             <div class="disorder-card">
-              <h3>Generalized Anxiety Disorder (GAD)</h3>
-              <p>Persistent and excessive worry about various aspects of daily life, often without a specific cause.</p>
+              <h3 id="type1-title"></h3>
+              <p id="type1-desc"></p>
             </div>
             <div class="disorder-card">
-              <h3>Panic Disorder</h3>
-              <p>Recurrent, unexpected panic attacks and ongoing worry about having more attacks.</p>
+              <h3 id="type2-title"></h3>
+              <p id="type2-desc"></p>
             </div>
             <div class="disorder-card">
-              <h3>Social Anxiety Disorder</h3>
-              <p>Intense fear of social situations where you might be judged, embarrassed, or scrutinized.</p>
+              <h3 id="type3-title"></h3>
+              <p id="type3-desc"></p>
             </div>
             <div class="disorder-card">
-              <h3>Specific Phobias</h3>
-              <p>Irrational fear of specific objects or situations, such as heights, flying, or animals.</p>
+              <h3 id="type4-title"></h3>
+              <p id="type4-desc"></p>
             </div>
             <div class="disorder-card">
-              <h3>Agoraphobia</h3>
-              <p>Fear of being in situations where escape might be difficult or help unavailable.</p>
+              <h3 id="type5-title"></h3>
+              <p id="type5-desc"></p>
             </div>
             <div class="disorder-card">
-              <h3>Separation Anxiety</h3>
-              <p>Excessive fear or anxiety about separation from attachment figures (more common in children).</p>
+              <h3 id="type6-title"></h3>
+              <p id="type6-desc"></p>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="symptoms">
-          <h2><i class="fas fa-exclamation-triangle"></i> Common Symptoms</h2>
-          <p>Anxiety can affect both your mind and body. Here are some common signs to watch for:</p>
+          <h2><i class="fas fa-exclamation-triangle"></i> <span id="section3-title"></span></h2>
+          <p id="section3-p1"></p>
           <div class="symptoms-grid">
             <div class="symptom-item">
               <i class="fas fa-heartbeat"></i>
-              <span>Racing heart, palpitations, or chest tightness</span>
+              <span id="symptom1"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-wind"></i>
-              <span>Shortness of breath, hyperventilation, or feeling smothered</span>
+              <span id="symptom2"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-hands"></i>
-              <span>Trembling, shaking, or muscle tension</span>
+              <span id="symptom3"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-tint"></i>
-              <span>Sweating, chills, or hot flashes</span>
+              <span id="symptom4"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-dizzy"></i>
-              <span>Dizziness, lightheadedness, or feeling faint</span>
+              <span id="symptom5"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-brain"></i>
-              <span>Racing thoughts, difficulty concentrating, or mind going blank</span>
+              <span id="symptom6"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-toilet"></i>
-              <span>Upset stomach, nausea, or digestive issues</span>
+              <span id="symptom7"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-bed"></i>
-              <span>Sleep problems (trouble falling or staying asleep)</span>
+              <span id="symptom8"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-running"></i>
-              <span>Restlessness, feeling keyed up or on edge</span>
+              <span id="symptom9"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-eye"></i>
-              <span>Hypervigilance (constantly scanning for danger)</span>
+              <span id="symptom10"></span>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="coping">
-          <h2><i class="fas fa-tools"></i> Coping Strategies</h2>
-          <p>While professional treatment is important, these strategies can help manage anxiety symptoms:</p>
+          <h2><i class="fas fa-tools"></i> <span id="section4-title"></span></h2>
+          <p id="section4-p1"></p>
           <div class="coping-strategies">
             <div class="strategy-card">
-              <h3>Breathing Techniques</h3>
-              <p>Practice deep breathing exercises like 4-7-8 breathing (inhale 4 seconds, hold 7, exhale 8) to calm your nervous system.</p>
+              <h3 id="strategy1-title"></h3>
+              <p id="strategy1-desc"></p>
             </div>
             <div class="strategy-card">
-              <h3>Grounding Exercises</h3>
-              <p>Use the 5-4-3-2-1 method: identify 5 things you see, 4 things you feel, 3 things you hear, 2 things you smell, and 1 thing you taste.</p>
+              <h3 id="strategy2-title"></h3>
+              <p id="strategy2-desc"></p>
             </div>
             <div class="strategy-card">
-              <h3>Progressive Muscle Relaxation</h3>
-              <p>Systematically tense and relax different muscle groups to release physical tension.</p>
+              <h3 id="strategy3-title"></h3>
+              <p id="strategy3-desc"></p>
             </div>
             <div class="strategy-card">
-              <h3>Cognitive Restructuring</h3>
-              <p>Challenge and reframe anxious thoughts by examining evidence for and against them.</p>
+              <h3 id="strategy4-title"></h3>
+              <p id="strategy4-desc"></p>
             </div>
             <div class="strategy-card">
-              <h3>Mindfulness & Meditation</h3>
-              <p>Practice staying present without judgment, observing thoughts and feelings as they come and go.</p>
+              <h3 id="strategy5-title"></h3>
+              <p id="strategy5-desc"></p>
             </div>
             <div class="strategy-card">
-              <h3>Lifestyle Adjustments</h3>
-              <p>Regular exercise, balanced nutrition, adequate sleep, and limiting caffeine/alcohol can reduce anxiety.</p>
+              <h3 id="strategy6-title"></h3>
+              <p id="strategy6-desc"></p>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="treatment">
-          <h2><i class="fas fa-stethoscope"></i> Professional Treatment Options</h2>
-          <p>Anxiety disorders are highly treatable. Most people benefit from professional help, which might include:</p>
+          <h2><i class="fas fa-stethoscope"></i> <span id="section5-title"></span></h2>
+          <p id="section5-p1"></p>
           <ul class="treatment-list">
-            <li><strong>Cognitive Behavioral Therapy (CBT):</strong> The most effective therapy for anxiety disorders, helping you identify and change thinking and behavior patterns.</li>
-            <li><strong>Exposure Therapy:</strong> Gradually facing feared situations in a safe, controlled way to reduce fear responses.</li>
-            <li><strong>Acceptance and Commitment Therapy (ACT):</strong> Learning to accept anxious feelings while committing to value-based actions.</li>
-            <li><strong>Medication:</strong> SSRIs, SNRIs, or anti-anxiety medications can help manage symptoms, often in combination with therapy.</li>
-            <li><strong>Mindfulness-Based Therapies:</strong> MBCT and other mindfulness approaches can help manage anxiety symptoms.</li>
+            <li><strong id="treatment1"></strong></li>
+            <li><strong id="treatment2"></strong></li>
+            <li><strong id="treatment3"></strong></li>
+            <li><strong id="treatment4"></strong></li>
+            <li><strong id="treatment5"></strong></li>
           </ul>
-          <p style="margin-top: 15px;">Many people find that a combination of therapy and medication works best. Treatment should be tailored to your specific needs and type of anxiety disorder.</p>
+          <p style="margin-top: 15px;" id="section5-p2"></p>
         </div>
 
         <div class="content-section" id="help">
-          <h2><i class="fas fa-hands-helping"></i> Getting Help</h2>
-          <p>If anxiety is interfering with your daily life, reaching out for help is an important step toward feeling better.</p>
-          <p><strong>Start with your primary care doctor</strong> - they can rule out other medical conditions that might cause similar symptoms and refer you to mental health specialists.</p>
-          <p><strong>Consider seeing a mental health professional</strong> such as a psychiatrist, psychologist, or licensed therapist who specializes in treating anxiety disorders.</p>
-          
-         
-
+          <h2><i class="fas fa-hands-helping"></i> <span id="section6-title"></span></h2>
+          <p id="section6-p1"></p>
+          <p id="section6-p2"></p>
+          <p id="section6-p3"></p>
         </div>
         
         <div class="source-info">
-          <p><strong>Source Information:</strong> This content is based on information from the National Institute of Mental Health (NIMH). For more detailed information, visit <a href="https://www.nimh.nih.gov/health/topics/anxiety-disorders" target="_blank">NIMH Anxiety Disorders Information</a>.</p>
+          <p><strong id="source-text"></strong> <a href="https://www.nimh.nih.gov/health/topics/anxiety-disorders" target="_blank" id="source-link"></a></p>
         </div>
       </div>
     </div>
   </div>
+
 
   <script>
     function scrollToSection(sectionId) {
@@ -457,10 +698,6 @@
       });
     }
   </script>
-
-
-
-   
 
 </body>
 </html>

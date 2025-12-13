@@ -2,11 +2,35 @@
 <html lang="en">
 <head>
 
-  <title>Trauma & PTSD - Mentivio</title>
+  <title id="page-title"></title>
+
+    
     <!-- Load component script with defer -->
     <script src="../js/components.js" defer></script>
-  <style>
-    /* Base Styles */
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
+    :root {
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -14,324 +38,595 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--dark);
+      background-color: var(--white);
     }
     
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
     
-    /* Resource Detail Styles */
+    /* Resource Detail Container - Updated style */
     .resource-detail-container {
       padding: 40px 0;
     }
     
+    /* Resource Header - Updated with requested gradient */
     .resource-header {
       text-align: center;
-      margin-bottom: 50px;
-      padding: 30px;
-      background: linear-gradient(135deg, #5c9e06 0%, #c7c41b 100%);
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--warning), var(--danger));
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     
     .resource-icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
     }
     
     .resource-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 700;
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
     }
     
     .resource-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     
+    /* Content Section - Updated style */
     .content-section {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
     }
     
     .content-section h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .content-section h2 i {
-      color: #5c9e06;
+      color: var(--warning);
     }
     
     .content-section p {
-      margin-bottom: 15px;
-      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.6;
     }
     
-    /* PTSD-specific styles */
+    /* Symptoms Cluster - Updated style */
     .symptoms-cluster {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .symptom-cluster {
-      padding: 25px;
-      background: #f7fafc;
-      border-radius: 10px;
-      border-left: 4px solid #5c9e06;
-      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 1.5rem;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--warning);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .symptom-cluster:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--danger);
     }
     
     .symptom-cluster h3 {
-      color: #2d3748;
-      margin-bottom: 15px;
+      color: var(--dark);
+      margin-bottom: 1rem;
       font-size: 1.2rem;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
     }
     
     .symptom-cluster h3 i {
-      color: #5c9e06;
+      color: var(--warning);
     }
     
     .symptom-cluster ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .symptom-cluster li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 25px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .symptom-cluster li:before {
       content: "•";
-      color: #5c9e06;
+      color: var(--warning);
       font-weight: bold;
       position: absolute;
       left: 0;
+      font-size: 1.2rem;
     }
     
     .symptom-cluster strong {
-      color: #2d3748;
+      color: var(--dark);
+      font-weight: 600;
     }
     
+    /* Treatment Options - Updated style */
     .treatment-options {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .treatment-card {
-      padding: 25px;
-      background: #f7fafc;
-      border-radius: 10px;
-      border-top: 4px solid #5c9e06;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--warning);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .treatment-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: var(--danger);
     }
     
     .treatment-card h3 {
-      color: #2d3748;
-      margin-bottom: 15px;
+      color: var(--dark);
+      margin-bottom: 1rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
     .treatment-card ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .treatment-card li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 25px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .treatment-card li:before {
       content: "✓";
-      color: #5c9e06;
+      color: var(--warning);
       font-weight: bold;
       position: absolute;
       left: 0;
     }
     
+    /* Coping Techniques - Updated style */
     .coping-techniques {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 30px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .technique-category {
-      padding: 25px;
-      background: #f7fafc;
-      border-radius: 10px;
+      padding: 1.5rem;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .technique-category h3 {
-      color: #2d3748;
-      margin-bottom: 20px;
+      color: var(--dark);
+      margin-bottom: 1.25rem;
       font-size: 1.2rem;
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
     }
     
     .technique-category h3 i {
-      color: #5c9e06;
+      color: var(--warning);
     }
     
     .technique-grid {
       display: grid;
-      gap: 20px;
+      gap: 1rem;
+      flex: 1;
     }
     
     .technique-item {
-      padding: 20px;
-      background: white;
-      border-radius: 8px;
-      border-left: 4px solid #5c9e06;
-      transition: transform 0.3s;
+      padding: 1.25rem;
+      background: var(--white);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--warning);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .technique-item:hover {
       transform: translateX(5px);
+      box-shadow: var(--shadow);
+      border-color: var(--danger);
     }
     
     .technique-item h4 {
-      color: #2d3748;
-      margin-bottom: 10px;
+      color: var(--dark);
+      margin-bottom: 0.75rem;
       font-size: 1.1rem;
-    }
-    
-    .source-info {
-      margin-top: 40px;
-      padding: 20px;
-      background: #edf2f7;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-    
-    .quick-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 30px 0;
-      justify-content: center;
-    }
-    
-    .nav-btn {
-      padding: 10px 20px;
-      background: #5c9e06;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s;
-    }
-    
-    .nav-btn:hover {
-      background: #434190;
-    }
-    
-    .stat-highlight {
-      background: #ebf8ff;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #4299e1;
-    }
-    
-    .stat-highlight p {
-      color: #2b6cb0;
       font-weight: 500;
     }
     
+    .technique-item p {
+      margin-bottom: 0;
+      color: var(--gray);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    
+    /* Risk Factors - Updated style */
     .risk-factors {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .risk-category {
-      padding: 20px;
-      background: #f7fafc;
-      border-radius: 8px;
+      padding: 1.5rem;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .risk-category h3 {
-      color: #2d3748;
-      margin-bottom: 15px;
+      color: var(--dark);
+      margin-bottom: 1rem;
       font-size: 1.1rem;
+      font-weight: 500;
     }
     
     .risk-category ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .risk-category li {
-      padding: 6px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 20px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .risk-category.risk li:before {
       content: "⚠";
-      color: #e53e3e;
+      color: var(--danger);
       position: absolute;
       left: 0;
     }
     
     .risk-category.resilience li:before {
       content: "🛡";
-      color: #38a169;
+      color: var(--success);
       position: absolute;
       left: 0;
     }
     
+    /* Stat Highlight - Updated style */
+    .stat-highlight {
+      background: rgba(74, 111, 165, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--primary);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .stat-highlight p {
+      color: var(--primary);
+      font-weight: 500;
+      margin-bottom: 0;
+      font-size: 1.1rem;
+    }
+    
+    /* Source Info - Updated style */
+    .source-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .source-info h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Quick Navigation - Updated style */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      justify-content: center;
+    }
+    
+    /* Navigation Buttons - Updated to match prediction.css button style */
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--warning);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--danger);
+      transform: translateY(-2px);
+    }
+    
+    /* Action Buttons - For consistency with prediction.css */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--warning);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--danger);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--warning);
+      border: 2px solid var(--warning);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(255, 152, 0, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Emergency Alert - For PTSD page */
+    .emergency-alert {
+      background: var(--danger-light);
+      border-left: 4px solid var(--danger);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-top: 1.5rem;
+      border: 1px solid rgba(244, 67, 54, 0.2);
+    }
+    
+    .emergency-alert h3 {
+      color: var(--danger);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .emergency-alert ul {
+      list-style-type: none;
+    }
+    
+    .emergency-alert li {
+      padding: 0.5rem 0;
+      color: var(--dark);
+      line-height: 1.5;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+    
+    .emergency-alert li:before {
+      content: "•";
+      color: var(--danger);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    /* Focus states - Matched to prediction.css */
+    .nav-btn:focus,
+    .btn:focus {
+      outline: 2px solid var(--warning);
+      outline-offset: 2px;
+    }
+    
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
       .resource-header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       
-      .symptoms-cluster, .treatment-options, .coping-techniques, .risk-factors {
+      .symptoms-cluster,
+      .treatment-options,
+      .coping-techniques,
+      .risk-factors {
         grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .symptom-cluster,
+      .treatment-card,
+      .technique-category,
+      .risk-category,
+      .emergency-alert,
+      .stat-highlight {
+        padding: 1.25rem;
+      }
+      
+      .technique-grid {
+        gap: 0.75rem;
+      }
+      
+      .technique-item {
+        padding: 1rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
       }
       
       .quick-nav {
         justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+      
+      .symptom-cluster h3,
+      .treatment-card h3,
+      .technique-category h3 {
+        font-size: 1.1rem;
+      }
+      
+      .technique-item {
+        flex-direction: column;
+      }
+      
+      .technique-item h4 {
+        margin-bottom: 0.5rem;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .symptom-cluster:hover,
+      .treatment-card:hover,
+      .technique-item:hover,
+      .nav-btn:hover,
+      .btn:hover {
+        transform: none;
+      }
+      
+      .symptom-cluster:active,
+      .treatment-card:active,
+      .technique-item:active,
+      .nav-btn:active,
+      .btn:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -343,202 +638,199 @@
         <div class="resource-icon">
           <i class="fas fa-shield-alt"></i>
         </div>
-        <h1>Trauma & PTSD</h1>
-        <p class="resource-subtitle">Understanding trauma responses, PTSD symptoms, and evidence-based recovery approaches</p>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
       </div>
 
       <div class="quick-nav">
-        <button class="nav-btn" onclick="scrollToSection('what-is')">Understanding PTSD</button>
-        <button class="nav-btn" onclick="scrollToSection('symptoms')">Symptoms</button>
-        <button class="nav-btn" onclick="scrollToSection('risk')">Risk Factors</button>
-        <button class="nav-btn" onclick="scrollToSection('treatment')">Treatment</button>
-        <button class="nav-btn" onclick="scrollToSection('coping')">Coping Strategies</button>
+        <button class="nav-btn" onclick="scrollToSection('what-is')" id="nav-understanding"></button>
+        <button class="nav-btn" onclick="scrollToSection('symptoms')" id="nav-symptoms"></button>
+        <button class="nav-btn" onclick="scrollToSection('risk')" id="nav-risk"></button>
+        <button class="nav-btn" onclick="scrollToSection('treatment')" id="nav-treatment"></button>
+        <button class="nav-btn" onclick="scrollToSection('coping')" id="nav-coping"></button>
       </div>
 
       <div class="resource-content">
         <div class="content-section" id="what-is">
-          <h2><i class="fas fa-info-circle"></i> Understanding Trauma and PTSD</h2>
-          <p>Post-Traumatic Stress Disorder (PTSD) is a mental health condition that can develop after experiencing or witnessing a terrifying event. While it's normal to have upsetting memories or feel on edge after trauma, PTSD involves symptoms that persist and significantly disrupt daily life.</p>
+          <h2><i class="fas fa-info-circle"></i> <span id="section1-title"></span></h2>
+          <p id="section1-p1"></p>
           
           <div class="stat-highlight">
-            <p><i class="fas fa-chart-line"></i> About 6% of people will experience PTSD at some point in their lifetime. Women are more likely than men to develop PTSD.</p>
+            <p><i class="fas fa-chart-line"></i> <span id="stat-text"></span></p>
           </div>
           
-          <p>PTSD symptoms typically begin within 3 months of the traumatic event, though they can sometimes emerge later. For a diagnosis, symptoms must last more than 1 month and be severe enough to interfere with relationships, work, or other important areas of life.</p>
+          <p id="section1-p2"></p>
         </div>
 
         <div class="content-section" id="symptoms">
-          <h2><i class="fas fa-exclamation-triangle"></i> PTSD Symptoms Clusters</h2>
-          <p>PTSD symptoms are grouped into four main clusters. To be diagnosed, adults must experience symptoms from all four categories for at least one month:</p>
+          <h2><i class="fas fa-exclamation-triangle"></i> <span id="section2-title"></span></h2>
+          <p id="section2-p1"></p>
           
           <div class="symptoms-cluster">
             <div class="symptom-cluster">
-              <h3><i class="fas fa-history"></i> Re-experiencing Symptoms</h3>
+              <h3><i class="fas fa-history"></i> <span id="cluster1-title"></span></h3>
               <ul>
-                <li><strong>Flashbacks:</strong> Reliving the trauma as if it's happening again</li>
-                <li><strong>Nightmares:</strong> Disturbing dreams related to the trauma</li>
-                <li><strong>Intrusive memories:</strong> Unwanted, recurrent memories</li>
-                <li><strong>Emotional distress:</strong> Physical reactions to trauma reminders</li>
-                <li><strong>Psychological distress:</strong> Intense feelings when exposed to cues</li>
+                <li id="cluster1-item1"></li>
+                <li id="cluster1-item2"></li>
+                <li id="cluster1-item3"></li>
+                <li id="cluster1-item4"></li>
+                <li id="cluster1-item5"></li>
               </ul>
             </div>
             <div class="symptom-cluster">
-              <h3><i class="fas fa-ban"></i> Avoidance Symptoms</h3>
+              <h3><i class="fas fa-ban"></i> <span id="cluster2-title"></span></h3>
               <ul>
-                <li><strong>Avoiding memories:</strong> Staying away from thoughts or feelings</li>
-                <li><strong>Avoiding reminders:</strong> Staying away from people, places, or activities</li>
-                <li><strong>Memory gaps:</strong> Inability to recall important aspects of the trauma</li>
-                <li><strong>Emotional numbing:</strong> Difficulty experiencing positive feelings</li>
+                <li id="cluster2-item1"></li>
+                <li id="cluster2-item2"></li>
+                <li id="cluster2-item3"></li>
+                <li id="cluster2-item4"></li>
               </ul>
             </div>
             <div class="symptom-cluster">
-              <h3><i class="fas fa-brain"></i> Negative Thoughts and Mood</h3>
+              <h3><i class="fas fa-brain"></i> <span id="cluster3-title"></span></h3>
               <ul>
-                <li><strong>Negative beliefs:</strong> About oneself, others, or the world</li>
-                <li><strong>Distorted blame:</strong> Blaming self or others for the trauma</li>
-                <li><strong>Negative emotional state:</strong> Persistent fear, horror, anger, guilt, shame</li>
-                <li><strong>Diminished interest:</strong> In significant activities</li>
-                <li><strong>Detachment:</strong> From others; feeling estranged</li>
+                <li id="cluster3-item1"></li>
+                <li id="cluster3-item2"></li>
+                <li id="cluster3-item3"></li>
+                <li id="cluster3-item4"></li>
+                <li id="cluster3-item5"></li>
               </ul>
             </div>
             <div class="symptom-cluster">
-              <h3><i class="fas fa-bolt"></i> Arousal and Reactivity</h3>
+              <h3><i class="fas fa-bolt"></i> <span id="cluster4-title"></span></h3>
               <ul>
-                <li><strong>Irritability or aggression:</strong> Angry outbursts</li>
-                <li><strong>Reckless behavior:</strong> Self-destructive behavior</li>
-                <li><strong>Hypervigilance:</strong> Being overly alert to danger</li>
-                <li><strong>Exaggerated startle response:</strong> Easily startled</li>
-                <li><strong>Concentration problems:</strong> Difficulty focusing</li>
-                <li><strong>Sleep disturbances:</strong> Trouble falling or staying asleep</li>
+                <li id="cluster4-item1"></li>
+                <li id="cluster4-item2"></li>
+                <li id="cluster4-item3"></li>
+                <li id="cluster4-item4"></li>
+                <li id="cluster4-item5"></li>
+                <li id="cluster4-item6"></li>
               </ul>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="risk">
-          <h2><i class="fas fa-balance-scale"></i> Risk and Resilience Factors</h2>
-          <p>Not everyone who experiences trauma develops PTSD. Various factors influence whether someone develops the condition:</p>
+          <h2><i class="fas fa-balance-scale"></i> <span id="section3-title"></span></h2>
+          <p id="section3-p1"></p>
           
           <div class="risk-factors">
             <div class="risk-category risk">
-              <h3>Risk Factors</h3>
+              <h3 id="risk-title"></h3>
               <ul>
-                <li>Previous traumatic experiences, especially in childhood</li>
-                <li>Getting hurt or seeing people hurt or killed</li>
-                <li>Feeling horror, helplessness, or extreme fear</li>
-                <li>Little or no social support after the event</li>
-                <li>Additional stressors after trauma (loss, injury, job loss)</li>
-                <li>Personal or family history of mental illness</li>
-                <li>History of substance use</li>
+                <li id="risk-item1"></li>
+                <li id="risk-item2"></li>
+                <li id="risk-item3"></li>
+                <li id="risk-item4"></li>
+                <li id="risk-item5"></li>
+                <li id="risk-item6"></li>
+                <li id="risk-item7"></li>
               </ul>
             </div>
             <div class="risk-category resilience">
-              <h3>Resilience Factors</h3>
+              <h3 id="resilience-title"></h3>
               <ul>
-                <li>Seeking and receiving support from others</li>
-                <li>Learning to feel okay with one's actions in response</li>
-                <li>Having effective coping strategies</li>
-                <li>Being prepared to respond to upsetting events</li>
-                <li>Strong social support network</li>
-                <li>Positive coping mechanisms</li>
-                <li>Ability to find meaning in difficult experiences</li>
+                <li id="resilience-item1"></li>
+                <li id="resilience-item2"></li>
+                <li id="resilience-item3"></li>
+                <li id="resilience-item4"></li>
+                <li id="resilience-item5"></li>
+                <li id="resilience-item6"></li>
+                <li id="resilience-item7"></li>
               </ul>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="treatment">
-          <h2><i class="fas fa-stethoscope"></i> Evidence-Based Treatments</h2>
-          <p>PTSD treatment works. With proper care, people can learn to feel safe in the world and develop effective coping strategies. The most effective treatments are trauma-focused therapies:</p>
+          <h2><i class="fas fa-stethoscope"></i> <span id="section4-title"></span></h2>
+          <p id="section4-p1"></p>
           
           <div class="treatment-options">
             <div class="treatment-card">
-              <h3>Trauma-Focused Psychotherapies</h3>
+              <h3 id="treatment1-title"></h3>
               <ul>
-                <li><strong>Cognitive Processing Therapy (CPT):</strong> Helps challenge and modify unhelpful beliefs about the trauma</li>
-                <li><strong>Prolonged Exposure Therapy (PE):</strong> Gradual exposure to trauma memories in a safe environment</li>
-                <li><strong>Eye Movement Desensitization and Reprocessing (EMDR):</strong> Uses bilateral stimulation while processing trauma</li>
-                <li><strong>Trauma-Focused Cognitive Behavioral Therapy (TF-CBT):</strong> Especially effective for children and adolescents</li>
+                <li id="treatment1-item1"></li>
+                <li id="treatment1-item2"></li>
+                <li id="treatment1-item3"></li>
+                <li id="treatment1-item4"></li>
               </ul>
             </div>
             <div class="treatment-card">
-              <h3>Medication Options</h3>
+              <h3 id="treatment2-title"></h3>
               <ul>
-                <li><strong>SSRIs:</strong> Sertraline, Paroxetine, Fluoxetine (FDA-approved for PTSD)</li>
-                <li><strong>SNRIs:</strong> Venlafaxine (shown to be effective)</li>
-                <li><strong>Prazosin:</strong> Specifically for trauma-related nightmares</li>
-                <li><strong>Atypical Antipsychotics:</strong> For severe symptoms when other treatments aren't effective</li>
+                <li id="treatment2-item1"></li>
+                <li id="treatment2-item2"></li>
+                <li id="treatment2-item3"></li>
+                <li id="treatment2-item4"></li>
               </ul>
-              <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;"><strong>Note:</strong> Benzodiazepines are not recommended for PTSD treatment as they don't address core symptoms and can have serious side effects.</p>
+              <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;"><strong id="treatment2-note"></strong></p>
             </div>
             <div class="treatment-card">
-              <h3>Complementary Approaches</h3>
+              <h3 id="treatment3-title"></h3>
               <ul>
-                <li><strong>Yoga and Mindfulness:</strong> Body-based trauma healing and stress reduction</li>
-                <li><strong>Acupuncture:</strong> For anxiety and stress reduction symptoms</li>
-                <li><strong>Service Animals:</strong> Emotional support and grounding during distress</li>
-                <li><strong>Art and Music Therapy:</strong> Non-verbal expression of trauma experiences</li>
-                <li><strong>Group Therapy:</strong> Shared experiences and peer support</li>
+                <li id="treatment3-item1"></li>
+                <li id="treatment3-item2"></li>
+                <li id="treatment3-item3"></li>
+                <li id="treatment3-item4"></li>
+                <li id="treatment3-item5"></li>
               </ul>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="coping">
-          <h2><i class="fas fa-tools"></i> Coping Strategies and Grounding Techniques</h2>
-          <p>These techniques can help manage PTSD symptoms between therapy sessions and during moments of distress:</p>
+          <h2><i class="fas fa-tools"></i> <span id="section5-title"></span></h2>
+          <p id="section5-p1"></p>
           
           <div class="coping-techniques">
             <div class="technique-category">
-              <h3><i class="fas fa-first-aid"></i> Immediate Grounding Techniques</h3>
+              <h3><i class="fas fa-first-aid"></i> <span id="technique1-title"></span></h3>
               <div class="technique-grid">
                 <div class="technique-item">
-                  <h4>5-4-3-2-1 Method</h4>
-                  <p>Name 5 things you can see, 4 things you can touch, 3 things you can hear, 2 things you can smell, 1 thing you can taste. This brings attention to the present moment.</p>
+                  <h4 id="technique1-item1-title"></h4>
+                  <p id="technique1-item1-desc"></p>
                 </div>
                 <div class="technique-item">
-                  <h4>Temperature Change</h4>
-                  <p>Hold an ice cube, splash cold water on your face, or hold a warm drink. The temperature change can help interrupt distressing thoughts.</p>
+                  <h4 id="technique1-item2-title"></h4>
+                  <p id="technique1-item2-desc"></p>
                 </div>
                 <div class="technique-item">
-                  <h4>Breathing Exercises</h4>
-                  <p>4-7-8 breathing: Inhale for 4 counts, hold for 7 counts, exhale for 8 counts. Repeat 4-5 times to calm the nervous system.</p>
+                  <h4 id="technique1-item3-title"></h4>
+                  <p id="technique1-item3-desc"></p>
                 </div>
                 <div class="technique-item">
-                  <h4>Body Awareness</h4>
-                  <p>Focus on physical sensations - feel your feet on the ground, notice the chair supporting you, pay attention to your breathing.</p>
+                  <h4 id="technique1-item4-title"></h4>
+                  <p id="technique1-item4-desc"></p>
                 </div>
               </div>
             </div>
             <div class="technique-category">
-              <h3><i class="fas fa-seedling"></i> Long-Term Recovery Strategies</h3>
+              <h3><i class="fas fa-seedling"></i> <span id="technique2-title"></span></h3>
               <div class="technique-grid">
                 <div class="technique-item">
-                  <h4>Safety Planning</h4>
-                  <p>Create a detailed plan for managing triggers and crisis situations. Include emergency contacts, coping strategies, and safe places.</p>
+                  <h4 id="technique2-item1-title"></h4>
+                  <p id="technique2-item1-desc"></p>
                 </div>
                 <div class="technique-item">
-                  <h4>Trigger Identification</h4>
-                  <p>Keep a journal to identify and understand your specific triggers. Note what happened before, during, and after distressing episodes.</p>
+                  <h4 id="technique2-item2-title"></h4>
+                  <p id="technique2-item2-desc"></p>
                 </div>
                 <div class="technique-item">
-                  <h4>Support System Building</h4>
-                  <p>Develop relationships with understanding friends, family, or support groups. Consider joining PTSD support groups for shared experiences.</p>
+                  <h4 id="technique2-item3-title"></h4>
+                  <p id="technique2-item3-desc"></p>
                 </div>
                 <div class="technique-item">
-                  <h4>Self-Care Routine</h4>
-                  <p>Establish consistent routines for sleep, meals, exercise, and relaxation. Prioritize activities that bring comfort and joy.</p>
+                  <h4 id="technique2-item4-title"></h4>
+                  <p id="technique2-item4-desc"></p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-         
-      
-
         <div class="source-info">
-          <p><strong>Source Information:</strong> This content is based on information from the National Institute of Mental Health (NIMH) and the National Center for PTSD. For more detailed information, visit <a href="https://www.nimh.nih.gov/health/publications/post-traumatic-stress-disorder-ptsd" target="_blank">NIMH PTSD Information</a> and <a href="https://www.ptsd.va.gov/understand_tx/index.asp" target="_blank">National Center for PTSD Treatment Guide</a>.</p>
+          <p><strong id="source-text"></strong> <a href="https://www.nimh.nih.gov/health/publications/post-traumatic-stress-disorder-ptsd" target="_blank" id="source-link1"></a> and <a href="https://www.ptsd.va.gov/understand_tx/index.asp" target="_blank" id="source-link2"></a>.</p>
         </div>
       </div>
     </div>
@@ -551,6 +843,5 @@
       });
     }
   </script>
-  
 </body>
 </html>

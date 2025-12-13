@@ -1,31 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <title>Analogy Visualizer - Mentivio</title>
+  <title id="page-title"></title>
+  <!-- Load component script with defer -->
   <script src="../js/components.js" defer></script>
     
-    
-  <style>
-    /* Your CSS remains exactly the same */
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
     :root {
-      --primary: #4f46e5;
-      --primary-light: #7c3aed;
-      --primary-dark: #3730a3;
-      --secondary: #6366f1;
-      --accent: #a78bfa;
-      --light: #f8fafc;
-      --dark: #1e293b;
-      --success: #16a34a;
-      --warning: #facc15;
-      --danger: #ef4444;
-      --danger-light: #fecaca;
-      --danger-dark: #dc2626;
-      --gray: #64748b;
-      --gray-light: #e2e8f0;
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
       --transition: all 0.3s ease;
-      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
     
     * {
@@ -39,31 +40,21 @@
     }
     
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
       color: var(--dark);
-      background-color: #f5f7fa;
+      background-color: var(--white);
       overflow-x: hidden;
     }
     
+    /* Hero Section - Matched to Home.html */
     .hero {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      color: white;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: var(--dark);
       padding: clamp(4rem, 10vw, 6rem) 20px;
       text-align: center;
       position: relative;
-      overflow: hidden;
-    }
-    
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.05"><path fill="white" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
-      background-size: cover;
+      margin-bottom: 2rem;
     }
     
     .hero-content {
@@ -74,35 +65,38 @@
     }
     
     .hero h1 {
-      font-size: clamp(2.2rem, 5vw, 3rem);
-      color: #ffffff;
+      font-size: clamp(2.2rem, 5vw, 2.8rem);
+      color: var(--dark);
       margin-bottom: 1.5rem;
-      font-weight: 700;
+      font-weight: 300;
       line-height: 1.2;
     }
     
-    .hero p {
-      font-size: clamp(1rem, 2.5vw, 1.3rem);
-      color: #ffffff;
-      max-width: 700px;
-      margin: 0 auto 2.5rem;
-      opacity: 0.9;
-      line-height: 1.6;
+    .hero h1 strong {
+      font-weight: 600;
+      color: var(--primary);
     }
     
-  
-    /* Container - Enhanced for Mobile */
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--gray);
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.8;
+    }
+    
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 clamp(1rem, 3vw, 1.5rem);
+      padding: 0 20px;
     }
     
-    /* Disclaimer Alert - Enhanced for Mobile */
+    /* Disclaimer Alert - Updated style */
     .disclaimer-alert {
       background: #fff3cd;
       border: 1px solid #ffeaa7;
-      border-radius: 12px;
+      border-radius: var(--radius);
       padding: clamp(1.2rem, 3vw, 1.5rem);
       margin: 2rem 0;
       display: flex;
@@ -114,12 +108,14 @@
     .alert-icon {
       font-size: clamp(1.5rem, 3vw, 1.8rem);
       flex-shrink: 0;
+      color: #856404;
     }
     
     .alert-content h3 {
       color: #856404;
       margin-bottom: 0.5rem;
       font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+      font-weight: 600;
     }
     
     .alert-content p {
@@ -128,7 +124,7 @@
       font-size: clamp(0.9rem, 2vw, 1rem);
     }
     
-    /* Global Controls - Enhanced for Mobile */
+    /* Global Controls - Updated style */
     .global-controls {
       display: flex;
       gap: clamp(0.8rem, 2vw, 1rem);
@@ -137,36 +133,37 @@
       flex-wrap: wrap;
     }
     
+    /* Buttons - Updated to match prediction.css style */
     .global-btn {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      padding: clamp(0.8rem, 2vw, 1rem) clamp(1.2rem, 3vw, 1.5rem);
+      padding: clamp(0.875rem, 2vw, 1rem) clamp(1.2rem, 3vw, 1.5rem);
       border: none;
-      border-radius: 8px;
-      background: var(--primary);
+      border-radius: 50px;
+      background-color: var(--primary);
       color: white;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       transition: var(--transition);
       font-size: clamp(0.9rem, 2vw, 1rem);
+      font-family: inherit;
     }
     
     .global-btn:hover {
-      background: var(--primary-dark);
+      background-color: var(--primary-light);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     }
     
     .global-btn.stop {
-      background: var(--danger);
+      background-color: var(--danger);
     }
     
     .global-btn.stop:hover {
-      background: var(--danger-dark);
+      background-color: var(--danger-dark);
     }
     
-    /* Comparison Grid - Enhanced for Mobile */
+    /* Comparison Grid - Updated style */
     .comparison-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
@@ -174,23 +171,25 @@
       margin-bottom: 3rem;
     }
     
+    /* Card Layout - Matched to Home.html */
     .visualization-card {
-      background: white;
-      border-radius: 16px;
+      background: var(--white);
+      border-radius: var(--radius);
       padding: clamp(1.5rem, 3vw, 2rem);
       box-shadow: var(--shadow);
       transition: var(--transition);
       display: flex;
       flex-direction: column;
       height: 100%;
+      border: 1px solid var(--gray-light);
     }
     
     .visualization-card:hover {
       box-shadow: var(--shadow-lg);
-      transform: translateY(-5px);
+      transform: translateY(-3px);
     }
     
-    /* Card Header - Enhanced for Mobile */
+    /* Card Header - Updated style */
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -205,14 +204,14 @@
       align-items: center;
       gap: 0.5rem;
       font-size: clamp(1.2rem, 2.5vw, 1.4rem);
-      font-weight: 600;
+      font-weight: 500;
       color: var(--dark);
     }
     
     .condition-indicator {
-      padding: 0.4rem 0.8rem;
+      padding: 0.4rem 1rem;
       border-radius: 20px;
-      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+      font-size: clamp(0.8rem, 1.8vw, 0.9rem);
       font-weight: 600;
       text-align: center;
       white-space: nowrap;
@@ -221,12 +220,32 @@
       max-width: 180px;
     }
     
-    .bipolar1-indicator { background: #ffeaa7; color: #e74c3c; }
-    .bipolar2-indicator { background: #d6eaf8; color: #3498db; }
-    .depression-indicator { background: #e8e8e8; color: #2c3e50; }
-    .normal-indicator { background: #d5f5e3; color: #27ae60; }
+    /* Condition indicators with updated colors */
+    .bipolar1-indicator { 
+      background: rgba(244, 67, 54, 0.1); 
+      color: var(--danger); 
+      border: 1px solid rgba(244, 67, 54, 0.2);
+    }
     
-    /* Human Timeline Section - Enhanced for Mobile */
+    .bipolar2-indicator { 
+      background: rgba(123, 160, 91, 0.1); 
+      color: var(--secondary); 
+      border: 1px solid rgba(123, 160, 91, 0.2);
+    }
+    
+    .depression-indicator { 
+      background: var(--gray-light); 
+      color: var(--gray); 
+      border: 1px solid rgba(108, 117, 125, 0.2);
+    }
+    
+    .normal-indicator { 
+      background: rgba(76, 175, 80, 0.1); 
+      color: var(--success); 
+      border: 1px solid rgba(76, 175, 80, 0.2);
+    }
+    
+    /* Human Timeline Section - Updated style */
     .human-timeline-section {
       display: flex;
       flex-direction: column;
@@ -238,9 +257,10 @@
       position: relative;
       height: 160px;
       background: var(--light);
-      border-radius: 12px;
+      border-radius: var(--radius);
       padding: 1rem;
       overflow: hidden;
+      border: 1px solid var(--gray-light);
     }
     
     .conversation-box {
@@ -251,11 +271,12 @@
       background: white;
       padding: 0.8rem 1rem;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
       font-size: clamp(0.8rem, 2vw, 0.9rem);
       line-height: 1.4;
       z-index: 2;
       transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .walking-human {
@@ -269,6 +290,7 @@
     .walker {
       font-size: clamp(2.5rem, 3vw, 3rem);
       transition: var(--transition);
+      color: var(--primary);
     }
     
     .walking-path {
@@ -280,11 +302,12 @@
       background: var(--gray-light);
     }
     
-    /* Timeline Section - Enhanced for Mobile */
+    /* Timeline Section - Updated style */
     .timeline-section {
       background: var(--light);
-      border-radius: 12px;
+      border-radius: var(--radius);
       padding: 1.2rem;
+      border: 1px solid var(--gray-light);
     }
     
     .timeline-title {
@@ -322,6 +345,7 @@
       transform: translateY(-50%);
       transition: width 1s ease-in-out;
       border-radius: 2px;
+      background: var(--primary);
     }
     
     .timeline-marker {
@@ -331,7 +355,9 @@
       border-radius: 50%;
       transform: translate(-50%, -50%);
       transition: left 1s ease-in-out;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      background: var(--primary);
+      border: 2px solid white;
     }
     
     .timeline-labels {
@@ -347,74 +373,75 @@
       flex: 1;
     }
     
-   /* Metrics Container - Enhanced for Mobile */
-.metrics-container {
-  margin-bottom: 1.5rem;
-}
-
-.metrics-title {
-  font-size: clamp(0.9rem, 1.5vw, 1rem);
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--dark);
-}
-
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-}
-
-.metric-item {
-  text-align: center;
-}
-
-.metric-name {
-  font-size: clamp(0.7rem, 1.5vw, 0.8rem);
-  font-weight: 400;
-  margin-bottom: 0.5rem;
-  color: var(--gray);
-}
-
-.donut-chart {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  margin: 0 auto;
-  border-radius: 50%;
-  background: var(--gray-light);
-}
-
-.donut-segment {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
-  transform: rotate(var(--segment-rotation, 0deg));
-  background: conic-gradient(
-    var(--segment-color, var(--primary)) 0deg var(--segment-rotation, 0deg),
-    transparent var(--segment-rotation, 0deg) 360deg
-  );
-}
-
-.donut-inner {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40px;
-  height: 40px;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-  font-weight: 600;
-  box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
-}
-    /* Controls - Enhanced for Mobile */
+    /* Metrics Container - Updated style */
+    .metrics-container {
+      margin-bottom: 1.5rem;
+    }
+    
+    .metrics-title {
+      font-size: clamp(0.9rem, 1.5vw, 1rem);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--dark);
+    }
+    
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+    
+    .metric-item {
+      text-align: center;
+    }
+    
+    .metric-name {
+      font-size: clamp(0.7rem, 1.5vw, 0.8rem);
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+      color: var(--gray);
+    }
+    
+    .donut-chart {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: var(--gray-light);
+    }
+    
+    .donut-segment {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
+      transform: rotate(var(--segment-rotation, 0deg));
+      background: conic-gradient(
+        var(--segment-color, var(--primary)) 0deg var(--segment-rotation, 0deg),
+        transparent var(--segment-rotation, 0deg) 360deg
+      );
+    }
+    
+    .donut-inner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+      font-weight: 600;
+      box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Controls - Updated style */
     .controls {
       display: flex;
       gap: 0.8rem;
@@ -426,9 +453,9 @@
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      padding: 0.6rem 1rem;
+      padding: 0.75rem 1rem;
       border: none;
-      border-radius: 6px;
+      border-radius: 50px;
       background: var(--primary);
       color: white;
       font-weight: 500;
@@ -438,14 +465,15 @@
       flex: 1;
       justify-content: center;
       max-width: 100px;
+      font-family: inherit;
     }
     
     .control-btn:hover {
-      background: var(--primary-dark);
+      background: var(--primary-light);
       transform: translateY(-2px);
     }
     
-    /* Comparison Summary - Enhanced for Mobile */
+    /* Comparison Summary - Updated style */
     .comparison-summary {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
@@ -454,11 +482,12 @@
     }
     
     .summary-card {
-      background: white;
-      border-radius: 12px;
+      background: var(--white);
+      border-radius: var(--radius);
       padding: clamp(1.2rem, 2.5vw, 1.5rem);
       box-shadow: var(--shadow);
       transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .summary-card:hover {
@@ -471,7 +500,7 @@
       align-items: center;
       gap: 0.5rem;
       font-size: clamp(1rem, 2.2vw, 1.2rem);
-      font-weight: 600;
+      font-weight: 500;
       margin-bottom: 0.8rem;
       color: var(--dark);
     }
@@ -482,14 +511,15 @@
       color: var(--gray);
     }
     
-    /* Info Panel - Enhanced for Mobile */
+    /* Info Panel - Updated style */
     .info-panel {
-      background: white;
-      border-radius: 16px;
+      background: var(--white);
+      border-radius: var(--radius);
       padding: clamp(1.5rem, 3vw, 2rem);
       box-shadow: var(--shadow);
       margin: 3rem 0;
       overflow-x: auto;
+      border: 1px solid var(--gray-light);
     }
     
     .info-header {
@@ -510,28 +540,31 @@
       justify-content: center;
       font-size: 1.5rem;
       color: white;
+      background: var(--primary);
     }
-    
-    .bipolar1-icon { background: #e74c3c; }
-    .depression-icon { background: #3498db; }
     
     .info-title {
       font-size: clamp(1.3rem, 3vw, 1.6rem);
       color: var(--dark);
       text-align: center;
-      font-weight: 700;
+      font-weight: 300;
     }
     
-    /* Comparison Table - Enhanced for Mobile */
+    .info-title strong {
+      font-weight: 600;
+      color: var(--primary);
+    }
+    
+    /* Comparison Table - Updated style */
     .comparison-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+      font-size: clamp(0.9rem, 1.8vw, 1rem);
     }
     
     .comparison-table th,
     .comparison-table td {
-      padding: 0.8rem;
+      padding: 1rem;
       text-align: left;
       border-bottom: 1px solid var(--gray-light);
     }
@@ -546,101 +579,100 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      font-size: clamp(0.8rem, 1.8vw, 0.9rem);
+      font-size: clamp(0.9rem, 1.8vw, 1rem);
     }
     
-    .bipolar1-header { color: #e74c3c; }
-    .bipolar2-header { color: #f39c12; }
-    .depression-header { color: #3498db; }
-    .normal-header { color: #27ae60; }
-    
     .feature-name {
-      font-weight: 600;
+      font-weight: 500;
       color: var(--dark);
       min-width: 120px;
     }
     
     .critical-difference {
-      color: var(--primary) ;
+      color: var(--primary);
       font-weight: 700;
       margin-bottom: 0.3rem;
     }
     
     .key-point {
-      font-size: clamp(0.7rem, 1.6vw, 0.75rem);
+      font-size: clamp(0.85rem, 1.6vw, 0.9rem);
       color: var(--gray);
       margin-top: 0.2rem;
+      line-height: 1.4;
     }
     
     .highlight-box {
       background: var(--light);
-      padding: 0.6rem;
-      border-radius: 6px;
+      padding: 0.75rem;
+      border-radius: 8px;
       margin-top: 0.5rem;
       border-left: 3px solid var(--primary);
     }
     
-    /* Loading Animation */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .highlight-box strong {
+      color: var(--primary);
+    }
+    
+    /* Animation Classes */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 0.5s ease;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    .running {
+      animation: bounce 0.5s infinite alternate;
+    }
+    
+    .walking {
+      animation: bounce 1s infinite alternate;
+    }
+    
+    .slow {
+      animation: bounce 2s infinite alternate;
+    }
+    
+    .still {
+      animation: none;
+    }
+    
+    .bipolar1-extreme-high {
+      background: rgba(244, 67, 54, 0.1) !important;
+      color: var(--danger) !important;
+      animation: pulse 0.5s infinite;
+    }
+    
+    .bipolar1-extreme-low {
+      background: rgba(74, 111, 165, 0.1) !important;
+      color: var(--primary) !important;
+      animation: pulse 0.8s infinite;
+    }
+    
+    /* Loading Animation - Matched to prediction.css */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     .fade-in {
-      animation: fadeInUp 0.6s ease forwards;
+      animation: fadeIn 0.5s ease forwards;
     }
-    /* Animation Classes - Add these */
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-}
-
-.pulse {
-  animation: pulse 0.5s ease;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
-}
-
-.running {
-  animation: bounce 0.5s infinite alternate;
-}
-
-.walking {
-  animation: bounce 1s infinite alternate;
-}
-
-.slow {
-  animation: bounce 2s infinite alternate;
-}
-
-.still {
-  animation: none;
-}
-
-.bipolar1-extreme-high {
-  background: #ffcccc !important;
-  color: #c0392b !important;
-  animation: pulse 0.5s infinite;
-}
-
-.bipolar1-extreme-low {
-  background: #c9e4f7 !important;
-  color: #2980b9 !important;
-  animation: pulse 0.8s infinite;
-}
     
-    /* Responsive Design */
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
+      .hero {
+        padding: 3rem 20px;
+      }
+      
       .card-header {
         flex-direction: column;
         align-items: flex-start;
@@ -666,44 +698,30 @@
       }
       
       .comparison-table {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
       }
       
       .comparison-table th,
       .comparison-table td {
-        padding: 0.6rem 0.4rem;
+        padding: 0.75rem 0.5rem;
       }
       
       .feature-name {
         min-width: 100px;
       }
-    }
-    
-    @media (max-width: 480px) {
-      .hero {
-        padding: 3rem 15px;
-      }
-      
-      .container {
-        padding: 0 0.8rem;
-      }
-      
-      .visualization-card {
-        padding: 1.2rem;
-      }
       
       .human-container {
-        height: 80px;
+        height: 120px;
         padding: 0.8rem;
       }
       
       .conversation-box {
-        font-size: 0.75rem;
-        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        padding: 0.75rem;
       }
       
       .walker {
-        font-size: 1.5rem;
+        font-size: 2rem;
       }
       
       .timeline-section {
@@ -722,7 +740,21 @@
       .donut-inner {
         width: 30px;
         height: 30px;
-        font-size: 0.7rem;
+        font-size: 0.85rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .hero {
+        padding: 2.5rem 15px;
+      }
+      
+      .container {
+        padding: 0 15px;
+      }
+      
+      .visualization-card {
+        padding: 1.5rem;
       }
       
       .comparison-summary {
@@ -730,12 +762,20 @@
       }
       
       .info-panel {
-        padding: 1.2rem;
+        padding: 1.5rem;
       }
       
       .info-header {
         flex-direction: column;
         text-align: center;
+      }
+      
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
       }
     }
     
@@ -758,79 +798,42 @@
         flex: 1;
         max-width: none;
       }
-    }
-    
-    /* High DPI Screens */
-    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-      .hero::before,
-      .crisis-alert::before {
-        background-size: 1200px 800px;
+      
+      .metrics-grid {
+        grid-template-columns: 1fr;
       }
     }
     
-    /* Reduced Motion */
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        transition-duration: 0.01ms !important;
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .visualization-card:hover,
+      .summary-card:hover,
+      .global-btn:hover,
+      .control-btn:hover {
+        transform: none;
       }
       
-      html {
-        scroll-behavior: auto;
+      .global-btn:active,
+      .control-btn:active {
+        transform: scale(0.98);
       }
-
-      /* Add to your existing CSS */
-.key-point {
-  display: block;
-  margin-top: 2px;
-  line-height: 1.3;
-}
-
-.critical-difference {
-  display: block;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.highlight-box {
-  margin-top: 8px;
-  padding: 8px;
-  background: var(--light);
-  border-radius: 6px;
-  border-left: 3px solid var(--primary);
-}
-
-.highlight-box strong {
-  color: var(--primary);
-}
-
-/* For mobile responsiveness */
-@media (max-width: 768px) {
-  .key-point {
-    font-size: 0.85rem;
-    margin-top: 1px;
-  }
-  
-  .comparison-table td {
-    padding: 0.6rem;
-  }
-}
-
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
     
     /* Print Styles */
     @media print {
       .hero {
-        background: var(--primary) !important;
-         -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-      }
-      
-      .crisis-alert {
-        background: var(--danger) !important;
+        background: var(--light) !important;
         -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+        print-color-adjust: exact;
       }
       
       .controls,
@@ -845,73 +848,66 @@
   <!-- Hero Section -->
   <section class="hero fade-in">
     <div class="hero-content">
-      <h1>Mental Health Condition Visualizer</h1>
-      <p>Accurate clinical visualization of Bipolar I, Bipolar II, Depression, and normal mood states</p>
+      <h1 id="analogy_hero_title0"></h1>
+      <p id="analogy_hero_description0"></p>
     </div>
   </section>
-
-      
 
   <div class="container">
     <div class="disclaimer-alert fade-in">
       <div class="alert-icon">⚠️</div>
       <div class="alert-content">
-        <h3>Important Disclaimer</h3>
-        <p>
-          This visualization is for <strong>educational purposes only</strong> and is <strong>not a diagnostic tool</strong>.
-          Mental health conditions are complex and vary between individuals.  
-        </p>
+        <h3 id="analogy_disclaimer_title0"></h3>
+        <p id="analogy_disclaimer_text0"></p>
       </div>
     </div>
 
     <div class="global-controls fade-in">
       <button class="global-btn" onclick="startAllDemos()">
-        <i class="fas fa-play"></i> Start All Demos
+        <i class="fas fa-play"></i> <span id="analogy_global_start_all0"></span>
       </button>
       <button class="global-btn stop" onclick="stopAllDemos()">
-        <i class="fas fa-stop"></i> Stop All Demos
+        <i class="fas fa-stop"></i> <span id="analogy_global_stop_all0"></span>
       </button>
       <button class="global-btn" onclick="resetAllDemos()">
-        <i class="fas fa-redo"></i> Reset All
+        <i class="fas fa-redo"></i> <span id="analogy_global_reset_all0"></span>
       </button>
     </div>
 
     <div class="comparison-grid">
       <!-- Bipolar I Card -->
-      <div class="visualization-card bipolar1-card fade-in">
+      <div class="visualization-card bipolar1-card fade-in" id="bipolar1-visualization-card">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
             <i class="fas fa-bolt"></i>
-            Bipolar I Disorder
+            <span id="analogy_bipolar1_name0"></span>
           </div>
-          <div class="condition-indicator bipolar1-indicator" id="bipolar1-indicator">EXTREME ROLLERCOASTER</div>
+          <div class="condition-indicator bipolar1-indicator" id="bipolar1-indicator0"></div>
         </div>
 
         <!-- Part 2: Human and Mood Timeline -->
         <div class="human-timeline-section">
-          <div class="human-container">
-            <div class="conversation-box" id="bipolar1-conversation">
-              "I can do anything! I don't need sleep for days!"
-            </div>
+          <div class="human-container" id="bipolar1-human-container">
+            <div class="conversation-box" id="bipolar1-conversation0"></div>
             <!-- Walking human with emoji -->
-            <div class="walking-human" id="bipolar1-walking-human">
-              <div class="walker" id="bipolar1-walker">🚶‍➡️</div>
+            <div class="walking-human" id="bipolar1-walking-human0">
+              <div class="walker" id="bipolar1-walker0">🚶‍➡️</div>
             </div>
-            <div class="walking-path"></div>
+            <div class="walking-path" id="bipolar1-walking-path0"></div>
           </div>
 
           <div class="timeline-section">
-            <div class="timeline-title">Mood Timeline</div>
-            <div class="timeline-container">
-              <div class="timeline">
-                <div class="timeline-line"></div>
-                <div class="timeline-path" id="bipolar1-timeline-path" style="background: #e74c3c; width: 90%"></div>
-                <div class="timeline-marker" id="bipolar1-timeline-marker" style="background: #e74c3c; left: 90%; top: 50%"></div>
-                <div class="timeline-labels">
-                  <div class="timeline-label">Severe Depression</div>
-                  <div class="timeline-label">Normal</div>
-                  <div class="timeline-label">Mania</div>
+            <div class="timeline-title" id="analogy_timeline_title0"></div>
+            <div class="timeline-container" id="bipolar1-timeline-container0">
+              <div class="timeline" id="bipolar1-timeline0">
+                <div class="timeline-line" id="bipolar1-timeline-line0"></div>
+                <div class="timeline-path" id="bipolar1-timeline-path0" style="background: #e74c3c; width: 90%"></div>
+                <div class="timeline-marker" id="bipolar1-timeline-marker0" style="background: #e74c3c; left: 90%; top: 50%"></div>
+                <div class="timeline-labels" id="bipolar1-timeline-labels0">
+                  <div class="timeline-label" id="analogy_label_severe_depression0"></div>
+                  <div class="timeline-label" id="analogy_label_normal0"></div>
+                  <div class="timeline-label" id="analogy_label_mania0"></div>
                 </div>
               </div>
             </div>
@@ -919,87 +915,86 @@
         </div>
 
         <!-- Part 3: Key Metrics -->
-        <div class="metrics-container">
-          <div class="metrics-title">Key Metrics</div>
-          <div class="metrics-grid">
-            <div class="metric-item">
-              <div class="metric-name">ENERGY LEVEL</div>
-              <div class="donut-chart" id="bipolar1-energy-chart">
-                <div class="donut-segment" id="bipolar1-energy-segment" style="--segment-color: #f39c12; --segment-rotation: 342deg;"></div>
-                <div class="donut-inner" id="bipolar1-energy-value">95%</div>
+        <div class="metrics-container" id="bipolar1-metrics-container0">
+          <div class="metrics-title" id="analogy_metrics_title0"></div>
+          <div class="metrics-grid" id="bipolar1-metrics-grid0">
+            <div class="metric-item" id="bipolar1-metric-item0">
+              <div class="metric-name" id="analogy_energy_level0"></div>
+              <div class="donut-chart" id="bipolar1-energy-chart0">
+                <div class="donut-segment" id="bipolar1-energy-segment0" style="--segment-color: #f39c12; --segment-rotation: 342deg;"></div>
+                <div class="donut-inner" id="bipolar1-energy-value0">95%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">SLEEP NEED</div>
-              <div class="donut-chart" id="bipolar1-sleep-chart">
-                <div class="donut-segment" id="bipolar1-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 36deg;"></div>
-                <div class="donut-inner" id="bipolar1-sleep-value">10%</div>
+            <div class="metric-item" id="bipolar1-metric-item1">
+              <div class="metric-name" id="analogy_sleep_need0"></div>
+              <div class="donut-chart" id="bipolar1-sleep-chart0">
+                <div class="donut-segment" id="bipolar1-sleep-segment0" style="--segment-color: #9b59b6; --segment-rotation: 36deg;"></div>
+                <div class="donut-inner" id="bipolar1-sleep-value0">10%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">FUNCTIONALITY</div>
-              <div class="donut-chart" id="bipolar1-function-chart">
-                <div class="donut-segment" id="bipolar1-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 72deg;"></div>
-                <div class="donut-inner" id="bipolar1-function-value">30%</div>
+            <div class="metric-item" id="bipolar1-metric-item2">
+              <div class="metric-name" id="analogy_functionality0"></div>
+              <div class="donut-chart" id="bipolar1-function-chart0">
+                <div class="donut-segment" id="bipolar1-function-segment0" style="--segment-color: #2ecc71; --segment-rotation: 72deg;"></div>
+                <div class="donut-inner" id="bipolar1-function-value0">30%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">HOSPITALIZATION RISK</div>
-              <div class="donut-chart" id="bipolar1-hospital-chart">
-                <div class="donut-segment" id="bipolar1-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 288deg;"></div>
-                <div class="donut-inner" id="bipolar1-hospital-value">High</div>
+            <div class="metric-item" id="bipolar1-metric-item3">
+              <div class="metric-name" id="analogy_hospitalization_risk0"></div>
+              <div class="donut-chart" id="bipolar1-hospital-chart0">
+                <div class="donut-segment" id="bipolar1-hospital-segment0" style="--segment-color: #e74c3c; --segment-rotation: 288deg;"></div>
+                <div class="donut-inner" id="bipolar1-hospital-value0">High</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Part 4: Controls -->
-        <div class="controls">
+        <div class="controls" id="bipolar1-controls0">
           <button class="control-btn" onclick="startBipolar1Demo()">
-            <i class="fas fa-play"></i> Start
+            <i class="fas fa-play"></i> <span id="analogy_start0"></span>
           </button>
           <button class="control-btn" onclick="stopBipolar1Demo()">
-            <i class="fas fa-stop"></i> Stop
+            <i class="fas fa-stop"></i> <span id="analogy_stop0"></span>
           </button>
           <button class="control-btn" onclick="resetBipolar1Demo()">
-            <i class="fas fa-redo"></i> Reset
+            <i class="fas fa-redo"></i> <span id="analogy_reset0"></span>
           </button>
         </div>
       </div>
 
       <!-- Bipolar II Card -->
-      <div class="visualization-card bipolar2-card fade-in">
+      <div class="visualization-card bipolar2-card fade-in" id="bipolar2-visualization-card">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
             <i class="fas fa-wave-square"></i>
-            Bipolar II Disorder
+            <span id="analogy_bipolar2_name0"></span>
           </div>
-          <div class="condition-indicator bipolar2-indicator" id="bipolar2-indicator">MILD HIGHS, DEEP LOWS</div>
+          <div class="condition-indicator bipolar2-indicator" id="bipolar2-indicator0"></div>
         </div>
 
         <!-- Part 2: Human and Mood Timeline -->
         <div class="human-timeline-section">
-          <div class="human-container">
-            <div class="conversation-box" id="bipolar2-conversation">
-              "I'm so productive! But I know this won't last..."
+          <div class="human-container" id="bipolar2-human-container">
+            <div class="conversation-box" id="bipolar2-conversation0"></div>
+            <div class="walking-human" id="bipolar2-walking-human0">
+              <div class="walker" id="bipolar2-walker0">🚶‍➡️</div>
             </div>
-            <div class="walking-human" id="bipolar2-walking-human">
-              <div class="walker" id="bipolar2-walker">🚶‍➡️</div>
-            </div>
+            <div class="walking-path" id="bipolar2-walking-path0"></div>
           </div>
 
           <div class="timeline-section">
-            <div class="timeline-title">Mood Timeline</div>
-            <div class="timeline-container">
-              <div class="timeline">
-                <div class="timeline-line"></div>
-                <div class="timeline-path" id="bipolar2-timeline-path" style="background: #f39c12; width: 70%"></div>
-                <div class="timeline-marker" id="bipolar2-timeline-marker" style="background: #f39c12; left: 70%; top: 50%"></div>
-                <div class="timeline-labels">
-                  <div class="timeline-label">Severe Depression</div>
-                  <div class="timeline-label">Normal</div>
-                  <div class="timeline-label">Hypomania</div>
+            <div class="timeline-title" id="analogy_timeline_title1"></div>
+            <div class="timeline-container" id="bipolar2-timeline-container0">
+              <div class="timeline" id="bipolar2-timeline0">
+                <div class="timeline-line" id="bipolar2-timeline-line0"></div>
+                <div class="timeline-path" id="bipolar2-timeline-path0" style="background: #f39c12; width: 70%"></div>
+                <div class="timeline-marker" id="bipolar2-timeline-marker0" style="background: #f39c12; left: 70%; top: 50%"></div>
+                <div class="timeline-labels" id="bipolar2-timeline-labels0">
+                  <div class="timeline-label" id="analogy_label_severe_depression1"></div>
+                  <div class="timeline-label" id="analogy_label_normal1"></div>
+                  <div class="timeline-label" id="analogy_label_hypomania0"></div>
                 </div>
               </div>
             </div>
@@ -1007,87 +1002,86 @@
         </div>
 
         <!-- Part 3: Key Metrics -->
-        <div class="metrics-container">
-          <div class="metrics-title">Key Metrics</div>
-          <div class="metrics-grid">
-            <div class="metric-item">
-              <div class="metric-name">ENERGY LEVEL</div>
-              <div class="donut-chart" id="bipolar2-energy-chart">
-                <div class="donut-segment" id="bipolar2-energy-segment" style="--segment-color: #f39c12; --segment-rotation: 270deg;"></div>
-                <div class="donut-inner" id="bipolar2-energy-value">75%</div>
+        <div class="metrics-container" id="bipolar2-metrics-container0">
+          <div class="metrics-title" id="analogy_metrics_title1"></div>
+          <div class="metrics-grid" id="bipolar2-metrics-grid0">
+            <div class="metric-item" id="bipolar2-metric-item0">
+              <div class="metric-name" id="analogy_energy_level1"></div>
+              <div class="donut-chart" id="bipolar2-energy-chart0">
+                <div class="donut-segment" id="bipolar2-energy-segment0" style="--segment-color: #f39c12; --segment-rotation: 270deg;"></div>
+                <div class="donut-inner" id="bipolar2-energy-value0">75%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">SLEEP NEED</div>
-              <div class="donut-chart" id="bipolar2-sleep-chart">
-                <div class="donut-segment" id="bipolar2-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 144deg;"></div>
-                <div class="donut-inner" id="bipolar2-sleep-value">40%</div>
+            <div class="metric-item" id="bipolar2-metric-item1">
+              <div class="metric-name" id="analogy_sleep_need1"></div>
+              <div class="donut-chart" id="bipolar2-sleep-chart0">
+                <div class="donut-segment" id="bipolar2-sleep-segment0" style="--segment-color: #9b59b6; --segment-rotation: 144deg;"></div>
+                <div class="donut-inner" id="bipolar2-sleep-value0">40%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">FUNCTIONALITY</div>
-              <div class="donut-chart" id="bipolar2-function-chart">
-                <div class="donut-segment" id="bipolar2-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 216deg;"></div>
-                <div class="donut-inner" id="bipolar2-function-value">60%</div>
+            <div class="metric-item" id="bipolar2-metric-item2">
+              <div class="metric-name" id="analogy_functionality1"></div>
+              <div class="donut-chart" id="bipolar2-function-chart0">
+                <div class="donut-segment" id="bipolar2-function-segment0" style="--segment-color: #2ecc71; --segment-rotation: 216deg;"></div>
+                <div class="donut-inner" id="bipolar2-function-value0">60%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">HOSPITALIZATION RISK</div>
-              <div class="donut-chart" id="bipolar2-hospital-chart">
-                <div class="donut-segment" id="bipolar2-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 108deg;"></div>
-                <div class="donut-inner" id="bipolar2-hospital-value">Low</div>
+            <div class="metric-item" id="bipolar2-metric-item3">
+              <div class="metric-name" id="analogy_hospitalization_risk1"></div>
+              <div class="donut-chart" id="bipolar2-hospital-chart0">
+                <div class="donut-segment" id="bipolar2-hospital-segment0" style="--segment-color: #e74c3c; --segment-rotation: 108deg;"></div>
+                <div class="donut-inner" id="bipolar2-hospital-value0">Low</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Part 4: Controls -->
-        <div class="controls">
+        <div class="controls" id="bipolar2-controls0">
           <button class="control-btn" onclick="startBipolar2Demo()">
-            <i class="fas fa-play"></i> Start
+            <i class="fas fa-play"></i> <span id="analogy_start1"></span>
           </button>
           <button class="control-btn" onclick="stopBipolar2Demo()">
-            <i class="fas fa-stop"></i> Stop
+            <i class="fas fa-stop"></i> <span id="analogy_stop1"></span>
           </button>
           <button class="control-btn" onclick="resetBipolar2Demo()">
-            <i class="fas fa-redo"></i> Reset
+            <i class="fas fa-redo"></i> <span id="analogy_reset1"></span>
           </button>
         </div>
       </div>
 
       <!-- Depression Card -->
-      <div class="visualization-card depression-card fade-in">
+      <div class="visualization-card depression-card fade-in" id="depression-visualization-card">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
             <i class="fas fa-cloud"></i>
-            Major Depressive Disorder
+            <span id="analogy_depression_name0"></span>
           </div>
-          <div class="condition-indicator depression-indicator" id="depression-indicator">ONLY DEEP LOWS</div>
+          <div class="condition-indicator depression-indicator" id="depression-indicator0"></div>
         </div>
 
         <!-- Part 2: Human and Mood Timeline -->
         <div class="human-timeline-section">
-          <div class="human-container">
-            <div class="conversation-box" id="depression-conversation">
-              "Everything feels heavy. I can't get out of bed."
+          <div class="human-container" id="depression-human-container">
+            <div class="conversation-box" id="depression-conversation0"></div>
+            <div class="walking-human" id="depression-walking-human0">
+              <div class="walker" id="depression-walker0">🚶‍➡️</div>
             </div>
-            <div class="walking-human" id="depression-walking-human">
-              <div class="walker" id="depression-walker">🚶‍➡️</div>
-            </div>
+            <div class="walking-path" id="depression-walking-path0"></div>
           </div>
 
           <div class="timeline-section">
-            <div class="timeline-title">Mood Timeline</div>
-            <div class="timeline-container">
-              <div class="timeline">
-                <div class="timeline-line"></div>
-                <div class="timeline-path" id="depression-timeline-path" style="background: #3498db; width: 15%"></div>
-                <div class="timeline-marker" id="depression-timeline-marker" style="background: #3498db; left: 15%; top: 50%"></div>
-                <div class="timeline-labels">
-                  <div class="timeline-label">Severe Depression</div>
-                  <div class="timeline-label">Normal</div>
-                  <div class="timeline-label">No Highs</div>
+            <div class="timeline-title" id="analogy_timeline_title2"></div>
+            <div class="timeline-container" id="depression-timeline-container0">
+              <div class="timeline" id="depression-timeline0">
+                <div class="timeline-line" id="depression-timeline-line0"></div>
+                <div class="timeline-path" id="depression-timeline-path0" style="background: #3498db; width: 15%"></div>
+                <div class="timeline-marker" id="depression-timeline-marker0" style="background: #3498db; left: 15%; top: 50%"></div>
+                <div class="timeline-labels" id="depression-timeline-labels0">
+                  <div class="timeline-label" id="analogy_label_severe_depression2"></div>
+                  <div class="timeline-label" id="analogy_label_normal2"></div>
+                  <div class="timeline-label" id="analogy_label_no_highs0"></div>
                 </div>
               </div>
             </div>
@@ -1095,87 +1089,86 @@
         </div>
 
         <!-- Part 3: Key Metrics -->
-        <div class="metrics-container">
-          <div class="metrics-title">Key Metrics</div>
-          <div class="metrics-grid">
-            <div class="metric-item">
-              <div class="metric-name">ENERGY LEVEL</div>
-              <div class="donut-chart" id="depression-energy-chart">
-                <div class="donut-segment" id="depression-energy-segment" style="--segment-color: #2980b9; --segment-rotation: 36deg;"></div>
-                <div class="donut-inner" id="depression-energy-value">10%</div>
+        <div class="metrics-container" id="depression-metrics-container0">
+          <div class="metrics-title" id="analogy_metrics_title2"></div>
+          <div class="metrics-grid" id="depression-metrics-grid0">
+            <div class="metric-item" id="depression-metric-item0">
+              <div class="metric-name" id="analogy_energy_level2"></div>
+              <div class="donut-chart" id="depression-energy-chart0">
+                <div class="donut-segment" id="depression-energy-segment0" style="--segment-color: #2980b9; --segment-rotation: 36deg;"></div>
+                <div class="donut-inner" id="depression-energy-value0">10%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">SLEEP NEED</div>
-              <div class="donut-chart" id="depression-sleep-chart">
-                <div class="donut-segment" id="depression-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 324deg;"></div>
-                <div class="donut-inner" id="depression-sleep-value">90%</div>
+            <div class="metric-item" id="depression-metric-item1">
+              <div class="metric-name" id="analogy_sleep_need2"></div>
+              <div class="donut-chart" id="depression-sleep-chart0">
+                <div class="donut-segment" id="depression-sleep-segment0" style="--segment-color: #9b59b6; --segment-rotation: 324deg;"></div>
+                <div class="donut-inner" id="depression-sleep-value0">90%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">FUNCTIONALITY</div>
-              <div class="donut-chart" id="depression-function-chart">
-                <div class="donut-segment" id="depression-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 72deg;"></div>
-                <div class="donut-inner" id="depression-function-value">20%</div>
+            <div class="metric-item" id="depression-metric-item2">
+              <div class="metric-name" id="analogy_functionality2"></div>
+              <div class="donut-chart" id="depression-function-chart0">
+                <div class="donut-segment" id="depression-function-segment0" style="--segment-color: #2ecc71; --segment-rotation: 72deg;"></div>
+                <div class="donut-inner" id="depression-function-value0">20%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">HOSPITALIZATION RISK</div>
-              <div class="donut-chart" id="depression-hospital-chart">
-                <div class="donut-segment" id="depression-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 180deg;"></div>
-                <div class="donut-inner" id="depression-hospital-value">Medium</div>
+            <div class="metric-item" id="depression-metric-item3">
+              <div class="metric-name" id="analogy_hospitalization_risk2"></div>
+              <div class="donut-chart" id="depression-hospital-chart0">
+                <div class="donut-segment" id="depression-hospital-segment0" style="--segment-color: #e74c3c; --segment-rotation: 180deg;"></div>
+                <div class="donut-inner" id="depression-hospital-value0">Medium</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Part 4: Controls -->
-        <div class="controls">
+        <div class="controls" id="depression-controls0">
           <button class="control-btn" onclick="startDepressionDemo()">
-            <i class="fas fa-play"></i> Start
+            <i class="fas fa-play"></i> <span id="analogy_start2"></span>
           </button>
           <button class="control-btn" onclick="stopDepressionDemo()">
-            <i class="fas fa-stop"></i> Stop
+            <i class="fas fa-stop"></i> <span id="analogy_stop2"></span>
           </button>
           <button class="control-btn" onclick="resetDepressionDemo()">
-            <i class="fas fa-redo"></i> Reset
+            <i class="fas fa-redo"></i> <span id="analogy_reset2"></span>
           </button>
         </div>
       </div>
 
       <!-- Normal Card -->
-      <div class="visualization-card normal-card fade-in">
+      <div class="visualization-card normal-card fade-in" id="normal-visualization-card">
         <!-- Part 1: Title and Status -->
         <div class="card-header">
           <div class="card-title">
             <i class="fas fa-balance-scale"></i>
-            Normal Mood State
+            <span id="analogy_normal_name0"></span>
           </div>
-          <div class="condition-indicator normal-indicator" id="normal-indicator">EVERYDAY UPS AND DOWNS</div>
+          <div class="condition-indicator normal-indicator" id="normal-indicator0"></div>
         </div>
 
         <!-- Part 2: Human and Mood Timeline -->
         <div class="human-timeline-section">
-          <div class="human-container">
-            <div class="conversation-box" id="normal-conversation">
-              "Today was okay. Some ups, some downs, but manageable."
+          <div class="human-container" id="normal-human-container">
+            <div class="conversation-box" id="normal-conversation0"></div>
+            <div class="walking-human" id="normal-walking-human0">
+              <div class="walker" id="normal-walker0">🚶‍➡️</div>
             </div>
-            <div class="walking-human" id="normal-walking-human">
-              <div class="walker" id="normal-walker">🚶‍➡️</div>
-            </div>
+            <div class="walking-path" id="normal-walking-path0"></div>
           </div>
 
           <div class="timeline-section">
-            <div class="timeline-title">Mood Timeline</div>
-            <div class="timeline-container">
-              <div class="timeline">
-                <div class="timeline-line"></div>
-                <div class="timeline-path" id="normal-timeline-path" style="background: #27ae60; width: 50%"></div>
-                <div class="timeline-marker" id="normal-timeline-marker" style="background: #27ae60; left: 50%; top: 50%"></div>
-                <div class="timeline-labels">
-                  <div class="timeline-label">Sad Moments</div>
-                  <div class="timeline-label">Normal</div>
-                  <div class="timeline-label">Happy Moments</div>
+            <div class="timeline-title" id="analogy_timeline_title3"></div>
+            <div class="timeline-container" id="normal-timeline-container0">
+              <div class="timeline" id="normal-timeline0">
+                <div class="timeline-line" id="normal-timeline-line0"></div>
+                <div class="timeline-path" id="normal-timeline-path0" style="background: #27ae60; width: 50%"></div>
+                <div class="timeline-marker" id="normal-timeline-marker0" style="background: #27ae60; left: 50%; top: 50%"></div>
+                <div class="timeline-labels" id="normal-timeline-labels0">
+                  <div class="timeline-label" id="analogy_label_sad_moments0"></div>
+                  <div class="timeline-label" id="analogy_label_normal3"></div>
+                  <div class="timeline-label" id="analogy_label_happy_moments0"></div>
                 </div>
               </div>
             </div>
@@ -1183,90 +1176,90 @@
         </div>
 
         <!-- Part 3: Key Metrics -->
-        <div class="metrics-container">
-          <div class="metrics-title">Key Metrics</div>
-          <div class="metrics-grid">
-            <div class="metric-item">
-              <div class="metric-name">ENERGY LEVEL</div>
-              <div class="donut-chart" id="normal-energy-chart">
-                <div class="donut-segment" id="normal-energy-segment" style="--segment-color: #27ae60; --segment-rotation: 198deg;"></div>
-                <div class="donut-inner" id="normal-energy-value">55%</div>
+        <div class="metrics-container" id="normal-metrics-container0">
+          <div class="metrics-title" id="analogy_metrics_title3"></div>
+          <div class="metrics-grid" id="normal-metrics-grid0">
+            <div class="metric-item" id="normal-metric-item0">
+              <div class="metric-name" id="analogy_energy_level3"></div>
+              <div class="donut-chart" id="normal-energy-chart0">
+                <div class="donut-segment" id="normal-energy-segment0" style="--segment-color: #27ae60; --segment-rotation: 198deg;"></div>
+                <div class="donut-inner" id="normal-energy-value0">55%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">SLEEP NEED</div>
-              <div class="donut-chart" id="normal-sleep-chart">
-                <div class="donut-segment" id="normal-sleep-segment" style="--segment-color: #9b59b6; --segment-rotation: 252deg;"></div>
-                <div class="donut-inner" id="normal-sleep-value">70%</div>
+            <div class="metric-item" id="normal-metric-item1">
+              <div class="metric-name" id="analogy_sleep_need3"></div>
+              <div class="donut-chart" id="normal-sleep-chart0">
+                <div class="donut-segment" id="normal-sleep-segment0" style="--segment-color: #9b59b6; --segment-rotation: 252deg;"></div>
+                <div class="donut-inner" id="normal-sleep-value0">70%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">FUNCTIONALITY</div>
-              <div class="donut-chart" id="normal-function-chart">
-                <div class="donut-segment" id="normal-function-segment" style="--segment-color: #2ecc71; --segment-rotation: 324deg;"></div>
-                <div class="donut-inner" id="normal-function-value">90%</div>
+            <div class="metric-item" id="normal-metric-item2">
+              <div class="metric-name" id="analogy_functionality3"></div>
+              <div class="donut-chart" id="normal-function-chart0">
+                <div class="donut-segment" id="normal-function-segment0" style="--segment-color: #2ecc71; --segment-rotation: 324deg;"></div>
+                <div class="donut-inner" id="normal-function-value0">90%</div>
               </div>
             </div>
-            <div class="metric-item">
-              <div class="metric-name">HOSPITALIZATION RISK</div>
-              <div class="donut-chart" id="normal-hospital-chart">
-                <div class="donut-segment" id="normal-hospital-segment" style="--segment-color: #e74c3c; --segment-rotation: 18deg;"></div>
-                <div class="donut-inner" id="normal-hospital-value">None</div>
+            <div class="metric-item" id="normal-metric-item3">
+              <div class="metric-name" id="analogy_hospitalization_risk3"></div>
+              <div class="donut-chart" id="normal-hospital-chart0">
+                <div class="donut-segment" id="normal-hospital-segment0" style="--segment-color: #e74c3c; --segment-rotation: 18deg;"></div>
+                <div class="donut-inner" id="normal-hospital-value0">None</div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Part 4: Controls -->
-        <div class="controls">
+        <div class="controls" id="normal-controls0">
           <button class="control-btn" onclick="startNormalDemo()">
-            <i class="fas fa-play"></i> Start
+            <i class="fas fa-play"></i> <span id="analogy_start3"></span>
           </button>
           <button class="control-btn" onclick="stopNormalDemo()">
-            <i class="fas fa-stop"></i> Stop
+            <i class="fas fa-stop"></i> <span id="analogy_stop3"></span>
           </button>
           <button class="control-btn" onclick="resetNormalDemo()">
-            <i class="fas fa-redo"></i> Reset
+            <i class="fas fa-redo"></i> <span id="analogy_reset3"></span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Rest of the content remains the same -->
+    <!-- Comparison Summary -->
     <div class="comparison-summary">
-      <div class="summary-card summary-bipolar1">
+      <div class="summary-card summary-bipolar1" id="summary-bipolar1-card0">
         <div class="summary-title">
-          <i class="fas fa-bolt"></i> Bipolar I
+          <i class="fas fa-bolt"></i> <span id="analogy_summary_bipolar1_title0"></span>
         </div>
-        <p><strong>Extreme Rollercoaster</strong> - Characterized by manic episodes that may require hospitalization. The most severe form of bipolar disorder.</p>
+        <p id="analogy_summary_bipolar1_description0"></p>
       </div>
-      <div class="summary-card summary-bipolar2">
+      <div class="summary-card summary-bipolar2" id="summary-bipolar2-card0">
         <div class="summary-title">
-          <i class="fas fa-wave-square"></i> Bipolar II
+          <i class="fas fa-wave-square"></i> <span id="analogy_summary_bipolar2_title0"></span>
         </div>
-        <p><strong>Mild Highs, Deep Lows</strong> - Defined by hypomanic episodes (less severe than mania) and major depressive episodes.</p>
+        <p id="analogy_summary_bipolar2_description0"></p>
       </div>
-      <div class="summary-card summary-depression">
+      <div class="summary-card summary-depression" id="summary-depression-card0">
         <div class="summary-title">
-          <i class="fas fa-cloud"></i> Depression
+          <i class="fas fa-cloud"></i> <span id="analogy_summary_depression_title0"></span>
         </div>
-        <p><strong>Only Deep Lows</strong> - Characterized by depressive episodes only, with no history of manic or hypomanic episodes.</p>
+        <p id="analogy_summary_depression_description0"></p>
       </div>
-      <div class="summary-card summary-normal">
+      <div class="summary-card summary-normal" id="summary-normal-card0">
         <div class="summary-title">
-          <i class="fas fa-balance-scale"></i> Normal Mood
+          <i class="fas fa-balance-scale"></i> <span id="analogy_summary_normal_title0"></span>
         </div>
-        <p><strong>Everyday Ups and Downs</strong> - Normal emotional variations that don't significantly impair functioning.</p>
+        <p id="analogy_summary_normal_description0"></p>
       </div>
     </div>
 
     <div class="info-panel fade-in">
       <div class="info-header">
-        <div class="info-icon bipolar1-icon">
+        <div class="info-icon bipolar1-icon" id="bipolar1-info-icon0">
           <i class="fas fa-bolt"></i>
         </div>
-        <h2 class="info-title">Key Differences Between Conditions</h2>
-        <div class="info-icon depression-icon">
+        <h2 class="info-title" id="analogy_comparison_title0"></h2>
+        <div class="info-icon depression-icon" id="depression-info-icon0">
           <i class="fas fa-cloud"></i>
         </div>
       </div>
@@ -1274,665 +1267,638 @@
       <table class="comparison-table">
         <thead>
           <tr>
-            <th>Feature</th>
+            <th id="analogy_table_feature_header0"></th>
             <th>
-              <div class="condition-header bipolar1-header">
-                <i class="fas fa-bolt"></i> Bipolar I
+              <div class="condition-header bipolar1-header" id="bipolar1-condition-header0">
+                <i class="fas fa-bolt"></i> <span id="analogy_table_bipolar1_header0"></span>
               </div>
             </th>
             <th>
-              <div class="condition-header bipolar2-header">
-                <i class="fas fa-wave-square"></i> Bipolar II
+              <div class="condition-header bipolar2-header" id="bipolar2-condition-header0">
+                <i class="fas fa-wave-square"></i> <span id="analogy_table_bipolar2_header0"></span>
               </div>
             </th>
             <th>
-              <div class="condition-header depression-header">
-                <i class="fas fa-cloud"></i> Depression (MDD)
+              <div class="condition-header depression-header" id="depression-condition-header0">
+                <i class="fas fa-cloud"></i> <span id="analogy_table_depression_header0"></span>
               </div>
             </th>
             <th>
-              <div class="condition-header normal-header">
-                <i class="fas fa-balance-scale"></i> Normal Mood
+              <div class="condition-header normal-header" id="normal-condition-header0">
+                <i class="fas fa-balance-scale"></i> <span id="analogy_table_normal_header0"></span>
               </div>
             </th>
           </tr>
         </thead>
         <tbody>
-          <tr class="high-mood-row">
-            <td class="feature-name">High Mood Episodes</td>
-            <td>
-              <span class="critical-difference">Mania</span>
-              <span class="key-point">Very high energy, risky behavior</span>
-              <span class="key-point">Possible hospitalization</span>
-              <span class="key-point">Psychosis possible</span>
-            </td>
-            <td>
-              <span class="critical-difference">Hypomania</span>
-              <span class="key-point">Milder, productive</span>
-              <span class="key-point">Not psychotic</span>
-              <span class="key-point">No hospitalization needed</span>
-            </td>
-            <td>
-              <span class="critical-difference">None</span>
-              <span class="key-point">No elevated mood episodes</span>
-            </td>
-            <td>
-              Normal mood variations
-              <span class="key-point">Temporary happiness</span>
-              <span class="key-point">Context-appropriate</span>
-            </td>
+          <tr class="high-mood-row" id="high-mood-row0">
+            <td class="feature-name" id="analogy_table_high_mood0"></td>
+            <td id="analogy_bipolar1_high_mood_content0"></td>
+            <td id="analogy_bipolar2_high_mood_content0"></td>
+            <td id="analogy_depression_high_mood_content0"></td>
+            <td id="analogy_normal_high_mood_content0"></td>
           </tr>
-          <tr class="low-mood-row">
-            <td class="feature-name">Low Mood Episodes</td>
-            <td>
-              Major Depression
-              <span class="key-point">Severe, debilitating</span>
-              <span class="key-point">Often follows mania</span>
-            </td>
-            <td>
-              Major Depression
-              <span class="key-point">Often more frequent/longer</span>
-              <span class="key-point">Primary complaint</span>
-            </td>
-            <td>
-              <span class="critical-difference">Major Depression</span>
-              <span class="key-point">Only mood state (no highs)</span>
-              <span class="key-point">Can be severe, long-lasting</span>
-            </td>
-            <td>
-              Sadness sometimes
-              <span class="key-point">Short-term</span>
-              <span class="key-point">Proportional to events</span>
-            </td>
+          <tr class="low-mood-row" id="low-mood-row0">
+            <td class="feature-name" id="analogy_table_low_mood0"></td>
+            <td id="analogy_bipolar1_low_mood_content0"></td>
+            <td id="analogy_bipolar2_low_mood_content0"></td>
+            <td id="analogy_depression_low_mood_content0"></td>
+            <td id="analogy_normal_low_mood_content0"></td>
           </tr>
-          <tr>
-            <td class="feature-name">Energy Levels</td>
-            <td>
-              <span class="critical-difference">Extreme highs + extreme lows</span>
-              <span class="key-point">Mania: excessive energy</span>
-              <span class="key-point">Depression: very low energy</span>
-            </td>
-            <td>
-              High (hypomania) + low
-              <span class="key-point">Hypomania: increased energy</span>
-              <span class="key-point">Depression: low energy</span>
-            </td>
-            <td>
-              Mostly low
-              <span class="key-point">Consistently low energy</span>
-              <span class="key-point">Fatigue common</span>
-            </td>
-            <td>
-              Balanced, manageable
-              <span class="key-point">Normal daily fluctuations</span>
-            </td>
+          <tr id="energy-row0">
+            <td class="feature-name" id="analogy_table_energy0"></td>
+            <td id="analogy_bipolar1_energy_content0"></td>
+            <td id="analogy_bipolar2_energy_content0"></td>
+            <td id="analogy_depression_energy_content0"></td>
+            <td id="analogy_normal_energy_content0"></td>
           </tr>
-          <tr>
-            <td class="feature-name">Sleep Patterns</td>
-            <td>
-              <span class="critical-difference">Little/no sleep during mania</span>
-              <span class="key-point">Feels rested despite little sleep</span>
-              <span class="key-point">Excessive sleep during depression</span>
-            </td>
-            <td>
-              Reduced sleep during hypomania
-              <span class="key-point">Less need for sleep</span>
-              <span class="key-point">Oversleeping during depression</span>
-            </td>
-            <td>
-              Trouble sleeping or oversleeping
-              <span class="key-point">Insomnia or hypersomnia</span>
-            </td>
-            <td>
-              Normal variations
-              <span class="key-point">Regular sleep-wake cycle</span>
-            </td>
+          <tr id="sleep-row0">
+            <td class="feature-name" id="analogy_table_sleep0"></td>
+            <td id="analogy_bipolar1_sleep_content0"></td>
+            <td id="analogy_bipolar2_sleep_content0"></td>
+            <td id="analogy_depression_sleep_content0"></td>
+            <td id="analogy_normal_sleep_content0"></td>
           </tr>
-          <tr>
-            <td class="feature-name">Impact on Life</td>
-            <td>
-              <span class="critical-difference">Severe, disruptive</span>
-              <span class="key-point">Can't work during episodes</span>
-              <span class="key-point">Relationship damage</span>
-            </td>
-            <td>
-              Moderate but still disruptive
-              <span class="key-point">Struggle to maintain function</span>
-              <span class="key-point">Relationships strained</span>
-            </td>
-            <td>
-              Can be severe, long-lasting
-              <span class="key-point">Work/school performance suffers</span>
-              <span class="key-point">Social withdrawal</span>
-            </td>
-            <td>
-              Manageable
-              <span class="key-point">Doesn't disrupt daily functioning</span>
-            </td>
+          <tr id="impact-row0">
+            <td class="feature-name" id="analogy_table_impact0"></td>
+            <td id="analogy_bipolar1_impact_content0"></td>
+            <td id="analogy_bipolar2_impact_content0"></td>
+            <td id="analogy_depression_impact_content0"></td>
+            <td id="analogy_normal_impact_content0"></td>
           </tr>
-          <tr class="diagnosis-key">
-            <td class="feature-name">Diagnosis Key</td>
-            <td>
-              <span class="critical-difference">Mania defines Bipolar I</span>
-              <br> </br>
-              <div class="highlight-box">
-                <strong>Key Differentiator:</strong> Presence of at least one manic episode
-              </div>
-            </td>
-            <td>
-              <span class="critical-difference">Hypomania + Depression define Bipolar II</span>
-              <div class="highlight-box">
-                <strong>Key Differentiator:</strong> Hypomania (not mania) + major depression
-              </div>
-            </td>
-            <td>
-              <span class="critical-difference">Only Depression (no mania/hypomania)</span>
-              <div class="highlight-box">
-                <strong>Key Differentiator:</strong> No history of elevated mood episodes
-              </div>
-            </td>
-            <td>
-              Not a disorder
-              <br> </br>
-              <div class="highlight-box">
-                <strong>Key Differentiator:</strong> Normal range of human emotion
-              </div>
-            </td>
+          <tr class="diagnosis-key" id="diagnosis-key-row0">
+            <td class="feature-name" id="analogy_table_diagnosis0"></td>
+            <td id="analogy_bipolar1_diagnosis_content0"></td>
+            <td id="analogy_bipolar2_diagnosis_content0"></td>
+            <td id="analogy_depression_diagnosis_content0"></td>
+            <td id="analogy_normal_diagnosis_content0"></td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <script>
+<script>
     // Animation intervals
     let bipolar1Interval, bipolar2Interval, depressionInterval, normalInterval;
-    
+
+    // Helper function to get indicator text from translations
+    function getIndicatorText(condition, state) {
+        if (!window.i18n || !window.i18n.translations) {
+            // Fallback to English defaults if i18n not available
+            const defaults = {
+                'bipolar1': {
+                    'manic': 'MANIC EPISODE',
+                    'depressive': 'DEPRESSIVE EPISODE',
+                    'default': 'EXTREME ROLLERCOASTER'
+                },
+                'bipolar2': {
+                    'hypomanic': 'HYPOMANIC EPISODE',
+                    'depressive': 'DEPRESSIVE EPISODE',
+                    'default': 'MILD HIGHS, DEEP LOWS'
+                },
+                'depression': {
+                    'depressive': 'DEPRESSIVE EPISODE',
+                    'default': 'ONLY DEEP LOWS'
+                },
+                'normal': {
+                    'default': 'EVERYDAY UPS AND DOWNS'
+                }
+            };
+            return defaults[condition]?.[state] || defaults[condition]?.default || '';
+        }
+        
+        const currentLang = window.i18n.currentLang;
+        const translations = window.i18n.translations[currentLang]?.analogy?.analogy_conditions;
+        
+        if (!translations || !translations[condition]) return '';
+        
+        const conditionData = translations[condition];
+        
+        switch(state) {
+            case 'manic':
+                return conditionData.indicator_manic0 || conditionData.indicator_default0 || '';
+            case 'hypomanic':
+                return conditionData.indicator_hypomanic0 || conditionData.indicator_default0 || '';
+            case 'depressive':
+            case 'depression':
+                return conditionData.indicator_depressive0 || conditionData.indicator_default0 || '';
+            default:
+                return conditionData.indicator_default0 || '';
+        }
+    }
+
     // Conversation messages for each condition
-    const bipolar1Messages = {
-      manic: [
-        "I can do anything! I don't need sleep for days!",
-        "My thoughts are racing at 100mph!",
-        "Why is everyone so slow? I need to do everything NOW!",
-        "I'm starting three businesses today! Nothing can stop me!",
-        "I feel invincible! Let's take risks!"
-      ],
-      depressive: [
-        "I can't get out of bed. Everything is pointless.",
-        "Why did I do all those things? I'm such a failure.",
-        "I wish I could just disappear forever.",
-        "I can't concentrate on anything. What's the point?",
-        "Everyone would be better off without me."
-      ]
+    let bipolar1Messages = {
+        manic: [],
+        depressive: []
     };
     
-    const bipolar2Messages = [
-      "I'm so productive! But I know this won't last...",
-      "I feel great, but something feels off...",
-      "I've accomplished so much in just a few hours!",
-      "I can't stop talking, I have so much to say!",
-      "This energy is amazing, but the crash is coming."
-    ];
-    
-    const depressionMessages = [
-      "Everything feels heavy. I can't get out of bed.",
-      "Why does everything feel so pointless?",
-      "I wish I could just disappear.",
-      "I can't concentrate on anything. What's the point?",
-      "Everyone would be better off without me."
-    ];
-    
-    const normalMessages = [
-      "Today was okay. Some ups, some downs, but manageable.",
-      "I feel balanced and in control of my emotions.",
-      "Some things are challenging, but I can handle them.",
-      "I appreciate the small joys in my daily life.",
-      "I have energy for my work and personal life."
-    ];
+    let bipolar2Messages = [];
+    let depressionMessages = [];
+    let normalMessages = [];
     
     // Emoji walkers for each condition
     const bipolar1Walkers = {
-      manic: ["🏃‍♂️‍➡️", "💨", "⚡", "🚀", "🎯"],
-      depressive: ["🚶‍➡️", "🐌", "💤", "😴", "🛌"]
+        manic: ["🏃‍♂️‍➡️", "💨", "⚡", "🚀", "🎯"],
+        depressive: ["🚶‍➡️", "🐌", "💤", "😴", "🛌"]
     };
     const bipolar2Walkers = ["🚶‍➡️", "🏃‍♂️‍➡️", "🚶‍➡️", "🏃‍♂️‍➡️", "🚶‍➡️"];
     const depressionWalkers = ["🚶‍➡️", "🐌", "💤", "😴", "🛌"];
     const normalWalkers = ["🚶‍➡️", "🚶‍➡️", "🚶‍➡️", "🚶‍➡️", "🚶‍➡️"];
     
-    // Bipolar I Disorder Demo - Enhanced to show extreme highs and lows
+    // Load conversation messages from i18n system
+    const loadConversationMessages = () => {
+        if (window.i18n && window.i18n.translations) {
+            const currentLang = window.i18n.currentLang;
+            const translations = window.i18n.translations[currentLang];
+            
+            if (translations && translations.analogy && translations.analogy.analogy_conditions) {
+                const analogyConditions = translations.analogy.analogy_conditions;
+                
+                // Load Bipolar I messages
+                if (analogyConditions.bipolar1 && analogyConditions.bipolar1.conversations0) {
+                    bipolar1Messages = analogyConditions.bipolar1.conversations0;
+                }
+                
+                // Load Bipolar II messages
+                if (analogyConditions.bipolar2 && analogyConditions.bipolar2.conversations0) {
+                    bipolar2Messages = analogyConditions.bipolar2.conversations0;
+                }
+                
+                // Load Depression messages
+                if (analogyConditions.depression && analogyConditions.depression.conversations0) {
+                    depressionMessages = analogyConditions.depression.conversations0;
+                }
+                
+                // Load Normal messages
+                if (analogyConditions.normal && analogyConditions.normal.conversations0) {
+                    normalMessages = analogyConditions.normal.conversations0;
+                }
+            }
+        }
+    };
+
+    // Bipolar I Disorder Demo
     function startBipolar1Demo() {
-      stopBipolar1Demo();
-      const indicator = document.getElementById('bipolar1-indicator');
-      const walker = document.getElementById('bipolar1-walker');
-      const walkingHuman = document.getElementById('bipolar1-walking-human');
-      
-      let currentEpisode = 'manic';
-      let moodValue = 90;
-      let messageIndex = 0;
-      let walkerIndex = 0;
-      
-      bipolar1Interval = setInterval(() => {
-        // Simulate extreme mood swings between manic and depressive episodes
-        if (currentEpisode === 'manic' && Math.random() > 0.7) {
-          currentEpisode = 'depressive';
-          indicator.textContent = 'DEPRESSIVE EPISODE';
-          indicator.classList.remove('bipolar1-extreme-high');
-          indicator.classList.add('bipolar1-extreme-low');
-          walker.classList.remove('running');
-          walker.classList.add('slow');
-        } else if (currentEpisode === 'depressive' && Math.random() > 0.8) {
-          currentEpisode = 'manic';
-          indicator.textContent = 'MANIC EPISODE';
-          indicator.classList.remove('bipolar1-extreme-low');
-          indicator.classList.add('bipolar1-extreme-high');
-          walker.classList.remove('slow');
-          walker.classList.add('running');
-        }
+        stopBipolar1Demo();
+        const indicator = document.getElementById('bipolar1-indicator0');
+        const walker = document.getElementById('bipolar1-walker0');
         
-        // Update mood value based on episode
-        if (currentEpisode === 'manic') {
-          moodValue = 85 + Math.random() * 10;
-          updateMetrics('bipolar1', 90 + Math.random() * 10, 10 + Math.random() * 5, 25 + Math.random() * 10, 70 + Math.random() * 20);
-          updateConversation('bipolar1', bipolar1Messages.manic[messageIndex]);
-          updateWalker('bipolar1', bipolar1Walkers.manic[walkerIndex]);
-        } else {
-          moodValue = 10 + Math.random() * 10;
-          updateMetrics('bipolar1', 10 + Math.random() * 5, 90 + Math.random() * 5, 20 + Math.random() * 5, 45 + Math.random() * 10);
-          updateConversation('bipolar1', bipolar1Messages.depressive[messageIndex]);
-          updateWalker('bipolar1', bipolar1Walkers.depressive[walkerIndex]);
-        }
+        let currentEpisode = 'manic';
+        let moodValue = 90;
+        let manicMessageIndex = 0;
+        let depressiveMessageIndex = 0;
+        let manicWalkerIndex = 0;
+        let depressiveWalkerIndex = 0;
         
-        messageIndex = (messageIndex + 1) % bipolar1Messages.manic.length;
-        walkerIndex = (walkerIndex + 1) % bipolar1Walkers.manic.length;
-        
-        // Update timeline and walking human position
-        updateTimeline('bipolar1', moodValue);
-        updateWalkingHuman('bipolar1', moodValue);
-        
-      }, 2000);
+        // Initialize state with translated text
+        indicator.textContent = getIndicatorText('bipolar1', 'manic');
+        indicator.classList.add('bipolar1-extreme-high');
+        walker.classList.add('running');
+
+        bipolar1Interval = setInterval(() => {
+            // Episode swapping logic
+            if (currentEpisode === 'manic' && Math.random() > 0.7) {
+                currentEpisode = 'depressive';
+                indicator.textContent = getIndicatorText('bipolar1', 'depressive');
+                indicator.classList.remove('bipolar1-extreme-high');
+                indicator.classList.add('bipolar1-extreme-low');
+                walker.classList.remove('running');
+                walker.classList.add('slow');
+            } else if (currentEpisode === 'depressive' && Math.random() > 0.8) {
+                currentEpisode = 'manic';
+                indicator.textContent = getIndicatorText('bipolar1', 'manic');
+                indicator.classList.remove('bipolar1-extreme-low');
+                indicator.classList.add('bipolar1-extreme-high');
+                walker.classList.remove('slow');
+                walker.classList.add('running');
+            }
+            
+            // Mood & metrics update
+            let currentMessage, currentWalker;
+
+            if (currentEpisode === 'manic') {
+                moodValue = 85 + Math.random() * 10;
+                updateMetrics('bipolar1', 90 + Math.random() * 10, 10 + Math.random() * 5, 25 + Math.random() * 10, 70 + Math.random() * 20, '0');
+                
+                currentMessage = bipolar1Messages.manic[manicMessageIndex];
+                currentWalker = bipolar1Walkers.manic[manicWalkerIndex];
+                
+                manicMessageIndex = (manicMessageIndex + 1) % bipolar1Messages.manic.length;
+                manicWalkerIndex = (manicWalkerIndex + 1) % bipolar1Walkers.manic.length;
+
+            } else {
+                moodValue = 10 + Math.random() * 10;
+                updateMetrics('bipolar1', 10 + Math.random() * 5, 90 + Math.random() * 5, 20 + Math.random() * 5, 45 + Math.random() * 10, '0');
+                
+                currentMessage = bipolar1Messages.depressive[depressiveMessageIndex];
+                currentWalker = bipolar1Walkers.depressive[depressiveWalkerIndex];
+
+                depressiveMessageIndex = (depressiveMessageIndex + 1) % bipolar1Messages.depressive.length;
+                depressiveWalkerIndex = (depressiveWalkerIndex + 1) % bipolar1Walkers.depressive.length;
+            }
+            
+            // UI updates
+            updateConversation('bipolar1', currentMessage, '0');
+            updateWalker('bipolar1', currentWalker, '0');
+            updateTimeline('bipolar1', moodValue, '0');
+            updateWalkingHuman('bipolar1', moodValue, '0');
+        }, 2000);
     }
 
     function stopBipolar1Demo() {
-      clearInterval(bipolar1Interval);
-      const indicator = document.getElementById('bipolar1-indicator');
-      const walker = document.getElementById('bipolar1-walker');
-      indicator.classList.remove('pulse', 'bipolar1-extreme-high', 'bipolar1-extreme-low');
-      walker.classList.remove('running', 'slow');
+        clearInterval(bipolar1Interval);
+        const indicator = document.getElementById('bipolar1-indicator0');
+        const walker = document.getElementById('bipolar1-walker0');
+        indicator.classList.remove('pulse', 'bipolar1-extreme-high', 'bipolar1-extreme-low');
+        walker.classList.remove('running', 'slow');
     }
 
     function resetBipolar1Demo() {
-      stopBipolar1Demo();
-      const indicator = document.getElementById('bipolar1-indicator');
-      const walker = document.getElementById('bipolar1-walker');
-      
-      indicator.textContent = 'EXTREME ROLLERCOASTER';
-      indicator.classList.remove('pulse', 'bipolar1-extreme-high', 'bipolar1-extreme-low');
-      walker.classList.remove('running', 'walking', 'slow', 'still');
-      walker.classList.add('running');
-      
-      // Reset timeline and walking human
-      updateTimeline('bipolar1', 90);
-      updateWalkingHuman('bipolar1', 90);
-      
-      // Reset metrics
-      updateMetrics('bipolar1', 95, 10, 30, 80);
-      
-      // Reset conversation
-      updateConversation('bipolar1', bipolar1Messages.manic[0]);
-      
-      // Reset walker
-      updateWalker('bipolar1', bipolar1Walkers.manic[0]);
+        stopBipolar1Demo();
+        const indicator = document.getElementById('bipolar1-indicator0');
+        const walker = document.getElementById('bipolar1-walker0');
+        
+        indicator.textContent = getIndicatorText('bipolar1', 'default');
+        indicator.classList.remove('pulse', 'bipolar1-extreme-high', 'bipolar1-extreme-low');
+        walker.classList.remove('running', 'walking', 'slow', 'still');
+        walker.classList.add('running');
+        
+        updateTimeline('bipolar1', 90, '0');
+        updateWalkingHuman('bipolar1', 90, '0');
+        updateMetrics('bipolar1', 95, 10, 30, 80, '0');
+        
+        updateConversation('bipolar1', bipolar1Messages.manic[0], '0');
+        updateWalker('bipolar1', bipolar1Walkers.manic[0], '0');
     }
 
     // Bipolar II Disorder Demo
     function startBipolar2Demo() {
-      stopBipolar2Demo();
-      const indicator = document.getElementById('bipolar2-indicator');
-      const walker = document.getElementById('bipolar2-walker');
-      const walkingHuman = document.getElementById('bipolar2-walking-human');
-      
-      let moodValue = 70;
-      let episode = 'hypomanic';
-      let messageIndex = 0;
-      let walkerIndex = 0;
-      bipolar2Interval = setInterval(() => {
-        // Simulate cycling between hypomanic and depressive episodes
-        if (episode === 'hypomanic' && Math.random() > 0.8) {
-          episode = 'depressive';
-          indicator.textContent = 'DEPRESSIVE EPISODE';
-          walker.classList.remove('walking');
-          walker.classList.add('slow');
-        } else if (episode === 'depressive' && Math.random() > 0.9) {
-          episode = 'hypomanic';
-          indicator.textContent = 'HYPOMANIC EPISODE';
-          walker.classList.remove('slow');
-          walker.classList.add('walking');
-        }
+        stopBipolar2Demo();
+        const indicator = document.getElementById('bipolar2-indicator0');
+        const walker = document.getElementById('bipolar2-walker0');
         
-        // Update mood value based on episode
-        if (episode === 'hypomanic') {
-          moodValue = 65 + Math.random() * 10;
-          updateMetrics('bipolar2', 70 + Math.random() * 10, 40 + Math.random() * 10, 55 + Math.random() * 10, 25 + Math.random() * 10);
-          updateConversation('bipolar2', bipolar2Messages[messageIndex]);
-          updateWalker('bipolar2', bipolar2Walkers[0]);
-        } else {
-          moodValue = 15 + Math.random() * 10;
-          updateMetrics('bipolar2', 15 + Math.random() * 10, 80 + Math.random() * 10, 20 + Math.random() * 10, 40 + Math.random() * 10);
-          updateConversation('bipolar2', depressionMessages[messageIndex]);
-          updateWalker('bipolar2', bipolar2Walkers[4]);
-        }
+        let moodValue = 70;
+        let episode = 'hypomanic';
+        let messageIndex = 0;
+        let walkerIndex = 0;
         
-        messageIndex = (messageIndex + 1) % bipolar2Messages.length;
-        walkerIndex = (walkerIndex + 1) % bipolar2Walkers.length;
+        indicator.textContent = getIndicatorText('bipolar2', 'hypomanic');
         
-        // Update timeline and walking human position
-        updateTimeline('bipolar2', moodValue);
-        updateWalkingHuman('bipolar2', moodValue);
-        
-      }, 1800);
+        bipolar2Interval = setInterval(() => {
+            if (episode === 'hypomanic' && Math.random() > 0.8) {
+                episode = 'depressive';
+                indicator.textContent = getIndicatorText('bipolar2', 'depressive');
+                walker.classList.remove('walking');
+                walker.classList.add('slow');
+            } else if (episode === 'depressive' && Math.random() > 0.9) {
+                episode = 'hypomanic';
+                indicator.textContent = getIndicatorText('bipolar2', 'hypomanic');
+                walker.classList.remove('slow');
+                walker.classList.add('walking');
+            }
+            
+            if (episode === 'hypomanic') {
+                moodValue = 65 + Math.random() * 10;
+                updateMetrics('bipolar2', 70 + Math.random() * 10, 40 + Math.random() * 10, 55 + Math.random() * 10, 25 + Math.random() * 10, '0');
+                updateConversation('bipolar2', bipolar2Messages[messageIndex], '0');
+                updateWalker('bipolar2', bipolar2Walkers[walkerIndex], '0');
+            } else {
+                moodValue = 15 + Math.random() * 10;
+                updateMetrics('bipolar2', 15 + Math.random() * 10, 80 + Math.random() * 10, 20 + Math.random() * 10, 40 + Math.random() * 10, '0');
+                updateConversation('bipolar2', bipolar2Messages[messageIndex], '0');
+                updateWalker('bipolar2', bipolar2Walkers[4], '0');
+            }
+            
+            messageIndex = (messageIndex + 1) % bipolar2Messages.length;
+            walkerIndex = (walkerIndex + 1) % bipolar2Walkers.length;
+            
+            updateTimeline('bipolar2', moodValue, '0');
+            updateWalkingHuman('bipolar2', moodValue, '0');
+        }, 1800);
     }
 
     function stopBipolar2Demo() {
-      clearInterval(bipolar2Interval);
-      const indicator = document.getElementById('bipolar2-indicator');
-      const walker = document.getElementById('bipolar2-walker');
-      indicator.classList.remove('pulse');
-      walker.classList.remove('walking', 'slow');
+        clearInterval(bipolar2Interval);
+        const indicator = document.getElementById('bipolar2-indicator0');
+        const walker = document.getElementById('bipolar2-walker0');
+        indicator.classList.remove('pulse');
+        walker.classList.remove('walking', 'slow');
     }
 
     function resetBipolar2Demo() {
-      stopBipolar2Demo();
-      const indicator = document.getElementById('bipolar2-indicator');
-      const walker = document.getElementById('bipolar2-walker');
-      
-      indicator.textContent = 'MILD HIGHS, DEEP LOWS';
-      indicator.classList.remove('pulse');
-      walker.classList.remove('running', 'walking', 'slow', 'still');
-      walker.classList.add('walking');
-      
-      // Reset timeline and walking human
-      updateTimeline('bipolar2', 70);
-      updateWalkingHuman('bipolar2', 70);
-      
-      updateMetrics('bipolar2', 75, 40, 60, 30);
-      
-      // Reset conversation
-      updateConversation('bipolar2', bipolar2Messages[0]);
-      
-      // Reset walker
-      updateWalker('bipolar2', bipolar2Walkers[0]);
+        stopBipolar2Demo();
+        const indicator = document.getElementById('bipolar2-indicator0');
+        const walker = document.getElementById('bipolar2-walker0');
+        
+        indicator.textContent = getIndicatorText('bipolar2', 'default');
+        indicator.classList.remove('pulse');
+        walker.classList.remove('running', 'walking', 'slow', 'still');
+        walker.classList.add('walking');
+        
+        updateTimeline('bipolar2', 70, '0');
+        updateWalkingHuman('bipolar2', 70, '0');
+        updateMetrics('bipolar2', 75, 40, 60, 30, '0');
+        
+        updateConversation('bipolar2', bipolar2Messages[0], '0');
+        updateWalker('bipolar2', bipolar2Walkers[0], '0');
     }
 
     // Depression Demo
     function startDepressionDemo() {
-      stopDepressionDemo();
-      const indicator = document.getElementById('depression-indicator');
-      const walker = document.getElementById('depression-walker');
-      const walkingHuman = document.getElementById('depression-walking-human');
-      
-      let moodValue = 15;
-      let messageIndex = 0;
-      let walkerIndex = 0;
-      depressionInterval = setInterval(() => {
-        // Simulate stable low mood with minor fluctuations
-        moodValue = 10 + Math.random() * 10;
+        stopDepressionDemo();
+        const indicator = document.getElementById('depression-indicator0');
+        const walker = document.getElementById('depression-walker0');
         
-        // Update timeline and walking human position
-        updateTimeline('depression', moodValue);
-        updateWalkingHuman('depression', moodValue);
+        let moodValue = 15;
+        let messageIndex = 0;
+        let walkerIndex = 0;
         
-        // Update metrics with low values
-        updateMetrics('depression', 10 + Math.random() * 5, 90 + Math.random() * 5, 20 + Math.random() * 5, 45 + Math.random() * 10);
+        indicator.textContent = getIndicatorText('depression', 'depressive');
         
-        // Update conversation
-        updateConversation('depression', depressionMessages[messageIndex]);
-        messageIndex = (messageIndex + 1) % depressionMessages.length;
-        
-        // Update walker
-        updateWalker('depression', depressionWalkers[walkerIndex]);
-        walkerIndex = (walkerIndex + 1) % depressionWalkers.length;
-        
-      }, 2000);
+        depressionInterval = setInterval(() => {
+            moodValue = 10 + Math.random() * 10;
+            
+            updateTimeline('depression', moodValue, '0');
+            updateWalkingHuman('depression', moodValue, '0');
+            updateMetrics('depression', 10 + Math.random() * 5, 90 + Math.random() * 5, 20 + Math.random() * 5, 45 + Math.random() * 10, '0');
+            
+            updateConversation('depression', depressionMessages[messageIndex], '0');
+            messageIndex = (messageIndex + 1) % depressionMessages.length;
+            
+            updateWalker('depression', depressionWalkers[walkerIndex], '0');
+            walkerIndex = (walkerIndex + 1) % depressionWalkers.length;
+        }, 2000);
     }
 
     function stopDepressionDemo() {
-      clearInterval(depressionInterval);
-      const indicator = document.getElementById('depression-indicator');
-      const walker = document.getElementById('depression-walker');
-      indicator.classList.remove('pulse');
-      walker.classList.remove('slow');
+        clearInterval(depressionInterval);
+        const indicator = document.getElementById('depression-indicator0');
+        const walker = document.getElementById('depression-walker0');
+        indicator.classList.remove('pulse');
+        walker.classList.remove('slow');
     }
 
     function resetDepressionDemo() {
-      stopDepressionDemo();
-      const indicator = document.getElementById('depression-indicator');
-      const walker = document.getElementById('depression-walker');
-      
-      indicator.textContent = 'ONLY DEEP LOWS';
-      indicator.classList.remove('pulse');
-      walker.classList.remove('running', 'walking', 'slow', 'still');
-      walker.classList.add('slow');
-      
-      // Reset timeline and walking human
-      updateTimeline('depression', 15);
-      updateWalkingHuman('depression', 15);
-      
-      updateMetrics('depression', 10, 90, 20, 50);
-      
-      // Reset conversation
-      updateConversation('depression', depressionMessages[0]);
-      
-      // Reset walker
-      updateWalker('depression', depressionWalkers[0]);
+        stopDepressionDemo();
+        const indicator = document.getElementById('depression-indicator0');
+        const walker = document.getElementById('depression-walker0');
+        
+        indicator.textContent = getIndicatorText('depression', 'default');
+        indicator.classList.remove('pulse');
+        walker.classList.remove('running', 'walking', 'slow', 'still');
+        walker.classList.add('slow');
+        
+        updateTimeline('depression', 15, '0');
+        updateWalkingHuman('depression', 15, '0');
+        updateMetrics('depression', 10, 90, 20, 50, '0');
+        
+        updateConversation('depression', depressionMessages[0], '0');
+        updateWalker('depression', depressionWalkers[0], '0');
     }
 
     // Normal Mood Demo
     function startNormalDemo() {
-      stopNormalDemo();
-      const indicator = document.getElementById('normal-indicator');
-      const walker = document.getElementById('normal-walker');
-      const walkingHuman = document.getElementById('normal-walking-human');
-      
-      let moodValue = 50;
-      let messageIndex = 0;
-      let walkerIndex = 0;
-      normalInterval = setInterval(() => {
-        // Simulate normal mood fluctuations
-        moodValue = 45 + Math.random() * 10;
+        stopNormalDemo();
+        const indicator = document.getElementById('normal-indicator0');
+        const walker = document.getElementById('normal-walker0');
         
-        // Update timeline and walking human position
-        updateTimeline('normal', moodValue);
-        updateWalkingHuman('normal', moodValue);
+        let moodValue = 50;
+        let messageIndex = 0;
+        let walkerIndex = 0;
         
-        // Update metrics with stable values
-        updateMetrics('normal', 50 + Math.random() * 10, 70 + Math.random() * 10, 85 + Math.random() * 10, 5 + Math.random() * 5);
+        indicator.textContent = getIndicatorText('normal', 'default');
         
-        // Update conversation
-        updateConversation('normal', normalMessages[messageIndex]);
-        messageIndex = (messageIndex + 1) % normalMessages.length;
-        
-        // Update walker
-        updateWalker('normal', normalWalkers[walkerIndex]);
-        walkerIndex = (walkerIndex + 1) % normalWalkers.length;
-        
-      }, 1600);
+        normalInterval = setInterval(() => {
+            moodValue = 45 + Math.random() * 10;
+            
+            updateTimeline('normal', moodValue, '0');
+            updateWalkingHuman('normal', moodValue, '0');
+            updateMetrics('normal', 50 + Math.random() * 10, 70 + Math.random() * 10, 85 + Math.random() * 10, 5 + Math.random() * 5, '0');
+            
+            updateConversation('normal', normalMessages[messageIndex], '0');
+            messageIndex = (messageIndex + 1) % normalMessages.length;
+            
+            updateWalker('normal', normalWalkers[walkerIndex], '0');
+            walkerIndex = (walkerIndex + 1) % normalWalkers.length;
+        }, 1600);
     }
 
     function stopNormalDemo() {
-      clearInterval(normalInterval);
-      const indicator = document.getElementById('normal-indicator');
-      const walker = document.getElementById('normal-walker');
-      indicator.classList.remove('pulse');
-      walker.classList.remove('walking');
+        clearInterval(normalInterval);
+        const indicator = document.getElementById('normal-indicator0');
+        const walker = document.getElementById('normal-walker0');
+        indicator.classList.remove('pulse');
+        walker.classList.remove('walking');
     }
 
     function resetNormalDemo() {
-      stopNormalDemo();
-      const indicator = document.getElementById('normal-indicator');
-      const walker = document.getElementById('normal-walker');
-      
-      indicator.textContent = 'EVERYDAY UPS AND DOWNS';
-      indicator.classList.remove('pulse');
-      walker.classList.remove('running', 'walking', 'slow', 'still');
-      walker.classList.add('walking');
-      
-      // Reset timeline and walking human
-      updateTimeline('normal', 50);
-      updateWalkingHuman('normal', 50);
-      
-      updateMetrics('normal', 55, 70, 90, 5);
-      
-      // Reset conversation
-      updateConversation('normal', normalMessages[0]);
-      
-      // Reset walker
-      updateWalker('normal', normalWalkers[0]);
+        stopNormalDemo();
+        const indicator = document.getElementById('normal-indicator0');
+        const walker = document.getElementById('normal-walker0');
+        
+        indicator.textContent = getIndicatorText('normal', 'default');
+        indicator.classList.remove('pulse');
+        walker.classList.remove('running', 'walking', 'slow', 'still');
+        walker.classList.add('walking');
+        
+        updateTimeline('normal', 50, '0');
+        updateWalkingHuman('normal', 50, '0');
+        updateMetrics('normal', 55, 70, 90, 5, '0');
+        
+        updateConversation('normal', normalMessages[0], '0');
+        updateWalker('normal', normalWalkers[0], '0');
     }
 
-    // Enhanced helper functions
-    function updateTimeline(condition, moodValue) {
-      const timelinePath = document.getElementById(`${condition}-timeline-path`);
-      const timelineMarker = document.getElementById(`${condition}-timeline-marker`);
-      
-      // Update the path width based on current mood
-      timelinePath.style.width = `${moodValue}%`;
-      timelineMarker.style.left = `${moodValue}%`;
+    // Helper functions
+    function updateTimeline(condition, moodValue, suffix = '') {
+        const timelinePath = document.getElementById(`${condition}-timeline-path${suffix}`);
+        const timelineMarker = document.getElementById(`${condition}-timeline-marker${suffix}`);
+        
+        if (timelinePath && timelineMarker) {
+            timelinePath.style.width = `${moodValue}%`;
+            timelineMarker.style.left = `${moodValue}%`;
+        }
     }
 
-    function updateWalkingHuman(condition, moodValue) {
-      const walkingHuman = document.getElementById(`${condition}-walking-human`);
-      
-      // Calculate position based on mood value (0-100% of container width)
-      const containerWidth = walkingHuman.parentElement.offsetWidth;
-      const humanWidth = walkingHuman.offsetWidth;
-      const position = (moodValue / 100) * (containerWidth - humanWidth);
-      
-      // Move the walking human to the calculated position
-      walkingHuman.style.left = `${position}px`;
+    function updateWalkingHuman(condition, moodValue, suffix = '') {
+        const walkingHuman = document.getElementById(`${condition}-walking-human${suffix}`);
+        
+        if (walkingHuman && walkingHuman.parentElement) {
+            const containerWidth = walkingHuman.parentElement.offsetWidth;
+            const humanWidth = walkingHuman.offsetWidth;
+            const position = (moodValue / 100) * (containerWidth - humanWidth);
+            walkingHuman.style.left = `${position}px`;
+        }
     }
 
-    function updateConversation(condition, message) {
-      const conversationBox = document.getElementById(`${condition}-conversation`);
-      conversationBox.textContent = message;
-      
-      // Add a subtle pulse animation when message changes
-      conversationBox.classList.remove('pulse');
-      void conversationBox.offsetWidth; // Trigger reflow
-      conversationBox.classList.add('pulse');
+    function updateConversation(condition, message, suffix = '') {
+        const conversationBox = document.getElementById(`${condition}-conversation${suffix}`);
+        if (conversationBox) {
+            conversationBox.textContent = message;
+            conversationBox.classList.remove('pulse');
+            void conversationBox.offsetWidth;
+            conversationBox.classList.add('pulse');
+        }
     }
 
-    function updateWalker(condition, emoji) {
-      const walker = document.getElementById(`${condition}-walker`);
-      walker.textContent = emoji;
-      
-      // Add a subtle scale animation when walker changes
-      walker.classList.remove('pulse');
-      void walker.offsetWidth; // Trigger reflow
-      walker.classList.add('pulse');
+    function updateWalker(condition, emoji, suffix = '') {
+        const walker = document.getElementById(`${condition}-walker${suffix}`);
+        if (walker) {
+            walker.textContent = emoji;
+            walker.classList.remove('pulse');
+            void walker.offsetWidth;
+            walker.classList.add('pulse');
+        }
     }
 
-    function updateMetrics(condition, energy, sleep, functionality, hospitalization) {
-      // Update donut charts
-      updateDonutChart(`${condition}-energy-chart`, `${condition}-energy-segment`, energy, `${condition}-energy-value`);
-      updateDonutChart(`${condition}-sleep-chart`, `${condition}-sleep-segment`, sleep, `${condition}-sleep-value`);
-      updateDonutChart(`${condition}-function-chart`, `${condition}-function-segment`, functionality, `${condition}-function-value`);
-      
-      // Update hospitalization risk text
-      let hospitalText = 'None';
-      if (hospitalization > 60) hospitalText = 'High';
-      else if (hospitalization > 30) hospitalText = 'Medium';
-      else if (hospitalization > 10) hospitalText = 'Low';
-      
-      document.getElementById(`${condition}-hospital-value`).textContent = hospitalText;
-      
-      // Update hospitalization donut
-      let hospitalPercentage = 5;
-      if (hospitalText === 'High') hospitalPercentage = 80;
-      else if (hospitalText === 'Medium') hospitalPercentage = 50;
-      else if (hospitalText === 'Low') hospitalPercentage = 30;
-      
-      updateDonutChart(`${condition}-hospital-chart`, `${condition}-hospital-segment`, hospitalPercentage, `${condition}-hospital-value`);
+    function updateMetrics(condition, energy, sleep, functionality, hospitalization, suffix = '') {
+        updateDonutChart(`${condition}-energy-chart${suffix}`, `${condition}-energy-segment${suffix}`, energy, `${condition}-energy-value${suffix}`);
+        updateDonutChart(`${condition}-sleep-chart${suffix}`, `${condition}-sleep-segment${suffix}`, sleep, `${condition}-sleep-value${suffix}`);
+        updateDonutChart(`${condition}-function-chart${suffix}`, `${condition}-function-segment${suffix}`, functionality, `${condition}-function-value${suffix}`);
+        
+        let hospitalText = 'None';
+        if (hospitalization > 60) hospitalText = 'High';
+        else if (hospitalization > 30) hospitalText = 'Medium';
+        else if (hospitalization > 10) hospitalText = 'Low';
+        
+        const hospitalValueElement = document.getElementById(`${condition}-hospital-value${suffix}`);
+        if (hospitalValueElement) {
+            hospitalValueElement.textContent = hospitalText;
+        }
+        
+        let hospitalPercentage = 5;
+        if (hospitalText === 'High') hospitalPercentage = 80;
+        else if (hospitalText === 'Medium') hospitalPercentage = 50;
+        else if (hospitalText === 'Low') hospitalPercentage = 30;
+        
+        updateDonutChart(`${condition}-hospital-chart${suffix}`, `${condition}-hospital-segment${suffix}`, hospitalPercentage, `${condition}-hospital-value${suffix}`);
     }
     
     function updateDonutChart(chartId, segmentId, percentage, valueId) {
-      const segment = document.getElementById(segmentId);
-      const valueElement = document.getElementById(valueId);
-      const rotation = (percentage / 100) * 360;
-      
-      // Update the CSS custom property
-      segment.style.setProperty('--segment-rotation', `${rotation}deg`);
-      
-      // Update the inner text
-      if (valueId.includes('hospital')) {
-        let hospitalText = 'None';
-        if (percentage > 60) hospitalText = 'High';
-        else if (percentage > 30) hospitalText = 'Medium';
-        else if (percentage > 10) hospitalText = 'Low';
-        valueElement.textContent = hospitalText;
-      } else {
-        valueElement.textContent = `${Math.round(percentage)}%`;
-      }
+        const segment = document.getElementById(segmentId);
+        const valueElement = document.getElementById(valueId);
+        
+        if (segment && valueElement) {
+            const rotation = (percentage / 100) * 360;
+            segment.style.setProperty('--segment-rotation', `${rotation}deg`);
+            
+            if (valueId.includes('hospital')) {
+                let hospitalText = 'None';
+                if (percentage > 60) hospitalText = 'High';
+                else if (percentage > 30) hospitalText = 'Medium';
+                else if (percentage > 10) hospitalText = 'Low';
+                valueElement.textContent = hospitalText;
+            } else {
+                valueElement.textContent = `${Math.round(percentage)}%`;
+            }
+        }
     }
 
     // Global control functions
     function startAllDemos() {
-      startBipolar1Demo();
-      startBipolar2Demo();
-      startDepressionDemo();
-      startNormalDemo();
+        startBipolar1Demo();
+        startBipolar2Demo();
+        startDepressionDemo();
+        startNormalDemo();
     }
 
     function stopAllDemos() {
-      stopBipolar1Demo();
-      stopBipolar2Demo();
-      stopDepressionDemo();
-      stopNormalDemo();
+        stopBipolar1Demo();
+        stopBipolar2Demo();
+        stopDepressionDemo();
+        stopNormalDemo();
     }
 
     function resetAllDemos() {
-      resetBipolar1Demo();
-      resetBipolar2Demo();
-      resetDepressionDemo();
-      resetNormalDemo();
+        resetBipolar1Demo();
+        resetBipolar2Demo();
+        resetDepressionDemo();
+        resetNormalDemo();
+    }
+
+    // Function to update indicator texts when language changes
+    function updateIndicatorTexts() {
+        const indicators = [
+            { id: 'bipolar1-indicator0', condition: 'bipolar1', state: 'default' },
+            { id: 'bipolar2-indicator0', condition: 'bipolar2', state: 'default' },
+            { id: 'depression-indicator0', condition: 'depression', state: 'default' },
+            { id: 'normal-indicator0', condition: 'normal', state: 'default' }
+        ];
+        
+        indicators.forEach(indicator => {
+            const element = document.getElementById(indicator.id);
+            if (element) {
+                const condition = indicator.condition;
+                const isRunning = 
+                    (condition === 'bipolar1' && bipolar1Interval) ||
+                    (condition === 'bipolar2' && bipolar2Interval) ||
+                    (condition === 'depression' && depressionInterval) ||
+                    (condition === 'normal' && normalInterval);
+                
+                if (!isRunning) {
+                    element.textContent = getIndicatorText(indicator.condition, indicator.state);
+                }
+            }
+        });
     }
 
     // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
-      resetAllDemos();
-      
-      // Add scroll animation
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
+        // Load conversation messages after i18n system is ready
+        setTimeout(() => {
+            loadConversationMessages();
+            resetAllDemos();
+        }, 500);
+        
+        // Add scroll animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
         });
-      }, observerOptions);
-      
-      // Observe all fade-in elements
-      document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-      
-      // Handle window resize for better mobile experience
-      window.addEventListener('resize', function() {
-        document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
-      });
-      
-      // Initialize mobile view class
-      if (window.innerWidth <= 768) {
-        document.body.classList.add('mobile-view');
-      }
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
+        });
+        
+        // Initialize mobile view class
+        if (window.innerWidth <= 768) {
+            document.body.classList.add('mobile-view');
+        }
+        
+        // Listen for language changes
+        document.addEventListener('languageChanged', (e) => {
+            console.log('Language changed, updating indicator texts...');
+            updateIndicatorTexts();
+            loadConversationMessages();
+        });
     });
-  </script>
 
+    // Make functions available globally
+    window.loadConversationMessages = loadConversationMessages;
+    window.resetAllDemos = resetAllDemos;
+    window.startAllDemos = startAllDemos;
+    window.stopAllDemos = stopAllDemos;
+</script>
+  </body>
 </html>
+

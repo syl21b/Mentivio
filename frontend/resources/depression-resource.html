@@ -1,12 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <title id="page-title"></title>
 
-  <title>Understanding Depression - Mentivio</title>
     <!-- Load component script with defer -->
     <script src="../js/components.js" defer></script>
-  <style>
-    /* Base Styles */
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
+    :root {
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -14,213 +36,445 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--dark);
+      background-color: var(--white);
     }
     
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
     
-    /* Resource Detail Styles */
+    /* Resource Detail Container - Updated style */
     .resource-detail-container {
       padding: 40px 0;
     }
     
+    /* Resource Header - Updated with requested gradient */
     .resource-header {
       text-align: center;
-      margin-bottom: 50px;
-      padding: 30px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     
     .resource-icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
     }
     
     .resource-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 700;
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
     }
     
     .resource-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     
+    /* Content Section - Updated style */
     .content-section {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
     }
     
     .content-section h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .content-section h2 i {
-      color: #667eea;
+      color: var(--primary);
     }
     
     .content-section p {
-      margin-bottom: 15px;
-      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.6;
     }
     
+    /* Symptoms Grid - Updated style */
     .symptoms-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
     }
     
     .symptom-item {
       display: flex;
       align-items: center;
-      gap: 15px;
-      padding: 15px;
-      background: #f7fafc;
-      border-radius: 8px;
-      transition: transform 0.3s, box-shadow 0.3s;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .symptom-item:hover {
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
+      border-color: var(--primary-light);
     }
     
     .symptom-item i {
       font-size: 1.5rem;
-      color: #667eea;
+      color: var(--primary);
       width: 30px;
       text-align: center;
+      flex-shrink: 0;
     }
     
+    .symptom-text {
+      flex: 1;
+    }
+    
+    .symptom-text h4 {
+      color: var(--dark);
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+    
+    .symptom-text p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    
+    /* Treatment Options - Updated style */
     .treatment-options {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .treatment-card {
-      padding: 25px;
-      background: #f7fafc;
-      border-radius: 10px;
-      border-left: 4px solid #667eea;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--primary);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .treatment-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: var(--primary-light);
     }
     
     .treatment-card h3 {
-      color: #4a5568;
-      margin-bottom: 15px;
+      color: var(--dark);
+      margin-bottom: 1rem;
       font-size: 1.3rem;
+      font-weight: 500;
     }
     
     .treatment-card ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .treatment-card li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 20px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .treatment-card li:before {
       content: "•";
-      color: #667eea;
+      color: var(--primary);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+      font-size: 1.2rem;
+    }
+    
+    /* Key Takeaways - Updated style */
+    .key-takeaways {
+      background: var(--light);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-top: 1.5rem;
+      border-left: 4px solid var(--secondary);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .key-takeaways h3 {
+      color: var(--dark);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    
+    .key-takeaways ul {
+      list-style-type: none;
+    }
+    
+    .key-takeaways li {
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      color: var(--gray);
+      line-height: 1.5;
+    }
+    
+    .key-takeaways li:before {
+      content: "✓";
+      color: var(--secondary);
       font-weight: bold;
       position: absolute;
       left: 0;
     }
     
-   
-    
-    
+    /* Source Info - Updated style */
     .source-info {
-      margin-top: 40px;
-      padding: 20px;
-      background: #edf2f7;
-      border-radius: 10px;
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
       font-size: 0.9rem;
-      color: #4a5568;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
     }
     
+    .source-info h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    /* Quick Navigation - Updated style */
     .quick-nav {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin: 30px 0;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
     }
     
+    /* Navigation Buttons - Updated to match prediction.css button style */
     .nav-btn {
-      padding: 10px 20px;
-      background: #667eea;
+      padding: 0.75rem 1.5rem;
+      background-color: var(--primary);
       color: white;
       border: none;
-      border-radius: 6px;
+      border-radius: 50px;
       cursor: pointer;
       font-size: 0.9rem;
-      transition: background 0.3s;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
     }
     
     .nav-btn:hover {
-      background: #5a6fd8;
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
     }
     
+    /* Types Grid - Updated style */
     .types-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(250px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .type-card {
-      padding: 20px;
-      background: #f7fafc;
-      border-radius: 8px;
-      border-top: 4px solid #667eea;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--primary);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .type-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
     }
     
     .type-card h4 {
-      color: #4a5568;
-      margin-bottom: 10px;
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
     }
     
+    .type-card p {
+      margin-bottom: 0;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    
+    /* Action Buttons - For consistency with prediction.css */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(74, 111, 165, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Focus states - Matched to prediction.css */
+    .nav-btn:focus,
+    .btn:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+    
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
       .resource-header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       
-      .symptoms-grid, .treatment-options {
+      .symptoms-grid,
+      .treatment-options,
+      .types-grid {
         grid-template-columns: 1fr;
       }
       
       .quick-nav {
         justify-content: center;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .treatment-card,
+      .type-card {
+        padding: 1.25rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .btn {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .symptom-item {
+        padding: 1rem;
+      }
+      
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .symptom-item:hover,
+      .treatment-card:hover,
+      .type-card:hover,
+      .nav-btn:hover,
+      .btn:hover {
+        transform: none;
+      }
+      
+      .symptom-item:active,
+      .treatment-card:active,
+      .nav-btn:active,
+      .btn:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -232,143 +486,139 @@
         <div class="resource-icon">
           <i class="fas fa-cloud"></i>
         </div>
-        <h1>Understanding Depression</h1>
-        <p class="resource-subtitle">A comprehensive guide to recognizing, understanding, and finding help for depression</p>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
       </div>
 
       <div class="quick-nav">
-        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Depression?</button>
-        <button class="nav-btn" onclick="scrollToSection('symptoms')">Symptoms</button>
-        <button class="nav-btn" onclick="scrollToSection('types')">Types of Depression</button>
-        <button class="nav-btn" onclick="scrollToSection('treatment')">Treatment Options</button>
-        <button class="nav-btn" onclick="scrollToSection('help')">Getting Help</button>
+        <button class="nav-btn" onclick="scrollToSection('what-is')" id="nav-what-is"></button>
+        <button class="nav-btn" onclick="scrollToSection('symptoms')" id="nav-symptoms"></button>
+        <button class="nav-btn" onclick="scrollToSection('types')" id="nav-types"></button>
+        <button class="nav-btn" onclick="scrollToSection('treatment')" id="nav-treatment"></button>
+        <button class="nav-btn" onclick="scrollToSection('help')" id="nav-help"></button>
       </div>
 
       <div class="resource-content">
         <div class="content-section" id="what-is">
-          <h2><i class="fas fa-info-circle"></i> What is Depression?</h2>
-          <p>We all feel sad or down sometimes, but these feelings usually pass after a while. Depression is different—it's a serious medical condition that affects how you feel, think, and handle daily activities.</p>
-          <p>Depression isn't just "feeling blue." It can cause intense emotional pain and make it hard to function at work, school, or in relationships. The good news is that depression is treatable, and most people who seek help get better.</p>
-          <p>Depression can affect anyone regardless of age, gender, background, or life circumstances. It results from a combination of genetic, biological, environmental, and psychological factors.</p>
+          <h2><i class="fas fa-info-circle"></i> <span id="section1-title"></span></h2>
+          <p id="section1-p1"></p>
+          <p id="section1-p2"></p>
+          <p id="section1-p3"></p>
         </div>
 
         <div class="content-section" id="symptoms">
-          <h2><i class="fas fa-exclamation-triangle"></i> Common Signs and Symptoms</h2>
-          <p>Depression shows up differently in different people, but here are some common signs to watch for:</p>
+          <h2><i class="fas fa-exclamation-triangle"></i> <span id="section2-title"></span></h2>
+          <p id="section2-p1"></p>
           <div class="symptoms-grid">
             <div class="symptom-item">
               <i class="fas fa-sad-tear"></i>
-              <span>Persistent sad, anxious, or empty feelings</span>
+              <span id="symptom1"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-bed"></i>
-              <span>Sleep problems (too much or too little)</span>
+              <span id="symptom2"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-utensils"></i>
-              <span>Appetite or weight changes</span>
+              <span id="symptom3"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-tired"></i>
-              <span>Loss of energy or increased fatigue</span>
+              <span id="symptom4"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-brain"></i>
-              <span>Trouble thinking, concentrating, or making decisions</span>
+              <span id="symptom5"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-heart-broken"></i>
-              <span>Feelings of worthlessness or guilt</span>
+              <span id="symptom6"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-angry"></i>
-              <span>Irritability or restlessness</span>
+              <span id="symptom7"></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-running"></i>
-              <span>Loss of interest in activities you once enjoyed</span>
+              <span id="symptom8"></span>
             </div>
           </div>
-          <p style="margin-top: 20px;">If you've experienced several of these symptoms for more than two weeks, it might be time to talk to a healthcare provider.</p>
+          <p style="margin-top: 20px;" id="section2-p2"></p>
         </div>
 
         <div class="content-section" id="types">
-          <h2><i class="fas fa-list"></i> Types of Depression</h2>
-          <p>Depression isn't one-size-fits-all. There are several types, each with its own characteristics:</p>
+          <h2><i class="fas fa-list"></i> <span id="section3-title"></span></h2>
+          <p id="section3-p1"></p>
           <div class="types-grid">
             <div class="type-card">
-              <h4>Major Depression</h4>
-              <p>Severe symptoms that interfere with daily life, lasting at least two weeks.</p>
+              <h4 id="type1-title"></h4>
+              <p id="type1-desc"></p>
             </div>
             <div class="type-card">
-              <h4>Persistent Depressive Disorder</h4>
-              <p>Less severe but longer-lasting depression (two years or more).</p>
+              <h4 id="type2-title"></h4>
+              <p id="type2-desc"></p>
             </div>
             <div class="type-card">
-              <h4>Seasonal Affective Disorder</h4>
-              <p>Depression that occurs during specific seasons, usually winter.</p>
+              <h4 id="type3-title"></h4>
+              <p id="type3-desc"></p>
             </div>
             <div class="type-card">
-              <h4>Perinatal Depression</h4>
-              <p>Depression during pregnancy or after childbirth (postpartum).</p>
+              <h4 id="type4-title"></h4>
+              <p id="type4-desc"></p>
             </div>
             <div class="type-card">
-              <h4>Depression with Psychosis</h4>
-              <p>Severe depression accompanied by hallucinations or delusions.</p>
+              <h4 id="type5-title"></h4>
+              <p id="type5-desc"></p>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="treatment">
-          <h2><i class="fas fa-stethoscope"></i> Treatment Options</h2>
-          <p>Depression is highly treatable. Most people benefit from professional help, which might include:</p>
+          <h2><i class="fas fa-stethoscope"></i> <span id="section4-title"></span></h2>
+          <p id="section4-p1"></p>
           <div class="treatment-options">
             <div class="treatment-card">
-              <h3>Psychotherapy (Talk Therapy)</h3>
+              <h3 id="treatment1-title"></h3>
               <ul>
-                <li>Cognitive Behavioral Therapy (CBT)</li>
-                <li>Interpersonal Therapy (IPT)</li>
-                <li>Problem-Solving Therapy</li>
-                <li>Mindfulness-Based Therapies</li>
+                <li id="treatment1-item1"></li>
+                <li id="treatment1-item2"></li>
+                <li id="treatment1-item3"></li>
+                <li id="treatment1-item4"></li>
               </ul>
             </div>
             <div class="treatment-card">
-              <h3>Medication</h3>
+              <h3 id="treatment2-title"></h3>
               <ul>
-                <li>Antidepressants (SSRIs, SNRIs)</li>
-                <li>Mood stabilizers (in some cases)</li>
-                <li>Combination approaches</li>
+                <li id="treatment2-item1"></li>
+                <li id="treatment2-item2"></li>
+                <li id="treatment2-item3"></li>
               </ul>
-              <p style="margin-top: 10px; font-size: 0.9rem;"><em>Medication can take 4-8 weeks to show full effects</em></p>
+              <p style="margin-top: 10px; font-size: 0.9rem;"><em id="treatment2-note"></em></p>
             </div>
             <div class="treatment-card">
-              <h3>Lifestyle & Self-Care</h3>
+              <h3 id="treatment3-title"></h3>
               <ul>
-                <li>Regular physical activity</li>
-                <li>Healthy eating habits</li>
-                <li>Consistent sleep schedule</li>
-                <li>Stress reduction techniques</li>
-                <li>Social connection</li>
+                <li id="treatment3-item1"></li>
+                <li id="treatment3-item2"></li>
+                <li id="treatment3-item3"></li>
+                <li id="treatment3-item4"></li>
+                <li id="treatment3-item5"></li>
               </ul>
             </div>
           </div>
-          <p style="margin-top: 20px;">Many people find that a combination of treatments works best. What helps one person might not work for another, so it's important to work with a healthcare provider to find the right approach for you.</p>
+          <p style="margin-top: 20px;" id="section4-p2"></p>
         </div>
 
         <div class="content-section" id="help">
-          <h2><i class="fas fa-hands-helping"></i> Getting Help</h2>
-          <p>If you think you might be experiencing depression, reaching out for help is a sign of strength, not weakness.</p>
-          <p><strong>Start with your primary care doctor</strong> - they can rule out other medical conditions that might cause similar symptoms and refer you to mental health specialists.</p>
-          <p><strong>Consider seeing a mental health professional</strong> such as a psychiatrist, psychologist, or licensed therapist who specializes in treating depression.</p>
-          <p><strong>Build a support system</strong> of trusted friends or family members who can offer emotional support during your treatment.</p>
-          
-          
-       
-
+          <h2><i class="fas fa-hands-helping"></i> <span id="section5-title"></span></h2>
+          <p id="section5-p1"></p>
+          <p id="section5-p2"></p>
+          <p id="section5-p3"></p>
+          <p id="section5-p4"></p>
         </div>
         
         <div class="source-info">
-          <p><strong>Source Information:</strong> This content is based on information from the National Institute of Mental Health (NIMH). For more detailed information, visit <a href="https://www.nimh.nih.gov/health/publications/depression" target="_blank">NIMH Depression Information</a>.</p>
+          <p><strong id="source-text"></strong> <a href="https://www.nimh.nih.gov/health/publications/depression" target="_blank" id="source-link"></a>.</p>
         </div>
       </div>
     </div>
@@ -381,8 +631,5 @@
       });
     }
   </script>
-  
-
-
 </body>
 </html>

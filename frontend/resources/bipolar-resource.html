@@ -1,12 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-  <title>Bipolar Disorder - Mentivio</title>
+  
+  <title id="page-title"></title>
+    
     <!-- Load component script with defer -->
     <script src="../js/components.js" defer></script>
-  <style>
-    /* Base Styles */
+<style>
+    /* Consolidated CSS - matched to Home.html color scheme */
+    :root {
+      --primary: #4a6fa5;    /* Calming blue - matches Home.html */
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;  /* Natural green - matches Home.html */
+      --accent: #d4a5a5;     /* Soft pink - matches Home.html */
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
     * {
       margin: 0;
       padding: 0;
@@ -14,300 +37,374 @@
     }
     
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
+      color: var(--dark);
+      background-color: var(--white);
     }
     
+    /* Container - Matched to Home.html */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 20px;
     }
     
-    /* Resource Detail Styles */
+    /* Resource Detail Container - Updated style */
     .resource-detail-container {
       padding: 40px 0;
     }
     
+    /* Resource Header - Updated with requested gradient */
     .resource-header {
       text-align: center;
-      margin-bottom: 50px;
-      padding: 30px;
-      background: linear-gradient(135deg, #28b2f1 0%, #48bb78 100%);
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
       color: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
     }
     
     .resource-icon {
-      font-size: 3rem;
-      margin-bottom: 20px;
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
     }
     
     .resource-header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      font-weight: 700;
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
     }
     
     .resource-subtitle {
-      font-size: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.15rem);
       opacity: 0.9;
       max-width: 700px;
       margin: 0 auto;
+      line-height: 1.6;
     }
     
+    /* Content Section - Updated style */
     .content-section {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
     }
     
     .content-section h2 {
-      color: #4a5568;
-      margin-bottom: 20px;
-      font-size: 1.5rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .content-section h2 i {
-      color: #28b2f1;
+      color: var(--primary);
     }
     
     .content-section p {
-      margin-bottom: 15px;
-      font-size: 1.05rem;
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.6;
     }
     
-    /* Bipolar-specific styles */
+    /* Disorder Types - Updated style */
     .disorder-types {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .disorder-card {
-      padding: 25px;
-      background: #faf5ff;
-      border-radius: 10px;
-      border-left: 4px solid #28b2f1;
-      transition: transform 0.3s, box-shadow 0.3s;
+      padding: 1.5rem;
+      background: rgba(212, 165, 165, 0.1);
+      border-radius: var(--radius);
+      border-left: 4px solid var(--accent);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .disorder-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
     }
     
     .disorder-card h3 {
-      color: #553c9a;
-      margin-bottom: 15px;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
       font-size: 1.3rem;
+      font-weight: 500;
     }
     
+    .disorder-card p {
+      margin-bottom: 0;
+      color: var(--gray);
+      font-size: 0.95rem;
+      flex: 1;
+    }
+    
+    /* Symptoms Grid - Updated style */
     .symptoms-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .symptom-item {
       display: flex;
       align-items: flex-start;
-      gap: 15px;
-      padding: 20px;
-      background: #faf5ff;
-      border-radius: 8px;
-      transition: transform 0.3s;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: rgba(212, 165, 165, 0.1);
+      border-radius: var(--radius);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
     }
     
     .symptom-item:hover {
       transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      box-shadow: var(--shadow);
+      border-color: var(--primary);
     }
     
     .symptom-item i {
       font-size: 1.5rem;
-      color: #28b2f1;
+      color: var(--accent);
       width: 30px;
       text-align: center;
-      margin-top: 3px;
+      margin-top: 0.25rem;
+      flex-shrink: 0;
     }
     
+    .symptom-text {
+      flex: 1;
+    }
+    
+    .symptom-text h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+    
+    .symptom-text p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--gray);
+    }
+    
+    /* Treatment Options - Updated style */
     .treatment-options {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .treatment-card {
-      padding: 25px;
-      background: #faf5ff;
-      border-radius: 10px;
-      border-top: 4px solid #28b2f1;
-      transition: transform 0.3s;
+      padding: 1.5rem;
+      background: rgba(212, 165, 165, 0.1);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--accent);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .treatment-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
     }
     
     .treatment-card h3 {
-      color: #553c9a;
-      margin-bottom: 15px;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
     .treatment-card ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .treatment-card li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 20px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .treatment-card li:before {
       content: "•";
-      color: #28b2f1;
+      color: var(--accent);
       font-weight: bold;
       position: absolute;
       left: 0;
+      font-size: 1.2rem;
     }
     
+    /* Crisis Prevention - Updated style */
     .crisis-prevention {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 25px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .prevention-item {
-      padding: 20px;
-      background: #faf5ff;
-      border-radius: 8px;
+      padding: 1.5rem;
+      background: rgba(212, 165, 165, 0.1);
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .prevention-item h3 {
-      color: #553c9a;
-      margin-bottom: 15px;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
       font-size: 1.2rem;
+      font-weight: 500;
     }
     
     .prevention-item ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .prevention-item li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 25px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .prevention-item li:before {
       content: "✓";
-      color: #28b2f1;
+      color: var(--accent);
       font-weight: bold;
       position: absolute;
       left: 0;
     }
     
+    /* Emergency Alert - Updated style */
     .emergency-alert {
-      background: #fff5f5;
-      border-left: 4px solid #e53e3e;
-      padding: 25px;
-      border-radius: 10px;
-      margin-top: 30px;
+      background: var(--danger-light);
+      border-left: 4px solid var(--danger);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin-top: 1.5rem;
+      border: 1px solid rgba(244, 67, 54, 0.2);
     }
     
-    
-    .source-info {
-      margin-top: 40px;
-      padding: 20px;
-      background: #edf2f7;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      color: #4a5568;
-    }
-    
-    .quick-nav {
+    .emergency-alert h3 {
+      color: var(--danger);
+      margin-bottom: 1rem;
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 30px 0;
-      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
-    .nav-btn {
-      padding: 10px 20px;
-      background: #28b2f1;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.3s;
+    .emergency-alert ul {
+      list-style-type: none;
     }
     
-    .nav-btn:hover {
-      background: #48bb78;
+    .emergency-alert li {
+      padding: 0.5rem 0;
+      color: var(--dark);
+      line-height: 1.5;
+      position: relative;
+      padding-left: 1.5rem;
     }
     
+    .emergency-alert li:before {
+      content: "•";
+      color: var(--danger);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    /* Episode Comparison - Updated style */
     .episode-comparison {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
     }
     
     .episode-card {
-      padding: 25px;
-      border-radius: 10px;
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-light);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
     
     .episode-card.manic {
-      background: #fef5e7;
-      border-left: 4px solid #ed8936;
+      background: rgba(255, 152, 0, 0.1);
+      border-left: 4px solid var(--warning);
     }
     
     .episode-card.depressive {
-      background: #ebf8ff;
-      border-left: 4px solid #4299e1;
+      background: rgba(74, 111, 165, 0.1);
+      border-left: 4px solid var(--primary);
     }
     
     .episode-card h3 {
-      margin-bottom: 15px;
+      margin-bottom: 1rem;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 0.75rem;
+      font-weight: 500;
     }
     
     .episode-card.manic h3 {
-      color: #c05621;
+      color: var(--warning);
     }
     
     .episode-card.depressive h3 {
-      color: #2b6cb0;
+      color: var(--primary);
     }
     
     .episode-card ul {
       list-style-type: none;
+      flex: 1;
     }
     
     .episode-card li {
-      padding: 8px 0;
+      padding: 0.5rem 0;
       position: relative;
-      padding-left: 20px;
+      padding-left: 1.5rem;
+      color: var(--gray);
+      line-height: 1.5;
     }
     
     .episode-card li:before {
@@ -318,37 +415,228 @@
     }
     
     .episode-card.manic li:before {
-      color: #ed8936;
+      color: var(--warning);
     }
     
     .episode-card.depressive li:before {
-      color: #4299e1;
+      color: var(--primary);
     }
     
+    /* Stat Highlight - Updated style */
     .stat-highlight {
-      background: #faf5ff;
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border-left: 4px solid #28b2f1;
+      background: rgba(212, 165, 165, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--accent);
+      border: 1px solid var(--gray-light);
     }
     
     .stat-highlight p {
-      color: #553c9a;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 0;
+      font-size: 1.1rem;
+    }
+    
+    /* Source Info - Updated style */
+    .source-info {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .source-info h4 {
+      color: var(--dark);
+      margin-bottom: 0.5rem;
       font-weight: 500;
     }
     
+    /* Quick Navigation - Updated style */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0;
+      justify-content: center;
+    }
+    
+    /* Navigation Buttons - Updated to match prediction.css button style */
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    /* Action Buttons - For consistency with prediction.css */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(212, 165, 165, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Focus states - Matched to prediction.css */
+    .nav-btn:focus,
+    .btn:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+    
+    /* Responsive Design - Updated to match prediction.css structure */
     @media (max-width: 768px) {
       .resource-header h1 {
-        font-size: 2rem;
+        font-size: 1.5rem;
       }
       
-      .disorder-types, .symptoms-grid, .treatment-options, .crisis-prevention, .episode-comparison {
+      .disorder-types,
+      .symptoms-grid,
+      .treatment-options,
+      .crisis-prevention,
+      .episode-comparison {
         grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .disorder-card,
+      .symptom-item,
+      .treatment-card,
+      .prevention-item,
+      .episode-card,
+      .emergency-alert,
+      .stat-highlight {
+        padding: 1.25rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
       }
       
       .quick-nav {
         justify-content: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .symptom-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .symptom-item i {
+        margin-bottom: 0.5rem;
+      }
+      
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .disorder-card:hover,
+      .symptom-item:hover,
+      .treatment-card:hover,
+      .nav-btn:hover,
+      .btn:hover {
+        transform: none;
+      }
+      
+      .disorder-card:active,
+      .symptom-item:active,
+      .treatment-card:active,
+      .nav-btn:active,
+      .btn:active {
+        transform: scale(0.98);
+      }
+    }
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
@@ -360,83 +648,83 @@
         <div class="resource-icon">
           <i class="fas fa-balance-scale"></i>
         </div>
-        <h1>Bipolar Disorder</h1>
-        <p class="resource-subtitle">Understanding mood disorders, stabilization strategies, and comprehensive treatment approaches</p>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
       </div>
 
       <div class="quick-nav">
-        <button class="nav-btn" onclick="scrollToSection('what-is')">What is Bipolar?</button>
-        <button class="nav-btn" onclick="scrollToSection('types')">Types</button>
-        <button class="nav-btn" onclick="scrollToSection('symptoms')">Symptoms</button>
-        <button class="nav-btn" onclick="scrollToSection('treatment')">Treatment</button>
-        <button class="nav-btn" onclick="scrollToSection('crisis')">Crisis Prevention</button>
+        <button class="nav-btn" onclick="scrollToSection('what-is')" id="nav-what-is"></button>
+        <button class="nav-btn" onclick="scrollToSection('types')" id="nav-types"></button>
+        <button class="nav-btn" onclick="scrollToSection('symptoms')" id="nav-symptoms"></button>
+        <button class="nav-btn" onclick="scrollToSection('treatment')" id="nav-treatment"></button>
+        <button class="nav-btn" onclick="scrollToSection('crisis')" id="nav-crisis"></button>
       </div>
 
       <div class="resource-content">
         <div class="content-section" id="what-is">
-          <h2><i class="fas fa-info-circle"></i> What is Bipolar Disorder?</h2>
-          <p>Bipolar disorder is a mental health condition characterized by extreme mood swings that include emotional highs (mania or hypomania) and lows (depression). These mood changes go beyond normal ups and downs and can significantly impact daily functioning.</p>
+          <h2><i class="fas fa-info-circle"></i> <span id="section1-title"></span></h2>
+          <p id="section1-p1"></p>
           
           <div class="stat-highlight">
-            <p><i class="fas fa-chart-line"></i> Bipolar disorder affects approximately 5.7 million adult Americans, or about 2.6% of the U.S. population.</p>
+            <p><i class="fas fa-chart-line"></i> <span id="stat-text"></span></p>
           </div>
           
-          <p>While everyone experiences mood changes, people with bipolar disorder have shifts that are more severe, last longer, and interfere with their ability to work, maintain relationships, and function in daily life.</p>
+          <p id="section1-p2"></p>
         </div>
 
         <div class="content-section" id="types">
-          <h2><i class="fas fa-layer-group"></i> Types of Bipolar Disorder</h2>
-          <p>There are several types of bipolar disorder, each with distinct patterns of mood episodes:</p>
+          <h2><i class="fas fa-layer-group"></i> <span id="section2-title"></span></h2>
+          <p id="section2-p1"></p>
           
           <div class="disorder-types">
             <div class="disorder-card">
-              <h3>Bipolar I Disorder</h3>
-              <p><strong>Characteristics:</strong> Defined by manic episodes that last at least 7 days, or by manic symptoms so severe that immediate hospital care is needed. Depressive episodes typically last at least 2 weeks.</p>
-              <p><strong>Key feature:</strong> At least one manic episode is required for diagnosis.</p>
+              <h3 id="type1-title"></h3>
+              <p><strong>Characteristics:</strong> <span id="type1-desc"></span></p>
+              <p><strong>Key feature:</strong> <span id="type1-feature"></span></p>
             </div>
             <div class="disorder-card">
-              <h3>Bipolar II Disorder</h3>
-              <p><strong>Characteristics:</strong> Defined by a pattern of depressive episodes and hypomanic episodes, but not the full-blown manic episodes of Bipolar I.</p>
-              <p><strong>Key feature:</strong> Hypomanic episodes are less severe than manic episodes but still noticeable changes from normal behavior.</p>
+              <h3 id="type2-title"></h3>
+              <p><strong>Characteristics:</strong> <span id="type2-desc"></span></p>
+              <p><strong>Key feature:</strong> <span id="type2-feature"></span></p>
             </div>
             <div class="disorder-card">
-              <h3>Cyclothymic Disorder</h3>
-              <p><strong>Characteristics:</strong> Defined by periods of hypomanic symptoms and depressive symptoms lasting for at least 2 years in adults (1 year in children).</p>
-              <p><strong>Key feature:</strong> Symptoms are less severe but more chronic than other types.</p>
+              <h3 id="type3-title"></h3>
+              <p><strong>Characteristics:</strong> <span id="type3-desc"></span></p>
+              <p><strong>Key feature:</strong> <span id="type3-feature"></span></p>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="symptoms">
-          <h2><i class="fas fa-exclamation-triangle"></i> Symptoms and Mood Episodes</h2>
-          <p>Bipolar disorder involves distinct episodes of mood changes. Understanding these episodes is key to recognizing the condition:</p>
+          <h2><i class="fas fa-exclamation-triangle"></i> <span id="section3-title"></span></h2>
+          <p id="section3-p1"></p>
           
           <div class="episode-comparison">
             <div class="episode-card manic">
-              <h3><i class="fas fa-rocket"></i> Manic/Hypomanic Episodes</h3>
+              <h3><i class="fas fa-rocket"></i> <span id="manic-title"></span></h3>
               <ul>
-                <li>Feeling unusually "high," euphoric, or irritable</li>
-                <li>Decreased need for sleep without feeling tired</li>
-                <li>Racing thoughts and rapid speech</li>
-                <li>Increased energy and activity levels</li>
-                <li>Impulsive or risky behavior (spending, sex, business decisions)</li>
-                <li>Inflated self-esteem or grandiosity</li>
-                <li>Difficulty concentrating</li>
+                <li id="manic-symptom1"></li>
+                <li id="manic-symptom2"></li>
+                <li id="manic-symptom3"></li>
+                <li id="manic-symptom4"></li>
+                <li id="manic-symptom5"></li>
+                <li id="manic-symptom6"></li>
+                <li id="manic-symptom7"></li>
               </ul>
-              <p style="margin-top: 15px; font-style: italic;"><strong>Note:</strong> Hypomania is a less severe form of mania that doesn't cause major problems in daily functioning.</p>
+              <p style="margin-top: 15px; font-style: italic;"><strong id="manic-note"></strong></p>
             </div>
             
             <div class="episode-card depressive">
-              <h3><i class="fas fa-cloud-rain"></i> Depressive Episodes</h3>
+              <h3><i class="fas fa-cloud-rain"></i> <span id="depressive-title"></span></h3>
               <ul>
-                <li>Intense sadness, hopelessness, or emptiness</li>
-                <li>Loss of interest in activities once enjoyed</li>
-                <li>Significant changes in appetite or weight</li>
-                <li>Sleeping too much or too little</li>
-                <li>Fatigue or loss of energy</li>
-                <li>Feelings of worthlessness or excessive guilt</li>
-                <li>Difficulty concentrating or making decisions</li>
-                <li>Thoughts of death or suicide</li>
+                <li id="depressive-symptom1"></li>
+                <li id="depressive-symptom2"></li>
+                <li id="depressive-symptom3"></li>
+                <li id="depressive-symptom4"></li>
+                <li id="depressive-symptom5"></li>
+                <li id="depressive-symptom6"></li>
+                <li id="depressive-symptom7"></li>
+                <li id="depressive-symptom8"></li>
               </ul>
             </div>
           </div>
@@ -444,99 +732,94 @@
           <div class="symptoms-grid" style="margin-top: 30px;">
             <div class="symptom-item">
               <i class="fas fa-bolt"></i>
-              <span><strong>Mixed Features:</strong> Symptoms of both mania and depression occurring simultaneously - often described as the most difficult part of bipolar disorder</span>
+              <span><strong id="feature1-title"></strong>: <span id="feature1-desc"></span></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-tachometer-alt"></i>
-              <span><strong>Rapid Cycling:</strong> Experiencing four or more mood episodes within a single year</span>
+              <span><strong id="feature2-title"></strong>: <span id="feature2-desc"></span></span>
             </div>
             <div class="symptom-item">
               <i class="fas fa-brain"></i>
-              <span><strong>Psychotic Symptoms:</strong> In severe episodes, may include hallucinations or delusions that match the mood state</span>
+              <span><strong id="feature3-title"></strong>: <span id="feature3-desc"></span></span>
             </div>
           </div>
         </div>
 
         <div class="content-section" id="treatment">
-          <h2><i class="fas fa-stethoscope"></i> Comprehensive Treatment Approaches</h2>
-          <p>Bipolar disorder is a lifelong condition, but effective treatment can help manage symptoms and enable people to live healthy, productive lives. Treatment typically involves a combination of approaches:</p>
+          <h2><i class="fas fa-stethoscope"></i> <span id="section4-title"></span></h2>
+          <p id="section4-p1"></p>
           
           <div class="treatment-options">
             <div class="treatment-card">
-              <h3><i class="fas fa-pills"></i> Medication Management</h3>
+              <h3><i class="fas fa-pills"></i> <span id="treatment1-title"></span></h3>
               <ul>
-                <li><strong>Mood Stabilizers:</strong> Lithium, Valproate, Lamotrigine - help prevent mood episodes</li>
-                <li><strong>Atypical Antipsychotics:</strong> Olanzapine, Quetiapine, Risperidone - manage manic and depressive symptoms</li>
-                <li><strong>Antidepressants:</strong> Used cautiously with mood stabilizers to avoid triggering mania</li>
-                <li><strong>Anti-anxiety medications:</strong> For managing anxiety symptoms</li>
+                <li id="treatment1-item1"></li>
+                <li id="treatment1-item2"></li>
+                <li id="treatment1-item3"></li>
+                <li id="treatment1-item4"></li>
               </ul>
-              <p style="margin-top: 10px; font-size: 0.9rem;"><em>Medication must be taken consistently and monitored regularly by a healthcare provider.</em></p>
+              <p style="margin-top: 10px; font-size: 0.9rem;"><em id="treatment1-note"></em></p>
             </div>
             <div class="treatment-card">
-              <h3><i class="fas fa-comments"></i> Psychotherapy</h3>
+              <h3><i class="fas fa-comments"></i> <span id="treatment2-title"></span></h3>
               <ul>
-                <li><strong>Cognitive Behavioral Therapy (CBT):</strong> Identify and change negative thought patterns</li>
-                <li><strong>Interpersonal and Social Rhythm Therapy (IPSRT):</strong> Stabilize daily rhythms and routines</li>
-                <li><strong>Family-Focused Therapy:</strong> Involve family in treatment and education</li>
-                <li><strong>Psychoeducation:</strong> Learn about the illness and management strategies</li>
+                <li id="treatment2-item1"></li>
+                <li id="treatment2-item2"></li>
+                <li id="treatment2-item3"></li>
+                <li id="treatment2-item4"></li>
               </ul>
             </div>
             <div class="treatment-card">
-              <h3><i class="fas fa-heartbeat"></i> Lifestyle Management</h3>
+              <h3><i class="fas fa-heartbeat"></i> <span id="treatment3-title"></span></h3>
               <ul>
-                <li><strong>Sleep Regulation:</strong> Maintain consistent sleep schedule</li>
-                <li><strong>Stress Management:</strong> Regular exercise, meditation, relaxation techniques</li>
-                <li><strong>Mood Tracking:</strong> Use journals or apps to monitor symptoms</li>
-                <li><strong>Substance Avoidance:</strong> Avoid alcohol and recreational drugs</li>
-                <li><strong>Healthy Routine:</strong> Consistent daily schedule for meals, activities, sleep</li>
+                <li id="treatment3-item1"></li>
+                <li id="treatment3-item2"></li>
+                <li id="treatment3-item3"></li>
+                <li id="treatment3-item4"></li>
+                <li id="treatment3-item5"></li>
               </ul>
             </div>
           </div>
           
           <div style="margin-top: 20px; padding: 15px; background: #f0fff4; border-radius: 8px;">
-            <p><strong>Treatment Success:</strong> With proper treatment, most people with bipolar disorder can achieve significant symptom reduction and improved quality of life. However, it often takes time to find the right combination of treatments.</p>
+            <p><strong>Treatment Success:</strong> <span id="treatment-success"></span></p>
           </div>
         </div>
 
         <div class="content-section" id="crisis">
-          <h2><i class="fas fa-user-shield"></i> Crisis Prevention and Management</h2>
-          <p>Recognizing early warning signs and having a crisis plan can help prevent severe episodes and ensure prompt treatment:</p>
+          <h2><i class="fas fa-user-shield"></i> <span id="section5-title"></span></h2>
+          <p id="section5-p1"></p>
           
           <div class="crisis-prevention">
             <div class="prevention-item">
-              <h3><i class="fas fa-binoculars"></i> Early Warning Signs</h3>
+              <h3><i class="fas fa-binoculars"></i> <span id="prevention1-title"></span></h3>
               <ul>
-                <li>Decreased need for sleep without feeling tired</li>
-                <li>Racing thoughts and rapid speech</li>
-                <li>Increased energy and activity levels</li>
-                <li>Impulsive or risky behavior</li>
-                <li>Withdrawal from social activities</li>
-                <li>Changes in appetite or sleep patterns</li>
-                <li>Difficulty concentrating</li>
-                <li>Increased irritability or agitation</li>
+                <li id="prevention1-item1"></li>
+                <li id="prevention1-item2"></li>
+                <li id="prevention1-item3"></li>
+                <li id="prevention1-item4"></li>
+                <li id="prevention1-item5"></li>
+                <li id="prevention1-item6"></li>
+                <li id="prevention1-item7"></li>
+                <li id="prevention1-item8"></li>
               </ul>
             </div>
             <div class="prevention-item">
-              <h3><i class="fas fa-clipboard-list"></i> Emergency Planning</h3>
+              <h3><i class="fas fa-clipboard-list"></i> <span id="prevention2-title"></span></h3>
               <ul>
-                <li>Create a crisis plan with your treatment team</li>
-                <li>Share warning signs with trusted family/friends</li>
-                <li>Keep emergency contact numbers accessible</li>
-                <li>Know when to seek immediate medical help</li>
-                <li>Have hospital information readily available</li>
-                <li>Prepare advance directives when well</li>
+                <li id="prevention2-item1"></li>
+                <li id="prevention2-item2"></li>
+                <li id="prevention2-item3"></li>
+                <li id="prevention2-item4"></li>
+                <li id="prevention2-item5"></li>
+                <li id="prevention2-item6"></li>
               </ul>
             </div>
           </div>
-          
-        
-
         </div>
 
-      
-
         <div class="source-info">
-          <p><strong>Source Information:</strong> This content is based on information from the National Institute of Mental Health (NIMH) and Cleveland Clinic. For more detailed information, visit <a href="https://www.nimh.nih.gov/health/publications/bipolar-disorder" target="_blank">NIMH Bipolar Disorder Information</a> and <a href="https://my.clevelandclinic.org/health/diseases/9294-bipolar-disorder" target="_blank">Cleveland Clinic Bipolar Disorder</a>.</p>
+          <p><strong id="source-text"></strong> <a href="https://www.nimh.nih.gov/health/publications/bipolar-disorder" target="_blank" id="source-link1"></a> and <a href="https://my.clevelandclinic.org/health/diseases/9294-bipolar-disorder" target="_blank" id="source-link2"></a>.</p>
         </div>
       </div>
     </div>
@@ -549,10 +832,5 @@
       });
     }
   </script>
-
-
-
-
-  
 </body>
 </html>
