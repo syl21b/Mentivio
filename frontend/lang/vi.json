@@ -338,7 +338,7 @@
             "section5-p2": "Bắt đầu với bác sĩ chăm sóc chính của bạn - họ có thể loại trừ các tình trạng y tế khác có thể gây ra các triệu chứng tương tự và giới thiệu bạn đến các chuyên gia sức khỏe tinh thần.",
             "section5-p3": "Cân nhắc gặp chuyên gia sức khỏe tinh thần như bác sĩ tinh thần, nhà tâm lý học hoặc nhà trị liệu được cấp phép chuyên điều trị trầm cảm.",
             "section5-p4": "Xây dựng hệ thống hỗ trợ gồm những người bạn hoặc thành viên gia đình đáng tin cậy có thể cung cấp hỗ trợ tình cảm trong quá trình điều trị của bạn.",
-            "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tâm Thần Quốc Gia (NIMH). Để biết thông tin chi tiết hơn, hãy truy cập ",
+            "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tinh Thần Quốc Gia (NIMH). Để biết thông tin chi tiết hơn, hãy truy cập ",
             "source-link": "Thông Tin Trầm Cảm của NIMH"
             },
 
@@ -437,8 +437,8 @@
             },
 
             "medication-resource": {
-              "page-title": "Thuốc Sức Khỏe Tâm Thần - Mentivio",
-              "hero-title": "Thuốc Sức Khỏe Tâm Thần",
+              "page-title": "Thuốc Sức Khỏe Tinh Thần - Mentivio",
+              "hero-title": "Thuốc Sức Khỏe Tinh Thần",
               "hero-subtitle": "Hướng dẫn toàn diện về thuốc tinh thần, cơ chế hoạt động và quyết định điều trị có thông tin",
               "nav-understanding": "Hiểu Về Thuốc",
               "nav-classes": "Nhóm Thuốc",
@@ -446,7 +446,7 @@
               "nav-management": "Quản Lý Thuốc",
               "nav-safety": "Thông Tin An Toàn",
               "nav-questions": "Câu Hỏi Cho Bác Sĩ",
-              "section1-title": "Hiểu Về Thuốc Tâm Thần",
+              "section1-title": "Hiểu Về Thuốc Tinh Thần",
               "section1-p1": "Thuốc tinh thần là công cụ có thể giúp kiểm soát các triệu chứng của tình trạng sức khỏe tinh thần bằng cách ảnh hưởng đến các chất hóa học trong não gọi là chất dẫn truyền thần kinh. Mặc dù thuốc có thể cực kỳ hữu ích, nhưng hiệu quả nhất khi kết hợp với trị liệu và thay đổi lối sống.",
               "section1-important": "Quan trọng: Thuốc ảnh hưởng khác nhau đến mỗi người, và có thể cần thử nhiều lần để tìm đúng loại thuốc với ít tác dụng phụ nhất. Sự kiên nhẫn và giao tiếp cởi mở với nhà cung cấp dịch vụ chăm sóc sức khỏe của bạn là chìa khóa.",
               "section1-p2": "Hướng dẫn này cung cấp thông tin giáo dục để giúp bạn có các cuộc thảo luận có thông tin với nhà cung cấp dịch vụ chăm sóc sức khỏe của bạn. Hãy nhớ rằng quyết định điều trị nên luôn được thực hiện cùng với các chuyên gia y tế có trình độ.",
@@ -585,9 +585,9 @@
               "modal-search": "Tìm Kiếm",
               "disclaimer-title": "Tuyên Bố Miễn Trừ Trách Nhiệm Y Tế Quan Trọng",
               "disclaimer-text": "Thông tin này chỉ dành cho mục đích giáo dục và không cấu thành lời khuyên y tế. Luôn tham khảo ý kiến chuyên gia y tế có trình độ trước khi bắt đầu, ngừng hoặc thay đổi bất kỳ chế độ dùng thuốc nào. Không bỏ qua lời khuyên y tế chuyên nghiệp hoặc trì hoãn tìm kiếm nó vì điều gì đó bạn đã đọc ở đây. Quyết định về thuốc nên được thực hiện cùng với nhà cung cấp dịch vụ chăm sóc sức khỏe của bạn dựa trên tình hình y tế cá nhân, triệu chứng và mục tiêu điều trị của bạn.",
-              "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tâm Thần Quốc Gia (NIMH) và Liên Minh Quốc Gia về Bệnh Tâm Thần (NAMI). Để biết thông tin chi tiết hơn, hãy truy cập ",
-              "source-link1": "Thuốc Sức Khỏe Tâm Thần NIMH",
-              "source-link2": "Thuốc Sức Khỏe Tâm Thần NAMI"
+              "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tinh Thần Quốc Gia (NIMH) và Liên Minh Quốc Gia về Bệnh Tinh Thần (NAMI). Để biết thông tin chi tiết hơn, hãy truy cập ",
+              "source-link1": "Thuốc Sức Khỏe Tinh Thần NIMH",
+              "source-link2": "Thuốc Sức Khỏe Tinh Thần NAMI"
             },
             "ptsd-resource": {
               "page-title": "Chấn Thương & Rối Loạn Căng Thẳng Sau Sang Chấn - Mentivio",
@@ -685,7 +685,7 @@
               "technique2-item3-desc": "Phát triển mối quan hệ với bạn bè, gia đình hiểu biết hoặc các nhóm hỗ trợ. Cân nhắc tham gia các nhóm hỗ trợ PTSD để chia sẻ kinh nghiệm.",
               "technique2-item4-title": "Thói Quen Tự Chăm Sóc",
               "technique2-item4-desc": "Thiết lập các thói quen nhất quán cho giấc ngủ, bữa ăn, tập thể dục và thư giãn. Ưu tiên các hoạt động mang lại sự thoải mái và niềm vui.",
-              "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tâm Thần Quốc Gia (NIMH) và Trung Tâm Quốc Gia về PTSD. Để biết thông tin chi tiết hơn, hãy truy cập ",
+              "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tinh Thần Quốc Gia (NIMH) và Trung Tâm Quốc Gia về PTSD. Để biết thông tin chi tiết hơn, hãy truy cập ",
               "source-link1": "Thông Tin PTSD của NIMH",
               "source-link2": "Hướng Dẫn Điều Trị của Trung Tâm Quốc Gia về PTSD"
             },
@@ -843,9 +843,9 @@
                 "symptom7-desc": "Cảm giác cáu kỉnh, thất vọng hoặc bồn chồn",
                 "symptom8-title": "Lo Ngại An Toàn",
                 "symptom8-desc": "Suy nghĩ làm hại bản thân hoặc người khác",
-                "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tâm Thần Quốc Gia (NIMH) và Sơ Cứu Sức Khỏe Tâm Thần. Để biết thông tin chi tiết hơn, hãy truy cập",
-                "source-link1": "Chăm Sóc Sức Khỏe Tâm Thần NIMH",
-                "source-link2": "Hướng Dẫn Tự Chăm Sóc Sơ Cứu Sức Khỏe Tâm Thần"
+                "source-text": "Thông Tin Nguồn: Nội dung này dựa trên thông tin từ Viện Sức Khỏe Tinh Thần Quốc Gia (NIMH) và Sơ Cứu Sức Khỏe Tinh Thần. Để biết thông tin chi tiết hơn, hãy truy cập",
+                "source-link1": "Chăm Sóc Sức Khỏe Tinh Thần NIMH",
+                "source-link2": "Hướng Dẫn Tự Chăm Sóc Sơ Cứu Sức Khỏe Tinh Thần"
             },
             
             "therapy-resource": {
@@ -1063,7 +1063,7 @@
 
 "analogy":{
   "page_title": "So Sánh Rối Loạn Tâm Trạng: Hình Ảnh Tương Tự",
-  "analogy_hero_title0": "Công Cụ Hình Dung Trạng Thái Sức Khỏe Tâm Thần",
+  "analogy_hero_title0": "Công Cụ Hình Dung Trạng Thái Sức Khỏe Tinh Thần",
   "analogy_hero_description0": "Hình dung lâm sàng chính xác các trạng thái Rối loạn lưỡng cực I, Lưỡng cực II, Trầm cảm và tâm trạng bình thường",
   
   "analogy_disclaimer_title0": "Tuyên Bố Miễn Trừ Trách Nhiệm Quan Trọng",
