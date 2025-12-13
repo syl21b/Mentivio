@@ -1,7 +1,26 @@
 // Unified Language and Components System
 class UnifiedI18n {
     constructor() {
-        this.currentLang = localStorage.getItem('preferred-language') || 'en';
+        // Try to get language from localStorage, URL parameter, or browser language
+        let storedLang = localStorage.getItem('preferred-language');
+        
+        // Check for lang parameter in URL (e.g., ?lang=vi)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlLang = urlParams.get('lang');
+        
+        // Use URL parameter if present, otherwise use stored preference
+        if (urlLang && ['en', 'vi', 'es', 'zh'].includes(urlLang)) {
+            this.currentLang = urlLang;
+            localStorage.setItem('preferred-language', urlLang);
+        } else if (storedLang && ['en', 'vi', 'es', 'zh'].includes(storedLang)) {
+            this.currentLang = storedLang;
+        } else {
+            // Fallback to browser language detection
+            const browserLang = navigator.language.split('-')[0];
+            this.currentLang = ['en', 'vi', 'es', 'zh'].includes(browserLang) ? browserLang : 'en';
+            localStorage.setItem('preferred-language', this.currentLang);
+        }
+        
         this.translations = {};
         this.componentCache = new Map();
         this.init();
@@ -92,8 +111,13 @@ class UnifiedI18n {
         const cacheKey = 'navbar';
         if (this.componentCache.has(cacheKey)) {
             document.body.insertAdjacentHTML('afterbegin', this.componentCache.get(cacheKey));
+            // After inserting navbar, initialize it and update language displays
             this.initNavbar();
             this.translateNavbar(this.currentLang);
+            // Force update language displays again after a small delay
+            setTimeout(() => {
+                this.updateLanguageDisplays();
+            }, 50);
             return;
         }
         
@@ -105,11 +129,18 @@ class UnifiedI18n {
                 document.body.insertAdjacentHTML('afterbegin', html);
                 this.initNavbar();
                 this.translateNavbar(this.currentLang);
+                // Force update language displays again after a small delay
+                setTimeout(() => {
+                    this.updateLanguageDisplays();
+                }, 50);
             })
             .catch(err => {
                 console.error('Navbar load failed:', err);
                 this.createEmergencyNavbar();
                 this.translateNavbar(this.currentLang);
+                setTimeout(() => {
+                    this.updateLanguageDisplays();
+                }, 50);
             });
     }
     
@@ -140,19 +171,18 @@ class UnifiedI18n {
             this.setupLanguageSelect();
             this.setupMobileMenu();
             this.setActiveNav();
-            this.updateLanguageDisplays();
+            this.updateLanguageDisplays(); // This will update displays immediately
         }, 100);
     }
 
     updateLanguageDisplays() {
+        // Update dropdown selects
         const selects = [document.getElementById('languageSelect'), document.getElementById('mobileLanguageSelect')];
-        const desktopDisplay = document.querySelector('.language-display');
-        const mobileDisplay = document.querySelector('.mobile-language-display');
+        selects.forEach(sel => { 
+            if(sel) sel.value = this.currentLang; 
+        });
         
-        // Update select values
-        selects.forEach(sel => { if(sel) sel.value = this.currentLang; });
-        
-        // Update displays with language codes
+        // Update display text with language codes
         const languageCodes = {
             en: 'EN',
             vi: 'VI',
@@ -161,6 +191,10 @@ class UnifiedI18n {
         };
         
         const displayCode = languageCodes[this.currentLang] || 'EN';
+        
+        // Update both desktop and mobile displays
+        const desktopDisplay = document.querySelector('.language-display');
+        const mobileDisplay = document.querySelector('.mobile-language-display');
         
         if (desktopDisplay) desktopDisplay.textContent = displayCode;
         if (mobileDisplay) mobileDisplay.textContent = displayCode;
@@ -271,7 +305,7 @@ class UnifiedI18n {
         localStorage.setItem('preferred-language', lang);
         
         // Update UI immediately
-        this.updateAllLanguageDisplays(lang);  // Update both displays
+        this.updateLanguageDisplays(); // This should update both displays
         this.translateNavbar(lang);
         this.translateFooter(lang);
         this.applyLanguage(lang);
