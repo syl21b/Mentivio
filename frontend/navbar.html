@@ -47,7 +47,7 @@
 </nav>
 
     <style>
-/* =========================================
+    /* =========================================
    ROOT VARIABLES & BLURRED GLASS COLORS
 ========================================= */
 :root {
@@ -178,35 +178,6 @@
     font-weight: 600 !important;
 }
 
-.mobile-controls { display: none; }
-
-@media (max-width: 768px) {
-  .mobile-controls { display: flex; }
-}
-
-/* =========================================
-   MOBILE MENU BUTTON
-========================================= */
-/* MOBILE MENU BUTTON — default hidden on desktop */
-.mobile-menu-btn {
-    display: none;
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius);
-    cursor: pointer;
-
-    background: var(--navbar-btn-bg);
-    color: var(--navbar-btn-color);
-    border: 1px solid var(--navbar-border);
-
-    align-items: center;
-    justify-content: center;
-
-    /* glass effect for the button */
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-}
-
 /* =========================================
    LANGUAGE SELECT (Shared styles)
 ========================================= */
@@ -254,6 +225,37 @@
 }
 
 /* =========================================
+   MOBILE CONTROLS - Hidden by default on desktop
+========================================= */
+.mobile-controls {
+    display: none;
+    align-items: center;
+    gap: 12px;
+}
+
+/* =========================================
+   MOBILE MENU BUTTON
+========================================= */
+.mobile-menu-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius);
+    cursor: pointer;
+
+    background: var(--navbar-btn-bg);
+    color: var(--navbar-btn-color);
+    border: 1px solid var(--navbar-border);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* glass effect for the button */
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* =========================================
    MOBILE LANGUAGE DROPDOWN
 ========================================= */
 .mobile-language-container {
@@ -265,11 +267,12 @@
    MOBILE RESPONSIVE NAVIGATION
 ========================================= */
 @media (max-width: 768px) {
-
-    .mobile-menu-btn {
+    /* Show mobile controls on mobile */
+    .mobile-controls {
         display: flex;
     }
 
+    /* Hide desktop nav links on mobile by default */
     .nav-links {
         position: fixed;
         top: 70px;
@@ -288,13 +291,17 @@
         transform: translateY(-100%);
         opacity: 0;
         visibility: hidden;
+        pointer-events: none;
 
         transition: all 0.3s ease;
+        z-index: 999;
     }
 
     .nav-links.active {
         transform: translateY(0);
         opacity: 1;
+        visibility: visible;
+        pointer-events: all;
     }
 
     .nav-links a {
@@ -304,18 +311,14 @@
         text-align: center;
     }
 
+    /* Hide desktop language dropdown on mobile */
     .nav-language-dropdown {
         display: none;
     }
 
+    /* Show mobile language dropdown on mobile */
     .mobile-language-container {
         display: block;
-    }
-
-    .mobile-controls {
-        display: flex;
-        align-items: center;
-        gap: 12px;
     }
 }
 
@@ -323,5 +326,6 @@
 @media (min-width: 769px) {
     .nav-language-dropdown { display: inline-block; }
     .mobile-language-container { display: none; }
-}
+    .mobile-controls { display: none; }
+}    
     </style>
