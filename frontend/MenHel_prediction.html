@@ -3,6 +3,7 @@
 <head>
   <title id="page-title"></title>
   <script src="../js/components.js" defer></script>
+
   <style>/* Consolidated CSS - matched to Home.html color scheme */
 :root {
   --primary: #4a6fa5;    /* Calming blue - matches Home.html */
@@ -1923,11 +1924,73 @@ select:focus {
   outline-offset: 2px;
   border-radius: 3px;
 }
-</style>
 
+
+
+
+
+/* Add custom alert styles */
+.custom-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #ef4444;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    max-width: 400px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.custom-alert.show {
+    transform: translateX(0);
+}
+
+.alert-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-message {
+    flex: 1;
+    font-size: 0.9rem;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+}
+
+.input-error {
+    border-color: #ef4444 !important;
+}
+
+.input-error-message {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+</style>
 </head>
+
 <body>
-  <!-- Navigation will be loaded by components.js -->
+
 
   <!-- Hero Section -->
   <section class="hero">
@@ -2287,6 +2350,173 @@ function initializeAssessment() {
     const API_BASE_URL = window.location.origin;
     let ASSESSMENT_CONFIG = {};
     
+    // Security Utilities
+    class SecurityUtils {
+        static getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                   this.getCookie('csrf_token');
+        }
+        
+        static getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+            return null;
+        }
+        
+        static generateSecureHeaders(method = 'GET') {
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            // Add CSRF token for state-changing operations
+            if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+                const csrfToken = this.getCSRFToken();
+                if (csrfToken) {
+                    headers['X-CSRF-Token'] = csrfToken;
+                }
+            }
+            
+            return headers;
+        }
+        
+        static sanitizeInput(input) {
+            if (typeof input !== 'string') return input;
+            return input.replace(/[<>"'`]/g, '').substring(0, 100);
+        }
+
+        static validateAge(age) {
+            if (!age) return { valid: true, message: '' };
+            
+            age = age.toString().trim();
+            
+            // Dynamically get current language from i18n system
+            const currentLang = window.i18n?.currentLang || 'en';
+            const translations = window.i18n?.translations[currentLang]?.prediction?.validation?.age || {};
+            
+            if (!/^\d+$/.test(age)) {
+                return { 
+                    valid: false, 
+                    message: translations.not_number || translations.invalid_number || 'Please enter numbers only (0-9)'
+                };
+            }
+            
+            const ageNum = parseInt(age, 10);
+            if (ageNum < 12) {
+                return { 
+                    valid: false, 
+                    message: translations.too_young || 'Age must be 12 or older'
+                };
+            }
+            if (ageNum > 100) {
+                return { 
+                    valid: false, 
+                    message: translations.too_old || 'Age must be 100 or younger'
+                };
+            }
+            
+            return { valid: true, message: '' };
+        }
+
+        static validatePatientNumber(number) {
+            if (!number) return { valid: true, message: '' };
+            
+            const trimmed = number.trim();
+            
+            // Dynamically get current language from i18n system
+            const currentLang = window.i18n?.currentLang || 'en';
+            const translations = window.i18n?.translations[currentLang]?.prediction?.validation?.patient_number || {};
+            
+            if (trimmed.length < 6) {
+                return { 
+                    valid: false, 
+                    message: translations.too_short || 'Patient number must be at least 6 characters'
+                };
+            }
+            
+            if (trimmed.length > 20) {
+                return { 
+                    valid: false, 
+                    message: translations.too_long || 'Patient number cannot exceed 20 characters'
+                };
+            }
+            
+            if (!/[a-z]/.test(trimmed)) {
+                return { 
+                    valid: false, 
+                    message: translations.no_lowercase || 'Must include at least one lowercase letter (a-z)'
+                };
+            }
+            
+            if (!/[A-Z]/.test(trimmed)) {
+                return { 
+                    valid: false, 
+                    message: translations.no_uppercase || 'Must include at least one uppercase letter (A-Z)'
+                };
+            }
+            
+            if (!/[0-9]/.test(trimmed)) {
+                return { 
+                    valid: false, 
+                    message: translations.no_digit || 'Must include at least one number (0-9)'
+                };
+            }
+            
+            if (/[^a-zA-Z0-9]/.test(trimmed)) {
+                return { 
+                    valid: false, 
+                    message: translations.special_chars || 'Only letters and numbers allowed (no special characters)'
+                };
+            }
+            
+            return { valid: true, message: '' };
+        }
+
+        static validateName(name) {
+            if (!name || name.trim().length === 0) {
+                // Dynamically get current language from i18n system
+                const currentLang = window.i18n?.currentLang || 'en';
+                const translations = window.i18n?.translations[currentLang]?.prediction?.validation?.name || {};
+                return { 
+                    valid: false, 
+                    message: translations.required || 'Name is required'
+                };
+            }
+            
+            const trimmed = name.trim();
+            
+            // Dynamically get current language from i18n system
+            const currentLang = window.i18n?.currentLang || 'en';
+            const translations = window.i18n?.translations[currentLang]?.prediction?.validation?.name || {};
+            
+            if (trimmed.length < 2) {
+                return { 
+                    valid: false, 
+                    message: translations.too_short || 'Name must be at least 2 characters'
+                };
+            }
+            
+            if (trimmed.length > 50) {
+                return { 
+                    valid: false, 
+                    message: translations.too_long || 'Name cannot exceed 50 characters'
+                };
+            }
+            
+            // Allow letters, spaces, hyphens, and apostrophes
+            if (!/^[a-zA-ZÀ-ÖØ-öø-ÿ\s\-']+$/u.test(trimmed)) {
+                return { 
+                    valid: false, 
+                    message: translations.invalid_format || 'Name can only contain letters, spaces, hyphens, and apostrophes'
+                };
+            }
+            
+            return { valid: true, message: '' };
+        }
+              
+      
+      }
+        
     // ============================================
     // DISPLAY MANAGER CLASS
     // ============================================
@@ -2302,9 +2532,6 @@ function initializeAssessment() {
         
         /**
          * Display 1: New Assessment Results
-         * @param {Object} assessmentData - Raw assessment data from backend
-         * @param {Object} patientInfo - Patient info collected during assessment
-         * @returns {string} - Complete HTML for results screen
          */
         displayNewAssessmentResults(assessmentData, patientInfo) {
             // Ensure data is in canonical English format
@@ -2312,7 +2539,7 @@ function initializeAssessment() {
             
             return `
                 <div class="result-box">
-                    ${this.displayResultsHeader()}
+                    ${this.displayResultsHeader(canonicalData)}
                     ${this.displayPatientInfoSection(patientInfo)}
                     ${this.displayPrimaryDiagnosisSection(canonicalData)}
                     ${this.displayOtherDiagnosesSection(canonicalData)}
@@ -2324,8 +2551,6 @@ function initializeAssessment() {
         
         /**
          * Display 2: Historical Assessment Results
-         * @param {Object} assessmentData - Complete assessment data from database
-         * @returns {string} - Complete HTML for historical view
          */
         displayHistoricalAssessment(assessmentData) {
             // Ensure data is in canonical English format
@@ -2333,7 +2558,7 @@ function initializeAssessment() {
             
             return `
                 <div class="result-box">
-                    ${this.displayResultsHeader(assessmentData.timestamp, assessmentData.id)}
+                    ${this.displayResultsHeader(canonicalData)}
                     ${this.displayPatientInfoSection(assessmentData.patient_info || {})}
                     ${this.displayPrimaryDiagnosisSection(canonicalData)}
                     ${this.displayOtherDiagnosesSection(canonicalData)}
@@ -2555,16 +2780,19 @@ function initializeAssessment() {
         // SUPPORTING COMPONENTS
         // ============================================
         
-        displayResultsHeader(timestamp = null, assessmentId = null) {
+        displayResultsHeader(assessmentData) {
             const translations = this.getTranslations();
-            const dateText = timestamp ? this.formatDateForLocale(timestamp) : new Date().toLocaleDateString();
+            const timestamp = assessmentData.timestamp || new Date().toISOString();
+            const dateText = this.formatDateForLocale(timestamp);
+            const assessmentId = assessmentData.id || assessmentData.assessment_id || 'N/A';
             
             return `
                 <div class="results-header">
                     <h2>${translations['results-complete'] || 'Assessment Complete'}</h2>
                     <div class="results-meta">
                         <span>${dateText}</span>
-                        ${assessmentId ? `<span>•</span><span>ID: ${assessmentId}</span>` : ''}
+                        <span>•</span>
+                        <span>ID: ${assessmentId}</span>
                     </div>
                 </div>
             `;
@@ -2588,6 +2816,10 @@ function initializeAssessment() {
                 <div class="results-actions">
                     <button id="newAssessmentBtn" class="btn btn-secondary">
                         ${navTranslations['new-assessment'] || '↻ New Assessment'}
+                    </button>
+                    <button id="learnMoreBtn" class="btn btn-info">
+                        <i class="fas fa-chart-line"></i>
+                        ${navTranslations['learn-more'] || 'Learn More'}
                     </button>
                     <button id="downloadBtn" class="btn btn-primary">
                         <i class="fas fa-download"></i>
@@ -2813,7 +3045,7 @@ function initializeAssessment() {
             } catch (error) {
                 return dateString;
             }
-}
+        }
         
         getQuestionsConfig() {
             return ASSESSMENT_CONFIG;
@@ -2842,12 +3074,6 @@ function initializeAssessment() {
             this.assessmentStartTime = null;
             this.currentAssessmentData = null;
             
-            // Cache properties
-            this.assessmentCache = new Map();
-            this.rawAssessmentsCache = new Map();
-            this.cacheTimestamp = new Map();
-            this.CACHE_TTL = 5 * 60 * 1000;
-            
             this.initializeElements();
             this.attachEventListeners();
             this.attachKeyboardListeners();
@@ -2858,6 +3084,7 @@ function initializeAssessment() {
                 this.initializeAssessmentConfig();
                 this.setupAgeValidation();
                 this.setupPatientNumberValidation();
+                this.setupNameValidation();
             }, 300);
         }
         
@@ -3115,16 +3342,17 @@ function initializeAssessment() {
             this.submitFinalBtn.addEventListener('click', () => this.submitFinalAssessment());
             
             // Patient info inputs
-            this.patientName.addEventListener('input', (e) => this.patientInfo.name = e.target.value);
-            this.patientNumber.addEventListener('input', (e) => this.patientInfo.number = e.target.value);
-            this.patientAge.addEventListener('input', (e) => this.patientInfo.age = e.target.value);
-            this.patientGender.addEventListener('change', (e) => this.patientInfo.gender = e.target.value);
-            
-            // Results screen
-            this.newAssessmentBtn.addEventListener('click', () => this.resetAssessment());
-            this.downloadBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.downloadReport();
+            this.patientName.addEventListener('input', (e) => {
+                this.patientInfo.name = SecurityUtils.sanitizeInput(e.target.value);
+            });
+            this.patientNumber.addEventListener('input', (e) => {
+                this.patientInfo.number = SecurityUtils.sanitizeInput(e.target.value);
+            });
+            this.patientAge.addEventListener('input', (e) => {
+                this.patientInfo.age = SecurityUtils.sanitizeInput(e.target.value);
+            });
+            this.patientGender.addEventListener('change', (e) => {
+                this.patientInfo.gender = e.target.value;
             });
             
             // History screen
@@ -3381,28 +3609,25 @@ function initializeAssessment() {
         // ============================================
         
         async submitFinalAssessment() {
-            // Validate inputs
-            const ageInput = document.getElementById('patientAge');
-            if (ageInput && !this.validateAgeInput(ageInput)) {
+            // Validate inputs with current language
+            const ageValidation = SecurityUtils.validateAge(this.patientAge.value);
+            if (!ageValidation.valid) {
+                this.showAlert('ageError', ageValidation.message);
                 return;
             }
-            
-            if (!this.patientInfo.name || !this.patientInfo.name.trim()) {
-                this.showAlert('nameRequired', 'Please enter patient name before submitting.');
-                return;
-            }
-            
-            const selectedGenderValue = this.patientGender.value;
-            this.patientInfo.gender = selectedGenderValue;
 
-            if (!this.patientInfo.number || !this.patientInfo.number.trim()) {
-                const translations = this.displayManager.getTranslations();
-                const confirmMessage = translations.errors?.noNumberConfirm || 'Patient number is not provided. Continue without saving to history?';
-                if (!confirm(confirmMessage)) {
-                    return;
-                }
+            const nameValidation = SecurityUtils.validateName(this.patientName.value);
+            if (!nameValidation.valid) {
+                this.showAlert('nameError', nameValidation.message);
+                return;
             }
-            
+
+            const numberValidation = SecurityUtils.validatePatientNumber(this.patientNumber.value);
+            if (!numberValidation.valid) {
+                this.showAlert('numberError', numberValidation.message);
+                return;
+            }
+
             this.showScreen(this.loadingScreen);
             this.isSubmitting = true;
 
@@ -3410,25 +3635,29 @@ function initializeAssessment() {
                 // Show loading animation
                 await this.simulateProcessing();
                 
-                // Send assessment to backend
+                // Send assessment to backend with security headers
                 const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
                 
                 const response = await fetch(`${API_BASE_URL}/api/predict`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Client-Timezone': userTimezone,
-                        'X-Language': 'en' // Always process in English
+                        ...SecurityUtils.generateSecureHeaders('POST'), 
+                        'X-Client-Timezone': userTimezone 
                     },
                     body: JSON.stringify({
                         responses: this.responses,
                         patientInfo: this.patientInfo,
                         assessment_start_time: this.assessmentStartTime,
-                        language: 'en' // Always send in English for processing
+                        language: 'en'
                     })
                 });
 
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        this.showAlert('csrfError', 'Security validation failed. Please refresh the page and try again.');
+                        return;
+                    }
+                    
                     const errorData = await response.json();
                     throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
                 }
@@ -3462,20 +3691,6 @@ function initializeAssessment() {
                 language: this.currentLanguage
             };
             
-            // Always save in English canonical format to backend
-            const dataToSave = {
-                ...resultData,
-                patient_info: this.patientInfo,
-                responses: this.responses,
-                language: 'en', // Always save in English
-                original_diagnosis: this.displayManager.convertToCanonicalKey(resultData.primary_diagnosis),
-                timestamp: new Date().toISOString(),
-                assessment_timestamp: this.assessmentStartTime
-            };
-            
-            // Save to backend in English
-            this.saveAssessmentToBackend(dataToSave);
-            
             // Display using Display 1
             const resultsHTML = this.displayManager.displayNewAssessmentResults(
                 resultData, 
@@ -3494,26 +3709,57 @@ function initializeAssessment() {
             }
             
             // Reattach event listeners for the new assessment results screen
-            this.attachResultsScreenListeners();
+            setTimeout(() => this.attachResultsScreenListeners(), 100);
         }
         
         attachResultsScreenListeners() {
             // Reattach listeners after DOM update
-            setTimeout(() => {
-                const newAssessmentBtn = document.getElementById('newAssessmentBtn');
-                const downloadBtn = document.getElementById('downloadBtn');
-                
-                if (newAssessmentBtn) {
-                    newAssessmentBtn.addEventListener('click', () => this.resetAssessment());
-                }
-                
-                if (downloadBtn) {
-                    downloadBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.downloadReport();
-                    });
-                }
-            }, 100);
+            const newAssessmentBtn = document.getElementById('newAssessmentBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const learnMoreBtn = document.getElementById('learnMoreBtn');
+            const backToHistoryBtn = document.getElementById('backToHistoryBtn');
+            const downloadHistoricalBtn = document.getElementById('downloadHistoricalBtn');
+            
+            if (newAssessmentBtn) {
+                newAssessmentBtn.addEventListener('click', () => this.resetAssessment());
+            }
+            
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.downloadReport();
+                });
+            }
+            
+            if (learnMoreBtn) {
+                learnMoreBtn.addEventListener('click', () => {
+                    // Get current language for the redirect
+                    const currentLang = this.currentLanguage || localStorage.getItem('preferred-language') || 'en';
+                    
+                    // Get the diagnosis from current assessment data
+                    const diagnosis = this.currentAssessmentData?.primary_diagnosis || '';
+                    
+                    // Get canonical diagnosis for URL parameter
+                    const canonicalDiagnosis = this.displayManager.convertToCanonicalKey(diagnosis);
+                    
+                    // Build URL with diagnosis parameter and language
+                    const url = `MenHel_analogy.html?diagnosis=${encodeURIComponent(canonicalDiagnosis)}&lang=${currentLang}`;
+                    
+                    // Redirect to Condition Visualizer
+                    window.location.href = url;
+                });
+            }
+            
+            if (backToHistoryBtn) {
+                backToHistoryBtn.addEventListener('click', () => this.showHistoryScreen());
+            }
+            
+            if (downloadHistoricalBtn) {
+                downloadHistoricalBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.downloadReport();
+                });
+            }
         }
         
         // ============================================
@@ -3521,11 +3767,19 @@ function initializeAssessment() {
         // ============================================
         
         async handleLogin() {
-            const name = this.loginPatientName.value.trim();
-            const number = this.loginPatientNumber.value.trim();
+            const name = SecurityUtils.sanitizeInput(this.loginPatientName.value);
+            const number = SecurityUtils.sanitizeInput(this.loginPatientNumber.value);
             
-            if (!name || !number) {
-                this.showAlert('loginRequired', 'Please enter both your name and patient number.');
+            // Validate with current language
+            const nameValidation = SecurityUtils.validateName(name);
+            if (!nameValidation.valid) {
+                this.showAlert('nameError', nameValidation.message);
+                return;
+            }
+
+            const numberValidation = SecurityUtils.validatePatientNumber(number);
+            if (!numberValidation.valid) {
+                this.showAlert('numberError', numberValidation.message);
                 return;
             }
 
@@ -3535,14 +3789,9 @@ function initializeAssessment() {
                 this.loginBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
                 this.loginBtn.disabled = true;
                 
-                await this.createUserSession(number);
-                
                 const response = await fetch(`${API_BASE_URL}/api/get-patient-assessments`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Session-ID': this.userSessionId || ''
-                    },
+                    headers: SecurityUtils.generateSecureHeaders('POST'),
                     body: JSON.stringify({
                         name: name,
                         number: number,
@@ -3551,6 +3800,11 @@ function initializeAssessment() {
                 });
 
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        this.showAlert('csrfError', 'Security validation failed. Please refresh the page and try again.');
+                        return;
+                    }
+                    
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
@@ -3746,18 +4000,36 @@ function initializeAssessment() {
                 }
 
                 // Load assessment from backend
-                const assessmentData = await this.loadSingleAssessmentFromBackend(
-                    this.currentPatient.name, 
-                    this.currentPatient.number, 
-                    assessmentId
-                );
+                const response = await fetch(`${API_BASE_URL}/api/get-single-assessment`, {
+                    method: 'POST',
+                    headers: SecurityUtils.generateSecureHeaders('POST'),
+                    body: JSON.stringify({
+                        name: this.currentPatient.name,
+                        number: this.currentPatient.number,
+                        assessment_id: assessmentId
+                    })
+                });
 
-                if (assessmentData) {
-                    // Display using Display 2
-                    this.displayHistoricalAssessment(assessmentData);
-                } else {
-                    this.showAlert('assessmentNotFound', 'Assessment not found. Please try reloading your history.');
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        this.showAlert('csrfError', 'Security validation failed. Please refresh the page and try again.');
+                        return;
+                    }
+                    
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
+                const result = await response.json();
+
+                if (!result.success || !result.assessment) {
+                    this.showAlert('assessmentNotFound', 'Assessment not found. Please try reloading your history.');
+                    return;
+                }
+
+                const assessmentData = result.assessment;
+                
+                // Display using Display 2
+                this.displayHistoricalAssessment(assessmentData);
 
             } catch (error) {
                 this.showAlert('loadError', 'Error loading assessment. Please try again.');
@@ -3794,130 +4066,64 @@ function initializeAssessment() {
             }
             
             // Reattach event listeners for historical view
-            this.attachHistoricalViewListeners();
-        }
-        
-        attachHistoricalViewListeners() {
-            // Reattach listeners after DOM update
-            setTimeout(() => {
-                const backToHistoryBtn = document.getElementById('backToHistoryBtn');
-                const downloadHistoricalBtn = document.getElementById('downloadHistoricalBtn');
-                
-                if (backToHistoryBtn) {
-                    backToHistoryBtn.addEventListener('click', () => this.showHistoryScreen());
-                }
-                
-                if (downloadHistoricalBtn) {
-                    downloadHistoricalBtn.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        this.downloadReport();
-                    });
-                }
-            }, 100);
+            setTimeout(() => this.attachResultsScreenListeners(), 100);
         }
         
         // ============================================
         // BACKEND INTEGRATION METHODS
         // ============================================
         
-        async createUserSession(patientNumber) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/create-session`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ patient_number: patientNumber })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    this.userSessionId = data.session_id;
-                    localStorage.setItem('user_session_id', this.userSessionId);
-                    return this.userSessionId;
-                }
-            } catch (error) {
-                console.error('Session creation failed:', error);
+        async deletePatientAssessment(assessmentId, event = null) {
+            if (!this.currentPatient) {
+                this.showAlert('noPatientLoggedIn', 'No patient logged in.');
+                return;
             }
-            return null;
-        }
-        
-        async saveAssessmentToBackend(assessmentData) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/save-assessment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ assessment_data: assessmentData })
-                });
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, details: ${errorText}`);
+            const translations = this.displayManager.getTranslations();
+            const confirmMessage = translations.errors?.deleteConfirm || 'Are you sure you want to delete this assessment? This action cannot be undone.';
+            
+            if (confirm(confirmMessage)) {
+                try {
+                    let deleteBtn;
+                    if (event) {
+                        deleteBtn = event.target.closest('.btn-delete');
+                        if (deleteBtn) {
+                            const loadingText = translations.loading || 'Loading...';
+                            deleteBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+                            deleteBtn.disabled = true;
+                        }
+                    }
+
+                    const response = await fetch(`${API_BASE_URL}/api/delete-assessment`, {
+                        method: 'POST',
+                        headers: SecurityUtils.generateSecureHeaders('POST'),
+                        body: JSON.stringify({
+                            patient_number: this.currentPatient.number,
+                            assessment_id: assessmentId
+                        })
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 403) {
+                            this.showAlert('csrfError', 'Security validation failed. Please refresh the page and try again.');
+                            return;
+                        }
+                        
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        // Reload history
+                        await this.handleLogin();
+                    } else {
+                        this.showAlert('deleteError', result.error || 'Failed to delete assessment.');
+                    }
+                    
+                } catch (error) {
+                    this.showAlert('deleteError', 'Error deleting assessment. Please try again.');
                 }
-
-                const result = await response.json();
-                return result;
-                
-            } catch (error) {
-                console.error('Save assessment failed:', error);
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async loadSingleAssessmentFromBackend(patientName, patientNumber, assessmentId) {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/get-single-assessment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        name: patientName,
-                        number: patientNumber,
-                        assessment_id: assessmentId
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Failed to load assessment');
-                }
-                
-                return result.assessment;
-                
-            } catch (error) {
-                console.error('Load assessment failed:', error);
-                throw error;
-            }
-        }
-        
-        async deleteAssessmentFromBackend(assessmentId) {
-            try {
-                if (!this.currentPatient) {
-                    throw new Error('No patient logged in');
-                }
-
-                const response = await fetch(`${API_BASE_URL}/api/delete-assessment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        patient_number: this.currentPatient.number,
-                        assessment_id: assessmentId
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                return result;
-                
-            } catch (error) {
-                console.error('Delete assessment failed:', error);
-                throw error;
             }
         }
         
@@ -3941,6 +4147,8 @@ function initializeAssessment() {
         }
         
         updateProgress() {
+            if (!ASSESSMENT_CONFIG || !ASSESSMENT_CONFIG.questions) return;
+            
             const progress = ((this.currentQuestionIndex + 1) / ASSESSMENT_CONFIG.questions.length) * 100;
             this.progressFill.style.width = `${progress}%`;
             
@@ -3976,12 +4184,18 @@ function initializeAssessment() {
                 }
             }
         }
-        
+                
         updateAllTexts() {
             const translations = this.displayManager.getTranslations();
             
             // Get navigation translations (they're nested under 'navigation')
             const navTranslations = translations.navigation || {};
+            
+            // Get validation translations
+            const validationTranslations = translations.validation || {};
+            const nameValidation = validationTranslations.name || {};
+            const ageValidation = validationTranslations.age || {};
+            const patientNumberValidation = validationTranslations.patient_number || {};
             
             // Update all text elements using the translations
             const textElements = [
@@ -4018,9 +4232,9 @@ function initializeAssessment() {
                 ['review-title', translations['review-title'] || 'Review Your Answers'],
                 ['review-description', translations['review-description'] || 'Please review your answers...'],
                 ['patient-info-title', translations['patient-info-title'] || 'Patient Information'],
-                ['patient-name-label', translations['patient-name-label'] || 'Patient Name:'],
-                ['patient-number-label', translations['patient-number-label'] || 'Patient Number:'],
-                ['patient-age-label', translations['patient-age-label'] || 'Age:'],
+                ['patient-name-label', nameValidation.label || 'Patient Name:'],
+                ['patient-number-label', patientNumberValidation.label || 'Patient Number:'],
+                ['patient-age-label', ageValidation.label || 'Age:'],
                 ['patient-gender-label', translations['patient-gender-label'] || 'Gender:'],
                 ['gender-default', translations['patient-gender-default'] || 'Select Gender'],
                 ['gender-male', translations['patient-gender-male'] || 'Male'],
@@ -4041,8 +4255,8 @@ function initializeAssessment() {
                 ['history-title', translations['history-title'] || 'Assessment History'],
                 ['history-description', translations['history-description'] || 'View and manage your previous assessments'],
                 ['access-history-title', translations['access-history-title'] || 'Access Your Assessment History'],
-                ['login-name-label', translations['login-name-label'] || 'Patient Name:'],
-                ['login-number-label', translations['login-number-label'] || 'Patient Number:'],
+                ['login-name-label', nameValidation.label || 'Patient Name:'],
+                ['login-number-label', patientNumberValidation.label || 'Patient Number:'],
                 
                 ['mobile-home', translations['mobile.home'] || 'Home'],
                 ['mobile-assessment', translations['mobile.assessment'] || 'Assessment'],
@@ -4061,8 +4275,63 @@ function initializeAssessment() {
                     }
                 }
             });
-        }
-                
+            
+            // ============================================
+            // UPDATE VALIDATION MESSAGES AND INPUT ATTRIBUTES
+            // ============================================
+            
+            // Update patient form inputs
+            const patientNameInput = document.getElementById('patientName');
+            if (patientNameInput) {
+                patientNameInput.placeholder = nameValidation.placeholder || 'Enter patient name';
+                patientNameInput.title = nameValidation.title || 'Enter patient name (2-50 characters)';
+            }
+            
+            const patientNameHint = document.getElementById('patient-name-hint');
+            if (patientNameHint) {
+                patientNameHint.textContent = nameValidation.hint || 'Enter patient name (2-50 characters)';
+            }
+            
+            const patientNumberInput = document.getElementById('patientNumber');
+            if (patientNumberInput) {
+                patientNumberInput.placeholder = patientNumberValidation.placeholder || 'Enter patient number';
+                patientNumberInput.title = patientNumberValidation.title || '6-20 characters with at least one uppercase letter, one lowercase letter, and one number';
+            }
+            
+            const patientNumberHint = document.getElementById('patient-number-hint');
+            if (patientNumberHint) {
+                patientNumberHint.textContent = patientNumberValidation.hint || '6-20 characters with uppercase, lowercase, and numbers';
+            }
+            
+            const patientAgeInput = document.getElementById('patientAge');
+            if (patientAgeInput) {
+                patientAgeInput.placeholder = ageValidation.placeholder || 'Enter age (12-100)';
+                patientAgeInput.title = ageValidation.title || 'Enter a number between 12 and 100';
+            }
+            
+            const patientAgeHint = document.getElementById('patient-age-hint');
+            if (patientAgeHint) {
+                patientAgeHint.textContent = ageValidation.hint || 'Enter age between 12-100';
+            }
+            
+            // Update login form inputs
+            const loginPatientNameInput = document.getElementById('loginPatientName');
+            if (loginPatientNameInput) {
+                loginPatientNameInput.placeholder = nameValidation.placeholder || 'Enter patient name';
+                loginPatientNameInput.title = nameValidation.title || 'Enter patient name (2-50 characters)';
+            }
+            
+            const loginPatientNumberInput = document.getElementById('loginPatientNumber');
+            if (loginPatientNumberInput) {
+                loginPatientNumberInput.placeholder = patientNumberValidation.placeholder || 'Enter patient number';
+                loginPatientNumberInput.title = patientNumberValidation.title || '6-20 characters with at least one uppercase letter, one lowercase letter, and one number';
+            }
+            
+            const loginNumberHint = document.getElementById('login-number-hint');
+            if (loginNumberHint) {
+                loginNumberHint.textContent = patientNumberValidation.hint || '6-20 characters with uppercase, lowercase, and numbers';
+            }
+        }   
 
         async changeLanguage(newLanguage) {
             const oldLanguage = this.currentLanguage;
@@ -4209,51 +4478,69 @@ function initializeAssessment() {
         
         setupAgeValidation() {
             const ageInput = document.getElementById('patientAge');
+            const loginAgeInput = document.getElementById('loginPatientAge'); // if exists
             
-            if (ageInput) {
-                ageInput.addEventListener('keypress', (e) => {
+            const setupValidation = (inputElement) => {
+                if (!inputElement) return;
+                
+                // Helper function to validate and show error
+                const validateAndShowError = () => {
+                    const validation = SecurityUtils.validateAge(inputElement.value);
+                    if (!validation.valid) {
+                        this.showInputError(inputElement, validation.message);
+                    } else {
+                        this.clearInputError(inputElement);
+                    }
+                };
+                
+                // Validate on keypress (for non-numeric characters)
+                inputElement.addEventListener('keypress', (e) => {
                     const charCode = e.charCode || e.keyCode || e.which;
                     if (charCode > 31 && (charCode < 48 || charCode > 57)) {
                         e.preventDefault();
-                        this.showInputError(ageInput, 'Please enter numbers only (0-9)');
+                        // Get translation dynamically
+                        const currentLang = window.i18n?.currentLang || 'en';
+                        const translations = window.i18n?.translations[currentLang]?.prediction?.validation?.age || {};
+                        const errorMsg = translations.not_number || 'Please enter numbers only (0-9)';
+                        this.showInputError(inputElement, errorMsg);
                         return false;
                     }
+                    // Clear any previous error when valid character is typed
+                    this.clearInputError(inputElement);
                 });
                 
-                ageInput.addEventListener('blur', (e) => {
-                    this.validateAgeInput(ageInput);
+                // Validate on input (as user types)
+                inputElement.addEventListener('input', (e) => {
+                    this.clearInputError(inputElement);
+                    // Real-time validation as they type
+                    validateAndShowError();
                 });
                 
-                ageInput.addEventListener('input', (e) => {
-                    this.clearInputError(ageInput);
+                // Validate on blur (when focus leaves)
+                inputElement.addEventListener('blur', () => {
+                    validateAndShowError();
                 });
-            }
+                
+                // Validate when language changes
+                const validateOnLanguageChange = () => {
+                    if (inputElement.value.trim() !== '') {
+                        validateAndShowError();
+                    }
+                };
+                
+                // Listen for language changes
+                document.addEventListener('languageChanged', validateOnLanguageChange);
+                
+                // Clean up listener when input is removed (optional)
+                inputElement.addEventListener('DOMNodeRemoved', () => {
+                    document.removeEventListener('languageChanged', validateOnLanguageChange);
+                });
+            };
+            
+            setupValidation(ageInput);
+            if (loginAgeInput) setupValidation(loginAgeInput);
         }
-        
-        validateAgeInput(inputElement) {
-            const value = inputElement.value.trim();
-            
-            if (value === '') {
-                this.clearInputError(inputElement);
-                return true;
-            }
-            
-            if (!/^\d+$/.test(value)) {
-                this.showInputError(inputElement, 'Age must contain only numbers. Please enter digits only.');
-                return false;
-            }
-            
-            const age = parseInt(value, 10);
-            
-            if (age < 18 || age > 100) {
-                this.showInputError(inputElement, 'Age must be between 18 and 100');
-                return false;
-            }
-            
-            this.clearInputError(inputElement);
-            return true;
-        }
-        
+
         setupPatientNumberValidation() {
             const numberInput = document.getElementById('patientNumber');
             const loginNumberInput = document.getElementById('loginPatientNumber');
@@ -4261,6 +4548,22 @@ function initializeAssessment() {
             const setupValidation = (inputElement) => {
                 if (!inputElement) return;
                 
+                // Helper function to validate and show error
+                const validateAndShowError = () => {
+                    const value = inputElement.value.trim();
+                    if (value !== '') {
+                        const validation = SecurityUtils.validatePatientNumber(value);
+                        if (!validation.valid) {
+                            this.showInputError(inputElement, validation.message);
+                        } else {
+                            this.clearInputError(inputElement);
+                        }
+                    } else {
+                        this.clearInputError(inputElement);
+                    }
+                };
+                
+                // Validate on keypress (for special characters)
                 inputElement.addEventListener('keypress', (e) => {
                     const charCode = e.charCode || e.keyCode || e.which;
                     
@@ -4271,23 +4574,42 @@ function initializeAssessment() {
                         
                     if (!isValidChar) {
                         e.preventDefault();
-                        this.showInputError(inputElement, 'Only letters (A-Z, a-z) and numbers (0-9) are allowed');
+                        // Get translation dynamically
+                        const currentLang = window.i18n?.currentLang || 'en';
+                        const translations = window.i18n?.translations[currentLang]?.prediction?.validation?.patient_number || {};
+                        const errorMsg = translations.special_chars || 'Only letters and numbers allowed (no special characters)';
+                        this.showInputError(inputElement, errorMsg);
                         return false;
                     }
-                });
-                
-                inputElement.addEventListener('input', (e) => {
+                    // Clear any previous error when valid character is typed
                     this.clearInputError(inputElement);
                 });
                 
-                inputElement.addEventListener('blur', (e) => {
-                    const value = e.target.value.trim();
-                    if (value !== '') {
-                        const validation = this.validatePatientNumber(value);
-                        if (!validation.valid) {
-                            this.showInputError(inputElement, validation.message);
-                        }
+                // Validate on input (as user types)
+                inputElement.addEventListener('input', (e) => {
+                    this.clearInputError(inputElement);
+                    // Real-time validation as they type
+                    validateAndShowError();
+                });
+                
+                // Validate on blur (when focus leaves)
+                inputElement.addEventListener('blur', () => {
+                    validateAndShowError();
+                });
+                
+                // Validate when language changes
+                const validateOnLanguageChange = () => {
+                    if (inputElement.value.trim() !== '') {
+                        validateAndShowError();
                     }
+                };
+                
+                // Listen for language changes
+                document.addEventListener('languageChanged', validateOnLanguageChange);
+                
+                // Clean up listener when input is removed (optional)
+                inputElement.addEventListener('DOMNodeRemoved', () => {
+                    document.removeEventListener('languageChanged', validateOnLanguageChange);
                 });
             };
             
@@ -4295,51 +4617,57 @@ function initializeAssessment() {
             setupValidation(loginNumberInput);
         }
         
-        validatePatientNumber(number) {
-            if (!number || number.trim() === '') {
-                return { valid: true, message: '' };
-            }
+        setupNameValidation() {
+            const nameInput = document.getElementById('patientName');
+            const loginNameInput = document.getElementById('loginPatientName');
             
-            const trimmedNumber = number.trim();
-            
-            if (trimmedNumber.length < 6) {
-                return { 
-                    valid: false, 
-                    message: 'Patient number must be at least 6 characters long' 
+            const setupValidation = (inputElement) => {
+                if (!inputElement) return;
+                
+                // Helper function to validate and show error
+                const validateAndShowError = () => {
+                    const validation = SecurityUtils.validateName(inputElement.value);
+                    if (!validation.valid) {
+                        this.showInputError(inputElement, validation.message);
+                    } else {
+                        this.clearInputError(inputElement);
+                    }
                 };
-            }
-            
-            if (!/[a-z]/.test(trimmedNumber)) {
-                return { 
-                    valid: false, 
-                    message: 'Patient number must include at least one lowercase letter (a-z)' 
+                
+                // Validate on input (as user types)
+                inputElement.addEventListener('input', (e) => {
+                    this.clearInputError(inputElement);
+                    // Validate after a short delay to avoid validation on every keystroke
+                    setTimeout(() => {
+                        validateAndShowError();
+                    }, 300);
+                });
+                
+                // Validate on blur (when focus leaves)
+                inputElement.addEventListener('blur', () => {
+                    validateAndShowError();
+                });
+                
+                // Validate when language changes
+                const validateOnLanguageChange = () => {
+                    if (inputElement.value.trim() !== '') {
+                        validateAndShowError();
+                    }
                 };
-            }
+                
+                // Listen for language changes
+                document.addEventListener('languageChanged', validateOnLanguageChange);
+                
+                // Clean up listener when input is removed (optional)
+                inputElement.addEventListener('DOMNodeRemoved', () => {
+                    document.removeEventListener('languageChanged', validateOnLanguageChange);
+                });
+            };
             
-            if (!/[A-Z]/.test(trimmedNumber)) {
-                return { 
-                    valid: false, 
-                    message: 'Patient number must include at least one uppercase letter (A-Z)' 
-                };
-            }
-            
-            if (!/[0-9]/.test(trimmedNumber)) {
-                return { 
-                    valid: false, 
-                    message: 'Patient number must include at least one number (0-9)' 
-                };
-            }
-            
-            if (/[^a-zA-Z0-9]/.test(trimmedNumber)) {
-                return { 
-                    valid: false, 
-                    message: 'Patient number can only contain letters and numbers (no special characters)' 
-                };
-            }
-            
-            return { valid: true, message: '' };
+            setupValidation(nameInput);
+            setupValidation(loginNameInput);
         }
-        
+
         showInputError(inputElement, message) {
             this.clearInputError(inputElement);
             
@@ -4367,7 +4695,47 @@ function initializeAssessment() {
             const translations = this.displayManager.getTranslations();
             const alerts = translations.errors || translations.alerts || {};
             const message = alerts[alertKey] || defaultMessage;
-            alert(message);
+            
+            // Create a nice alert modal instead of default alert
+            this.createModalAlert(message);
+        }
+        
+        createModalAlert(message) {
+            // Remove existing alert if any
+            const existingAlert = document.querySelector('.custom-alert');
+            if (existingAlert) existingAlert.remove();
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'custom-alert';
+            alertDiv.innerHTML = `
+                <div class="alert-content">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-message">${message}</div>
+                    <button class="alert-close">&times;</button>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Show alert
+            setTimeout(() => alertDiv.classList.add('show'), 10);
+            
+            // Close on button click
+            const closeBtn = alertDiv.querySelector('.alert-close');
+            closeBtn.addEventListener('click', () => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 300);
+            });
+            
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 300);
+                }
+            }, 5000);
         }
         
         async downloadReport() {
@@ -4416,7 +4784,6 @@ function initializeAssessment() {
 
         async generatePDFReport(assessment) {
             try {
-
                 // Language-based filename translations
                 const filenameMap = {
                     en: "Mental_Health_Report",
@@ -4429,22 +4796,24 @@ function initializeAssessment() {
                     ko: "정신건강보고서"
                 };
 
-                const reportTitle =
-                    filenameMap[this.currentLanguage] || filenameMap["en"];
+                const reportTitle = filenameMap[this.currentLanguage] || filenameMap["en"];
+                const headers = SecurityUtils.generateSecureHeaders('POST');
+                headers['X-Language'] = this.currentLanguage;
 
                 const response = await fetch(`${API_BASE_URL}/api/generate-pdf-report`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Language': this.currentLanguage
-                    },
+                    headers: headers,
                     body: JSON.stringify({
                         assessment_data: assessment,
                         language: this.currentLanguage
                     })
                 });
 
+
                 if (!response.ok) {
+                    if (response.status === 403) {
+                        throw new Error('Security validation failed');
+                    }
                     throw new Error(`Server error: ${response.status}`);
                 }
 
@@ -4474,7 +4843,6 @@ function initializeAssessment() {
             }
         }
 
-
         async downloadHistoricalAssessment(assessmentId) {
             try {
                 if (!this.currentPatient) {
@@ -4482,13 +4850,24 @@ function initializeAssessment() {
                     return;
                 }
 
-                const assessment = await this.loadSingleAssessmentFromBackend(
-                    this.currentPatient.name, 
-                    this.currentPatient.number, 
-                    assessmentId
-                );
+                const response = await fetch(`${API_BASE_URL}/api/get-single-assessment`, {
+                    method: 'POST',
+                    headers: SecurityUtils.generateSecureHeaders('POST'),
+                    body: JSON.stringify({
+                        name: this.currentPatient.name,
+                        number: this.currentPatient.number,
+                        assessment_id: assessmentId
+                    })
+                });
 
-                if (assessment) {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.assessment) {
+                    const assessment = result.assessment;
                     assessment.language = this.currentLanguage;
                     await this.generatePDFReport(assessment);
                 } else {
@@ -4497,38 +4876,6 @@ function initializeAssessment() {
 
             } catch (error) {
                 this.showAlert('downloadError', 'Error downloading assessment. Please try again.');
-            }
-        }
-        
-        async deletePatientAssessment(assessmentId, event = null) {
-            if (!this.currentPatient) {
-                this.showAlert('noPatientLoggedIn', 'No patient logged in.');
-                return;
-            }
-
-            const translations = this.displayManager.getTranslations();
-            const confirmMessage = translations.errors?.deleteConfirm || 'Are you sure you want to delete this assessment? This action cannot be undone.';
-            
-            if (confirm(confirmMessage)) {
-                try {
-                    let deleteBtn;
-                    if (event) {
-                        deleteBtn = event.target.closest('.btn-delete');
-                        if (deleteBtn) {
-                            const loadingText = translations.loading || 'Loading...';
-                            deleteBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
-                            deleteBtn.disabled = true;
-                        }
-                    }
-
-                    await this.deleteAssessmentFromBackend(assessmentId);
-                    
-                    // Reload history
-                    await this.handleLogin();
-                    
-                } catch (error) {
-                    this.showAlert('deleteError', 'Error deleting assessment. Please try again.');
-                }
             }
         }
     }
@@ -4540,6 +4887,6 @@ function initializeAssessment() {
     window.mentalHealthAssessment = new MentalHealthAssessment();
 }
 </script>
-  </script>
+
 </body>
 </html>

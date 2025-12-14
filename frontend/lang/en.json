@@ -1488,9 +1488,8 @@
       "deleteError": "Error deleting assessment. Please try again.",
       "noOtherDiagnoses": "No other diagnoses considered",
       "noResponses": "No response data available"
-    }
-  },
-  "validation": {
+    },
+      "validation": {
     "name": {
       "label": "Patient Name",
       "placeholder": "Enter patient name",
@@ -1544,7 +1543,9 @@
       "saving": "Saving information...",
       "saved": "✓ Saved successfully"
     }
+  }
   },
+
   "api": {
     "health": {
       "healthy": "healthy",
@@ -1627,7 +1628,7 @@
     "patient_name": "Patient Name:",
     "patient_number": "Patient Number:",
     "age": "Age:",
-    "gender": "Gender:",
+    "gender_title": "Gender:",
     "clinical_results": "CLINICAL ASSESSMENT RESULTS",
     "primary_diagnosis": "Primary Diagnosis:",
     "confidence_level": "Confidence Level:",
@@ -1650,7 +1651,15 @@
       "utc": "UTC",
       "local_time": "Local Time",
       "timezone": "Time Zone"
+
     },
+            "gender": {
+      "Male": "Male",
+      "Female": "Female", 
+      "Other": "Other",
+      "Prefer not to say": "Prefer not to say"
+    },
+
     "question_categories": {
       "Mood & Emotions": "Mood & Emotions",
       "Sleep & Energy": "Sleep & Energy",

@@ -1306,7 +1306,7 @@
     "patient-gender-other": "Khác",
     "patient-gender-prefer-not": "Không muốn tiết lộ",
     "review-note-title": "📝 Quan trọng:",
-    "review-note-text": "Để lưu bài đánh giá của bạn và truy cập lịch sử sau này, vui lòng nhập **tên** và một **mã số bệnh nhân duy nhất** của bạn. Bạn sẽ cần những chi tiết này để xem lịch sử đánh giá của mình lần sau.",
+    "review-note-text": "Để lưu bài đánh giá của bạn và truy cập lịch sử sau này, vui lòng nhập <strong>tên</strong> và một <strong>mã số bệnh nhân duy nhất</strong> của bạn. Bạn sẽ cần những chi tiết này để xem lịch sử đánh giá của mình lần sau.",
     "responses-title": "Câu trả lời của Bạn",
     "answerLabel": "Trả lời:",
     "editButton": "Chỉnh sửa",
@@ -1464,9 +1464,8 @@
       "deleteError": "Lỗi khi xóa bài đánh giá. Vui lòng thử lại.",
       "noOtherDiagnoses": "Không có chẩn đoán khác được xem xét",
       "noResponses": "Không có dữ liệu phản hồi"
-    }
-  },
-  "validation": {
+    },
+    "validation": {
     "name": {
       "label": "Tên Bệnh nhân",
       "placeholder": "Nhập tên bệnh nhân",
@@ -1520,7 +1519,10 @@
       "saving": "Đang lưu thông tin...",
       "saved": "✓ Đã lưu thành công"
     }
+  }
+  
   },
+
   "api": {
     "health": {
       "healthy": "khỏe mạnh",
@@ -1603,7 +1605,7 @@
     "patient_name": "Tên Bệnh nhân:",
     "patient_number": "Mã số Bệnh nhân:",
     "age": "Tuổi:",
-    "gender": "Giới tính:",
+    "gender_title": "Giới tính:",
     "clinical_results": "KẾT QUẢ ĐÁNH GIÁ LÂM SÀNG",
     "primary_diagnosis": "Chẩn đoán Chính:",
     "confidence_level": "Mức độ Tin cậy:",
@@ -1627,6 +1629,13 @@
       "local_time": "Giờ Địa phương",
       "timezone": "Múi giờ"
     },
+         "gender": {
+      "Male": "Nam",
+      "Female": "Nữ",
+      "Other": "Khác",
+      "Prefer not to say": "Không muốn tiết lộ"
+    },
+
     "question_categories": {
       "Mood & Emotions": "Tâm trạng & Cảm xúc",
       "Sleep & Energy": "Giấc ngủ & Năng lượng",

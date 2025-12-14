@@ -1065,7 +1065,7 @@
   "analogy_hero_description0": "Visualización clínica precisa de los estados de ánimo normal, Trastorno Bipolar I, Bipolar II y Depresión",
   
   "analogy_disclaimer_title0": "Aviso Importante",
-  "analogy_disclaimer_text0": "Esta visualización es **solo con fines educativos** y **no es una herramienta de diagnóstico**. Las condiciones de salud mental son complejas y varían entre individuos.",
+  "analogy_disclaimer_text0": "Esta visualización es <strong>solo con fines educativos</strong> y <strong>no es una herramienta de diagnóstico</strong>. Las condiciones de salud mental son complejas y varían entre individuos.",
   
   "analogy_global_start_all0": "Iniciar Todas las Demos",
   "analogy_global_stop_all0": "Detener Todas las Demos",
@@ -1305,7 +1305,7 @@
     "patient-gender-other": "Otro",
     "patient-gender-prefer-not": "Prefiero no divulgar",
     "review-note-title": "📝 Importante:",
-    "review-note-text": "Para guardar su evaluación y acceder al historial más tarde, por favor ingrese su **nombre** y un **número de paciente único**. Necesitará estos detalles para ver su historial de evaluación la próxima vez.",
+    "review-note-text": "Para guardar su evaluación y acceder al historial más tarde, por favor ingrese su <strong>nombre</strong> y un <strong>número de paciente único</strong>. Necesitará estos detalles para ver su historial de evaluación la próxima vez.",
     "responses-title": "Sus Respuestas",
     "answerLabel": "Respuesta:",
     "editButton": "Editar",
@@ -1463,9 +1463,8 @@
       "deleteError": "Error al eliminar la evaluación. Por favor, inténtelo de nuevo.",
       "noOtherDiagnoses": "No se consideraron otros diagnósticos",
       "noResponses": "No hay datos de respuesta disponibles"
-    }
-  },
-  "validation": {
+    },
+      "validation": {
     "name": {
       "label": "Nombre del Paciente",
       "placeholder": "Ingrese el nombre del paciente",
@@ -1519,7 +1518,10 @@
       "saving": "Guardando información...",
       "saved": "✓ Guardado con éxito"
     }
+  }
+
   },
+
   "api": {
     "health": {
       "healthy": "saludable",
@@ -1602,7 +1604,7 @@
     "patient_name": "Nombre del Paciente:",
     "patient_number": "Número de Paciente:",
     "age": "Edad:",
-    "gender": "Género:",
+    "gender_title": "Género:",
     "clinical_results": "RESULTADOS DE LA EVALUACIÓN CLÍNICA",
     "primary_diagnosis": "Diagnóstico Principal:",
     "confidence_level": "Nivel de Confianza:",
@@ -1625,7 +1627,15 @@
       "utc": "UTC",
       "local_time": "Hora Local",
       "timezone": "Zona Horaria"
+
     },
+              "gender": {
+      "Male": "Masculino",
+      "Female": "Femenino",
+      "Other": "Otro",
+      "Prefer not to say": "Prefiero no decirlo"
+          },
+
     "question_categories": {
       "Mood & Emotions": "Estado de Ánimo y Emociones",
       "Sleep & Energy": "Sueño y Energía",
