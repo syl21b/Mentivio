@@ -309,7 +309,6 @@ class UnifiedI18n {
             }
         });
         
-        this.log(`Active nav set for: ${currentPage}`);
     }
 
     changeLanguage(lang) {
