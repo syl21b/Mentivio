@@ -1280,6 +1280,80 @@ select:focus {
   transform: translateY(0);
 }
 
+/* Validation Hint Styles */
+.validation-hint {
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  color: #6c757d; /* Gray color for hints */
+  margin-top: 4px;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+/* For specific hint containers */
+#patient-number-hint,
+#patient-age-hint,
+#patient-name-hint,
+#login-number-hint {
+  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+  color: #6c757d; /* Gray color for hints */
+  margin-top: 4px;
+  line-height: 1.4;
+  opacity: 0.8;
+}
+
+/* Adjust the parent container to better contain hints */
+.form-group .validation-message {
+  min-height: 24px; /* Reserve space for hint/error messages */
+}
+
+/* Make input placeholders lighter */
+.form-group input::placeholder,
+.form-group select::placeholder {
+  color: #adb5bd; /* Lighter gray for placeholders */
+  opacity: 0.8;
+}
+
+/* Ensure error messages remain prominent */
+.input-error-message {
+  color: #ef4444;
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 500;
+  opacity: 1 !important; /* Override any opacity inheritance */
+}
+
+/* For disabled/readonly hint states */
+.form-group input[readonly] + .validation-hint,
+.form-group input:disabled + .validation-hint {
+  opacity: 0.6;
+}
+
+/* Responsive adjustments for hints */
+@media (max-width: 768px) {
+  .validation-hint,
+  #patient-number-hint,
+  #patient-age-hint,
+  #patient-name-hint,
+  #login-number-hint {
+    font-size: 0.7rem;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 480px) {
+  .validation-hint,
+  #patient-number-hint,
+  #patient-age-hint,
+  #patient-name-hint,
+  #login-number-hint {
+    font-size: 0.65rem;
+    margin-top: 3px;
+  }
+}
+
 /* Input Error Styles */
 .input-error {
   border-color: var(--danger) !important;
@@ -4293,7 +4367,8 @@ function initializeAssessment() {
             
             const patientNameHint = document.getElementById('patient-name-hint');
             if (patientNameHint) {
-                patientNameHint.textContent = nameValidation.hint || 'Enter patient name (2-50 characters)';
+              const hintText = nameValidation.hint || 'Name must be 2-50 characters (letters, spaces, hyphens, apostrophes only)';
+              patientNameHint.innerHTML = `<span class="validation-hint-text">${hintText}</span>`;
             }
             
             const patientNumberInput = document.getElementById('patientNumber');
@@ -4304,7 +4379,8 @@ function initializeAssessment() {
             
             const patientNumberHint = document.getElementById('patient-number-hint');
             if (patientNumberHint) {
-                patientNumberHint.textContent = patientNumberValidation.hint || '6-20 characters with uppercase, lowercase, and numbers';
+              const hintText = patientNumberValidation.hint || '6-20 characters with uppercase, lowercase, and numbers';
+              patientNumberHint.innerHTML = `<span class="validation-hint-text">${hintText}</span>`;
             }
             
             const patientAgeInput = document.getElementById('patientAge');
@@ -4315,8 +4391,10 @@ function initializeAssessment() {
             
             const patientAgeHint = document.getElementById('patient-age-hint');
             if (patientAgeHint) {
-                patientAgeHint.textContent = ageValidation.hint || 'Enter age between 12-100';
+              const hintText = ageValidation.hint || 'Enter age between 12-100';
+              patientAgeHint.innerHTML = `<span class="validation-hint-text">${hintText}</span>`;
             }
+
             
             // Update login form inputs
             const loginPatientNameInput = document.getElementById('loginPatientName');
@@ -4333,7 +4411,8 @@ function initializeAssessment() {
             
             const loginNumberHint = document.getElementById('login-number-hint');
             if (loginNumberHint) {
-                loginNumberHint.textContent = patientNumberValidation.hint || '6-20 characters with uppercase, lowercase, and numbers';
+              const hintText = patientNumberValidation.hint || '6-20 characters with uppercase, lowercase, and numbers';
+              loginNumberHint.innerHTML = `<span class="validation-hint-text">${hintText}</span>`;
             }
         }   
 
