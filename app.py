@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_cors import CORS
 import pickle
 import joblib
@@ -1319,26 +1319,52 @@ initialize_clinical_enhancer()
 preprocessor = ClinicalPreprocessor(category_mappings)
 
 # ==================== ROUTES ====================
+# ==================== UPDATED ROUTES (HTML PAGES WITHOUT .html EXTENSION) ====================
 @app.route('/')
 def serve_index():
-    return send_from_directory('frontend', 'Home.html')
+    return send_from_directory('frontend', 'home.html')
 
-@app.route('/<page_name>.html')
+@app.route('/<page_name>')
 def serve_html_page(page_name):
-    main_pages = [
-        'Home', 'About', 'MenHel_analogy', 'MenHel_prediction', 
-        'resources', 'crisis-support', 'relief_techniques', 'navbar', 'footer'
-    ]
+    # Main pages (without .html extension)
+    main_pages = {
+        'home': 'home.html',
+        'about': 'about.html',
+        'analogy': 'analogy.html',
+        'prediction': 'prediction.html',
+        'resources': 'resources.html',
+        'crisis-support': 'crisis-support.html',
+        'relief_techniques': 'relief_techniques.html'
+    }
     
     if page_name in main_pages:
+        return send_from_directory('frontend', main_pages[page_name])
+    
+    # Resource pages (without .html extension)
+    resource_pages = [
+        'anxiety-resource', 'bipolar-resource', 'depression-resource',
+        'medication-resource', 'mindfulness-resource', 'ptsd-resource',
+        'selfcare-resource', 'therapy-resource'
+    ]
+    
+    if page_name in resource_pages:
+        return send_from_directory('frontend/resources', f'{page_name}.html')
+    
+    # Try with .html extension for backward compatibility
+    try:
         return send_from_directory('frontend', f'{page_name}.html')
-    else:
+    except:
         try:
             return send_from_directory('frontend/resources', f'{page_name}.html')
         except:
-            return send_from_directory('frontend', 'Home.html')
+            return send_from_directory('frontend', 'home.html')
 
-@app.route('/resources/<resource_name>.html')
+# Keep this for backward compatibility with .html URLs
+@app.route('/<page_name>.html')
+def serve_html_page_with_extension(page_name):
+    return redirect(f'/{page_name}')
+
+@app.route('/resources/<resource_name>')
 def serve_resource_page(resource_name):
     resource_pages = [
         'anxiety-resource', 'bipolar-resource', 'depression-resource',
@@ -1350,6 +1376,11 @@ def serve_resource_page(resource_name):
         return send_from_directory('frontend/resources', f'{resource_name}.html')
     else:
         return send_from_directory('frontend', 'resources.html')
+
+# Keep this for backward compatibility with .html URLs
+@app.route('/resources/<resource_name>.html')
+def serve_resource_page_with_extension(resource_name):
+    return redirect(f'/resources/{resource_name}')
 
 @app.route('/css/<path:filename>')
 def serve_css(filename):
@@ -1374,20 +1405,26 @@ def serve_assets(filename):
 def serve_resource_detail_css():
     return send_from_directory('frontend/resources', 'resource-detail.css')
 
+
+
 @app.route('/<path:path>')
 def serve_static_files(path):
-    if path.startswith('resources/'):
+    # Don't redirect static files
+    if path.startswith(('css/', 'js/', 'assets/', 'lang/', 'resources/')):
         try:
-            resource_path = path.replace('resources/', '', 1)
-            return send_from_directory('frontend/resources', resource_path)
+            if path.startswith('resources/'):
+                resource_path = path.replace('resources/', '', 1)
+                return send_from_directory('frontend/resources', resource_path)
+            return send_from_directory('frontend', path)
         except:
             pass
     
+    # Try to serve as a page without extension
     try:
-        return send_from_directory('frontend', path)
+        return serve_html_page(path)
     except:
-        return send_from_directory('frontend', 'Home.html')
-
+        return send_from_directory('frontend', 'home.html')
+    
 @app.route('/api/health', methods=['GET'])
 def health_check():
     try:
@@ -1755,7 +1792,7 @@ def predict():
     except Exception as e:
         logger.error(f"Secure prediction endpoint error: {e}")
         return jsonify({'error': 'Assessment failed. Please try again.'}), 500
-    
+
     
 def convert_response_to_english(response_value: str, feature: str, language: str = 'en') -> str:
     """Convert a response from user's language to English canonical format"""
@@ -3069,7 +3106,7 @@ def not_found(error):
         return jsonify({'error': 'API endpoint not found'}), 404
     else:
         try:
-            return send_from_directory('frontend', 'Home.html')  
+            return send_from_directory('frontend', 'home.html')  
         except:
             return jsonify({'error': 'Page not found'}), 404
 
@@ -3088,6 +3125,8 @@ def too_many_requests(error):
         'error': 'Too many requests',
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
+
+
 
 if __name__ == '__main__':
     if all([model_package, scaler, label_encoder, feature_names, category_mappings]):

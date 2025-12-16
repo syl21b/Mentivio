@@ -3821,7 +3821,7 @@ function initializeAssessment() {
                     const canonicalDiagnosis = this.displayManager.convertToCanonicalKey(diagnosis);
                     
                     // Build URL with diagnosis parameter and language
-                    const url = `MenHel_analogy.html?diagnosis=${encodeURIComponent(canonicalDiagnosis)}&lang=${currentLang}`;
+                    const url = `analogy.html?diagnosis=${encodeURIComponent(canonicalDiagnosis)}&lang=${currentLang}`;
                     
                     // Redirect to Condition Visualizer
                     window.location.href = url;

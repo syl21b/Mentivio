@@ -278,20 +278,33 @@ class UnifiedI18n {
     }
 
     setActiveNav() {
-        const currentPage = window.location.pathname.split('/').pop() || 'Home.html';
+        const currentPath = window.location.pathname;
+        // Remove .html if present and get page name
+        const currentPage = currentPath.replace('.html', '').split('/').pop() || 'home';
         const navLinks = document.querySelectorAll('.nav-links a');
         
         navLinks.forEach(link => {
             link.classList.remove('active');
             const href = link.getAttribute('href');
             
-            // Check for resources directory
-            const isInResourcesDir = window.location.pathname.includes('/resources/');
+            if (!href) return;
             
-            if (href && (href.includes(currentPage) || 
-                (currentPage === '' && href.includes('Home.html')) ||
-                (currentPage === 'index.html' && href.includes('Home.html')) ||
-                (isInResourcesDir && href.includes('resources.html')))) {
+            // Extract page name from href (remove leading slash and .html if present)
+            const hrefPage = href.replace(/^\/+/, '').replace('.html', '').toLowerCase();
+            const currentPageLower = currentPage.toLowerCase();
+            
+            // Check if current page matches the href
+            const isActive = (
+                hrefPage === currentPageLower ||
+                (currentPageLower === '' && hrefPage === 'home') ||
+                (currentPageLower === 'index' && hrefPage === 'home')
+            );
+            
+            // Special handling for resources directory
+            const isInResourcesDir = currentPath.includes('/resources/');
+            if (hrefPage === 'resources' && (currentPageLower === 'resources' || isInResourcesDir)) {
+                link.classList.add('active');
+            } else if (isActive) {
                 link.classList.add('active');
             }
         });
@@ -393,22 +406,24 @@ class UnifiedI18n {
         const navLinks = document.querySelectorAll('.nav-links a');
         
         navLinks.forEach(link => {
-            // Get the href attribute (e.g., "../frontend/Home.html")
+            // Get the href attribute (e.g., "/home", "/about")
             const href = link.getAttribute('href') || '';
             
-            // We use .includes() to check the filename, ignoring the directory path (../frontend/)
-            // This ensures it works regardless of folder depth
-            if (href.includes('Home.html') || (href.endsWith('/') && !href.includes('.'))) {
+            // Extract page name from href (remove leading slash and .html if present)
+            const pageName = href.replace(/^\/+/, '').replace('.html', '').toLowerCase();
+            
+            // Match clean URLs (without .html)
+            if (pageName === 'home' || pageName === '') {
                 link.textContent = translations.home;
-            } else if (href.includes('MenHel_prediction.html')) {
+            } else if (pageName === 'prediction') {
                 link.textContent = translations.assessment;
-            } else if (href.includes('MenHel_analogy.html')) {
+            } else if (pageName === 'analogy') {
                 link.textContent = translations.visualizer;
-            } else if (href.includes('resources.html')) {
+            } else if (pageName === 'resources') {
                 link.textContent = translations.resources;
-            } else if (href.includes('About.html')) {
+            } else if (pageName === 'about') {
                 link.textContent = translations.about;
-            } else if (href.includes('crisis-support.html')) {
+            } else if (pageName === 'crisis-support') {
                 link.textContent = translations.crisis;
             }
         });
@@ -424,7 +439,30 @@ class UnifiedI18n {
         const translations = this.getFooterTranslations(lang);
         if (!translations) return;
 
-        // Select all elements with data-translate attribute
+        // Translate all footer links to use clean URLs
+        const footerLinks = document.querySelectorAll('.footer a');
+        footerLinks.forEach(link => {
+            const href = link.getAttribute('href') || '';
+            const pageName = href.replace(/^\/+/, '').replace('.html', '').toLowerCase();
+            
+            if (pageName === 'home') {
+                link.textContent = translations.home;
+            } else if (pageName === 'prediction') {
+                link.textContent = translations.assessment;
+            } else if (pageName === 'analogy') {
+                link.textContent = translations.visualizer;
+            } else if (pageName === 'resources') {
+                link.textContent = translations.resources;
+            } else if (pageName === 'about') {
+                link.textContent = translations.about;
+            } else if (pageName === 'crisis-support') {
+                link.textContent = translations.crisis;
+            } else if (href.includes('contact')) {
+                link.textContent = translations.contact;
+            }
+        });
+        
+        // Update other footer elements with data-translate attribute
         const elements = document.querySelectorAll('[data-translate]');
         elements.forEach(element => {
             const key = element.getAttribute('data-translate');
@@ -440,29 +478,52 @@ class UnifiedI18n {
     
     getCurrentPage() {
         const path = window.location.pathname;
-        if (path.includes('anxiety-resource')) return 'anxiety-resource';
-        if (path.includes('bipolar-resource')) return 'bipolar-resource';
-        if (path.includes('depression-resource')) return 'depression-resource';
-        if (path.includes('medication-resource')) return 'medication-resource';
-        if (path.includes('mindfulness-resource')) return 'mindfulness-resource';
-        if (path.includes('ptsd-resource')) return 'ptsd-resource';
-        if (path.includes('selfcare-resource')) return 'selfcare-resource';
-        if (path.includes('therapy-resource')) return 'therapy-resource';
-        if (path.includes('resources')) return 'resources';
-        if (path.includes('MenHel_prediction')) return 'prediction';
-        if (path.includes('MenHel_analogy')) return 'analogy';
-        if (path.includes('About')) return 'about';
-        if (path.includes('crisis-support')) return 'crisis';
-        return 'Home';
+        // Remove .html extension if present
+        const cleanPath = path.replace('.html', '');
+        
+        // Extract just the page name (last part after slash)
+        const pageName = cleanPath.split('/').pop() || 'home';
+        
+        // Map page names to translation keys
+        const pageMap = {
+            'home': 'home',
+            'prediction': 'prediction',
+            'analogy': 'analogy',
+            'resources': 'resources',
+            'about': 'about',
+            'crisis-support': 'crisis',
+            'anxiety-resource': 'anxiety-resource',
+            'bipolar-resource': 'bipolar-resource',
+            'depression-resource': 'depression-resource',
+            'medication-resource': 'medication-resource',
+            'mindfulness-resource': 'mindfulness-resource',
+            'ptsd-resource': 'ptsd-resource',
+            'selfcare-resource': 'selfcare-resource',
+            'therapy-resource': 'therapy-resource'
+        };
+        
+        // If page name contains "resource" but isn't in the map, default to resources
+        if (pageName.includes('resource') && !pageMap[pageName]) {
+            return 'resources';
+        }
+        
+        return pageMap[pageName] || 'home';
     }
 
     getComponentPath(filename) {
         const currentPath = window.location.pathname;
-        const isInResourcesDir = currentPath.includes('/resources/');
+        const cleanPath = currentPath.replace('.html', '');
+        const isInResourcesDir = cleanPath.includes('/resources/');
         
         // Return cleaned path
-        if (currentPath === '/' || currentPath.endsWith('index.html')) return filename.replace('../', '');
-        if (isInResourcesDir) return `../../${filename.replace('../', '')}`;
+        if (cleanPath === '/' || cleanPath.endsWith('index')) {
+            return filename.replace('../', '');
+        }
+        
+        if (isInResourcesDir) {
+            return `../../${filename.replace('../', '')}`;
+        }
+        
         return filename; 
     }
     
@@ -570,22 +631,20 @@ class UnifiedI18n {
     
     createEmergencyNavbar() {
         const currentPath = window.location.pathname;
-        const isInResourcesDir = currentPath.includes('/resources/');
+        const cleanPath = currentPath.replace('.html', '');
+        const isInResourcesDir = cleanPath.includes('/resources/');
         
-        // Base path calculation: if in resources, go up 2 levels, otherwise go up 1 level or stay root
+        // Determine path prefix based on current location
         let relativePrefix = '';
         if (isInResourcesDir) {
-            relativePrefix = '../../frontend/';
-        } else if (currentPath.includes('/frontend/')) {
-            relativePrefix = ''; // Already in frontend
-        } else {
-            relativePrefix = 'frontend/';
+            relativePrefix = '../'; // Go up one level from resources
         }
+        // If already at root, no prefix needed
 
         const navbarHTML = `
             <nav class="navbar">
                 <div class="nav-container">
-                    <a href="${relativePrefix}Home.html" class="logo">
+                    <a href="${relativePrefix}home" class="logo">
                         <div class="logo-icon"><i class="fas fa-brain"></i></div>
                         <div class="logo-text">Mentivio</div>
                     </a>
@@ -604,12 +663,12 @@ class UnifiedI18n {
                         </button>
                     </div>
                     <div class="nav-links" id="navLinks">
-                        <a href="${relativePrefix}Home.html">Home</a>
-                        <a href="${relativePrefix}MenHel_prediction.html">Self-Assessment</a>
-                        <a href="${relativePrefix}MenHel_analogy.html">Condition Visualizer</a>
-                        <a href="${relativePrefix}resources.html">Resources</a>
-                        <a href="${relativePrefix}About.html">About</a>
-                        <a href="${relativePrefix}crisis-support.html" class="crisis-link">Crisis Support</a>
+                        <a href="${relativePrefix}home">Home</a>
+                        <a href="${relativePrefix}prediction">Self-Assessment</a>
+                        <a href="${relativePrefix}analogy">Condition Visualizer</a>
+                        <a href="${relativePrefix}resources">Resources</a>
+                        <a href="${relativePrefix}about">About</a>
+                        <a href="${relativePrefix}crisis-support" class="crisis-link">Crisis Support</a>
                         <div class="nav-language-dropdown">
                             <select class="language-select" id="languageSelect">
                                 <option value="en">English</option>
@@ -650,9 +709,9 @@ class UnifiedI18n {
                     <div class="footer-section">
                         <h4>Quick Links</h4>
                         <ul>
-                            <li><a href="${relativePrefix}Home.html">Home</a></li>
-                            <li><a href="${relativePrefix}MenHel_prediction.html">Self-Assessment</a></li>
-                            <li><a href="${relativePrefix}MenHel_analogy.html">Condition Visualizer</a></li>
+                            <li><a href="${relativePrefix}home.html">Home</a></li>
+                            <li><a href="${relativePrefix}prediction.html">Self-Assessment</a></li>
+                            <li><a href="${relativePrefix}analogy.html">Condition Visualizer</a></li>
                             <li><a href="${relativePrefix}resources.html">Resources</a></li>
                         </ul>
                     </div>

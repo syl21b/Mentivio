@@ -17,7 +17,7 @@ mental-health-web/
 │   ├── css/                    # Stylesheets
 │   ├── js/                     # JavaScript modules
 │   │   ├── components.js       # UI components
-│   │   └── MenHel_prediction.js # Main prediction logic
+│   │   └── prediction.js # Main prediction logic
 │   └── resources/              # Static resources
 ├── backend/                    # Backend processing
 │   └── assessment/             # Assessment logic
@@ -27,12 +27,12 @@ mental-health-web/
 ├── dataset/                    # Training data
 ├── templates/                  # HTML pages
 │   ├── Home.html              # Landing page
-│   ├── MenHel_prediction.html # Main assessment interface
+│   ├── prediction.html # Main assessment interface
 │   ├── About.html             # About page
 │   ├── crisis-support.html    # Crisis resources
 │   ├── resources.html         # Additional resources
 │   ├── relief_techniques.html # Coping techniques
-│   ├── MenHel_analogy.html    # Educational content
+│   ├── analogy.html    # Educational content
 │   └── navbar.html & footer.html # Layout components
 ├── app.py                     # Flask application
 ├── requirements.txt           # Python dependencies
