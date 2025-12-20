@@ -1320,9 +1320,12 @@ preprocessor = ClinicalPreprocessor(category_mappings)
 
 # ==================== ROUTES ====================
 # ==================== UPDATED ROUTES (HTML PAGES WITHOUT .html EXTENSION) ====================
+#@app.route('/')
+#def serve_index():
+#    return send_from_directory('frontend', 'home.html')
 @app.route('/')
 def serve_index():
-    return send_from_directory('frontend', 'home.html')
+    return redirect('/home', code=302) 
 
 @app.route('/<page_name>')
 def serve_html_page(page_name):
@@ -1425,61 +1428,12 @@ def serve_static_files(path):
     except:
         return send_from_directory('frontend', 'home.html')
 
-@app.route('/apple-touch-icon.png')
-def apple_icon():
-    return send_from_directory(os.path.join(app.root_path, 'frontend/'), 
-                             'apple-touch-icon.png')
 
-@app.route('/assets/favicon.png')
-def favicon_png():
-    return send_from_directory(os.path.join(app.root_path, 'frontend/assets'), 
-                             'favicon.png')
 
-@app.route('/assets/favicon.ico')
-def favicon_ico():
-    return send_from_directory(os.path.join(app.root_path, 'frontend/assets'), 
-                             'favicon.ico')
-@app.route('/debug-icons')
-def debug_icons():
-    import os
-    base_path = os.path.join(app.root_path, 'frontend')
-    
-    files = {
-        'apple-touch-icon.png': os.path.join(base_path, 'apple-touch-icon.png'),
-        'favicon.png': os.path.join(base_path, 'assets', 'favicon.png'),
-        'favicon.ico': os.path.join(base_path, 'assets', 'favicon.ico')
-    }
-    
-    debug_info = f"""
-    <h1>Icon Debug Info</h1>
-    <p>Root path: {app.root_path}</p>
-    <p>Base path: {base_path}</p>
-    <p>Files:</p>
-    <ul>
-    """
-    
-    for name, path in files.items():
-        exists = os.path.exists(path)
-        debug_info += f'<li>{name}: {path} - EXISTS: {exists}</li>'
-    
-    debug_info += f"""
-    </ul>
-    <p>HTML head snippet:</p>
-    <pre>
-    &lt;link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"&gt;
-    &lt;link rel="icon" type="image/png" href="/assets/favicon.png"&gt;
-    &lt;link rel="icon" type="image/x-icon" href="/assets/favicon.ico"&gt;
-    </pre>
-    <p>Test links:</p>
-    <ul>
-        <li><a href="/apple-touch-icon.png">/apple-touch-icon.png</a></li>
-        <li><a href="/assets/favicon.png">/assets/favicon.png</a></li>
-        <li><a href="/assets/favicon.ico">/assets/favicon.ico</a></li>
-    </ul>
-    """
-    
-    return debug_info
-  
+
+
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
     try:

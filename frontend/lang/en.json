@@ -965,18 +965,22 @@
     "timeline-2025-title": "Building With Purpose",
     "timeline-2025-content": "I began collaborating with mental health professionals to create tools that bridge the gap between clinical care and everyday struggles. Our goal was simple: make mental health support accessible to everyone, regardless of their circumstances.",
     
-    "subtimeline-august-date": "August 2025",
-    "subtimeline-august-title": "Ideation & Data Collection",
-    "subtimeline-august-content": "Initial brainstorming sessions, concept development, and comprehensive data collection and cleaning to build our foundational dataset.",
+    "subtimeline-august25-date": "August 2025",
+    "subtimeline-august25-title": "Ideation & Data Collection",
+    "subtimeline-august25-content": "Initial brainstorming sessions, concept development, and comprehensive data collection and cleaning to build our foundational dataset.",
     
-    "subtimeline-october-date": "October 2025",
-    "subtimeline-october-title": "Machine Learning Development",
-    "subtimeline-october-content": "Built and tested multiple ML models to find the optimal solution for developing our mental health assessment tool, focusing on accuracy and user experience.",
+    "subtimeline-october25-date": "October 2025",
+    "subtimeline-october25-title": "Machine Learning Development",
+    "subtimeline-october25-content": "Built and tested multiple ML models to find the optimal solution for developing our mental health assessment tool, focusing on accuracy and user experience.",
     
-    "subtimeline-november-date": "November 2025",
-    "subtimeline-november-title": "Platform Development",
-    "subtimeline-november-content": "Integrated the ML models into a user-friendly web platform, focusing on intuitive design and accessibility for all users.",
+    "subtimeline-november25-date": "November 2025",
+    "subtimeline-november25-title": "Platform Development",
+    "subtimeline-november25-content": "Integrated the ML models into a user-friendly web platform, focusing on intuitive design and accessibility for all users.",
     
+  "subtimeline-december25-date": "December 2025",
+"subtimeline-december25-title": "Global Expansion & Localization",
+"subtimeline-december25-content": "Launched multilingual support to break down language barriers, ensuring that mental health resources are accessible and culturally resonant for a diverse global community.",
+
     "timeline-now-year": "Now",
     "timeline-now-title": "A Community of Hope",
     "timeline-now-content": "Mentivio is my promise that no one should face their mental health journey alone. Born from personal experience, it's a platform built with compassion and understanding for anyone seeking support.",

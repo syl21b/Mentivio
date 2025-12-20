@@ -950,18 +950,22 @@
     "timeline-2025-title": "Construyendo con Propósito",
     "timeline-2025-content": "Comencé a colaborar con profesionales de la salud mental para crear herramientas que cierren la brecha entre la atención clínica y las luchas cotidianas. Nuestro objetivo era simple: hacer que el apoyo de salud mental sea accesible para todos, independientemente de sus circunstancias.",
     
-    "subtimeline-august-date": "Agosto 2025",
-    "subtimeline-august-title": "Ideación y Recopilación de Datos",
-    "subtimeline-august-content": "Sesiones iniciales de lluvia de ideas, desarrollo de conceptos y recopilación y limpieza integral de datos para construir nuestro conjunto de datos fundamental.",
+    "subtimeline-august25-date": "Agosto 2025",
+    "subtimeline-august25-title": "Ideación y Recopilación de Datos",
+    "subtimeline-august25-content": "Sesiones iniciales de lluvia de ideas, desarrollo de conceptos y recopilación y limpieza integral de datos para construir nuestro conjunto de datos fundamental.",
     
-    "subtimeline-october-date": "Octubre 2025",
-    "subtimeline-october-title": "Desarrollo de Aprendizaje Automático",
-    "subtimeline-october-content": "Construimos y probamos múltiples modelos de ML para encontrar la solución óptima para desarrollar nuestra herramienta de evaluación de salud mental, centrándonos en la precisión y la experiencia del usuario.",
+    "subtimeline-october25-date": "Octubre 2025",
+    "subtimeline-october25-title": "Desarrollo de Aprendizaje Automático",
+    "subtimeline-october25-content": "Construimos y probamos múltiples modelos de ML para encontrar la solución óptima para desarrollar nuestra herramienta de evaluación de salud mental, centrándonos en la precisión y la experiencia del usuario.",
     
-    "subtimeline-november-date": "Noviembre 2025",
-    "subtimeline-november-title": "Desarrollo de la Plataforma",
-    "subtimeline-november-content": "Integramos los modelos de ML en una plataforma web fácil de usar, centrándonos en el diseño intuitivo y la accesibilidad para todos los usuarios.",
+    "subtimeline-november25-date": "Noviembre 2025",
+    "subtimeline-november25-title": "Desarrollo de la Plataforma",
+    "subtimeline-november25-content": "Integramos los modelos de ML en una plataforma web fácil de usar, centrándonos en el diseño intuitivo y la accesibilidad para todos los usuarios.",
     
+    "subtimeline-december25-date": "Diciembre 2025",
+"subtimeline-december25-title": "Expansión Global y Localización",
+"subtimeline-december25-content": "Lanzamos el soporte multilingüe para eliminar las barreras idiomáticas, garantizando que los recursos de salud mental sean accesibles y culturalmente resonantes para una comunidad global diversa.",
+
     "timeline-now-year": "Ahora",
     "timeline-now-title": "Una Comunidad de Esperanza",
     "timeline-now-content": "Mentivio es mi promesa de que nadie debería enfrentar su viaje de salud mental solo. Nacido de la experiencia personal, es una plataforma construida con compasión y comprensión para cualquier persona que busque apoyo.",

@@ -4,9 +4,10 @@
   <title id="page-title">Mentivio - Mental Health Platform</title>
   <!-- Load component script with defer -->
   <script src="../frontend/js/components.js" defer></script>
-
+  <script src="../frontend/js/chatbot.js" defer></script>
     
-  <style>:root {
+  <style>
+    :root {
   --primary: #4a6fa5;    /* Calming blue */
   --primary-light: #88a4c7;
   --secondary: #7ba05b;  /* Natural green */
@@ -33,7 +34,7 @@
 
 html {
   scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -1179,7 +1180,11 @@ p, h1, h2, h3, h4, h5, h6, span:not(.btn *):not(.feature-link *):not(.resource-l
 
       document.querySelectorAll(".fade-section").forEach(sec => observer.observe(sec));
     });
+    
   </script>
 
+  
+
+  
 </body>
 </html>

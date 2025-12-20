@@ -946,18 +946,22 @@
     "timeline-2025-title": "有目的建设",
     "timeline-2025-content": "我开始与心理健康专业人士合作，创建弥合临床护理和日常斗争之间差距的工具。我们的目标很简单：使心理健康支持对每个人都可及，无论他们的情况如何。",
     
-    "subtimeline-august-date": "2025年8月",
-    "subtimeline-august-title": "构思与数据收集",
-    "subtimeline-august-content": "初始头脑风暴会议、概念开发以及全面数据收集和清理，以建立我们的基础数据集。",
+    "subtimeline-august25-date": "2025年8月",
+    "subtimeline-august25-title": "构思与数据收集",
+    "subtimeline-august25-content": "初始头脑风暴会议、概念开发以及全面数据收集和清理，以建立我们的基础数据集。",
     
-    "subtimeline-october-date": "2025年10月",
-    "subtimeline-october-title": "机器学习开发",
-    "subtimeline-october-content": "构建和测试多个ML模型，以找到开发我们的心理健康评估工具的最佳解决方案，专注于准确性和用户体验。",
+    "subtimeline-october25-date": "2025年10月",
+    "subtimeline-october25-title": "机器学习开发",
+    "subtimeline-october25-content": "构建和测试多个ML模型，以找到开发我们的心理健康评估工具的最佳解决方案，专注于准确性和用户体验。",
     
-    "subtimeline-november-date": "2025年11月",
-    "subtimeline-november-title": "平台开发",
-    "subtimeline-november-content": "将ML模型集成到用户友好的网络平台，专注于直观设计和所有用户的可访问性。",
+    "subtimeline-november25-date": "2025年11月",
+    "subtimeline-november25-title": "平台开发",
+    "subtimeline-november25-content": "将ML模型集成到用户友好的网络平台，专注于直观设计和所有用户的可访问性。",
     
+    "subtimeline-december25-date": "2025年12月",
+"subtimeline-december25-title": "全球扩张与本地化",
+"subtimeline-december25-content": "推出了多语言支持，打破语言障碍，确保全球多元化社区都能获得具有文化共鸣且易于触达的精神健康资源。",
+
     "timeline-now-year": "现在",
     "timeline-now-title": "希望社区",
     "timeline-now-content": "Mentivio是我的承诺，没有人应该独自面对他们的心理健康旅程。源于个人经验，这是一个为任何寻求支持的人建立的平台，充满同情和理解。",
