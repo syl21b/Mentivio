@@ -13,9 +13,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-setup_env.sh/
-app.log/
-load_db.ipynb/
+setup_env.sh
+app.log
+load_db.ipynb
 
 
 # Virtual Environment
