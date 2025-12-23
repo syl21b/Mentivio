@@ -87,16 +87,21 @@ class UnifiedI18n {
             .catch(() => this.createEmergencyHead());
     }
 
+    // In the createEmergencyHead method
     createEmergencyHead() {
-        // Adjust path based on current location to ensure CSS loads
         const currentPath = window.location.pathname;
-        const cssPath = currentPath.includes('/resources/') ? '../../css/nav-footer.css' : '../css/nav-footer.css';
+        const cssPath = currentPath.includes('/resources/') ? '../../css/components.css' : '../css/components.css';
         
         const emergencyHead = `
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <link rel="stylesheet" href="${cssPath}">
+            <!-- Base styles if any -->
+            <style>
+                body { margin: 0; font-family: 'Inter', sans-serif; }
+                .navbar, .footer { transition: opacity 0.3s ease; }
+            </style>
         `;
         document.head.insertAdjacentHTML('beforeend', emergencyHead);
     }
@@ -170,8 +175,9 @@ class UnifiedI18n {
         setTimeout(() => {
             this.setupLanguageSelect();
             this.setupMobileMenu();
+            this.setupNewsletterForm();
             this.setActiveNav();
-            this.updateLanguageDisplays(); // This will update displays immediately
+            this.updateLanguageDisplays();
         }, 100);
     }
 
@@ -179,7 +185,11 @@ class UnifiedI18n {
         // Update dropdown selects
         const selects = [document.getElementById('languageSelect'), document.getElementById('mobileLanguageSelect')];
         selects.forEach(sel => { 
-            if(sel) sel.value = this.currentLang; 
+            if(sel) {
+                // Ensure we're setting a string value
+                const langValue = this.currentLang.toString();
+                sel.value = langValue;
+            }
         });
         
         // Update display text with language codes
@@ -196,31 +206,21 @@ class UnifiedI18n {
         const desktopDisplay = document.querySelector('.language-display');
         const mobileDisplay = document.querySelector('.mobile-language-display');
         
-        if (desktopDisplay) desktopDisplay.textContent = displayCode;
-        if (mobileDisplay) mobileDisplay.textContent = displayCode;
-    }
-
-    updateAllLanguageDisplays(lang) {
-        const languageCodes = {
-            en: 'EN',
-            vi: 'VI',
-            es: 'ES',
-            zh: 'ZH'
-        };
-        
-        const displayCode = languageCodes[lang] || 'EN';
-        
-        // Update desktop display
-        const desktopDisplay = document.querySelector('.language-display');
-        if (desktopDisplay) desktopDisplay.textContent = displayCode;
-        
-        // Update mobile display
-        const mobileDisplay = document.querySelector('.mobile-language-display');
-        if (mobileDisplay) mobileDisplay.textContent = displayCode;
+        if (desktopDisplay) {
+            desktopDisplay.textContent = displayCode.toString();
+        }
+        if (mobileDisplay) {
+            mobileDisplay.textContent = displayCode.toString();
+        }
     }
 
     setupLanguageSelect() {
-        const handleLangChange = (e) => this.changeLanguage(e.target.value);
+        const handleLangChange = (e) => {
+            const lang = e.target.value;
+            if (lang && ['en', 'vi', 'es', 'zh'].includes(lang)) {
+                this.changeLanguage(lang);
+            }
+        };
         
         const langSelect = document.getElementById('languageSelect');
         if (langSelect) {
@@ -317,7 +317,7 @@ class UnifiedI18n {
         localStorage.setItem('preferred-language', lang);
         
         // Update UI immediately
-        this.updateLanguageDisplays(); // This should update both displays
+        this.updateLanguageDisplays();
         this.translateNavbar(lang);
         this.translateFooter(lang);
         this.applyLanguage(lang);
@@ -350,7 +350,6 @@ class UnifiedI18n {
         }, 10);
     }
 
-    // Also update the applyLanguage method to be more aggressive:
     applyLanguage(lang) {
         const page = this.getCurrentPage();
         const translations = this.translations[lang]?.[page];
@@ -369,11 +368,17 @@ class UnifiedI18n {
             if (element) {
                 try {
                     if (key === 'newsletter-placeholder' || element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                        element.placeholder = translations[key];
-                    } else if (translations[key].includes('<') && translations[key].includes('>')) {
+                        const value = translations[key];
+                        if (typeof value === 'string') {
+                            element.placeholder = value;
+                        }
+                    } else if (translations[key] && translations[key].includes('<') && translations[key].includes('>')) {
                         element.innerHTML = translations[key];
                     } else {
-                        element.textContent = translations[key];
+                        const value = translations[key];
+                        if (typeof value === 'string') {
+                            element.textContent = value;
+                        }
                     }
                 } catch (error) {
                     console.warn(`Failed to update element ${key}:`, error);
@@ -382,7 +387,10 @@ class UnifiedI18n {
                 // Try to find element by class or data attribute as fallback
                 const fallbackElement = document.querySelector(`[data-translate="${key}"]`);
                 if (fallbackElement) {
-                    fallbackElement.textContent = translations[key];
+                    const value = translations[key];
+                    if (typeof value === 'string') {
+                        fallbackElement.textContent = value;
+                    }
                 }
             }
         });
@@ -397,79 +405,95 @@ class UnifiedI18n {
         document.dispatchEvent(event);
     }
         
-    // --- UPDATED TRANSLATE NAVBAR METHOD ---
+    // FIXED translateNavbar method with debugging
     translateNavbar(lang) {
         const translations = this.getNavbarTranslations(lang);
-        if (!translations) return;
+        if (!translations) {
+            console.error('No navbar translations found for language:', lang);
+            return;
+        }
+        
+        console.log('Translating navbar with:', translations);
         
         const navLinks = document.querySelectorAll('.nav-links a');
         
-        navLinks.forEach(link => {
-            // Get the href attribute (e.g., "/home", "/about")
+        navLinks.forEach((link, index) => {
             const href = link.getAttribute('href') || '';
-            
-            // Extract page name from href (remove leading slash and .html if present)
             const pageName = href.replace(/^\/+/, '').replace('.html', '').toLowerCase();
             
-            // Match clean URLs (without .html)
+            let translationKey = '';
             if (pageName === 'home' || pageName === '') {
-                link.textContent = translations.home;
+                translationKey = 'home';
             } else if (pageName === 'prediction') {
-                link.textContent = translations.assessment;
+                translationKey = 'assessment';
             } else if (pageName === 'analogy') {
-                link.textContent = translations.visualizer;
+                translationKey = 'visualizer';
             } else if (pageName === 'resources') {
-                link.textContent = translations.resources;
+                translationKey = 'resources';
             } else if (pageName === 'about') {
-                link.textContent = translations.about;
+                translationKey = 'about';
             } else if (pageName === 'crisis-support') {
-                link.textContent = translations.crisis;
+                translationKey = 'crisis';
+            }
+            
+            if (translationKey && translations[translationKey]) {
+                const text = translations[translationKey];
+                // Ensure it's a string
+                if (typeof text === 'string') {
+                    link.textContent = text;
+                } else {
+                    console.error(`Translation for ${translationKey} is not a string:`, text);
+                    link.textContent = String(text); // Convert to string as fallback
+                }
             }
         });
         
         const logoText = document.querySelector('.logo-text');
         if (logoText && translations.logo) {
-            logoText.textContent = translations.logo;
+            const logoTextValue = translations.logo;
+            if (typeof logoTextValue === 'string') {
+                logoText.textContent = logoTextValue;
+            } else {
+                console.error('Logo translation is not a string:', logoTextValue);
+                logoText.textContent = String(logoTextValue);
+            }
         }
     }
     
-    // --- UPDATED TRANSLATE FOOTER METHOD ---
+    // FIXED translateFooter method with debugging
     translateFooter(lang) {
         const translations = this.getFooterTranslations(lang);
-        if (!translations) return;
-
-        // Translate all footer links to use clean URLs
-        const footerLinks = document.querySelectorAll('.footer a');
-        footerLinks.forEach(link => {
-            const href = link.getAttribute('href') || '';
-            const pageName = href.replace(/^\/+/, '').replace('.html', '').toLowerCase();
-            
-            if (pageName === 'home') {
-                link.textContent = translations.home;
-            } else if (pageName === 'prediction') {
-                link.textContent = translations.assessment;
-            } else if (pageName === 'analogy') {
-                link.textContent = translations.visualizer;
-            } else if (pageName === 'resources') {
-                link.textContent = translations.resources;
-            } else if (pageName === 'about') {
-                link.textContent = translations.about;
-            } else if (pageName === 'crisis-support') {
-                link.textContent = translations.crisis;
-            } else if (href.includes('contact')) {
-                link.textContent = translations.contact;
-            }
-        });
+        if (!translations) {
+            console.error('No footer translations found for language:', lang);
+            return;
+        }
         
-        // Update other footer elements with data-translate attribute
+        console.log('Translating footer with:', translations);
+
+        // Translate all footer elements with data-translate
         const elements = document.querySelectorAll('[data-translate]');
         elements.forEach(element => {
             const key = element.getAttribute('data-translate');
-            if (translations[key]) {
-                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                    element.placeholder = translations[key];
+            if (key && translations[key]) {
+                const value = translations[key];
+                
+                // Debug log
+                console.log(`Setting ${key} to:`, value, 'Type:', typeof value);
+                
+                if (typeof value === 'string') {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = value;
+                        element.title = value;
+                    } else if (element.tagName === 'BUTTON') {
+                        element.textContent = value;
+                    } else {
+                        element.textContent = value;
+                    }
                 } else {
-                    element.textContent = translations[key];
+                    console.error(`Translation value for ${key} is not a string:`, value);
+                    // Convert to string as fallback
+                    const stringValue = String(value);
+                    element.textContent = stringValue;
                 }
             }
         });
@@ -528,10 +552,42 @@ class UnifiedI18n {
     
     getNavbarTranslations(lang) {
         const translations = {
-            en: { home: 'Home', assessment: 'Self-Assessment', visualizer: 'Condition Visualizer', resources: 'Resources', about: 'About', crisis: 'Crisis Support', logo: 'Mentivio' },
-            vi: { home: 'Trang chủ', assessment: 'Tự Đánh Giá', visualizer: 'Trình Hiển Thị', resources: 'Tài Nguyên', about: 'Giới Thiệu', crisis: 'Hỗ Trợ Khủng Hoảng', logo: 'Mentivio' },
-            es: { home: 'Inicio', assessment: 'Autoevaluación', visualizer: 'Visualizador', resources: 'Recursos', about: 'Acerca de', crisis: 'Apoyo en Crisis', logo: 'Mentivio' },
-            zh: { home: '首页', assessment: '自我评估', visualizer: '状况可视化', resources: '资源', about: '关于我们', crisis: '危机支持', logo: 'Mentivio' }
+            en: { 
+                home: 'Home', 
+                assessment: 'Self-Assessment', 
+                visualizer: 'Condition Visualizer', 
+                resources: 'Resources', 
+                about: 'About', 
+                crisis: 'Crisis Support', 
+                logo: 'Mentivio' 
+            },
+            vi: { 
+                home: 'Trang chủ', 
+                assessment: 'Tự Đánh Giá', 
+                visualizer: 'Trình Hiển Thị', 
+                resources: 'Tài Nguyên', 
+                about: 'Giới Thiệu', 
+                crisis: 'Hỗ Trợ Khủng Hoảng', 
+                logo: 'Mentivio' 
+            },
+            es: { 
+                home: 'Inicio', 
+                assessment: 'Autoevaluación', 
+                visualizer: 'Visualizador', 
+                resources: 'Recursos', 
+                about: 'Acerca de', 
+                crisis: 'Apoyo en Crisis', 
+                logo: 'Mentivio' 
+            },
+            zh: { 
+                home: '首页', 
+                assessment: '自我评估', 
+                visualizer: '状况可视化', 
+                resources: '资源', 
+                about: '关于我们', 
+                crisis: '危机支持', 
+                logo: 'Mentivio' 
+            }
         };
         return translations[lang] || translations.en;
     }
@@ -556,11 +612,19 @@ class UnifiedI18n {
                 "contact": "Contact",
                 "copyright": "© 2025 Mentivio Mental Health Platform.",
                 "disclaimer": "This platform is for educational purposes only. Always consult healthcare professionals for medical advice.",
-                "made-by": "Create by Shin Le"
+                "made-by": "Created by Shin Le",
+                "newsletterSuccess": "Thank you for subscribing!",
+                "newsletterError": "Please enter a valid email address.",
+                "emailValidation": "Please enter a valid email address",
+                "newsletterSubscribed": "Subscribed successfully!",
+                "newsletterErrorTitle": "Subscription Error",
+                "newsletterSuccessTitle": "Success!",
+                "newsletterProcessing": "Processing...",
+                "newsletterTryAgain": "Try again"
             },
             vi: {
                 "logo": "Mentivio",
-                "footer-tagline": "Nền tảng sức khỏe tinh thần đầy lòng trắc ẩn cung cấp thông tin chi tiết thông qua tự đánh giá và giáo dục.",
+                "footer-tagline": "Một nền tảng sức khỏe tinh thần đầy lòng trắc ẩn cung cấp thông tin chi tiết thông qua tự đánh giá và giáo dục.",
                 "newsletter-title": "Cập Nhật",
                 "newsletter-description": "Nhận mẹo về sức khỏe tinh thần và cập nhật nền tảng.",
                 "newsletter-placeholder": "Email của bạn",
@@ -576,7 +640,15 @@ class UnifiedI18n {
                 "contact": "Liên Hệ",
                 "copyright": "© 2025 Nền tảng Sức khỏe Tinh thần Mentivio.",
                 "disclaimer": "Nền tảng này chỉ dành cho mục đích giáo dục. Luôn tham khảo ý kiến chuyên gia y tế để được tư vấn y tế.",
-                "made-by": "Tạo bởi Shin Le"
+                "made-by": "Tạo bởi Shin Le",
+                "newsletterSuccess": "Cảm ơn bạn đã đăng ký!",
+                "newsletterError": "Vui lòng nhập địa chỉ email hợp lệ.",
+                "emailValidation": "Vui lòng nhập địa chỉ email hợp lệ",
+                "newsletterSubscribed": "Đăng ký thành công!",
+                "newsletterErrorTitle": "Lỗi Đăng Ký",
+                "newsletterSuccessTitle": "Thành công!",
+                "newsletterProcessing": "Đang xử lý...",
+                "newsletterTryAgain": "Thử lại"
             },
             es: {
                 "logo": "Mentivio",
@@ -596,7 +668,15 @@ class UnifiedI18n {
                 "contact": "Contacto",
                 "copyright": "© 2025 Plataforma de Salud Mental Mentivio.",
                 "disclaimer": "Esta plataforma es solo con fines educativos. Siempre consulte a profesionales de la salud para obtener asesoramiento médico.",
-                "made-by": "Creado por Shin Le"
+                "made-by": "Creado por Shin Le",
+                "newsletterSuccess": "¡Gracias por suscribirte!",
+                "newsletterError": "Por favor, introduce una dirección de correo electrónico válida.",
+                "emailValidation": "Por favor, introduce una dirección de correo electrónico válida",
+                "newsletterSubscribed": "¡Suscripción exitosa!",
+                "newsletterErrorTitle": "Error de Suscripción",
+                "newsletterSuccessTitle": "¡Éxito!",
+                "newsletterProcessing": "Procesando...",
+                "newsletterTryAgain": "Intentar de nuevo"
             },
             zh: {
                 "logo": "Mentivio",
@@ -616,12 +696,21 @@ class UnifiedI18n {
                 "contact": "联系我们",
                 "copyright": "© 2025 Mentivio 心理健康平台。",
                 "disclaimer": "此平台仅供教育目的。请务必咨询医疗专业人员以获取医疗建议。",
-                "made-by": "由 Shin Le 创建"
+                "made-by": "由 Shin Le 创建",
+                "newsletterSuccess": "感谢您的订阅！",
+                "newsletterError": "请输入有效的电子邮件地址。",
+                "emailValidation": "请输入有效的电子邮件地址",
+                "newsletterSubscribed": "订阅成功！",
+                "newsletterErrorTitle": "订阅错误",
+                "newsletterSuccessTitle": "成功！",
+                "newsletterProcessing": "处理中...",
+                "newsletterTryAgain": "重试"
             }
         };
+        
         return translations[lang] || translations.en;
     }
-    
+        
     setupEventListeners() {
         document.querySelectorAll('.lang-btn').forEach(btn => {
             btn.addEventListener('click', (e) => this.changeLanguage(e.target.dataset.lang));
@@ -731,7 +820,49 @@ class UnifiedI18n {
         `;
         document.body.insertAdjacentHTML('beforeend', footerHTML);
     }
+
+    setupNewsletterForm() {
+        const newsletterForm = document.querySelector('.newsletter-box-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const emailInput = newsletterForm.querySelector('input[type="email"]');
+                const email = emailInput.value.trim();
+                
+                if (email && this.validateEmail(email)) {
+                    // Show success message in current language
+                    const successMessage = this.getTranslation('prediction.newsletterSuccess', 'Thank you for subscribing!');
+                    alert(successMessage);
+                    emailInput.value = '';
+                } else {
+                    const errorMessage = this.getTranslation('prediction.newsletterError', 'Please enter a valid email address.');
+                    alert(errorMessage);
+                }
+            });
+        }
+    }
+
+    validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    // Helper method to get translation safely
+    getTranslation(path, defaultValue = '') {
+        const parts = path.split('.');
+        let value = this.translations[this.currentLang];
+        
+        for (const part of parts) {
+            if (value && value[part] !== undefined) {
+                value = value[part];
+            } else {
+                return defaultValue;
+            }
+        }
+        return value || defaultValue;
+    }
 }
+
 
 
 // Initialize the unified system
