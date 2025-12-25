@@ -3,8 +3,16 @@
 <head>
 
   <title id = "page-title" > </title>
-
-    <script src="../js/components.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Add base tag to ensure all relative URLs work correctly -->
+    <base href="/">
+    
+    <!-- Load scripts in correct order -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+     <script src="../frontend/js/head-content.js" defer></script>
 
 <style>
     /* Consolidated CSS - matched to Home.html color scheme */
@@ -803,16 +811,16 @@
     
     // NOTE: In a real application, these alert messages would also be loaded from the JSON
     // based on the selected language, but for simplicity in this example, we keep the original text
-    // with added data-i18n attributes for the future.
+    // with added data-globalLangManager attributes for the future.
 function showExercise(exerciseType) {
-    if (!window.i18n || !window.i18n.translations) {
+    if (!window.globalLangManager || !window.globalLangManager.translations) {
         alert('Language system not ready. Please try again.');
         return;
     }
     
-    const currentLang = window.i18n.currentLang;
-    const page = window.i18n.getCurrentPage();
-    const translations = window.i18n.translations[currentLang];
+    const currentLang = window.globalLangManager.currentLang;
+    const page = window.globalLangManager.getCurrentPage();
+    const translations = window.globalLangManager.translations[currentLang];
     
     if (!translations || !translations[page] || !translations[page].exercises) {
         alert('Exercise data not available.');
@@ -831,9 +839,9 @@ function showExercise(exerciseType) {
     
 function showExercise(exerciseType) {
 
-    const currentLang = window.i18n.currentLang;
-    const page = window.i18n.getCurrentPage();
-    const translations = window.i18n.translations[currentLang];
+    const currentLang = window.globalLangManager.currentLang;
+    const page = window.globalLangManager.getCurrentPage();
+    const translations = window.globalLangManager.translations[currentLang];
     const exercises = translations[page].exercises;
     
     // Get the exercise text based on exerciseType
@@ -843,5 +851,7 @@ function showExercise(exerciseType) {
 }
 
   </script>
+
+
 </body>
 </html>

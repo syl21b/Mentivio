@@ -2,10 +2,19 @@
 <html lang="en">
 <head>
   <title id="page-title"></title>
-  <!-- Load component script with defer -->
-  <script src="../frontend/js/components.js" defer></script>
-  <script src="../frontend/js/chatbot.js" defer></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+    <!-- Add base tag to ensure all relative URLs work correctly -->
+    <base href="/">
     
+    <!-- Load scripts in correct order -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+     <script src="../frontend/js/head-content.js" defer></script>
+     
   <style>
     :root {
   --primary: #4a6fa5;    /* Calming blue */
@@ -977,10 +986,6 @@ p, h1, h2, h3, h4, h5, h6, span:not(.btn *):not(.feature-link *):not(.resource-l
 
 
 
-
-
-
-
   <!-- Hero Section -->
   <section class="hero fade-section">
     <div class="hero-content">
@@ -1175,7 +1180,7 @@ p, h1, h2, h3, h4, h5, h6, span:not(.btn *):not(.feature-link *):not(.resource-l
     </div>
   </section>
 
-  <!-- Fade + I18n Loader -->
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       // Fade-in animation observer
@@ -1190,7 +1195,7 @@ p, h1, h2, h3, h4, h5, h6, span:not(.btn *):not(.feature-link *):not(.resource-l
     
   </script>
 
-  
+
 
   
 </body>

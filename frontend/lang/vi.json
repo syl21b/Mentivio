@@ -1,5 +1,6 @@
 {
   "home": {
+    "page-title": "Mentivio - Người Bạn Đồng Hành Chăm Sóc Sức Khỏe Tinh Thần Của Bạn",
     "hero.logo": "Mentivio",
     "hero.title": "Mentivio – Điểm Tựa Bình Yên Cho Tâm Hồn",
     "hero.subtitle": "Hãy lắng nghe và thấu hiểu sức khỏe tinh thần của bạn thông qua các công cụ đánh giá an toàn, khoa học và đầy sự sẻ chia của chúng tôi.",
@@ -1013,7 +1014,7 @@
     "search-btn": "Tìm"
   },
   "analogy": {
-    "page_title": "Hình Dung Rối Loạn Tâm Trạng",
+    "page-title": "Hình Dung Rối Loạn Tâm Trạng",
     "analogy_hero_title0": "Công Cụ Mô Phỏng Trạng Thái Cảm Xúc",
     "analogy_hero_description0": "Hình dung trực quan sự khác biệt giữa Lưỡng cực I, Lưỡng cực II, Trầm cảm và Tâm trạng bình thường.",
     "analogy_disclaimer_title0": "Lưu Ý Quan Trọng",

@@ -1,5 +1,6 @@
 {
   "home": {
+    "page-title": "Mentivio - 你的心理健康伴侣",
     "hero.logo": "Mentivio",
     "hero.title": "Mentivio – 一处心灵庇护所",
     "hero.subtitle": "带着同理心迈出第一步，通过我们安全、循证的工具和资源，更好地了解您的心理健康。",
@@ -1013,7 +1014,7 @@
     "search-btn": "查找"
   },
   "analogy": {
-    "page_title": "情绪可视化器",
+    "page-title": "情绪可视化器",
     "analogy_hero_title0": "情绪状态模拟器",
     "analogy_hero_description0": "可视化双相 I 型、双相 II 型、抑郁症与正常情绪之间的差异。",
     "analogy_disclaimer_title0": "免责声明",

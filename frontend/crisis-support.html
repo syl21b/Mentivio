@@ -2,9 +2,20 @@
 <html lang="en">
 <head>
   <title id="page-title"></title>
-  <!-- Load component script with defer -->
-  <script src="../js/components.js" defer></script>
 
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+      <!-- Add base tag to ensure all relative URLs work correctly -->
+    <base href="/">
+    
+    <!-- Load scripts in correct order -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+ <script src="../frontend/js/head-content.js" defer></script>
+ 
 <style>
 :root {
   --primary: #4f46e5;
@@ -1426,6 +1437,7 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
     });
   </script>
 
-</body>
 
+
+</body>
 </html>

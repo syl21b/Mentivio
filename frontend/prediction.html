@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
   <title id="page-title"></title>
-  <script src="../js/components.js" defer></script>
-
+    <!-- Add base tag to ensure all relative URLs work correctly -->
+    <base href="/">
+    
+    <!-- Load scripts in correct order -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+ <script src="../frontend/js/head-content.js" defer></script>
+ 
   <style>/* Consolidated CSS - matched to Home.html color scheme */
 :root {
   --primary: #4a6fa5;    /* Calming blue - matches Home.html */
@@ -2355,7 +2363,7 @@ select:focus {
 class MentalHealthAssessmentSystem {
     constructor() {
         this.API_BASE_URL = window.location.origin;
-        this.currentLanguage = window.i18n?.currentLang || 'en';
+        this.currentLanguage = window.globalLangManager?.currentLang || 'en';
         this.currentPatient = null;
         this.currentQuestionIndex = 0;
         this.responses = {};
@@ -2495,50 +2503,55 @@ class MentalHealthAssessmentSystem {
     }
 
     cacheElements() {
-        // Cache all DOM elements
+        // Helper to map ID strings to DOM elements
+        const getMap = (ids) => Object.entries(ids).reduce((acc, [key, id]) => {
+            acc[key] = document.getElementById(id);
+            return acc;
+        }, {});
+
         this.elements = {
-            screens: {
-                welcome: document.getElementById('welcomeScreen'),
-                questions: document.getElementById('questionsScreen'),
-                loading: document.getElementById('loadingScreen'),
-                review: document.getElementById('reviewScreen'),
-                results: document.getElementById('resultsScreen'),
-                history: document.getElementById('historyScreen')
-            },
-            buttons: {
-                start: document.getElementById('startBtn'),
-                viewHistory: document.getElementById('viewHistoryBtn'),
-                prev: document.getElementById('prevBtn'),
-                next: document.getElementById('nextBtn'),
-                backToQuestions: document.getElementById('backToQuestionsBtn'),
-                submitFinal: document.getElementById('submitFinalBtn'),
-                login: document.getElementById('loginBtn'),
-                logout: document.getElementById('logoutBtn'),
-                backToWelcomeFromLogin: document.getElementById('backToWelcomeFromLoginBtn'),
-                backToWelcome: document.getElementById('backToWelcomeBtn')
-            },
-            questionElements: {
-                category: document.getElementById('questionCategory'),
-                text: document.getElementById('questionText'),
-                options: document.getElementById('optionsContainer'),
-                progressFill: document.getElementById('progressFill'),
-                progressText: document.getElementById('progressText')
-            },
-            reviewElements: {
-                responsesList: document.getElementById('responsesList'),
-                patientName: document.getElementById('patientName'),
-                patientNumber: document.getElementById('patientNumber'),
-                patientAge: document.getElementById('patientAge'),
-                patientGender: document.getElementById('patientGender')
-            },
-            historyElements: {
-                loginSection: document.getElementById('loginSection'),
-                patientHistorySection: document.getElementById('patientHistorySection'),
-                loginPatientName: document.getElementById('loginPatientName'),
-                loginPatientNumber: document.getElementById('loginPatientNumber'),
-                loggedInPatientNumber: document.getElementById('loggedInPatientNumber'),
-                patientHistoryList: document.getElementById('patientHistoryList')
-            }
+            screens: getMap({
+                welcome: 'welcomeScreen',
+                questions: 'questionsScreen',
+                loading: 'loadingScreen',
+                review: 'reviewScreen',
+                results: 'resultsScreen',
+                history: 'historyScreen'
+            }),
+            buttons: getMap({
+                start: 'startBtn',
+                viewHistory: 'viewHistoryBtn',
+                prev: 'prevBtn',
+                next: 'nextBtn',
+                backToQuestions: 'backToQuestionsBtn',
+                submitFinal: 'submitFinalBtn',
+                login: 'loginBtn',
+                logout: 'logoutBtn',
+                backToWelcomeFromLogin: 'backToWelcomeFromLoginBtn',
+                backToWelcome: 'backToWelcomeBtn'
+            }),
+            questionElements: getMap({
+                category: 'questionCategory',
+                text: 'questionText',
+                options: 'optionsContainer',
+                progressFill: 'progressFill',
+                progressText: 'progressText'
+            }),
+            reviewElements: getMap({
+                responsesList: 'responsesList',
+                patientName: 'patientName',
+                patientNumber: 'patientNumber',
+                patientAge: 'patientAge',
+                patientGender: 'patientGender'
+            }),
+            historyElements: getMap({
+                loginSection: 'loginSection',
+                patientHistorySection: 'patientHistorySection',
+                loginPatientName: 'loginPatientName',
+                loginPatientNumber: 'loginPatientNumber',
+                loggedInPatientNumber: 'loggedInPatientNumber',
+                patientHistoryList: 'patientHistoryList'
+            })
         };
     }
 
@@ -2578,19 +2591,79 @@ class MentalHealthAssessmentSystem {
     // UTILITY FUNCTIONS
     // ============================================
 
-    getTranslation(path, defaultValue = '') {
+// Replace the getTranslation method in MentalHealthAssessmentSystem class
+// Replace the getTranslation method in MentalHealthAssessmentSystem class
+getTranslation(path, defaultValue = '') {
+    // First check if globalLangManager exists
+    if (!window.globalLangManager) {
+        return defaultValue;
+    }
+    
+    // If globalLangManager has a t() method, use it
+    if (typeof window.globalLangManager.t === 'function') {
+        // Don't extract anything - let the t() method handle it
+        const result = window.globalLangManager.t(path, 'prediction');
+        // If the result is the same as the path, it might not have found the translation
+        if (result && result !== path) {
+            return result;
+        }
+    }
+    
+    // Fallback: manually search in translations
+    const translations = window.globalLangManager.translations || {};
+    const currentLang = this.currentLanguage;
+    
+    // Try multiple possible structures
+    let value = defaultValue;
+    
+    // Structure 1: { en: { pdf_report: {...} } }
+    if (translations[currentLang] && translations[currentLang][path]) {
+        value = translations[currentLang][path];
+    }
+    // Structure 2: { en: { pdf_report: { title: '...' } } } - nested
+    else if (translations[currentLang]) {
         const parts = path.split('.');
-        let value = window.i18n?.translations[this.currentLanguage];
+        let current = translations[currentLang];
         
         for (const part of parts) {
-            if (value && value[part] !== undefined) {
-                value = value[part];
+            if (current && current[part] !== undefined) {
+                current = current[part];
             } else {
-                return defaultValue;
+                current = null;
+                break;
             }
         }
-        return value;
+        
+        if (current !== null && typeof current === 'string') {
+            value = current;
+        }
     }
+    // Structure 3: { pdf_report: { title: '...' } } - not nested by language
+    else if (translations[path]) {
+        value = translations[path];
+    }
+    // Structure 4: { pdf_report: { title: '...' } } - nested in root
+    else {
+        const parts = path.split('.');
+        let current = translations;
+        
+        for (const part of parts) {
+            if (current && current[part] !== undefined) {
+                current = current[part];
+            } else {
+                current = null;
+                break;
+            }
+        }
+        
+        if (current !== null && typeof current === 'string') {
+            value = current;
+        }
+    }
+    
+    return value || defaultValue;
+}
+
 
     showScreen(screenElement) {
         // Hide all screens
@@ -2980,17 +3053,22 @@ class MentalHealthAssessmentSystem {
 }
 
     getTranslatedGender(genderKey) {
-        if (!genderKey) return this.getTranslation('prediction.not_provided', 'Not provided');
+        if (!genderKey) return this.getPDFTranslation('pdf_report.not_provided');
         
-        const genderMap = {
+        // Use translation system instead of hardcoded English map
+        const translationMap = {
             'Male': 'pdf_report.gender.Male',
-            'Female': 'pdf_report.gender.Female',
+            'Female': 'pdf_report.gender.Female', 
             'Other': 'pdf_report.gender.Other',
             'Prefer not to say': 'pdf_report.gender.Prefer not to say'
         };
         
-        const translationKey = genderMap[genderKey];
-        return translationKey ? this.getTranslation(translationKey, genderKey) : genderKey;
+        const translationKey = translationMap[genderKey];
+        if (translationKey) {
+            return this.getTranslation(translationKey, genderKey);
+        }
+        
+        return genderKey;
     }
 
     generatePatientInfoHTML(patientInfo) {
@@ -3781,143 +3859,232 @@ class MentalHealthAssessmentSystem {
     // ============================================
     // PDF AND DOWNLOAD
     // ============================================
-    // Add this method to the class
-    prepareDataForPDF(assessmentData) {
-        // Extract and translate all data for PDF
-        const t = this.getTranslation.bind(this);
+// ============================================
+// PDF TRANSLATION UTILITIES
+// ============================================
+
+buildPDFTranslations() {
+    const translationKeys = {
+        // Main sections
+        title: 'pdf_report.title',
+        assessment_details: 'pdf_report.assessment_details',
+        patient_info: 'pdf_report.patient_info',
+        clinical_results: 'pdf_report.clinical_results',
+        differential_diagnoses: 'pdf_report.differential_diagnoses',
+        key_responses: 'pdf_report.key_responses',
+        important_disclaimer: 'pdf_report.important_disclaimer',
+        footer: 'pdf_report.footer',
         
-        // Patient Info
-        const patientInfo = {
-            name: assessmentData.patient_info?.name || '',
-            number: assessmentData.patient_info?.number || '',
-            age: assessmentData.patient_info?.age || '',
-            gender: this.getTranslatedGender(assessmentData.patient_info?.gender)
-        };
+        // Assessment details
+        assessment_id: 'pdf_report.assessment_id',
+        assessment_started: 'pdf_report.assessment_started',
+        report_generated: 'pdf_report.report_generated',
+        assessment_timezone: 'pdf_report.assessment_timezone',
         
-        // Get diagnosis in current language
-        const primaryDiagnosis = t(`prediction.diagnosisTranslations.${assessmentData.primary_diagnosis}`) || 
-                              assessmentData.primary_diagnosis;
+        // Patient info
+        patient_name: 'pdf_report.patient_name',
+        patient_number: 'pdf_report.patient_number',
+        age: 'pdf_report.age',
+        gender_title: 'pdf_report.gender_title',
         
-        // Translate all diagnoses
-        const allDiagnoses = (assessmentData.all_diagnoses || []).map(diag => ({
-            diagnosis: t(`prediction.diagnosisTranslations.${diag.diagnosis}`) || diag.diagnosis,
-            probability: diag.probability || 0,
-            confidence_percentage: diag.confidence_percentage || 0,
-            rank: diag.rank || 0
-        }));
+        // Clinical results
+        primary_diagnosis: 'pdf_report.primary_diagnosis',
+        confidence_level: 'pdf_report.confidence_level',
+        assessment_datetime: 'pdf_report.assessment_datetime',
+        assessment_summary: 'pdf_report.assessment_summary',
         
-        // Get diagnosis description
-        const diagnosisDescription = t(`prediction.diagnosisDescriptions.${assessmentData.primary_diagnosis}`) ||
-                                  t('prediction.diagnosisDescriptions.default_description');
+        // Differential diagnoses
+        diagnosis: 'pdf_report.diagnosis',
+        probability: 'pdf_report.probability',
         
-        // Translate questions and answers from coded_responses
-        const questionsAndAnswers = [];
+        // Key responses
+        domain: 'pdf_report.domain',
+        question: 'pdf_report.question',
+        answer: 'pdf_report.answer',
         
-        if (assessmentData.coded_responses) {
-            Object.entries(assessmentData.coded_responses).forEach(([questionCode, answerCode]) => {
-                // Get question details from config
-                const questionConfig = this.assessmentConfig.questions.find(q => q.code === questionCode);
-                if (questionConfig) {
-                    // Get question text translation
-                    const questionText = t(`prediction.questions.${questionCode}`);
-                    
-                    // Get category translation
-                    const categoryText = t(`prediction.questionCategories.${questionConfig.categoryCode}`) ||
-                                      this.CODE_TO_ENGLISH.CATEGORIES[questionConfig.categoryCode];
-                    
-                    // Convert answer code to display text
-                    let answerDisplay = this.getAnswerDisplayTextForCode(answerCode, questionConfig.answerType);
-                    
-                    questionsAndAnswers.push({
-                        category: categoryText,
-                        question: questionText,
-                        answer: answerDisplay,
-                        feature: questionConfig.feature,
-                        questionCode: questionCode,
-                        answerCode: answerCode
-                    });
-                }
-            });
+        // Disclaimer
+        disclaimer_text: 'pdf_report.disclaimer_text',
+        not_provided: 'pdf_report.not_provided',
+        
+        // Timezone labels
+        timezone_labels: {
+            utc: 'pdf_report.timezone_labels.utc',
+            local_time: 'pdf_report.timezone_labels.local_time',
+            timezone: 'pdf_report.timezone_labels.timezone'
+        }
+    };
+    
+    // Build translations object recursively
+    const buildTranslations = (keys) => {
+        const result = {};
+        
+        for (const [key, value] of Object.entries(keys)) {
+            if (typeof value === 'string') {
+                result[key] = this.getTranslation(value, value);
+            } else if (typeof value === 'object' && value !== null) {
+                result[key] = buildTranslations(value);
+            }
         }
         
-        // Format dates
-        const formatDate = (dateString) => {
-            try {
-                return new Date(dateString).toLocaleDateString(this.currentLanguage, {
-                    year: 'numeric', month: 'long', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
-            } catch {
-                return dateString || t('prediction.not_provided', 'Not provided');
-            }
-        };
-        
-        const assessmentDate = formatDate(assessmentData.assessment_timestamp);
-        const reportDate = formatDate(assessmentData.timestamp);
-        
-        // Prepare complete data object for PDF
-        const pdfData = {
-            // Basic info
-            id: assessmentData.id || '',
-            timestamp: reportDate,
-            assessment_timestamp: assessmentDate,
-            timezone: assessmentData.timezone || 'UTC',
-            language: this.currentLanguage,
-            
-            // Patient info
-            patient_info: patientInfo,
-            
-            // Diagnosis results
-            primary_diagnosis: primaryDiagnosis,
-            confidence_percentage: assessmentData.confidence_percentage || 
-                                  Math.round((assessmentData.confidence || 0) * 100),
-            all_diagnoses: allDiagnoses,
-            diagnosis_description: diagnosisDescription,
-            
-            // Questions and answers
-            questions_and_answers: questionsAndAnswers,
-            
-            // PDF-specific translations
-            pdf_translations: {
-                title: t('pdf_report.title', 'MENTAL HEALTH ASSESSMENT REPORT'),
-                assessment_details: t('pdf_report.assessment_details', 'ASSESSMENT DETAILS'),
-                assessment_id: t('pdf_report.assessment_id', 'Assessment ID:'),
-                assessment_started: t('pdf_report.assessment_started', 'Assessment Started:'),
-                report_generated: t('pdf_report.report_generated', 'Report Generated:'),
-                patient_info: t('pdf_report.patient_info', 'PATIENT INFORMATION'),
-                patient_name: t('pdf_report.patient_name', 'Patient Name:'),
-                patient_number: t('pdf_report.patient_number', 'Patient Number:'),
-                age: t('pdf_report.age', 'Age:'),
-                gender_title: t('pdf_report.gender_title', 'Gender:'),
-                clinical_results: t('pdf_report.clinical_results', 'CLINICAL ASSESSMENT RESULTS'),
-                primary_diagnosis_label: t('pdf_report.primary_diagnosis', 'Primary Diagnosis:'),
-                confidence_level: t('pdf_report.confidence_level', 'Confidence Level:'),
-                assessment_datetime: t('pdf_report.assessment_datetime', 'Assessment Date & Time:'),
-                assessment_summary: t('pdf_report.assessment_summary', 'Assessment Summary:'),
-                differential_diagnoses: t('pdf_report.differential_diagnoses', 'DIFFERENTIAL DIAGNOSES'),
-                diagnosis: t('pdf_report.diagnosis', 'Diagnosis'),
-                probability: t('pdf_report.probability', 'Probability'),
-                key_responses: t('pdf_report.key_responses', 'ASSESSMENT QUESTIONS & ANSWERS'),
-                domain: t('pdf_report.domain', 'Domain'),
-                question: t('pdf_report.question', 'Question'),
-                answer: t('pdf_report.answer', 'Answer'),
-                important_disclaimer: t('pdf_report.important_disclaimer', 'IMPORTANT DISCLAIMER'),
-                disclaimer_text: t('pdf_report.disclaimer_text', 'This assessment is for informational purposes only...'),
-                footer: t('pdf_report.footer', 'Confidential Mental Health Assessment Report'),
-                not_provided: t('pdf_report.not_provided', 'Not Provided')
-            },
-            
-            // Original data for reference
-            original_data: {
-                primary_diagnosis_key: assessmentData.primary_diagnosis,
-                coded_responses: assessmentData.coded_responses,
-                confidence: assessmentData.confidence
-            }
-        };
-        
-        return pdfData;
-    }
+        return result;
+    };
+    
+    const translations = buildTranslations(translationKeys);
+    
+    // Add gender translations separately (they need special handling)
+    translations.gender = this.getGenderTranslations();
+    
+    return translations;
+}
 
+getGenderTranslations() {
+    const genderKeys = {
+        'Male': 'pdf_report.gender.Male',
+        'Female': 'pdf_report.gender.Female', 
+        'Other': 'pdf_report.gender.Other',
+        'Prefer not to say': 'pdf_report.gender.Prefer not to say'
+    };
+    
+    const translations = {};
+    for (const [key, translationKey] of Object.entries(genderKeys)) {
+        translations[key] = this.getTranslation(translationKey, key);
+    }
+    
+    return translations;
+}
+
+getTranslatedGender(genderKey) {
+    if (!genderKey) return this.getTranslation('pdf_report.not_provided', 'N/A');
+    
+    const genderTranslations = this.getGenderTranslations();
+    return genderTranslations[genderKey] || genderKey;
+}
+
+formatDateForPDF(dateString, fallbackKey = 'prediction.not_provided') {
+    if (!dateString) return this.getTranslation(fallbackKey, 'Not provided');
+    
+    try {
+        return new Date(dateString).toLocaleDateString(this.currentLanguage, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch {
+        return dateString;
+    }
+}
+
+translateDiagnosis(diagnosisKey) {
+    return this.getTranslation(
+        `prediction.diagnosisTranslations.${diagnosisKey}`,
+        diagnosisKey
+    );
+}
+
+translateDiagnosisDescription(diagnosisKey) {
+    return this.getTranslation(
+        `prediction.diagnosisDescriptions.${diagnosisKey}`,
+        this.getTranslation('prediction.diagnosisDescriptions.default_description', 'Evaluation completed successfully.')
+    );
+}
+
+translateQuestionAndAnswer(questionCode, answerCode) {
+    const questionConfig = this.assessmentConfig?.questions.find(q => q.code === questionCode);
+    if (!questionConfig) return null;
+    
+    const questionText = this.getTranslation(`prediction.questions.${questionCode}`);
+    const categoryText = this.getTranslation(
+        `prediction.questionCategories.${questionConfig.categoryCode}`,
+        this.CODE_TO_ENGLISH.CATEGORIES[questionConfig.categoryCode]
+    );
+    const answerText = this.getAnswerDisplayTextForCode(answerCode, questionConfig.answerType);
+    
+    return {
+        category: categoryText,
+        question: questionText,
+        answer: answerText,
+        feature: questionConfig.feature,
+        questionCode,
+        answerCode
+    };
+}
+
+// ============================================
+// PREPARE PDF DATA (REFACTORED)
+// ============================================
+
+prepareDataForPDF(assessmentData) {
+    // Build patient info with translated gender
+    const patientInfo = {
+        name: assessmentData.patient_info?.name || '',
+        number: assessmentData.patient_info?.number || '',
+        age: assessmentData.patient_info?.age || '',
+        gender: this.getTranslatedGender(assessmentData.patient_info?.gender)
+    };
+    
+    // Translate primary diagnosis
+    const primaryDiagnosis = this.translateDiagnosis(assessmentData.primary_diagnosis);
+    const diagnosisDescription = this.translateDiagnosisDescription(assessmentData.primary_diagnosis);
+    
+    // Translate all diagnoses
+    const allDiagnoses = (assessmentData.all_diagnoses || []).map(diag => ({
+        diagnosis: this.translateDiagnosis(diag.diagnosis),
+        probability: diag.probability || 0,
+        confidence_percentage: diag.confidence_percentage || 0,
+        rank: diag.rank || 0
+    }));
+    
+    // Translate questions and answers
+    const questionsAndAnswers = [];
+    if (assessmentData.coded_responses) {
+        Object.entries(assessmentData.coded_responses).forEach(([questionCode, answerCode]) => {
+            const qa = this.translateQuestionAndAnswer(questionCode, answerCode);
+            if (qa) questionsAndAnswers.push(qa);
+        });
+    }
+    
+    // Format dates
+    const assessmentDate = this.formatDateForPDF(assessmentData.assessment_timestamp);
+    const reportDate = this.formatDateForPDF(assessmentData.timestamp);
+    
+    // Calculate confidence percentage
+    const confidencePercentage = assessmentData.confidence_percentage || 
+                               Math.round((assessmentData.confidence || 0) * 100);
+    
+    // Build complete PDF data object
+    return {
+        // Metadata
+        id: assessmentData.id || '',
+        timestamp: reportDate,
+        assessment_timestamp: assessmentDate,
+        timezone: assessmentData.timezone || 'UTC',
+        language: this.currentLanguage,
+        
+        // Patient info
+        patient_info: patientInfo,
+        
+        // Diagnosis results
+        primary_diagnosis: primaryDiagnosis,
+        confidence_percentage: confidencePercentage,
+        all_diagnoses: allDiagnoses,
+        diagnosis_description: diagnosisDescription,
+        
+        // Questions and answers
+        questions_and_answers: questionsAndAnswers,
+        
+        // Translations for PDF template
+        pdf_translations: this.buildPDFTranslations(),
+        
+        // Original data for reference
+        original_data: {
+            primary_diagnosis_key: assessmentData.primary_diagnosis,
+            coded_responses: assessmentData.coded_responses,
+            confidence: assessmentData.confidence
+        }
+    };
+}
 
     async downloadReport() {
         if (!this.currentAssessmentData) {
@@ -4127,9 +4294,9 @@ class MentalHealthAssessmentSystem {
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize after i18n is ready
+    // Initialize after globalLangManager is ready
     const initApp = () => {
-        if (!window.i18n) {
+        if (!window.globalLangManager) {
             setTimeout(initApp, 100);
             return;
         }

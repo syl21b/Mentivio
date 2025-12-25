@@ -3,9 +3,17 @@
 <head>
   
   <title id="page-title"></title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Add base tag to ensure all relative URLs work correctly -->
+    <base href="/">
     
-    <!-- Load component script with defer -->
-    <script src="../js/components.js" defer></script>
+    <!-- Load scripts in correct order -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+     <script src="../frontend/js/head-content.js" defer></script>
+  
 <style>
     /* Consolidated CSS - matched to Home.html color scheme */
     :root {
@@ -832,5 +840,7 @@
       });
     }
   </script>
+
+
 </body>
 </html>

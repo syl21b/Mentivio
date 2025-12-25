@@ -1,10 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title id="page_title"></title>
-  <!-- Load component script with defer -->
-  <script src="../js/components.js" defer></script>
+  <title id="page-title"></title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+      <!-- Add base tag to ensure all relative URLs work correctly -->
+    <base href="/">
     
+    <!-- Load scripts in correct order -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+     <script src="../frontend/js/head-content.js" defer></script>
+     
 <style>/* Consolidated CSS - matched to home.html color scheme */
 :root {
   --primary: #4a6fa5;    /* Calming blue - matches home.html */
@@ -1795,8 +1805,8 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
 
     // Helper function to get indicator text from translations
     function getIndicatorText(condition, state) {
-        if (!window.i18n || !window.i18n.translations) {
-            // Fallback to English defaults if i18n not available
+        if (!window.globalLangManager || !window.globalLangManager.translations) {
+            // Fallback to English defaults if language manager not available
             const defaults = {
                 'bipolar1': {
                     'manic': 'MANIC EPISODE',
@@ -1819,12 +1829,12 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
             return defaults[condition]?.[state] || defaults[condition]?.default || '';
         }
         
-        const currentLang = window.i18n.currentLang;
-        const translations = window.i18n.translations[currentLang]?.analogy?.analogy_conditions;
+        const translations = window.globalLangManager.translations;
+        const analogyTranslations = translations.analogy?.analogy_conditions;
         
-        if (!translations || !translations[condition]) return '';
+        if (!analogyTranslations || !analogyTranslations[condition]) return '';
         
-        const conditionData = translations[condition];
+        const conditionData = analogyTranslations[condition];
         
         switch(state) {
             case 'manic':
@@ -1838,6 +1848,7 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
                 return conditionData.indicator_default0 || '';
         }
     }
+        
 
     // Conversation messages for each condition
     let bipolar1Messages = {
@@ -1858,35 +1869,60 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
     const depressionWalkers = ["🚶‍➡️", "🐌", "💤", "😴", "🛌"];
     const normalWalkers = ["🚶‍➡️", "🚶‍➡️", "🚶‍➡️", "🚶‍➡️", "🚶‍➡️"];
     
-    // Load conversation messages from i18n system
+
     const loadConversationMessages = () => {
-        if (window.i18n && window.i18n.translations) {
-            const currentLang = window.i18n.currentLang;
-            const translations = window.i18n.translations[currentLang];
+        if (window.globalLangManager && window.globalLangManager.translations) {
+            const translations = window.globalLangManager.translations;
             
             if (translations && translations.analogy && translations.analogy.analogy_conditions) {
                 const analogyConditions = translations.analogy.analogy_conditions;
                 
                 // Load Bipolar I messages
                 if (analogyConditions.bipolar1 && analogyConditions.bipolar1.conversations0) {
-                    bipolar1Messages = analogyConditions.bipolar1.conversations0;
+                    const conv = analogyConditions.bipolar1.conversations0;
+                    // Check structure - it should have manic and depressive arrays
+                    if (conv.manic && Array.isArray(conv.manic)) {
+                        bipolar1Messages.manic = conv.manic;
+                    }
+                    if (conv.depressive && Array.isArray(conv.depressive)) {
+                        bipolar1Messages.depressive = conv.depressive;
+                    }
                 }
                 
                 // Load Bipolar II messages
                 if (analogyConditions.bipolar2 && analogyConditions.bipolar2.conversations0) {
                     bipolar2Messages = analogyConditions.bipolar2.conversations0;
+                    // Ensure it's an array
+                    if (!Array.isArray(bipolar2Messages)) {
+                        bipolar2Messages = [];
+                    }
                 }
                 
                 // Load Depression messages
                 if (analogyConditions.depression && analogyConditions.depression.conversations0) {
                     depressionMessages = analogyConditions.depression.conversations0;
+                    if (!Array.isArray(depressionMessages)) {
+                        depressionMessages = [];
+                    }
                 }
                 
                 // Load Normal messages
                 if (analogyConditions.normal && analogyConditions.normal.conversations0) {
                     normalMessages = analogyConditions.normal.conversations0;
+                    if (!Array.isArray(normalMessages)) {
+                        normalMessages = [];
+                    }
                 }
+                
+                console.log('Conversation messages loaded:', {
+                    bipolar1: bipolar1Messages,
+                    bipolar2: bipolar2Messages.length,
+                    depression: depressionMessages.length,
+                    normal: normalMessages.length
+                });
             }
+        } else {
+            console.warn('Global language manager or translations not available');
         }
     };
 
@@ -2297,11 +2333,33 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
 
     // Initialize the page
     document.addEventListener('DOMContentLoaded', function() {
-        // Load conversation messages after i18n system is ready
+        console.log('Analogy page loaded');
+        
+        // Wait for language manager to be ready
+        const waitForLangManager = setInterval(() => {
+            if (window.globalLangManager && window.globalLangManager.translations) {
+                clearInterval(waitForLangManager);
+                
+
+                loadConversationMessages();
+                
+                // Set a small delay to ensure translations are applied
+                setTimeout(() => {
+                    resetAllDemos();
+                    console.log('Demos reset with translations');
+                }, 300);
+            }
+        }, 100);
+        
+        // Timeout after 3 seconds if language manager doesn't load
         setTimeout(() => {
-            loadConversationMessages();
-            resetAllDemos();
-        }, 500);
+            clearInterval(waitForLangManager);
+            if (!window.globalLangManager) {
+                console.error('Language manager not loaded after timeout');
+                // Fallback to English
+                resetAllDemos();
+            }
+        }, 3000);
         
         // Add scroll animation
         const observerOptions = {
@@ -2338,11 +2396,21 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
         
         // Listen for language changes
         document.addEventListener('languageChanged', (e) => {
-            console.log('Language changed, updating indicator texts...');
-            updateIndicatorTexts();
+            console.log('Language changed, updating analogy page...');
             loadConversationMessages();
+            // Don't reset demos automatically - let user decide
+            updateIndicatorTexts();
         });
     });
+
+    // Function to update indicator texts when language changes
+    function updateIndicatorTexts() {
+        console.log('Updating indicator texts...');
+        // Only update if demos are not running
+        if (!bipolar1Interval && !bipolar2Interval && !depressionInterval && !normalInterval) {
+            resetAllDemos();
+        }
+    }
 
     // Make functions available globally
     window.loadConversationMessages = loadConversationMessages;
@@ -2350,6 +2418,9 @@ p, h1, h2, h3, h4, span:not(.global-btn *):not(.control-btn *):not(.condition-in
     window.startAllDemos = startAllDemos;
     window.stopAllDemos = stopAllDemos;
 </script>
+
+
+
   </body>
 </html>
 

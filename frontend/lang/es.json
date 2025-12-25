@@ -1,5 +1,6 @@
 {
   "home": {
+    "page-title": "Mentivio - Tu Compañero de Bienestar Mental",
     "hero.logo": "Mentivio",
     "hero.title": "Mentivio – Un Refugio para Tu Mente",
     "hero.subtitle": "Da un paso compasivo hacia la comprensión de tu salud mental con nuestras herramientas y recursos seguros, basados en evidencia.",
@@ -1013,7 +1014,7 @@
     "search-btn": "Buscar"
   },
   "analogy": {
-    "page_title": "Visualizador de Estado de Ánimo",
+    "page-title": "Visualizador de Estado de Ánimo",
     "analogy_hero_title0": "Simulador de Estado de Ánimo",
     "analogy_hero_description0": "Visualiza la diferencia entre Bipolar I, II, Depresión y estados de ánimo normales.",
     "analogy_disclaimer_title0": "Descargo de Responsabilidad",

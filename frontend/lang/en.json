@@ -1,5 +1,6 @@
 {
   "home": {
+    "page-title": "Mentivio - Your Mental Wellness Companion",
     "hero.logo": "Mentivio",
     "hero.title": "Mentivio – A Gentle Space for Your Mind",
     "hero.subtitle": "Take a compassionate step toward understanding your mental health with our safe, evidence-based tools and resources.",
@@ -1013,7 +1014,7 @@
     "search-btn": "Find"
   },
   "analogy": {
-    "page_title": "Mood Visualizer",
+    "page-title": "Mood Visualizer",
     "analogy_hero_title0": "Mood State Simulator",
     "analogy_hero_description0": "Visualize the difference between Bipolar I, II, Depression, and Normal moods.",
     "analogy_disclaimer_title0": "Disclaimer",
