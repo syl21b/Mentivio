@@ -276,7 +276,7 @@
                     </a>
                     <p class="footer-tagline">${t.tagline}</p>
                     <div class="footer-social">
-                        <a href="https://www.facebook.com/share/1DuD1SzUFC/" class="social-link" aria-label="Facebook">
+                        <a href="https://www.facebook.com/groups/2027247394734437/" class="social-link" aria-label="Facebook">
                             <i class="fab fa-facebook-f"></i>
                         </a>
                         <a href="https://www.instagram.com/mentivio1?igsh=aTFuNjk4M254NjIy" class="social-link" aria-label="Instagram">
