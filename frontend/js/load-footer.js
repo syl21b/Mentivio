@@ -343,25 +343,47 @@
         document.head.appendChild(faLink);
     }
 
-        // Add this inside the load-footer.js IIFE
+    // Add this inside the load-footer.js IIFE
     document.addEventListener('langChanged', (e) => {
-        const newLang = e.detail.lang;
-        const t = translations[newLang] || translations.en;
+            const newLang = e.detail.lang;
+            const t = translations[newLang] || translations.en;
 
-        // Update Footer Headings
-        const headings = document.querySelectorAll('.footer-heading');
-        if (headings[0]) headings[0].textContent = t.quickLinks;
-        if (headings[1]) headings[1].textContent = t.support;
-        if (headings[2]) headings[2].textContent = t.contact;
+            // 1. Update Footer Headings
+            const headings = document.querySelectorAll('.footer-heading');
+            if (headings[0]) headings[0].textContent = t.quickLinks;
+            if (headings[1]) headings[1].textContent = t.support;
+            if (headings[2]) headings[2].textContent = t.contact;
 
-        // Update Tagline
-        const tagline = document.querySelector('.footer-tagline');
-        if (tagline) tagline.textContent = t.tagline;
-        
-        // Update Copyright
-        const copyright = document.querySelector('.footer-copyright');
-        if (copyright) copyright.textContent = t.copyright;
-    });
+            // 2. Update the Quick Links section
+            const quickLinks = document.querySelectorAll('.footer-section')[1].querySelectorAll('.footer-link');
+            if (quickLinks.length >= 4) {
+                quickLinks[0].innerHTML = `<i class="fas fa-home"></i> ${t.home}`;
+                quickLinks[1].innerHTML = `<i class="fas fa-clipboard-check"></i> ${t.assessment}`;
+                quickLinks[2].innerHTML = `<i class="fas fa-eye"></i> ${t.visualizer}`;
+                quickLinks[3].innerHTML = `<i class="fas fa-info-circle"></i> ${t.about}`;
+            }
+
+            // 3. Update the Support section links
+            const supportLinks = document.querySelectorAll('.footer-section')[2].querySelectorAll('.footer-link');
+            if (supportLinks.length >= 4) {
+                supportLinks[0].innerHTML = `<i class="fas fa-life-ring"></i> ${t.crisis}`;
+                supportLinks[1].innerHTML = `<i class="fas fa-book"></i> ${t.resources}`;
+                supportLinks[2].innerHTML = `<i class="fas fa-shield-alt"></i> ${t.privacy}`;
+                supportLinks[3].innerHTML = `<i class="fas fa-file-contract"></i> ${t.terms}`;
+            }
+
+            // 4. Update Tagline, Copyright, and Contact
+            const tagline = document.querySelector('.footer-tagline');
+            if (tagline) tagline.textContent = t.tagline;
+            
+            const copyright = document.querySelector('.footer-copyright');
+            if (copyright) copyright.textContent = t.copyright;
+
+            const contactEmail = document.querySelector('.footer-contact');
+            if (contactEmail) {
+                contactEmail.innerHTML = `<i class="fas fa-envelope" style="margin-right: 8px;"></i> ${t.email}`;
+            }
+        });
 
     // Add smooth scroll for anchor links within the footer
     document.querySelectorAll('.footer-link[href^="#"]').forEach(link => {
