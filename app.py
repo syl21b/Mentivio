@@ -2590,7 +2590,7 @@ if __name__ == '__main__':
             import sys
             sys.exit(1)
     
-    port = int(os.environ.get('PORT', 5002))
+    port = int(os.environ.get('PORT', 3000))
     debug_mode = not bool(os.environ.get('RENDER'))
     
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

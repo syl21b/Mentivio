@@ -77,10 +77,9 @@
                 z-index: 1000;
                 display: flex;
                 align-items: center;
-                background: var(--navbar-bg);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border-bottom: 1px solid var(--navbar-border);
+                backdrop-filter: blur(50px);
+                -webkit-backdrop-filter: blur(50px);
+                
             }
             
             .nav-inner {
