@@ -23,7 +23,7 @@ load_db.ipynb
 
 # Dataset files
 dataset/raw/
-*.pkl
+#*.pkl
 *.joblib
 *.model
 
