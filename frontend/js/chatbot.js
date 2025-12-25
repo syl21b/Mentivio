@@ -4,15 +4,15 @@
 document.addEventListener('DOMContentLoaded', () => {
   const CONFIG = {
     name: "Mentivio",
-    persona: "empathic_expert", // human_like, clinical_expert, wise_friend
+    persona: "empathic_expert",
     memoryDepth: 20,
     learningEnabled: true,
     useMetaphors: true,
-    empathyLevel: 9 // 1-10
+    empathyLevel: 9
   };
 
   // ================================
-  // ADVANCED NEURAL SIMULATION (Pattern Matching + Context)
+  // ADVANCED NEURAL SIMULATION
   // ================================
   class NeuralMentivio {
     constructor() {
@@ -24,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
         learnedResponses: {}
       };
       this.conversationState = {
-        phase: 'engagement', // engagement, exploration, processing, integration
+        phase: 'engagement',
         trustLevel: 0,
         emotionalTemperature: 0,
         lastEmotion: 'neutral',
         unspokenTopics: []
       };
     }
+
 
     // ================================
     // DEEP TEXT ANALYSIS
