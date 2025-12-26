@@ -1,3 +1,4 @@
+
 // ULTRA-SIMPLE INSTANT NAVBAR - FORCED FULL WIDTH
 (function() {
     // Get language IMMEDIATELY (no async)
@@ -254,6 +255,7 @@
                     padding: 16px 20px !important;
                     border-bottom: 1px solid #f3f4f6 !important;
                     transition: all 0.2s ease !important;
+                    text-align: center;
                 }
                 
                 .mentivio-mobile-link:last-child {
@@ -281,37 +283,6 @@
                     .mentivio-mobile-link {
                         color: #e5e7eb !important;
                         border-bottom: 1px solid #1e293b !important;
-                    }
-                }
-                
-                /* Mobile language selector */
-                .mentivio-mobile-language {
-                    padding: 16px 20px !important;
-                    border-bottom: 1px solid #f3f4f6 !important;
-                }
-                
-                @media (prefers-color-scheme: dark) {
-                    .mentivio-mobile-language {
-                        border-bottom: 1px solid #1e293b !important;
-                    }
-                }
-                
-                .mentivio-mobile-language-select {
-                    width: 100% !important;
-                    padding: 12px 16px !important;
-                    background: rgba(79, 70, 229, 0.1) !important;
-                    color: #4f46e5 !important;
-                    border: 1px solid rgba(79, 70, 229, 0.2) !important;
-                    border-radius: 8px !important;
-                    font-weight: 600 !important;
-                    font-size: 0.9rem !important;
-                    cursor: pointer !important;
-                }
-                
-                @media (prefers-color-scheme: dark) {
-                    .mentivio-mobile-language-select {
-                        background: rgba(79, 70, 229, 0.2) !important;
-                        color: #a5b4fc !important;
                     }
                 }
             }
@@ -382,16 +353,6 @@
             <a href="/resources.html" class="mentivio-mobile-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
             <a href="/about.html" class="mentivio-mobile-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
             <a href="/crisis-support.html" class="mentivio-mobile-link crisis">${t.crisis}</a>
-            
-            <!-- Mobile Language Selector -->
-            <div class="mentivio-mobile-language">
-                <select class="mentivio-mobile-language-select" id="mentivioMobileMenuLanguageSelect">
-                    <option value="en" ${currentLang === 'en' ? 'selected' : ''}>English</option>
-                    <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>Vietnamese</option>
-                    <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Spanish</option>
-                    <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>Chinese</option>
-                </select>
-            </div>
         </div>
     `;
     
@@ -449,23 +410,6 @@
             }
         };
     });
-
-    // Mobile menu language selector
-    const mobileMenuLanguageSelect = document.getElementById('mentivioMobileMenuLanguageSelect');
-    if (mobileMenuLanguageSelect) {
-        mobileMenuLanguageSelect.onchange = function() {
-            const lang = this.value;
-            
-            if (window.globalLangManager) {
-                window.globalLangManager.changeLanguage(lang);
-            } else {
-                localStorage.setItem('preferred-language', lang);
-                const url = new URL(window.location);
-                url.searchParams.set('lang', lang);
-                window.location.href = url.toString();
-            }
-        };
-    }
 
     // Language change event listener
     document.addEventListener('langChanged', (e) => {
