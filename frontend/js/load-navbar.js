@@ -330,10 +330,10 @@
                     <!-- Mobile Language (abbreviation only) -->
                     <div class="mentivio-language-wrapper">
                         <select class="mentivio-language-select mentivio-mobile-language-select" id="mentivioMobileLanguageSelect">
-                            <option value="en" ${currentLang === 'en' ? 'selected' : ''}>EN</option>
-                            <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>VI</option>
-                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>ES</option>
-                            <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>ZH</option>
+                            <option value="en" ${currentLang === 'en' ? 'selected' : ''}>English</option>
+                            <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>Vietnamese</option>
+                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Spanish</option>
+                            <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>Chinese</option>
                         </select>
                         <div class="mentivio-language-display">${langDisplay}</div>
                     </div>
