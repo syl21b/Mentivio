@@ -41,7 +41,7 @@ class GlobalLanguageManager {
             if (!response.ok) {
                 throw new Error(`Failed to load translations: ${response.status}`);
             }
-            this.translations = await response.json();
+            this.translations = await response.json();  // <-- This loads the entire JSON file
             console.log(`Loaded translations for ${this.currentLang}:`, this.translations);
         } catch (error) {
             console.error('Failed to load translations:', error);
@@ -171,6 +171,12 @@ class GlobalLanguageManager {
         // Apply to all elements with ids that match translation keys
         Object.keys(pageTranslations).forEach(key => {
             const element = document.getElementById(key);
+            
+            // Skip if this is the "exercises" object (not a string)
+            if (key === 'exercises' && typeof pageTranslations[key] === 'object') {
+                return; // Skip, this is used by showExercise function
+            }
+            
             if (element) {
                 this.applyTranslationToElement(element, pageTranslations[key]);
             }
@@ -196,31 +202,22 @@ class GlobalLanguageManager {
             }
         });
         
-        // Update page title - FIXED VERSION
-        // First check current page translations, then app/common translations
+        // Update page title
         const titleElement = document.getElementById('page-title');
         let titleText = '';
-        
-        // Check in this order:
-        // 1. Current page translations
-        // 2. Root-level translations
-        // 3. App/common translations
         
         if (pageTranslations['page-title']) {
             titleText = pageTranslations['page-title'];
         } else if (this.translations['page-title']) {
-            // Direct root level (for shared pages)
             titleText = this.translations['page-title'];
         } else if (this.translations.app?.title) {
             titleText = this.translations.app.title;
         }
         
-        // Apply the title if found
         if (titleText && titleElement) {
             titleElement.textContent = titleText;
             document.title = titleText;
         } else if (titleElement) {
-            // Keep existing text if no translation found
             document.title = titleElement.textContent || document.title;
         }
         

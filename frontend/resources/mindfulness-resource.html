@@ -802,55 +802,46 @@
     </div>
   </div>
 
-  <script>
+<script>
     function scrollToSection(sectionId) {
       document.getElementById(sectionId).scrollIntoView({
         behavior: 'smooth'
       });
     }
     
-    // NOTE: In a real application, these alert messages would also be loaded from the JSON
-    // based on the selected language, but for simplicity in this example, we keep the original text
-    // with added data-globalLangManager attributes for the future.
-function showExercise(exerciseType) {
-    if (!window.globalLangManager || !window.globalLangManager.translations) {
-        alert('Language system not ready. Please try again.');
-        return;
+    function showExercise(exerciseType) {
+        if (!window.globalLangManager || !window.globalLangManager.translations) {
+            alert('Language system not ready. Please try again.');
+            return;
+        }
+        
+        const page = window.globalLangManager.getCurrentPage();
+        const translations = window.globalLangManager.translations; // Already in current language
+        
+        console.log('Page:', page);
+        console.log('Translations:', translations);
+        console.log('Page translations:', translations[page]);
+        
+        if (!translations || !translations[page] || !translations[page].exercises) {
+            alert('Exercise data not available.');
+            console.error('Missing data:', {
+                translationsExists: !!translations,
+                pageTranslationsExists: !!(translations && translations[page]),
+                exercisesExists: !!(translations && translations[page] && translations[page].exercises)
+            });
+            return;
+        }
+        
+        const exercises = translations[page].exercises;
+        
+        // Get the exercise text based on exerciseType
+        if (exercises[exerciseType]) {
+            alert(exercises[exerciseType]);
+        } else {
+            alert('Exercise not found: ' + exerciseType);
+        }
     }
-    
-    const currentLang = window.globalLangManager.currentLang;
-    const page = window.globalLangManager.getCurrentPage();
-    const translations = window.globalLangManager.translations[currentLang];
-    
-    if (!translations || !translations[page] || !translations[page].exercises) {
-        alert('Exercise data not available.');
-        return;
-    }
-    
-    const exercises = translations[page].exercises;
-    
-    // Get the exercise text based on exerciseType
-    if (exercises[exerciseType]) {
-        alert(exercises[exerciseType]);
-    } else {
-        alert('Exercise not found');
-    }
-}
-    
-function showExercise(exerciseType) {
-
-    const currentLang = window.globalLangManager.currentLang;
-    const page = window.globalLangManager.getCurrentPage();
-    const translations = window.globalLangManager.translations[currentLang];
-    const exercises = translations[page].exercises;
-    
-    // Get the exercise text based on exerciseType
-    if (exercises[exerciseType]) {
-        alert(exercises[exerciseType]);
-}
-}
-
-  </script>
+</script>
 
 
 </body>

@@ -2263,7 +2263,7 @@ def generate_pdf_report():
             [pdf_translations.get('assessment_id', 'Assessment ID:'), pdf_data.get('id', 'N/A')],
             [pdf_translations.get('assessment_started', 'Assessment Started:'), pdf_data.get('assessment_timestamp', 'N/A')],
             [pdf_translations.get('report_generated', 'Report Generated:'), pdf_data.get('timestamp', 'N/A')],
-            ['Timezone:', pdf_data.get('timezone', 'UTC')]
+            [pdf_translations.get('assessment_timezone', 'Timezone:'), pdf_data.get('timezone', 'UTC')]
         ]
         
         meta_table = Table(meta_data, colWidths=[2*inch, 4*inch])
@@ -2316,7 +2316,7 @@ def generate_pdf_report():
         confidence = confidence_percentage
         
         diagnosis_data = [
-            [pdf_translations.get('primary_diagnosis_label', 'Primary Diagnosis:'), primary_diagnosis],
+            [pdf_translations.get('primary_diagnosis', 'Primary Diagnosis:'), primary_diagnosis],
             [pdf_translations.get('confidence_level', 'Confidence Level:'), f"{confidence:.1f}%"],
             [pdf_translations.get('assessment_datetime', 'Assessment Date & Time:'), pdf_data.get('timestamp', 'N/A')]
         ]
