@@ -1296,7 +1296,9 @@ def serve_html_page(page_name):
         'prediction': 'prediction.html',
         'resources': 'resources.html',
         'crisis-support': 'crisis-support.html',
-        'relief_techniques': 'relief_techniques.html'
+        'relief_techniques': 'relief_techniques.html',
+        'privacy': 'privacy.html',
+        'terms': 'terms.html'
     }
     
     if page_name in main_pages:

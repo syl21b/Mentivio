@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title"></title>
+    <base href="/">
+    
+    <!-- Load scripts -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+     <script src="../frontend/js/head-content.js" defer></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #7c3aed;
+            --primary-dark: #4338ca;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--gray-800);
+            background: var(--gray-50);
+            min-height: 100vh;
+        }
+        
+        .terms-container {
+            max-width: min(95%, 800px);
+            margin: 0 auto;
+            padding: 4rem 1.5rem 6rem;
+        }
+        
+        .terms-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .terms-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .terms-header p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .last-updated {
+            background: var(--primary);
+            color: white;
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .terms-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .section h2 i {
+            font-size: 1.3rem;
+        }
+        
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+        
+        .section ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .section li {
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .important-note {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            border: 2px solid var(--warning);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: var(--radius);
+            position: relative;
+        }
+        
+        .important-note:before {
+            content: '⚠️';
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: white;
+            padding: 0 10px;
+            font-size: 1.2rem;
+        }
+        
+        .important-note strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .agreement-box {
+            background: var(--gray-50);
+            border: 2px solid var(--primary-light);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin: 2.5rem 0;
+            text-align: center;
+        }
+        
+        .agreement-box h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .agreement-box p {
+            font-style: italic;
+            color: var(--gray-600);
+        }
+        
+        .clause {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .clause h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .contact-section {
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-top: 3rem;
+            text-align: center;
+        }
+        
+        .contact-section h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .contact-section a {
+            color: var(--primary);
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .terms-container {
+                padding: 2rem 1rem 4rem;
+            }
+            
+            .terms-header h1 {
+                font-size: 2rem;
+            }
+            
+            .terms-content {
+                padding: 1.5rem;
+            }
+            
+            .section h2 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .terms-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .terms-content {
+                padding: 1.25rem;
+            }
+            
+            .clause {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar will be loaded here -->
+    
+    <div class="terms-container">
+        <div class="terms-header">
+            <h1 id="terms-title"></h1>
+            <p id="terms-subtitle"></p>
+            <div class="last-updated" id="terms-effective-date"></div>
+        </div>
+        
+        <div class="terms-content">
+            <!-- Agreement Box -->
+            <div class="agreement-box" id="agreement-section">
+                <h3 id="agreement-heading"></h3>
+                <p id="agreement-content"></p>
+            </div>
+            
+            <!-- Medical Disclaimer -->
+            <div class="important-note" id="medical-disclaimer">
+                <strong id="disclaimer-title"></strong>
+                <p id="disclaimer-content"></p>
+            </div>
+            
+            <!-- Section 1: Service Purpose -->
+            <div class="section" id="section-purpose">
+                <h2><i class="fas fa-heart"></i> <span id="section-purpose-heading"></span></h2>
+                <p id="section-purpose-content"></p>
+                <ul id="section-purpose-list">
+                    <li id="section-purpose-list-item-1"></li>
+                    <li id="section-purpose-list-item-2"></li>
+                    <li id="section-purpose-list-item-3"></li>
+                    <li id="section-purpose-list-item-4"></li>
+                </ul>
+            </div>
+            
+            <!-- Clause 1: Appropriate Use -->
+            <div class="clause" id="clause-appropriate-use">
+                <h4 id="clause-appropriate-use-heading"></h4>
+                <p id="clause-appropriate-use-content"></p>
+            </div>
+            
+            <!-- Clause 2: Age Requirements -->
+            <div class="clause" id="clause-age-requirements">
+                <h4 id="clause-age-requirements-heading"></h4>
+                <p id="clause-age-requirements-content"></p>
+            </div>
+            
+            <!-- Section 2: Your Responsibilities -->
+            <div class="section" id="section-responsibilities">
+                <h2><i class="fas fa-shield-alt"></i> <span id="section-responsibilities-heading"></span></h2>
+                <p id="section-responsibilities-content"></p>
+                <ul id="section-responsibilities-list">
+                    <li id="section-responsibilities-list-item-1"></li>
+                    <li id="section-responsibilities-list-item-2"></li>
+                    <li id="section-responsibilities-list-item-3"></li>
+                    <li id="section-responsibilities-list-item-4"></li>
+                </ul>
+            </div>
+            
+            <!-- Section 3: Intellectual Property -->
+            <div class="section" id="section-intellectual-property">
+                <h2><i class="fas fa-brain"></i> <span id="section-intellectual-property-heading"></span></h2>
+                <p id="section-intellectual-property-content-allowed"></p>
+                <ul id="section-intellectual-property-list-allowed">
+                    <li id="section-intellectual-property-list-allowed-item-1"></li>
+                    <li id="section-intellectual-property-list-allowed-item-2"></li>
+                    <li id="section-intellectual-property-list-allowed-item-3"></li>
+                </ul>
+                <p id="section-intellectual-property-content-not-allowed"></p>
+                <ul id="section-intellectual-property-list-not-allowed">
+                    <li id="section-intellectual-property-list-not-allowed-item-1"></li>
+                    <li id="section-intellectual-property-list-not-allowed-item-2"></li>
+                    <li id="section-intellectual-property-list-not-allowed-item-3"></li>
+                </ul>
+            </div>
+            
+            <!-- Section 4: Limitations of Liability -->
+            <div class="section" id="section-liability">
+                <h2><i class="fas fa-balance-scale"></i> <span id="section-liability-heading"></span></h2>
+                <p id="section-liability-content"></p>
+                <ul id="section-liability-list">
+                    <li id="section-liability-list-item-1"></li>
+                    <li id="section-liability-list-item-2"></li>
+                    <li id="section-liability-list-item-3"></li>
+                    <li id="section-liability-list-item-4"></li>
+                </ul>
+            </div>
+            
+            <!-- Section 5: Service Changes -->
+            <div class="section" id="section-service-changes">
+                <h2><i class="fas fa-sync-alt"></i> <span id="section-service-changes-heading"></span></h2>
+                <p id="section-service-changes-content-changes"></p>
+                <ul id="section-service-changes-list-changes">
+                    <li id="section-service-changes-list-changes-item-1"></li>
+                    <li id="section-service-changes-list-changes-item-2"></li>
+                    <li id="section-service-changes-list-changes-item-3"></li>
+                </ul>
+                <p id="section-service-changes-content-acceptance"></p>
+            </div>
+            
+            <!-- Section 6: Governing Law -->
+            <div class="section" id="section-governing-law">
+                <h2><i class="fas fa-globe"></i> <span id="section-governing-law-heading"></span></h2>
+                <p id="section-governing-law-content"></p>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="contact-section" id="contact-section">
+                <h3 id="contact-heading"></h3>
+                <p id="contact-content"></p>
+                <p id="contact-closing" style="margin-top: 1rem; font-size: 0.9rem; color: var(--gray-600);"></p>
+            </div>
+        </div>
+    </div>
+    
+
+</body>
+</html>

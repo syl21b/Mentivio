@@ -2507,26 +2507,26 @@ class MentalHealthAssessmentSystem {
     // ============================================
     // INITIALIZATION
     // ============================================
-// Add scroll behavior to hide/show mobile nav
-setupMobileNavScroll() {
-    let lastScrollTop = 0;
-    const mobileNav = document.querySelector('.mobile-nav');
-    const mobileNavHeight = mobileNav ? mobileNav.offsetHeight : 70;
-    
-    window.addEventListener('scroll', () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    // Add scroll behavior to hide/show mobile nav
+    setupMobileNavScroll() {
+        let lastScrollTop = 0;
+        const mobileNav = document.querySelector('.mobile-nav');
+        const mobileNavHeight = mobileNav ? mobileNav.offsetHeight : 70;
         
-        if (scrollTop > lastScrollTop && scrollTop > 100) {
-            // Scrolling down - hide nav
-            mobileNav.style.transform = 'translateY(100%)';
-        } else {
-            // Scrolling up - show nav
-            mobileNav.style.transform = 'translateY(0)';
-        }
-        
-        lastScrollTop = scrollTop;
-    }, { passive: true });
-}
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                // Scrolling down - hide nav
+                mobileNav.style.transform = 'translateY(100%)';
+            } else {
+                // Scrolling up - show nav
+                mobileNav.style.transform = 'translateY(0)';
+            }
+            
+            lastScrollTop = scrollTop;
+        }, { passive: true });
+    }
 
     init() {
         this.cacheElements();

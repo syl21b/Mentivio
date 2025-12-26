@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title"></title>
+    <base href="/">
+    
+    <!-- Load scripts -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/main.js" defer></script>
+     <script src="../frontend/js/head-content.js" defer></script>
+    
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #7c3aed;
+            --primary-dark: #4338ca;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --radius: 12px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--gray-800);
+            background: var(--gray-50);
+            min-height: 100vh;
+        }
+        
+        .policy-container {
+            max-width: min(95%, 800px);
+            margin: 0 auto;
+            padding: 4rem 1.5rem 6rem;
+        }
+        
+        .policy-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        
+        .policy-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .policy-header p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .last-updated {
+            background: var(--primary-light);
+            color: white;
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .policy-content {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section {
+            margin-bottom: 2.5rem;
+        }
+        
+        .section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--gray-100);
+        }
+        
+        .section p {
+            margin-bottom: 1rem;
+            color: var(--gray-700);
+        }
+        
+        .section ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .section li {
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .highlight-box {
+            background: var(--gray-50);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 var(--radius) var(--radius) 0;
+        }
+        
+        .highlight-box strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-info {
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            margin-top: 3rem;
+            text-align: center;
+        }
+        
+        .contact-info h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .contact-info a {
+            color: white;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .policy-container {
+                padding: 2rem 1rem 4rem;
+            }
+            
+            .policy-header h1 {
+                font-size: 2rem;
+            }
+            
+            .policy-content {
+                padding: 1.5rem;
+            }
+            
+            .section h2 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .policy-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .policy-content {
+                padding: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar will be loaded here -->
+    
+    <div class="policy-container">
+        <div class="policy-header">
+            <h1 id="privacy-title"></h1>
+            <p id="privacy-subtitle"></p>
+            <div class="last-updated" id="privacy-last-updated"></div>
+        </div>
+        
+        <div class="policy-content">
+            <!-- Section 1: Our Commitment -->
+            <div class="section" id="section-commitment">
+                <h2 id="section-commitment-heading"></h2>
+                <p id="section-commitment-content"></p>
+            </div>
+            
+            <!-- Section 2: Information We Collect -->
+            <div class="section" id="section-information-collected">
+                <h2 id="section-information-collected-heading"></h2>
+                <p id="section-information-collected-content"></p>
+                <ul id="section-information-collected-list">
+                    <li id="section-information-collected-list-item-1"><strong id="section-information-collected-list-item-1-strong"></strong> <span id="section-information-collected-list-item-1-text"></span></li>
+                    <li id="section-information-collected-list-item-2"><strong id="section-information-collected-list-item-2-strong"></strong> <span id="section-information-collected-list-item-2-text"></span></li>
+                    <li id="section-information-collected-list-item-3"><strong id="section-information-collected-list-item-3-strong"></strong> <span id="section-information-collected-list-item-3-text"></span></li>
+                    <li id="section-information-collected-list-item-4"><strong id="section-information-collected-list-item-4-strong"></strong> <span id="section-information-collected-list-item-4-text"></span></li>
+                </ul>
+            </div>
+            
+            <!-- Important Note -->
+            <div class="highlight-box" id="important-note">
+                <strong id="important-note-title"></strong> 
+                <span id="important-note-content"></span>
+            </div>
+            
+            <!-- Section 3: How We Use Information -->
+            <div class="section" id="section-information-use">
+                <h2 id="section-information-use-heading"></h2>
+                <p id="section-information-use-content"></p>
+                <ul id="section-information-use-list">
+                    <li id="section-information-use-list-item-1"></li>
+                    <li id="section-information-use-list-item-2"></li>
+                    <li id="section-information-use-list-item-3"></li>
+                    <li id="section-information-use-list-item-4"></li>
+                    <li id="section-information-use-list-item-5"></li>
+                </ul>
+            </div>
+            
+            <!-- Section 4: Data Security -->
+            <div class="section" id="section-security">
+                <h2 id="section-security-heading"></h2>
+                <p id="section-security-content"></p>
+                <ul id="section-security-list">
+                    <li id="section-security-list-item-1"><strong id="section-security-list-item-1-strong"></strong> <span id="section-security-list-item-1-text"></span></li>
+                    <li id="section-security-list-item-2"><strong id="section-security-list-item-2-strong"></strong> <span id="section-security-list-item-2-text"></span></li>
+                    <li id="section-security-list-item-3"><strong id="section-security-list-item-3-strong"></strong> <span id="section-security-list-item-3-text"></span></li>
+                    <li id="section-security-list-item-4"><strong id="section-security-list-item-4-strong"></strong> <span id="section-security-list-item-4-text"></span></li>
+                </ul>
+            </div>
+            
+            <!-- Section 5: Your Rights -->
+            <div class="section" id="section-rights">
+                <h2 id="section-rights-heading"></h2>
+                <p id="section-rights-content"></p>
+                <ul id="section-rights-list">
+                    <li id="section-rights-list-item-1"></li>
+                    <li id="section-rights-list-item-2"></li>
+                    <li id="section-rights-list-item-3"></li>
+                    <li id="section-rights-list-item-4"></li>
+                    <li id="section-rights-list-item-5"></li>
+                </ul>
+            </div>
+            
+            <!-- Section 6: Limitations -->
+            <div class="section" id="section-limitations">
+                <h2 id="section-limitations-heading"></h2>
+                <p id="section-limitations-content"></p>
+                <ul id="section-limitations-list">
+                    <li id="section-limitations-list-item-1"></li>
+                    <li id="section-limitations-list-item-2"></li>
+                    <li id="section-limitations-list-item-3"></li>
+                </ul>
+            </div>
+            
+            <!-- Contact Section -->
+            <div class="contact-info" id="contact-section">
+                <h3 id="contact-heading"></h3>
+                <p id="contact-content"></p>
+            </div>
+        </div>
+    </div>
+    
+  
+
+</body>
+</html>

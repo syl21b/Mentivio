@@ -350,7 +350,7 @@
                     <a href="/resources.html" class="mentivio-nav-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
                     <a href="/about.html" class="mentivio-nav-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
                     <a href="/crisis-support.html" class="mentivio-nav-link crisis">${t.crisis}</a>
-                    
+
                     <!-- Desktop Language Dropdown -->
                     <div class="mentivio-language-wrapper">
                         <select class="mentivio-language-select" id="mentivioLanguageSelect">
@@ -462,7 +462,7 @@
 
         // Update desktop links
         const desktopLinks = document.querySelectorAll('.mentivio-nav-link');
-        const keys = ['home', 'assessment', 'visualizer', 'resources', 'about', 'crisis'];
+        const keys = ['home', 'assessment', 'visualizer', 'resources', 'about', 'crisis', 'privacy', 'terms'];
         desktopLinks.forEach((link, index) => {
             if (keys[index]) link.textContent = t[keys[index]];
         });
