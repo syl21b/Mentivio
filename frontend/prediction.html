@@ -4017,76 +4017,80 @@ translateQuestionAndAnswer(questionCode, answerCode) {
 // PREPARE PDF DATA (REFACTORED)
 // ============================================
 
-prepareDataForPDF(assessmentData) {
-    // Build patient info with translated gender
-    const patientInfo = {
-        name: assessmentData.patient_info?.name || '',
-        number: assessmentData.patient_info?.number || '',
-        age: assessmentData.patient_info?.age || '',
-        gender: this.getTranslatedGender(assessmentData.patient_info?.gender)
-    };
-    
-    // Translate primary diagnosis
-    const primaryDiagnosis = this.translateDiagnosis(assessmentData.primary_diagnosis);
-    const diagnosisDescription = this.translateDiagnosisDescription(assessmentData.primary_diagnosis);
-    
-    // Translate all diagnoses
-    const allDiagnoses = (assessmentData.all_diagnoses || []).map(diag => ({
-        diagnosis: this.translateDiagnosis(diag.diagnosis),
-        probability: diag.probability || 0,
-        confidence_percentage: diag.confidence_percentage || 0,
-        rank: diag.rank || 0
-    }));
-    
-    // Translate questions and answers
-    const questionsAndAnswers = [];
-    if (assessmentData.coded_responses) {
-        Object.entries(assessmentData.coded_responses).forEach(([questionCode, answerCode]) => {
-            const qa = this.translateQuestionAndAnswer(questionCode, answerCode);
-            if (qa) questionsAndAnswers.push(qa);
-        });
-    }
-    
-    // Format dates
-    const assessmentDate = this.formatDateForPDF(assessmentData.assessment_timestamp);
-    const reportDate = this.formatDateForPDF(assessmentData.timestamp);
-    
-    // Calculate confidence percentage
-    const confidencePercentage = assessmentData.confidence_percentage || 
-                               Math.round((assessmentData.confidence || 0) * 100);
-    
-    // Build complete PDF data object
-    return {
-        // Metadata
-        id: assessmentData.id || '',
-        timestamp: reportDate,
-        assessment_timestamp: assessmentDate,
-        timezone: assessmentData.timezone || 'UTC',
-        language: this.currentLanguage,
+    prepareDataForPDF(assessmentData) {
+        // Build patient info with translated gender
+        const patientInfo = {
+            name: assessmentData.patient_info?.name || '',
+            number: assessmentData.patient_info?.number || '',
+            age: assessmentData.patient_info?.age || '',
+            gender: this.getTranslatedGender(assessmentData.patient_info?.gender)
+        };
         
-        // Patient info
-        patient_info: patientInfo,
+        // Translate primary diagnosis
+        const primaryDiagnosis = this.translateDiagnosis(assessmentData.primary_diagnosis);
+        const diagnosisDescription = this.translateDiagnosisDescription(assessmentData.primary_diagnosis);
         
-        // Diagnosis results
-        primary_diagnosis: primaryDiagnosis,
-        confidence_percentage: confidencePercentage,
-        all_diagnoses: allDiagnoses,
-        diagnosis_description: diagnosisDescription,
+        // Translate all diagnoses
+        const allDiagnoses = (assessmentData.all_diagnoses || []).map(diag => ({
+            diagnosis: this.translateDiagnosis(diag.diagnosis),
+            probability: diag.probability || 0,
+            confidence_percentage: diag.confidence_percentage || 0,
+            rank: diag.rank || 0
+        }));
         
-        // Questions and answers
-        questions_and_answers: questionsAndAnswers,
-        
-        // Translations for PDF template
-        pdf_translations: this.buildPDFTranslations(),
-        
-        // Original data for reference
-        original_data: {
-            primary_diagnosis_key: assessmentData.primary_diagnosis,
-            coded_responses: assessmentData.coded_responses,
-            confidence: assessmentData.confidence
+        // Translate questions and answers
+        const questionsAndAnswers = [];
+        if (assessmentData.coded_responses) {
+            Object.entries(assessmentData.coded_responses).forEach(([questionCode, answerCode]) => {
+                const qa = this.translateQuestionAndAnswer(questionCode, answerCode);
+                if (qa) questionsAndAnswers.push(qa);
+            });
         }
-    };
-}
+        
+        // Format dates
+        const assessmentDate = this.formatDateForPDF(assessmentData.assessment_timestamp);
+        const reportDate = this.formatDateForPDF(assessmentData.timestamp);
+        
+        // Calculate confidence percentage
+        const confidencePercentage = assessmentData.confidence_percentage || 
+                                  Math.round((assessmentData.confidence || 0) * 100);
+        
+        // Get the assessment ID - FIX HERE
+        const assessmentId = assessmentData.id || assessmentData.assessment_id || '';
+        
+        // Build complete PDF data object
+        return {
+            // Metadata - ADD ID HERE
+            id: assessmentId,
+            timestamp: reportDate,
+            assessment_timestamp: assessmentDate,
+            timezone: assessmentData.timezone || 'UTC',
+            language: this.currentLanguage,
+            
+            // Patient info
+            patient_info: patientInfo,
+            
+            // Diagnosis results
+            primary_diagnosis: primaryDiagnosis,
+            confidence_percentage: confidencePercentage,
+            all_diagnoses: allDiagnoses,
+            diagnosis_description: diagnosisDescription,
+            
+            // Questions and answers
+            questions_and_answers: questionsAndAnswers,
+            
+            // Translations for PDF template
+            pdf_translations: this.buildPDFTranslations(),
+            
+            // Original data for reference
+            original_data: {
+                primary_diagnosis_key: assessmentData.primary_diagnosis,
+                coded_responses: assessmentData.coded_responses,
+                confidence: assessmentData.confidence
+            }
+        };
+    }
+
 
     async downloadReport() {
         if (!this.currentAssessmentData) {
