@@ -206,6 +206,16 @@
                     padding: 0 20px !important;
                 }
                 
+                /* Reduce navbar height on mobile */
+                .mentivio-navbar {
+                    height: 60px !important;  /* Changed from 70px to 60px */
+                }
+                
+                /* Adjust body padding to match new navbar height */
+                body {
+                    padding-top: 60px !important;  /* Changed from 70px to 60px */
+                }
+                
                 /* Hide desktop links on mobile */
                 .mentivio-desktop-links {
                     display: none !important;
@@ -219,12 +229,18 @@
                 /* Show mobile menu button */
                 .mentivio-mobile-menu-btn {
                     display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    width: 40px !important;
+                    height: 40px !important;
+                    padding: 8px !important;
+                    font-size: 1.2rem !important;
                 }
                 
                 /* MOBILE DROPDOWN MENU */
                 .mentivio-mobile-menu {
                     position: fixed !important;
-                    top: 70px !important;
+                    top: 60px !important;  /* Changed from 70px to 60px */
                     left: 0 !important;
                     right: 0 !important;
                     width: 100vw !important;
@@ -292,6 +308,28 @@
                 .mentivio-navbar-inner {
                     padding: 0 16px !important;
                 }
+                
+                .mentivio-navbar {
+                    height: 55px !important;  /* Even more compact for very small screens */
+                }
+                
+                body {
+                    padding-top: 55px !important;
+                }
+                
+                .mentivio-mobile-menu {
+                    top: 55px !important;
+                }
+                
+                .mentivio-logo {
+                    font-size: 1.2rem !important;
+                }
+                
+                .mentivio-language-display {
+                    font-size: 0.8rem !important;
+                    min-width: 50px !important;
+                }
+            }
             }
         </style>
         

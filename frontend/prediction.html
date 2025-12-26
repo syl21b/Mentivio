@@ -36,6 +36,7 @@
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+  
 }
 
 * {
@@ -1341,6 +1342,22 @@ select:focus {
   opacity: 0.6;
 }
 
+@media (max-width: 768px) {
+    .container:last-child,
+    .survey-card:last-child {
+        margin-bottom: var(--mobile-nav-height) !important;
+    }
+    
+    .footer-container {
+        position: relative;
+        z-index: 999;
+    }
+    
+    .mobile-nav {
+        z-index: 1000;
+    }
+}
+
 /* Responsive adjustments for hints */
 @media (max-width: 768px) {
   .validation-hint,
@@ -2490,6 +2507,26 @@ class MentalHealthAssessmentSystem {
     // ============================================
     // INITIALIZATION
     // ============================================
+// Add scroll behavior to hide/show mobile nav
+setupMobileNavScroll() {
+    let lastScrollTop = 0;
+    const mobileNav = document.querySelector('.mobile-nav');
+    const mobileNavHeight = mobileNav ? mobileNav.offsetHeight : 70;
+    
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > lastScrollTop && scrollTop > 100) {
+            // Scrolling down - hide nav
+            mobileNav.style.transform = 'translateY(100%)';
+        } else {
+            // Scrolling up - show nav
+            mobileNav.style.transform = 'translateY(0)';
+        }
+        
+        lastScrollTop = scrollTop;
+    }, { passive: true });
+}
 
     init() {
         this.cacheElements();
@@ -2502,6 +2539,8 @@ class MentalHealthAssessmentSystem {
         
         // Listen for language changes
         this.setupLanguageListener();
+        // Setup mobile nav scroll behavior
+        this.setupMobileNavScroll();
     }
 
     cacheElements() {
