@@ -3010,7 +3010,7 @@ getTranslation(path, defaultValue = '') {
                 <div class="results-meta">
                     <span>${formatDate(data.timestamp)}</span>
                     <span>•</span>
-                    <span>${this.getTranslation('prediction.assessment.id-label', 'ID:')} ${data.id || 'N/A'}</span>
+                    <span>${this.getTranslation('prediction.assessment.id-label', 'ID:')} ${data.id || data.assessment_id || 'N/A'}</span>
                 </div>
             </div>
 
