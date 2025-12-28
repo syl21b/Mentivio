@@ -1184,7 +1184,7 @@
   "app": {
     "title": "Mentivio - Mental Health Check",
     "description": "Safe, private, and clinical mental health assessment.",
-    "copyright": "© 2024 Mentivio. All rights reserved.",
+    "copyright": "© 2025 Mentivio. All rights reserved.",
     "version": "3.0"
   },
   "prediction": {
@@ -1538,7 +1538,7 @@
     "privacy": {
       "privacy-title": "Privacy Policy",
       "privacy-subtitle": "Your trust is important to us. This policy explains how we handle your information with care and respect for your privacy.",
-      "privacy-last-updated": "Last Updated: December 2024",
+      "privacy-last-updated": "Last Updated: December 2025",
       "section-commitment-heading": "Our Commitment to Your Privacy",
       "section-commitment-content": "At Mentivio, we believe that mental wellness and privacy go hand in hand. We're committed to protecting your personal information while providing meaningful support through our platform.",
       "section-information-collected-heading": "Information We Collect",
@@ -1588,7 +1588,7 @@
     "terms": {
       "terms-title": "Terms of Service",
       "terms-subtitle": "Welcome to Mentivio. By using our platform, you agree to these terms designed to protect both you and our service.",
-      "terms-effective-date": "Effective: December 2024",
+      "terms-effective-date": "Effective: December 2025",
       "agreement-heading": "Your Agreement",
       "agreement-content": "By accessing or using Mentivio, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.",
       "disclaimer-title": "Critical Medical Disclaimer",

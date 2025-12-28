@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#4a6fa5">
     <title id="page-title">About - Mentivio</title>
     
     <!-- Add base tag to ensure all relative URLs work correctly -->
@@ -16,1318 +17,1054 @@
     <script src="../frontend/js/head-content.js" defer></script>
     <script src="../frontend/js/chatbot.js" defer></script>
 
-<style>
-:root {
-  --primary: #4a6fa5;    /* Calming blue */
-  --primary-light: #88a4c7;
-  --secondary: #7ba05b;  /* Natural green */
-  --accent: #d4a5a5;     /* Soft pink */
-  --light: #f8f9fa;
-  --dark: #2c3e50;
-  --gray: #6c757d;
-  --light-gray: #e9ecef;
-  --white: #ffffff;
-  --transition: all 0.3s ease;
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-md: 10px;
-  --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
-}
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-  text-size-adjust: 100%;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  line-height: 1.6;
-  color: var(--dark);
-  background-color: var(--white);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Hero Section - Calming and Professional */
-.hero {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  min-height: 40vh;
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.02"><path fill="%234a6fa5" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
-  background-size: cover;
-  pointer-events: none;
-}
-
-.hero-content {
-  max-width: min(90%, 800px);
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-  width: 100%;
-}
-
-.hero h1 {
-  font-size: clamp(1.8rem, 5vw, 2.8rem);
-  color: var(--dark);
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
-  font-weight: 300;
-  line-height: 1.2;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.hero h1 strong {
-  font-weight: 600;
-  color: var(--primary);
-}
-
-.hero p {
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-  color: var(--gray);
-  max-width: 600px;
-  margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
-  line-height: 1.6;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.mission-statement {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--radius);
-  padding: clamp(1rem, 3vw, 1.5rem);
-  margin: clamp(1.5rem, 4vw, 2rem) auto 0;
-  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
-  font-style: italic;
-  border: 1px solid var(--light-gray);
-  max-width: min(95%, 800px);
-  line-height: 1.6;
-  color: var(--gray);
-}
-
-/* About Container */
-.about-container {
-  max-width: min(95%, 1200px);
-  margin: 0 auto;
-  padding: 0 clamp(1rem, 4vw, 2.5rem);
-}
-
-/* Content Sections - Clean Cards */
-.content-section {
-  background-color: var(--white);
-  border-radius: var(--radius);
-  padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem);
-  margin-bottom: 1.5rem;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--light-gray);
-  transition: var(--transition);
-  position: relative;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: clamp(2rem, 5vw, 3rem);
-}
-
-.section-header h2 {
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  color: var(--dark);
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
-  font-weight: 300;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.section-header p {
-  font-size: clamp(0.95rem, 2.5vw, 1.1rem);
-  color: var(--gray);
-  max-width: min(95%, 600px);
-  margin: 0 auto;
-  line-height: 1.6;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Story Timeline - Clean Cards */
-.story-timeline {
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.timeline-item {
-  margin-bottom: 2rem;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Timeline Year */
-.timeline-year {
-  background-color: var(--primary);
-  color: white;
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  position: relative;
-  z-index: 2;
-  box-shadow: var(--shadow);
-  transition: var(--transition);
-  cursor: pointer;
-  border: none;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  align-self: flex-start;
-}
-
-.timeline-year:active {
-  transform: scale(0.95);
-}
-
-/* Year content */
-.year-content {
-  background: var(--light);
-  padding: 1.5rem;
-  border-radius: var(--radius);
-  margin-bottom: 0.5rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid var(--light-gray);
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-}
-
-.year-content.collapsed {
-  max-height: 4rem;
-  opacity: 0.7;
-  padding: 0.75rem;
-}
-
-.year-content h3 {
-  color: var(--primary);
-  margin-bottom: 0.75rem;
-  font-size: 1.3rem;
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.year-content p {
-  color: var(--gray);
-  line-height: 1.6;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
-
-/* Toggle indicator */
-.toggle-indicator {
-  position: absolute;
-  right: 0.75rem;
-  top: 0.75rem;
-  color: var(--primary);
-  font-size: 0.875rem;
-  transition: transform 0.3s ease;
-  background: none;
-  border: none;
-  padding: 0.25rem;
-  cursor: pointer;
-  z-index: 3;
-}
-
-.year-content.collapsed .toggle-indicator {
-  transform: rotate(-90deg);
-}
-
-/* Sub-timeline */
-.sub-timeline {
-  margin: 1rem 0 0 0;
-  padding-left: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 2000px;
-  overflow: hidden;
-}
-
-.sub-timeline.collapsed {
-  max-height: 0;
-  opacity: 0;
-  margin-top: 0;
-}
-
-.sub-timeline-item {
-  margin-bottom: 1.5rem;
-  position: relative;
-  padding-left: 0;
-}
-
-.sub-timeline-date {
-  font-weight: 500;
-  color: var(--primary);
-  margin-bottom: 0.5rem;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sub-timeline-content {
-  background: rgba(255, 255, 255, 0.7);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--light-gray);
-}
-
-.sub-timeline-content h4 {
-  color: var(--dark);
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 500;
-}
-
-.sub-timeline-content p {
-  color: var(--gray);
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-/* Values Grid - Clean Cards */
-.values-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: clamp(1.25rem, 3vw, 2rem);
-  margin-top: 1rem;
-}
-
-.value-card {
-  background-color: white;
-  border-radius: var(--radius);
-  padding: clamp(1.5rem, 4vw, 2rem);
-  text-align: center;
-  transition: var(--transition);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--light-gray);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  -webkit-tap-highlight-color: transparent;
-  position: relative;
-  overflow: hidden;
-}
-
-.value-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary), var(--primary-light));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.value-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
-}
-
-.value-card:hover::before {
-  opacity: 1;
-}
-
-.value-card:active {
-  transform: translateY(-2px);
-}
-
-.value-icon {
-  width: clamp(60px, 12vw, 70px);
-  height: clamp(60px, 12vw, 70px);
-  background-color: rgba(74, 111, 165, 0.1);
-  color: var(--primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto clamp(1rem, 3vw, 1.5rem);
-  font-size: clamp(1.5rem, 4vw, 1.8rem);
-  transition: var(--transition);
-}
-
-.value-card:hover .value-icon {
-  background-color: rgba(74, 111, 165, 0.2);
-  transform: scale(1.05);
-}
-
-.value-card h3 {
-  font-size: clamp(1.1rem, 3vw, 1.3rem);
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
-  color: var(--dark);
-  font-weight: 500;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.value-card p {
-  color: var(--gray);
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
-  line-height: 1.6;
-  flex-grow: 1;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* Team Grid - Clean Cards */
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-  gap: clamp(1.25rem, 3vw, 2rem);
-  margin-top: 1rem;
-}
-
-.team-member {
-  background-color: white;
-  border-radius: var(--radius);
-  padding: clamp(1.5rem, 4vw, 2rem);
-  text-align: center;
-  transition: var(--transition);
-  box-shadow: var(--shadow);
-  border: 1px solid var(--light-gray);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  -webkit-tap-highlight-color: transparent;
-  position: relative;
-  overflow: hidden;
-}
-
-.team-member::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary), var(--primary-light));
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.team-member:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
-}
-
-.team-member:hover::before {
-  opacity: 1;
-}
-
-.team-member:active {
-  transform: translateY(-2px);
-}
-
-.member-photo {
-  width: clamp(60px, 12vw, 70px);
-  height: clamp(60px, 12vw, 70px);
-  background-color: rgba(74, 111, 165, 0.1);
-  color: var(--primary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto clamp(1rem, 3vw, 1.5rem);
-  font-size: clamp(1.5rem, 4vw, 1.8rem);
-  transition: var(--transition);
-}
-
-.team-member:hover .member-photo {
-  background-color: rgba(74, 111, 165, 0.2);
-  transform: scale(1.05);
-}
-
-.team-member h3 {
-  font-size: clamp(1.1rem, 3vw, 1.3rem);
-  margin-bottom: clamp(0.75rem, 2vw, 1rem);
-  color: var(--dark);
-  font-weight: 500;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.member-role {
-  color: var(--primary);
-  font-weight: 500;
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
-  font-size: 1rem;
-}
-
-.member-bio {
-  color: var(--gray);
-  line-height: 1.6;
-  flex-grow: 1;
-  font-size: clamp(0.9rem, 2.5vw, 1rem);
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-/* CTA Section - Simple */
-.cta-section {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: white;
-  border-radius: var(--radius);
-  padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem);
-  text-align: center;
-  margin: clamp(2rem, 5vw, 3rem) 0;
-  box-shadow: var(--shadow-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-section h2 {
-  margin-bottom: clamp(1rem, 3vw, 1.5rem);
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  font-weight: 300;
-  line-height: 1.2;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.cta-section p {
-  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
-  opacity: 0.9;
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-  line-height: 1.6;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-}
-
-.cta-buttons {
-  display: flex;
-  gap: clamp(0.75rem, 2vw, 1rem);
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* CTA Buttons - Match home.html */
-.cta-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem);
-  border-radius: 50px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: var(--transition);
-  cursor: pointer;
-  border: none;
-  font-size: clamp(0.95rem, 2.5vw, 1rem);
-  min-width: clamp(140px, 25vw, 160px);
-  justify-content: center;
-  min-height: 44px;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  user-select: none;
-  position: relative;
-  overflow: hidden;
-}
-
-.cta-btn::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: inherit;
-  background: rgba(255, 255, 255, 0.1);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.cta-btn:hover::after {
-  opacity: 1;
-}
-
-.cta-btn:active {
-  transform: translateY(1px);
-}
-
-.cta-btn.primary {
-  background-color: white;
-  color: var(--primary);
-}
-
-.cta-btn.primary:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-.cta-btn:not(.primary) {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
-}
-
-.cta-btn:not(.primary):hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Focus states for accessibility */
-.cta-btn:focus-visible,
-.timeline-year:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 3px;
-}
-
-/* Animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-/* Responsive Design - Mobile First */
-
-/* Tablet and Small Desktop */
-@media (max-width: 992px) {
-  .values-grid,
-  .team-grid {
-    gap: 1.5rem;
-  }
-  
-  .value-card,
-  .team-member {
-    padding: 1.5rem;
-  }
-}
-
-/* Tablet Portrait */
-@media (max-width: 768px) {
-  .hero {
-    padding: 2.5rem 1.25rem;
-  }
-  
-  .hero h1 {
-    font-size: 2rem;
-    line-height: 1.3;
-  }
-  
-  .hero p {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .mission-statement {
-    margin: 1.5rem 1.25rem 0;
-    padding: 1.25rem;
-  }
-  
-  .about-container {
-    padding: 0 1.25rem;
-  }
-  
-  .content-section {
-    padding: 3rem 1.25rem;
-  }
-  
-  .cta-buttons {
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .cta-btn {
-    width: 100%;
-    max-width: 300px;
-  }
-  
-  .timeline-item {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 1.5rem;
-  }
-  
-  .timeline-year {
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-  
-  .year-content {
-    flex: 1;
-  }
-  
-  .values-grid,
-  .team-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
-  }
-  
-  .sub-timeline-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  
-  .sub-timeline-date {
-    min-width: 120px;
-    margin-bottom: 0;
-    justify-content: flex-end;
-  }
-  
-  .sub-timeline-content {
-    flex: 1;
-  }
-  
-  .cta-section {
-    margin: 2rem 0;
-    padding: 1.5rem;
-  }
-}
-
-/* Mobile Landscape */
-@media (max-width: 640px) {
-  .hero h1 {
-    font-size: 1.8rem;
-  }
-  
-  .hero p {
-    font-size: 1rem;
-  }
-  
-  .value-card h3,
-  .team-member h3 {
-    font-size: 1.1rem;
-  }
-  
-  .section-header h2 {
-    font-size: 1.6rem;
-  }
-  
-  .section-header p {
-    font-size: 0.95rem;
-  }
-}
-
-/* Mobile Portrait */
-@media (max-width: 480px) {
-  .hero {
-    padding: 2rem 1rem;
-  }
-  
-  .hero h1 {
-    font-size: 1.6rem;
-  }
-  
-  .content-section {
-    padding: 2.5rem 1rem;
-  }
-  
-  .value-card,
-  .team-member {
-    padding: 1.25rem;
-  }
-  
-  .value-icon,
-  .member-photo {
-    width: 55px;
-    height: 55px;
-    font-size: 1.5rem;
-  }
-  
-  .cta-btn {
-    min-width: 140px;
-    padding: 0.875rem 1.5rem;
-    font-size: 0.95rem;
-  }
-  
-  .cta-section {
-    padding: 1.25rem;
-    margin: 1.5rem 0;
-  }
-  
-  .mission-statement {
-    padding: 1rem;
-    margin: 1.25rem 1rem 0;
-  }
-}
-
-/* Small Mobile Devices */
-@media (max-width: 360px) {
-  .hero h1 {
-    font-size: 1.5rem;
-  }
-  
-  .hero p {
-    font-size: 0.95rem;
-  }
-  
-  .cta-buttons {
-    gap: 0.5rem;
-  }
-  
-  .cta-btn {
-    min-width: 100%;
-    font-size: 0.9rem;
-  }
-  
-  .value-card,
-  .team-member {
-    padding: 1rem;
-  }
-  
-  .value-card h3,
-  .team-member h3 {
-    font-size: 1rem;
-  }
-  
-  .value-card p,
-  .member-bio {
-    font-size: 0.85rem;
-  }
-  
-  .section-header h2 {
-    font-size: 1.4rem;
-  }
-}
-
-/* Touch-friendly improvements */
-@media (hover: none) and (pointer: coarse) {
-  .value-card:hover,
-  .team-member:hover,
-  .cta-btn.primary:hover,
-  .cta-btn:not(.primary):hover {
-    transform: none;
-  }
-  
-  .value-card:active,
-  .team-member:active {
-    transform: scale(0.98);
-  }
-  
-  .cta-btn.primary:active,
-  .cta-btn:not(.primary):active {
-    transform: scale(0.95);
-  }
-  
-  .value-card:hover .value-icon,
-  .team-member:hover .member-photo {
-    transform: none;
-  }
-  
-  .value-card:hover::before,
-  .team-member:hover::before {
-    opacity: 0;
-  }
-  
-  .cta-btn:hover::after {
-    opacity: 0;
-  }
-}
-
-/* Reduced Motion Support */
-@media (prefers-reduced-motion: reduce) {
-  .fade-in {
-    animation: none;
-  }
-  
-  .cta-btn,
-  .value-card,
-  .team-member,
-  .value-icon,
-  .member-photo {
-    transition: none;
-  }
-  
-  .value-card:hover,
-  .team-member:hover,
-  .cta-btn.primary:hover,
-  .cta-btn:not(.primary):hover {
-    transform: none;
-  }
-  
-  .value-card:hover .value-icon,
-  .team-member:hover .member-photo {
-    transform: none;
-  }
-  
-  .year-content,
-  .sub-timeline {
-    transition: none;
-  }
-}
-
-/* Focus States for Accessibility */
-button:focus,
-a:focus,
-input:focus {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 3px;
-}
-
-/* Print Styles */
-@media print {
-  .hero {
-    background: white !important;
-    padding: 2rem 0 !important;
-  }
-  
-  .cta-section {
-    display: none;
-  }
-  
-  .content-section {
-    break-inside: avoid;
-    box-shadow: none !important;
-    border: 1px solid #ddd !important;
-  }
-  
-  .year-content.collapsed,
-  .sub-timeline.collapsed {
-    max-height: none !important;
-    opacity: 1 !important;
-  }
-}
-
-/* iOS-specific fixes */
-@supports (-webkit-touch-callout: none) {
-  .cta-btn,
-  .value-card,
-  .team-member {
-    cursor: pointer;
-  }
-  
-  /* Fix for iOS Safari rounded corners with gradients */
-  .hero::before {
-    -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
-    mask-image: radial-gradient(circle, white 100%, black 100%);
-  }
-}
-
-/* Ensure all text is selectable but buttons are not */
-p, h1, h2, h3, h4, h5, h6, span:not(.cta-btn *) {
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-
-.cta-btn, .value-card, .team-member, .timeline-year {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-</style>
+    <style>
+    :root {
+        --primary: #4a6fa5;
+        --primary-light: #88a4c7;
+        --primary-dark: #3a5a80;
+        --secondary: #7ba05b;
+        --accent: #d4a5a5;
+        --light: #f8f9fa;
+        --dark: #2c3e50;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --white: #ffffff;
+        --transition: all 0.3s ease;
+        --radius: 12px;
+        --radius-sm: 8px;
+        --radius-md: 10px;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+        --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        text-size-adjust: 100%;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        line-height: 1.6;
+        color: var(--dark);
+        background-color: var(--white);
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Hero Section - Consistent with home.html */
+    .hero {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: clamp(3rem, 8vw, 6rem) clamp(1rem, 4vw, 2.5rem);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.02"><path fill="%234a6fa5" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+        background-size: cover;
+        pointer-events: none;
+    }
+
+    .hero-content {
+        max-width: min(90%, 800px);
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .hero h1 {
+        font-size: clamp(1.8rem, 5vw, 2.8rem);
+        color: var(--dark);
+        margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        font-weight: 300;
+        line-height: 1.2;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .hero h1 strong {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .hero p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        color: var(--gray);
+        max-width: 600px;
+        margin: 0 auto clamp(1.5rem, 4vw, 2.5rem);
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .mission-statement {
+        background: var(--white);
+        border-radius: var(--radius-sm);
+        padding: clamp(1rem, 3vw, 1.5rem);
+        margin-top: clamp(1.5rem, 4vw, 2rem);
+        font-style: italic;
+        border: 1px solid var(--light-gray);
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        line-height: 1.6;
+        color: var(--gray);
+    }
+
+    /* About Container */
+    .about-container {
+        max-width: min(95%, 1200px);
+        margin: 0 auto;
+        padding: 0 clamp(1rem, 4vw, 2.5rem);
+    }
+
+    /* Content Sections */
+    .content-section {
+        padding: clamp(2.5rem, 6vw, 4rem) 0;
+        position: relative;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: clamp(2rem, 5vw, 3rem);
+    }
+
+    .section-header h2 {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        color: var(--dark);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        font-weight: 300;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .section-header p {
+        font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        color: var(--gray);
+        max-width: min(95%, 600px);
+        margin: 0 auto;
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Story Timeline */
+    .story-timeline {
+        max-width: min(95%, 800px);
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .timeline-item {
+        margin-bottom: clamp(1.5rem, 4vw, 2rem);
+        position: relative;
+    }
+
+    .timeline-year {
+        background-color: var(--primary);
+        color: white;
+        width: clamp(3rem, 8vw, 3.5rem);
+        height: clamp(3rem, 8vw, 3.5rem);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        position: relative;
+        z-index: 2;
+        border: none;
+        transition: var(--transition);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+    }
+
+    .timeline-year:hover {
+        background-color: var(--primary-light);
+        transform: scale(1.05);
+    }
+
+    .timeline-year:active {
+        transform: scale(0.95);
+    }
+
+    .year-content {
+        background-color: var(--light);
+        padding: clamp(1.25rem, 3vw, 1.5rem);
+        border-radius: var(--radius);
+        border: 1px solid var(--light-gray);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .year-content.collapsed {
+        max-height: 4.5rem;
+        opacity: 0.8;
+        padding: clamp(0.75rem, 2vw, 1rem);
+    }
+
+    .year-content h3 {
+        font-size: clamp(1.1rem, 3vw, 1.3rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        color: var(--dark);
+        font-weight: 500;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .year-content p {
+        color: var(--gray);
+        line-height: 1.6;
+        margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .toggle-indicator {
+        position: absolute;
+        right: clamp(0.75rem, 2vw, 1rem);
+        top: clamp(0.75rem, 2vw, 1rem);
+        color: var(--primary);
+        background: none;
+        border: none;
+        font-size: clamp(0.75rem, 2vw, 0.875rem);
+        cursor: pointer;
+        transition: var(--transition);
+        -webkit-tap-highlight-color: transparent;
+        padding: 0.25rem;
+    }
+
+    /* Sub-timeline */
+    .sub-timeline {
+        margin: clamp(1rem, 3vw, 1.5rem) 0 0 0;
+        padding-left: 0;
+        transition: var(--transition);
+        max-height: 2000px;
+        overflow: hidden;
+    }
+
+    .sub-timeline.collapsed {
+        max-height: 0;
+        opacity: 0;
+        margin-top: 0;
+    }
+
+    .sub-timeline-item {
+        background: var(--white);
+        border-radius: var(--radius-sm);
+        padding: clamp(1rem, 2.5vw, 1.25rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        border: 1px solid var(--light-gray);
+        transition: var(--transition);
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .sub-timeline-item:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+
+    .sub-timeline-item:active {
+        transform: translateY(-1px);
+    }
+
+    .sub-timeline-date {
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        font-size: clamp(0.85rem, 2vw, 0.95rem);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sub-timeline-content h4 {
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        font-size: clamp(1rem, 2.5vw, 1.1rem);
+        font-weight: 500;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .sub-timeline-content p {
+        color: var(--gray);
+        font-size: clamp(0.85rem, 2vw, 0.95rem);
+        line-height: 1.5;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Values Grid */
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+        gap: clamp(1.25rem, 3vw, 2rem);
+        margin-top: clamp(1.5rem, 4vw, 2rem);
+    }
+
+    .value-card {
+        background-color: var(--white);
+        border-radius: var(--radius);
+        padding: clamp(1.5rem, 4vw, 2rem);
+        text-align: center;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--light-gray);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .value-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-light);
+    }
+
+    .value-card:active {
+        transform: translateY(-2px);
+    }
+
+    .value-icon {
+        width: clamp(60px, 12vw, 70px);
+        height: clamp(60px, 12vw, 70px);
+        background-color: rgba(74, 111, 165, 0.1);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto clamp(1rem, 3vw, 1.5rem);
+        font-size: clamp(1.5rem, 4vw, 1.8rem);
+        transition: var(--transition);
+    }
+
+    .value-card:hover .value-icon {
+        background-color: rgba(74, 111, 165, 0.2);
+        transform: scale(1.05);
+    }
+
+    .value-card h3 {
+        font-size: clamp(1.1rem, 3vw, 1.3rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        color: var(--dark);
+        font-weight: 500;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .value-card p {
+        color: var(--gray);
+        line-height: 1.6;
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Team Grid */
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+        gap: clamp(1.25rem, 3vw, 2rem);
+        margin-top: clamp(1.5rem, 4vw, 2rem);
+    }
+
+    .team-member {
+        background-color: var(--white);
+        border-radius: var(--radius);
+        padding: clamp(1.5rem, 4vw, 2rem);
+        text-align: center;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--light-gray);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .team-member:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-light);
+    }
+
+    .team-member:active {
+        transform: translateY(-2px);
+    }
+
+    .member-photo {
+        width: clamp(60px, 12vw, 70px);
+        height: clamp(60px, 12vw, 70px);
+        background-color: rgba(74, 111, 165, 0.1);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto clamp(1rem, 3vw, 1.5rem);
+        font-size: clamp(1.5rem, 4vw, 1.8rem);
+    }
+
+    .team-member h3 {
+        font-size: clamp(1.1rem, 3vw, 1.3rem);
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+        font-weight: 500;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .member-role {
+        color: var(--primary);
+        font-weight: 500;
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+    }
+
+    .member-bio {
+        color: var(--gray);
+        line-height: 1.6;
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border-radius: var(--radius);
+        padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 4vw, 2.5rem);
+        text-align: center;
+        margin: clamp(2rem, 5vw, 3rem) 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section h2 {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        font-weight: 300;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .cta-section h2 strong {
+        font-weight: 600;
+    }
+
+    .cta-section p {
+        font-size: clamp(1rem, 2.5vw, 1.2rem);
+        margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+        opacity: 0.9;
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: clamp(0.75rem, 2vw, 1rem);
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    /* Buttons - Consistent with home.html */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: clamp(0.875rem, 2.5vw, 1rem) clamp(1.5rem, 4vw, 2rem);
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        cursor: pointer;
+        border: none;
+        font-size: clamp(0.95rem, 2.5vw, 1rem);
+        min-width: clamp(140px, 25vw, 160px);
+        justify-content: center;
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+        user-select: none;
+    }
+
+    .btn-primary {
+        background-color: var(--white);
+        color: var(--primary);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+        background-color: transparent;
+        color: white;
+        border: 2px solid white;
+    }
+
+    .btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .btn:active {
+        transform: translateY(1px);
+    }
+
+    /* Responsive Design - Following home.html patterns */
+    @media (max-width: 768px) {
+        .hero {
+            padding: 2.5rem 1.25rem;
+        }
+        
+        .hero h1 {
+            font-size: 2rem;
+            line-height: 1.3;
+        }
+        
+        .hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .cta-buttons {
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .content-section {
+            padding: 3rem 0;
+        }
+        
+        .section-header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .values-grid,
+        .team-grid {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+        
+        .cta-section {
+            margin: 2rem 0;
+            padding: 2rem 1.25rem;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .hero h1 {
+            font-size: 1.8rem;
+        }
+        
+        .hero p {
+            font-size: 1rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.6rem;
+        }
+        
+        .section-header p {
+            font-size: 0.95rem;
+        }
+        
+        .year-content h3 {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero {
+            padding: 2rem 1rem;
+        }
+        
+        .hero h1 {
+            font-size: 1.6rem;
+        }
+        
+        .content-section {
+            padding: 2.5rem 0;
+        }
+        
+        .timeline-year {
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .year-content,
+        .value-card,
+        .team-member {
+            padding: 1.25rem;
+        }
+        
+        .value-icon,
+        .member-photo {
+            width: 55px;
+            height: 55px;
+            font-size: 1.5rem;
+        }
+        
+        .btn {
+            min-width: 140px;
+            padding: 0.875rem 1.5rem;
+            font-size: 0.95rem;
+        }
+        
+        .cta-section {
+            padding: 1.5rem 1rem;
+            margin: 1.5rem 0;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .hero h1 {
+            font-size: 1.5rem;
+        }
+        
+        .hero p {
+            font-size: 0.95rem;
+        }
+        
+        .cta-buttons {
+            gap: 0.5rem;
+        }
+        
+        .btn {
+            min-width: 100%;
+            font-size: 0.9rem;
+        }
+        
+        .year-content,
+        .value-card,
+        .team-member {
+            padding: 1rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.4rem;
+        }
+    }
+
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+        .value-card:hover,
+        .team-member:hover,
+        .btn-primary:hover,
+        .btn-secondary:hover {
+            transform: none;
+        }
+        
+        .value-card:active,
+        .team-member:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary:active,
+        .btn-secondary:active {
+            transform: scale(0.95);
+        }
+    }
+
+    /* Reduced Motion Support */
+    @media (prefers-reduced-motion: reduce) {
+        .btn,
+        .value-card,
+        .team-member,
+        .timeline-year,
+        .value-icon {
+            transition: none;
+        }
+        
+        .value-card:hover,
+        .team-member:hover,
+        .btn-primary:hover,
+        .btn-secondary:hover {
+            transform: none;
+        }
+        
+        .value-card:hover .value-icon {
+            transform: none;
+        }
+    }
+
+    /* Focus States for Accessibility */
+    button:focus,
+    a:focus {
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
+        border-radius: 3px;
+    }
+
+    /* Print Styles */
+    @media print {
+        .hero {
+            background: white !important;
+            padding: 2rem 0 !important;
+        }
+        
+        .hero h1 {
+            color: #333 !important;
+        }
+        
+        .hero p {
+            color: #666 !important;
+        }
+        
+        .cta-section {
+            display: none;
+        }
+        
+        .value-card,
+        .team-member {
+            break-inside: avoid;
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+    }
+
+    /* iOS-specific fixes */
+    @supports (-webkit-touch-callout: none) {
+        .btn,
+        .value-card,
+        .team-member,
+        .timeline-year {
+            cursor: pointer;
+        }
+        
+        .hero::before {
+            -webkit-mask-image: -webkit-radial-gradient(circle, white 100%, black 100%);
+            mask-image: radial-gradient(circle, white 100%, black 100%);
+        }
+    }
+
+    /* Text selection consistency */
+    p, h1, h2, h3, h4, h5, h6, span:not(.btn *) {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+    }
+
+    .btn, .value-card, .team-member, .timeline-year {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    /* Animation for fade-in sections */
+    .fade-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-section.active-fade {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    </style>
 </head>
 <body>
-  
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1 id="hero-title"></h1>
-      <p id="hero-subtitle"></p>
-      <div class="mission-statement" id="mission-statement"></div>
-    </div>
-  </section>
-
-  <div class="about-container">
-
-    <!-- Our Story Section -->
-    <section class="content-section fade-in">
-      <div class="section-header">
-        <h2 id="story-title"></h2>
-        <p id="story-subtitle"></p>
-      </div>
-      
-      <div class="story-timeline">
-
-        <!-- Timeline 2024 -->
-        <div class="timeline-item">
-          <button class="timeline-year" id="timeline-2024-year"></button>
-          <div class="year-content" id="content-2024">
-            <button class="toggle-indicator" aria-label="Toggle content">▼</button>
-            <h3 id="timeline-2024-title"></h3>
-            <p id="timeline-2024-content"></p>
-          </div>
+    <!-- Hero Section -->
+    <section class="hero fade-section">
+        <div class="hero-content">
+            <h1 id="hero-title"></h1>
+            <p id="hero-subtitle"></p>
+            <div class="mission-statement" id="mission-statement"></div>
         </div>
+    </section>
 
-        <!-- Timeline 2025 (with sub-timeline) -->
-        <div class="timeline-item">
-          <button class="timeline-year" id="timeline-2025-year"></button>
-          <div class="year-content" id="content-2025">
-            <button class="toggle-indicator" aria-label="Toggle content">▼</button>
-            <h3 id="timeline-2025-title"></h3>
-            <p id="timeline-2025-content"></p>
-
-            <div class="sub-timeline" id="subtimeline-2025">
-
-              <div class="sub-timeline-item">
-                <div class="sub-timeline-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span id="subtimeline-august25-date"></span>
-                </div>
-                <div class="sub-timeline-content">
-                  <h4 id="subtimeline-august25-title"></h4>
-                  <p id="subtimeline-august25-content"></p>
-                </div>
-              </div>
-
-              <div class="sub-timeline-item">
-                <div class="sub-timeline-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span id="subtimeline-october25-date"></span>
-                </div>
-                <div class="sub-timeline-content">
-                  <h4 id="subtimeline-october25-title"></h4>
-                  <p id="subtimeline-october25-content"></p>
-                </div>
-              </div>
-
-              <div class="sub-timeline-item">
-                <div class="sub-timeline-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span id="subtimeline-november25-date"></span>
-                </div>
-                <div class="sub-timeline-content">
-                  <h4 id="subtimeline-november25-title"></h4>
-                  <p id="subtimeline-november25-content"></p>
-                </div>
-              </div>
-
-                <div class="sub-timeline-item">
-                <div class="sub-timeline-date">
-                  <i class="fas fa-calendar-alt"></i>
-                  <span id="subtimeline-december25-date"></span>
-                </div>
-                <div class="sub-timeline-content">
-                  <h4 id="subtimeline-december25-title"></h4>
-                  <p id="subtimeline-december25-content"></p>
-                </div>
-              </div>
-
+    <div class="about-container">
+        <!-- Our Story Section -->
+        <section class="content-section fade-section">
+            <div class="section-header">
+                <h2 id="story-title"></h2>
+                <p id="story-subtitle"></p>
             </div>
-          </div>
-        </div>
+            
+            <div class="story-timeline">
+                <!-- Timeline 2024 -->
+                <div class="timeline-item">
+                    <button class="timeline-year" id="timeline-2024-year"></button>
+                    <div class="year-content" id="content-2024">
+                        <button class="toggle-indicator" aria-label="Toggle content">▼</button>
+                        <h3 id="timeline-2024-title"></h3>
+                        <p id="timeline-2024-content"></p>
+                    </div>
+                </div>
 
-        <!-- Timeline Now -->
-        <div class="timeline-item">
-          <button class="timeline-year" id="timeline-now-year"></button>
-          <div class="year-content" id="content-now">
-            <button class="toggle-indicator" aria-label="Toggle content">▼</button>
-            <h3 id="timeline-now-title"></h3>
-            <p id="timeline-now-content"></p>
-          </div>
-        </div>
+                <!-- Timeline 2025 -->
+                <div class="timeline-item">
+                    <button class="timeline-year" id="timeline-2025-year"></button>
+                    <div class="year-content" id="content-2025">
+                        <button class="toggle-indicator" aria-label="Toggle content">▼</button>
+                        <h3 id="timeline-2025-title"></h3>
+                        <p id="timeline-2025-content"></p>
 
-      </div>
-    </section>
+                        <div class="sub-timeline" id="subtimeline-2025">
+                            <div class="sub-timeline-item">
+                                <div class="sub-timeline-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span id="subtimeline-august25-date"></span>
+                                </div>
+                                <div class="sub-timeline-content">
+                                    <h4 id="subtimeline-august25-title"></h4>
+                                    <p id="subtimeline-august25-content"></p>
+                                </div>
+                            </div>
 
-    <!-- Our Values Section -->
-    <section class="content-section fade-in">
-      <div class="section-header">
-        <h2 id="values-title"></h2>
-        <p id="values-subtitle"></p>
-      </div>
-      
-      <div class="values-grid">
-        <div class="value-card">
-          <div class="value-icon"><i class="fas fa-user-shield"></i></div>
-          <h3 id="value-privacy-title"></h3>
-          <p id="value-privacy-content"></p>
-        </div>
+                            <div class="sub-timeline-item">
+                                <div class="sub-timeline-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span id="subtimeline-october25-date"></span>
+                                </div>
+                                <div class="sub-timeline-content">
+                                    <h4 id="subtimeline-october25-title"></h4>
+                                    <p id="subtimeline-october25-content"></p>
+                                </div>
+                            </div>
 
-        <div class="value-card">
-          <div class="value-icon"><i class="fas fa-graduation-cap"></i></div>
-          <h3 id="value-empowerment-title"></h3>
-          <p id="value-empowerment-content"></p>
-        </div>
+                            <div class="sub-timeline-item">
+                                <div class="sub-timeline-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span id="subtimeline-november25-date"></span>
+                                </div>
+                                <div class="sub-timeline-content">
+                                    <h4 id="subtimeline-november25-title"></h4>
+                                    <p id="subtimeline-november25-content"></p>
+                                </div>
+                            </div>
 
-        <div class="value-card">
-          <div class="value-icon"><i class="fas fa-hands-helping"></i></div>
-          <h3 id="value-compassion-title"></h3>
-          <p id="value-compassion-content"></p>
-        </div>
+                            <div class="sub-timeline-item">
+                                <div class="sub-timeline-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span id="subtimeline-december25-date"></span>
+                                </div>
+                                <div class="sub-timeline-content">
+                                    <h4 id="subtimeline-december25-title"></h4>
+                                    <p id="subtimeline-december25-content"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="value-card">
-          <div class="value-icon"><i class="fas fa-search"></i></div>
-          <h3 id="value-evidence-title"></h3>
-          <p id="value-evidence-content"></p>
-        </div>
-      </div>
-    </section>
+                <!-- Timeline Now -->
+                <div class="timeline-item">
+                    <button class="timeline-year" id="timeline-now-year"></button>
+                    <div class="year-content" id="content-now">
+                        <button class="toggle-indicator" aria-label="Toggle content">▼</button>
+                        <h3 id="timeline-now-title"></h3>
+                        <p id="timeline-now-content"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-    <!-- Team Section -->
-    <section class="content-section fade-in">
-      <div class="section-header">
-        <h2 id="team-title"></h2>
-        <p id="team-subtitle"></p>
-      </div>
-      
-      <div class="team-grid">
+        <!-- Our Values Section -->
+        <section class="content-section fade-section">
+            <div class="section-header">
+                <h2 id="values-title"></h2>
+                <p id="values-subtitle"></p>
+            </div>
+            
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-user-shield"></i></div>
+                    <h3 id="value-privacy-title"></h3>
+                    <p id="value-privacy-content"></p>
+                </div>
 
-        <div class="team-member">
-          <div class="member-photo"><i class="fas fa-user"></i></div>
-          <h3 id="team-founder-name"></h3>
-          <div class="member-role" id="team-founder-role"></div>
-          <p class="member-bio" id="team-founder-bio"></p>
-        </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <h3 id="value-empowerment-title"></h3>
+                    <p id="value-empowerment-content"></p>
+                </div>
 
-        <div class="team-member">
-          <div class="member-photo"><i class="fas fa-user-md"></i></div>
-          <h3 id="team-advisors-name"></h3>
-          <div class="member-role" id="team-advisors-role"></div>
-          <p class="member-bio" id="team-advisors-bio"></p>
-        </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-hands-helping"></i></div>
+                    <h3 id="value-compassion-title"></h3>
+                    <p id="value-compassion-content"></p>
+                </div>
 
-        <div class="team-member">
-          <div class="member-photo"><i class="fas fa-users"></i></div>
-          <h3 id="team-community-name"></h3>
-          <div class="member-role" id="team-community-role"></div>
-          <p class="member-bio" id="team-community-bio"></p>
-        </div>
+                <div class="value-card">
+                    <div class="value-icon"><i class="fas fa-search"></i></div>
+                    <h3 id="value-evidence-title"></h3>
+                    <p id="value-evidence-content"></p>
+                </div>
+            </div>
+        </section>
 
-      </div>
-    </section>
+        <!-- Team Section -->
+        <section class="content-section fade-section">
+            <div class="section-header">
+                <h2 id="team-title"></h2>
+                <p id="team-subtitle"></p>
+            </div>
+            
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-photo"><i class="fas fa-user"></i></div>
+                    <h3 id="team-founder-name"></h3>
+                    <div class="member-role" id="team-founder-role"></div>
+                    <p class="member-bio" id="team-founder-bio"></p>
+                </div>
 
-    <!-- Call to Action -->
-    <section class="cta-section fade-in">
-      <h2 id="cta-title"></h2>
-      <p id="cta-subtitle"></p>
-      <div class="cta-buttons">
-        <button class="cta-btn primary" onclick="location.href='prediction.html'">
-          <i class="fas fa-clipboard-check"></i> <span id="cta-assessment"></span>
-        </button>
-        <button class="cta-btn" onclick="location.href='resources.html'">
-          <i class="fas fa-book-open"></i> <span id="cta-learn-more"></span>
-        </button>
-      </div>
-    </section>
-  </div>
+                <div class="team-member">
+                    <div class="member-photo"><i class="fas fa-user-md"></i></div>
+                    <h3 id="team-advisors-name"></h3>
+                    <div class="member-role" id="team-advisors-role"></div>
+                    <p class="member-bio" id="team-advisors-bio"></p>
+                </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Mobile detection
-      const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      // Enhanced touch handling for mobile
-      if (isMobile) {
-        document.body.classList.add('mobile-device');
-        
-        // Prevent zoom on double tap
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(event) {
-          const now = Date.now();
-          if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
-          }
-          lastTouchEnd = now;
-        }, false);
-      }
-      
-      // Toggle functionality for timeline years
-      const timelineYears = document.querySelectorAll('.timeline-year');
-      const toggleButtons = document.querySelectorAll('.toggle-indicator');
-      
-      function toggleTimelineContent(contentId, year = null) {
-        const content = document.getElementById(contentId);
-        if (!content) return;
-        
-        const isCollapsed = content.classList.contains('collapsed');
-        const toggleBtn = content.querySelector('.toggle-indicator');
-        
-        // Toggle main content
-        content.classList.toggle('collapsed');
-        
-        // Update toggle button text
-        if (toggleBtn) {
-          toggleBtn.textContent = isCollapsed ? '▼' : '▲';
-        }
-        
-        // Handle sub-timeline for 2025
-        if (year === '2025' || contentId === 'content-2025') {
-          const subTimeline = document.getElementById('subtimeline-2025');
-          if (subTimeline) {
-            subTimeline.classList.toggle('collapsed');
-            // Keep sub-timeline expanded when main content is expanded
-            if (isCollapsed) {
-              subTimeline.classList.remove('collapsed');
+                <div class="team-member">
+                    <div class="member-photo"><i class="fas fa-users"></i></div>
+                    <h3 id="team-community-name"></h3>
+                    <div class="member-role" id="team-community-role"></div>
+                    <p class="member-bio" id="team-community-bio"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta-section fade-section">
+            <h2 id="cta-title"></h2>
+            <p id="cta-subtitle"></p>
+            <div class="cta-buttons">
+                <button class="btn btn-primary" onclick="location.href='prediction.html'">
+                    <i class="fas fa-clipboard-check"></i> <span id="cta-assessment"></span>
+                </button>
+                <button class="btn btn-secondary" onclick="location.href='resources.html'">
+                    <i class="fas fa-book-open"></i> <span id="cta-learn-more"></span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Fade-in animation observer (consistent with home.html)
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(e => {
+                    if (e.isIntersecting) e.target.classList.add("active-fade");
+                });
+            }, { threshold: 0.15 });
+
+            document.querySelectorAll(".fade-section").forEach(sec => observer.observe(sec));
+
+            // Timeline toggle functionality
+            const timelineYears = document.querySelectorAll('.timeline-year');
+            const toggleButtons = document.querySelectorAll('.toggle-indicator');
+            
+            function toggleTimelineContent(contentId, year = null) {
+                const content = document.getElementById(contentId);
+                if (!content) return;
+                
+                const isCollapsed = content.classList.contains('collapsed');
+                const toggleBtn = content.querySelector('.toggle-indicator');
+                
+                // Toggle main content
+                content.classList.toggle('collapsed');
+                
+                // Update toggle button
+                if (toggleBtn) {
+                    toggleBtn.textContent = isCollapsed ? '▼' : '▲';
+                }
+                
+                // Handle sub-timeline for 2025
+                if (year === '2025' || contentId === 'content-2025') {
+                    const subTimeline = document.getElementById('subtimeline-2025');
+                    if (subTimeline) {
+                        subTimeline.classList.toggle('collapsed');
+                        // Keep sub-timeline expanded when main content is expanded
+                        if (isCollapsed) {
+                            subTimeline.classList.remove('collapsed');
+                        }
+                    }
+                }
+                
+                // Smooth scroll into view if expanding on mobile
+                if (window.innerWidth <= 768 && isCollapsed) {
+                    setTimeout(() => {
+                        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 300);
+                }
             }
-          }
-        }
-        
-        // Smooth scroll into view if expanding on mobile
-        if (isMobile && isCollapsed) {
-          setTimeout(() => {
-            content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 300);
-        }
-      }
-      
-      // Year button click handlers
-      timelineYears.forEach(button => {
-        button.addEventListener('click', function() {
-          const year = this.textContent.trim();
-          let contentId;
-          
-          if (year === '2024') contentId = 'content-2024';
-          else if (year === '2025') contentId = 'content-2025';
-          else if (year === 'Now') contentId = 'content-now';
-          
-          if (contentId) toggleTimelineContent(contentId, year);
+            
+            // Year button click handlers
+            timelineYears.forEach(button => {
+                button.addEventListener('click', function() {
+                    const year = this.textContent.trim();
+                    let contentId;
+                    
+                    if (year === '2024') contentId = 'content-2024';
+                    else if (year === '2025') contentId = 'content-2025';
+                    else if (year === 'Now') contentId = 'content-now';
+                    
+                    if (contentId) toggleTimelineContent(contentId, year);
+                });
+            });
+            
+            // Toggle button click handlers
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const content = this.closest('.year-content');
+                    if (content) {
+                        const contentId = content.id;
+                        const year = contentId === 'content-2024' ? '2024' : 
+                                    contentId === 'content-2025' ? '2025' : 'Now';
+                        toggleTimelineContent(contentId, year);
+                    }
+                });
+            });
+            
+            // Initialize all content as expanded
+            document.querySelectorAll('.year-content').forEach(content => {
+                content.classList.remove('collapsed');
+                const toggleBtn = content.querySelector('.toggle-indicator');
+                if (toggleBtn) toggleBtn.textContent = '▲';
+            });
+            
+            // Initialize sub-timeline as expanded
+            const subTimeline = document.getElementById('subtimeline-2025');
+            if (subTimeline) subTimeline.classList.remove('collapsed');
         });
-        
-        // Add touch feedback for mobile
-        if (isMobile) {
-          button.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.95)';
-          });
-          
-          button.addEventListener('touchend', function() {
-            this.style.transform = 'scale(1)';
-          });
-        }
-      });
-      
-      // Toggle button click handlers
-      toggleButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-          e.stopPropagation();
-          const content = this.closest('.year-content');
-          if (content) {
-            const contentId = content.id;
-            const year = contentId === 'content-2024' ? '2024' : 
-                        contentId === 'content-2025' ? '2025' : 'Now';
-            toggleTimelineContent(contentId, year);
-          }
-        });
-      });
-      
-      // CTA button enhancements
-      document.querySelectorAll('.cta-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-          if (isMobile) {
-            // Add visual feedback
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-              this.style.transform = '';
-            }, 150);
-          }
-        });
-      });
-      
-      // Initialize all content as expanded
-      document.querySelectorAll('.year-content').forEach(content => {
-        content.classList.remove('collapsed');
-        const toggleBtn = content.querySelector('.toggle-indicator');
-        if (toggleBtn) toggleBtn.textContent = '▼';
-      });
-      
-      // Initialize sub-timeline as expanded
-      const subTimeline = document.getElementById('subtimeline-2025');
-      if (subTimeline) subTimeline.classList.remove('collapsed');
-      
-      // Add scroll animation for sections
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
-      
-      document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-      
-      // Handle orientation change
-      let previousOrientation = window.orientation;
-      window.addEventListener('orientationchange', function() {
-        setTimeout(() => {
-          if (window.orientation !== previousOrientation) {
-            previousOrientation = window.orientation;
-            // Force reflow to fix layout issues
-            document.body.style.display = 'none';
-            document.body.offsetHeight;
-            document.body.style.display = '';
-          }
-        }, 100);
-      });
-      
-      // Performance optimization for mobile
-      if (isMobile) {
-        // Debounce resize events
-        let resizeTimeout;
-        window.addEventListener('resize', function() {
-          clearTimeout(resizeTimeout);
-          resizeTimeout = setTimeout(function() {
-            // Update layout if needed
-          }, 100);
-        });
-      }
-    });
-    
-    // Handle page visibility for mobile performance
-    document.addEventListener('visibilitychange', function() {
-      if (document.hidden) {
-        // Page is hidden, pause animations if any
-      } else {
-        // Page is visible again
-      }
-    });
-  </script>
+    </script>
 </body>
 </html>
