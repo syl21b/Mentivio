@@ -588,7 +588,7 @@
           <div class="header-content">
             <div id="activeEmotion" class="active-emotion"></div>
             <div class="header-text">
-              <strong class="mentivio-title">Mentivio</strong>
+              <strong class="mentivio-title">Mentivio (Demo)</strong>
               <small id="currentDay" class="mentivio-subtitle">Thinking with you</small>
             </div>
           </div>
