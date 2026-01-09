@@ -1,8 +1,8 @@
 // ================================
-// Mentivio — Advanced AI Mental Health Companion
+// Mentivio — High EQ AI Mental Health Companion
 // ================================
 (function() {
-  // Inject head content
+  // Inject head content (same as before)
   const headContent = `
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -32,548 +32,227 @@
     initMentivio();
   }
 
-  function initMentivio() {
-    const CONFIG = {
-      name: "Mentivio",
-      persona: "empathic_expert",
-      memoryDepth: 20,
-      learningEnabled: true,
-      useMetaphors: true,
-      empathyLevel: 9
-    };
+function initMentivio() {
+  // Determine if we're in development or production
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1';
+  
+  const CONFIG = {
+    name: "Mentivio",
+    // Always use relative URL for the API endpoint
+    apiEndpoint: "/chatbot/api/chat",  // Changed: Always use relative URL
+    safetyMode: "high-eq",  // Changed to high-eq mode
+    allowedTopics: [
+      // Original wellness topics
+      "stress", "stress management", "feeling stressed", "stressful", 
+      "anxiety", "anxiety coping", "feeling anxious", "worried",
+      "depression", "mild depression", "feeling depressed", "sad",
+      "loneliness", "feeling lonely", "isolated",
+      "work-life balance", "work stress", "work pressure",
+      "study stress", "school stress", "academic pressure", "exams",
+      "relationship communication", "relationship issues", "friends",
+      "family", "family issues", "family stress",
+      "self-care", "self care", "taking care of myself",
+      "mindfulness", "meditation", "breathing exercises",
+      "positive thinking", "gratitude", "appreciation",
+      "goal setting", "time management", "productivity",
+      "sleep", "sleep hygiene", "sleep problems", "insomnia",
+      "healthy habits", "exercise", "physical activity",
+      "emotional awareness", "feelings", "emotions",
+      "communication skills", "talking about feelings",
+      "boundary setting", "saying no", "personal boundaries",
+      "self-compassion", "being kind to myself", "self kindness",
+      "resilience", "resilience building", "bouncing back",
+      "coping strategies", "coping skills", "dealing with stress",
+      "emotional regulation", "managing emotions",
+      "relaxation", "relaxation techniques", "calming down",
+      "social connections", "making friends", "social support",
+      "hobbies", "interests", "activities", "enjoyment",
+      
+      // NEW: High EQ and life topics
+      "life purpose", "finding meaning", "life direction", "purpose in life",
+      "motivation", "staying motivated", "lack of motivation", "feeling stuck",
+      "inspiration", "inspiring stories", "uplifting content", "hope",
+      "personal growth", "self-improvement", "becoming better", "growth mindset",
+      "overcoming challenges", "difficult times", "hard situations", "perseverance",
+      "success stories", "achievements", "accomplishments", "milestones",
+      "dreams", "aspirations", "goals in life", "future plans",
+      "passion", "what excites me", "things I love", "enthusiasm",
+      "creativity", "creative expression", "art", "writing", "music",
+      "nature", "beauty in life", "wonder", "awe", "sunrises", "sunsets",
+      "kindness", "acts of kindness", "helping others", "compassion",
+      "learning", "curiosity", "new skills", "knowledge",
+      "adventure", "new experiences", "trying new things", "exploration",
+      "friendship stories", "meaningful connections", "bonding moments",
+      "small joys", "little pleasures", "simple happiness", "daily joys",
+      "resilience stories", "overcoming adversity", "surviving tough times",
+      "positive changes", "life improvements", "turning points",
+      "self-discovery", "understanding myself", "personal insights",
+      "hope for future", "better days ahead", "things will get better",
+      "celebrating wins", "acknowledging progress", "small victories",
+      "mindset shift", "changing perspective", "seeing differently",
+      "emotional strength", "inner strength", "mental toughness",
+      "life lessons", "wisdom gained", "experiences taught me",
+      "gratitude stories", "thankful moments", "appreciation in life",
+      "healing journey", "recovery stories", "getting better",
+      "positive affirmations", "encouraging words", "self-talk",
+      "inspirational quotes", "meaningful sayings", "wise words",
+      "role models", "people who inspire", "heroes",
+      "community", "belonging", "being part of something",
+      "legacy", "making a difference", "impact on others",
+      "mindful living", "present moment", "being here now",
+      "emotional intelligence", "understanding feelings", "empathy",
+      "happiness habits", "joyful routines", "positive rituals",
+      "life balance", "harmony", "peaceful living",
+      "self-expression", "finding voice", "speaking truth",
+      "courage", "bravery", "facing fears", "stepping up",
+      "forgiveness", "letting go", "moving forward",
+      "authenticity", "being real", "true self",
+      "patience", "taking time", "slow progress",
+      "acceptance", "embracing reality", "making peace"
+    ]
+  };
 
     // ================================
-    // ADVANCED NEURAL SIMULATION
+    // ENHANCED LOCAL MEMORY WITH HIGH EQ
     // ================================
-    class NeuralMentivio {
+    class HighEQMentivio {
       constructor() {
-        this.shortTermMemory = [];
-        this.longTermMemory = JSON.parse(localStorage.getItem('mentivio_brain')) || {
-          userPatterns: {},
-          emotionalBaseline: {},
-          conversationThemes: [],
-          learnedResponses: {}
-        };
+        this.conversationHistory = JSON.parse(localStorage.getItem('mentivio_high_eq_history')) || [];
         this.conversationState = {
           phase: 'engagement',
           trustLevel: 0,
           emotionalTemperature: 0,
           lastEmotion: 'neutral',
-          unspokenTopics: []
+          needsInspiration: false,
+          topicsDiscussed: []
         };
       }
 
-      // [All AI methods remain the same as your original code - keeping it concise]
-      deepAnalyze(text) {
-        return {
-          surfaceEmotion: this.detectSurfaceEmotion(text),
-          underlyingEmotion: this.inferUnderlyingEmotion(text),
-          emotionalIntensity: this.calculateIntensity(text),
-          cognitiveDistortions: this.detectDistortions(text),
-          coreBeliefs: this.extractBeliefs(text),
-          copingStyle: this.identifyCopingStyle(text),
-          pronounRatio: this.analyzePronouns(text),
-          qualifierCount: this.countQualifiers(text),
-          passiveLanguage: this.detectPassiveVoice(text),
-          riskFactors: this.assessRisk(text),
-          protectiveFactors: this.assessProtectiveFactors(text),
-          vulnerabilitySignal: this.detectVulnerability(text),
-          hopeIndicators: this.detectHope(text)
-        };
-      }
-
-      detectSurfaceEmotion(text) {
-        const emotionMap = {
-          joy: /(happy|great|excited|wonderful|amazing|love|grateful)/gi,
-          sadness: /(sad|down|depressed|hopeless|empty|alone|tired)/gi,
-          anxiety: /(anxious|worried|nervous|scared|afraid|panic|overwhelmed)/gi,
-          anger: /(angry|mad|frustrated|annoyed|hate|pissed)/gi,
-          shame: /(embarrassed|ashamed|guilty|stupid|worthless)/gi
-        };
-        
-        let maxEmotion = 'neutral';
-        let maxCount = 0;
-        
-        for (const [emotion, pattern] of Object.entries(emotionMap)) {
-          const matches = text.match(pattern) || [];
-          if (matches.length > maxCount) {
-            maxCount = matches.length;
-            maxEmotion = emotion;
-          }
-        }
-        
-        return maxEmotion;
-      }
-
-      inferUnderlyingEmotion(text) {
-        const context = this.shortTermMemory.slice(-3).join(' ');
-        
-        if (context.includes('should have') || context.includes('could have')) {
-          return 'regret';
-        }
-        if (context.includes('always') || context.includes('never')) {
-          return 'helplessness';
-        }
-        if (text.includes('fine') && text.length < 10) {
-          return 'avoidance';
-        }
-        if (text.includes('I don\'t know') && this.conversationState.trustLevel > 3) {
-          return 'uncertainty';
-        }
-        
-        return this.detectSurfaceEmotion(text);
-      }
-
-      detectDistortions(text) {
-        const distortions = [];
-        
-        if (text.match(/\b(always|never|every|nobody|everyone)\b/gi)) {
-          distortions.push('black_white_thinking');
-        }
-        
-        if (text.match(/\b(disaster|worst|awful|terrible|end of the world)\b/gi)) {
-          distortions.push('catastrophizing');
-        }
-        
-        if (text.match(/\b(they think|he believes|she feels|people say)\b/gi)) {
-          distortions.push('mind_reading');
-        }
-        
-        if (text.match(/\b(should|must|have to|ought to)\b/gi)) {
-          distortions.push('should_statements');
-        }
-        
-        return distortions;
-      }
-
-      generateHumanResponse(analysis, userText) {
-        const responseArchitecture = this.buildResponseArchitecture(analysis);
-        
-        return this.assembleResponse(
-          responseArchitecture,
-          userText,
-          this.conversationState
-        );
-      }
-
-      buildResponseArchitecture(analysis) {
-        const archetype = this.selectArchetype(analysis);
-        
-        return {
-          archetype,
-          components: [
-            this.getEmpathicMirror(analysis),
-            this.getClinicalInsight(analysis),
-            this.getMetaphor(analysis),
-            this.getQuestion(analysis),
-            this.getAffirmation(analysis)
-          ].filter(comp => comp !== null),
-          pacing: this.determinePacing(analysis),
-          tone: this.determineTone(analysis)
-        };
-      }
-
-      selectArchetype(analysis) {
-        const trust = this.conversationState.trustLevel;
-        const emotion = analysis.underlyingEmotion;
-        
-        if (trust < 2) return 'gentle_explorer';
-        if (emotion === 'shame') return 'unconditional_accepter';
-        if (analysis.riskFactors.length > 0) return 'grounded_protector';
-        if (analysis.vulnerabilitySignal) return 'tender_witness';
-        if (analysis.hopeIndicators > 0) return 'hope_cultivator';
-        
-        return 'reflective_companion';
-      }
-
-      getEmpathicMirror(analysis) {
-        const mirrors = {
-          sadness: [
-            "I hear the heaviness in what you're sharing",
-            "That sounds deeply painful to carry",
-            "I can feel the weight of this through your words"
-          ],
-          anxiety: [
-            "I sense the swirl of thoughts and worries",
-            "That uncertainty must feel overwhelming",
-            "I'm noticing the tension in what you describe"
-          ],
-          anger: [
-            "I hear the frustration bubbling up",
-            "That injustice would make anyone feel that way",
-            "I sense the fire behind those words"
-          ],
-          shame: [
-            "I hear how hard you're being on yourself",
-            "That self-criticism sounds heavy to carry",
-            "I'm noticing the protective layer around that pain"
-          ],
-          joy: [
-            "I can feel the lightness in your sharing",
-            "That warmth comes through clearly",
-            "I'm smiling hearing about this"
-          ]
-        };
-        
-        const emotion = analysis.underlyingEmotion;
-        const options = mirrors[emotion] || mirrors.sadness;
-        return this.addNaturalVariation(options[Math.floor(Math.random() * options.length)]);
-      }
-
-      getClinicalInsight(analysis) {
-        if (this.conversationState.trustLevel < 3) return null;
-        
-        const insights = {
-          black_white_thinking: "When our minds see only extremes, the middle ground often holds the truth",
-          catastrophizing: "The mind has a way of making mountains out of molehills when we're stressed",
-          mind_reading: "We often project our own fears onto what others might be thinking",
-          should_statements: "'Should' is often the language of others' expectations, not our own values"
-        };
-        
-        const distortion = analysis.cognitiveDistortions[0];
-        return distortion && insights[distortion] 
-          ? this.makeInsightHuman(insights[distortion]) 
-          : null;
-      }
-
-      getMetaphor(analysis) {
-        if (!CONFIG.useMetaphors || Math.random() > 0.4) return null;
-        
-        const metaphors = {
-          sadness: [
-            "Like carrying a backpack full of stones that gets heavier each day",
-            "As if you're walking through honey - everything requires extra effort",
-            "Like watching life through a thick glass window"
-          ],
-          anxiety: [
-            "Like your thoughts are browser tabs that won't close",
-            "As if you're constantly braced for a wave that never comes",
-            "Like living with an overzealous alarm system"
-          ],
-          growth: [
-            "Healing isn't a straight line - it's more like a spiral where we revisit things with new perspective",
-            "Our emotions are like weather - they come and go, but we're the sky that holds them",
-            "The mind is like a garden - some parts need tending, others need space to grow wild"
-          ]
-        };
-        
-        const category = analysis.hopeIndicators > 0 ? 'growth' : analysis.underlyingEmotion;
-        const options = metaphors[category] || metaphors.growth;
-        return options[Math.floor(Math.random() * options.length)];
-      }
-
-      getQuestion(analysis) {
-        const trust = this.conversationState.trustLevel;
-        const phase = this.conversationState.phase;
-        
-        if (phase === 'engagement') {
-          const questions = [
-            "What's been on your heart lately?",
-            "Where does your mind go when it wanders?",
-            "What feeling has been visiting you most often?"
-          ];
-          return questions[Math.floor(Math.random() * questions.length)];
-        }
-        
-        if (phase === 'exploration' && trust > 2) {
-          const probingQuestions = {
-            sadness: "Where in your body do you feel this sadness?",
-            anxiety: "What's the quietest whisper beneath all those worries?",
-            anger: "What need isn't being met that's fueling this frustration?",
-            shame: "If you spoke to yourself like you would a dear friend, what would you say?"
-          };
-          
-          return probingQuestions[analysis.underlyingEmotion] || 
-                "What part of this feels most tender to touch?";
-        }
-        
-        if (phase === 'processing') {
-          return "What would it feel like to hold this with a little more gentleness?";
-        }
-        
-        return "How does sitting with this feel right now?";
-      }
-
-      getAffirmation(analysis) {
-        const affirmations = [
-          "You're showing real courage by looking at this",
-          "Your willingness to explore this is itself healing",
-          "I'm here with you in this, however it unfolds",
-          "This is hard work, and you're doing it",
-          "Your feelings make sense, given what you're carrying"
-        ];
-        
-        if (analysis.qualifierCount > 3 || analysis.vulnerabilitySignal) {
-          return affirmations[Math.floor(Math.random() * affirmations.length)];
-        }
-        
-        return null;
-      }
-
-      assembleResponse(architecture, userText, state) {
-        let response = '';
-        
-        if (Math.random() > 0.7 && state.trustLevel > 2) {
-          const fillers = ["Hmm", "Let me sit with that", "I'm thinking", "You know"];
-          response += `<em>${fillers[Math.floor(Math.random() * fillers.length)]}...</em><br><br>`;
-        }
-        
-        architecture.components.forEach((component, index) => {
-          if (index > 0) {
-            const connectors = [" ", "<br><br>", " I wonder... ", " Maybe... "];
-            response += connectors[Math.min(index, connectors.length - 1)];
-          }
-          
-          if (index === 0 && Math.random() > 0.5 && userText.length < 100) {
-            response += this.paraphraseWithEmpathy(userText) + " ";
-          }
-          
-          response += component;
+      updateLocalState(userText, emotion = 'neutral') {
+        this.conversationHistory.push({
+          text: userText,
+          role: 'user',
+          timestamp: Date.now(),
+          emotion: emotion
         });
-        
-        if (state.trustLevel > 1) {
-          const closers = ["", " I'm here.", " Take your time.", " No rush."];
-          if (Math.random() > 0.6) {
-            response += closers[Math.floor(Math.random() * closers.length)];
-          }
+
+        if (this.conversationHistory.length > 50) {
+          this.conversationHistory.shift();
         }
-        
-        return response;
-      }
 
-      addNaturalVariation(text) {
-        const variations = [
-          () => text,
-          () => text.charAt(0).toLowerCase() + text.slice(1),
-          () => text + ", you know?",
-          () => "You know, " + text.toLowerCase(),
-          () => text.replace(/\.$/, '...')
-        ];
-        
-        return variations[Math.floor(Math.random() * variations.length)]();
-      }
+        localStorage.setItem('mentivio_high_eq_history', JSON.stringify(this.conversationHistory));
 
-      makeInsightHuman(insight) {
-        const humanizers = [
-          "It occurs to me that " + insight.toLowerCase(),
-          "I'm reminded that " + insight.toLowerCase(),
-          "Something that often helps: " + insight.toLowerCase(),
-          "A thought: " + insight.toLowerCase()
-        ];
-        
-        return humanizers[Math.floor(Math.random() * humanizers.length)];
-      }
-
-      paraphraseWithEmpathy(text) {
-        const paraphrases = [
-          `So you're saying "${this.shortenText(text, 50)}"`,
-          `If I'm hearing you right: ${this.shortenText(text, 60)}`,
-          `What I'm understanding: ${this.shortenText(text, 40)}`
-        ];
-        
-        return paraphrases[Math.floor(Math.random() * paraphrases.length)];
-      }
-
-      shortenText(text, maxLength) {
-        if (text.length <= maxLength) return text;
-        return text.substring(0, maxLength) + '...';
-      }
-
-      updateConversationState(userText, analysis) {
-        if (analysis.vulnerabilitySignal) {
-          this.conversationState.trustLevel += 0.5;
-        }
-        
-        const messageCount = this.shortTermMemory.length;
+        // Update conversation state with more nuanced phases
+        const messageCount = this.conversationHistory.filter(m => m.role === 'user').length;
         if (messageCount < 3) this.conversationState.phase = 'engagement';
         else if (messageCount < 8) this.conversationState.phase = 'exploration';
         else if (messageCount < 15) this.conversationState.phase = 'processing';
         else this.conversationState.phase = 'integration';
         
-        this.conversationState.lastEmotion = analysis.underlyingEmotion;
-        this.conversationState.emotionalTemperature = analysis.emotionalIntensity;
-        
-        if (analysis.pronounRatio > 0.7) {
-          this.conversationState.unspokenTopics.push('self_focus');
+        // Enhanced trust calculation
+        if (messageCount > 2) {
+          const meaningfulConvo = userText.length > 30; // Simple heuristic
+          this.conversationState.trustLevel = Math.min(10, 
+            messageCount * (meaningfulConvo ? 0.7 : 0.3)
+          );
         }
         
-        this.shortTermMemory.push({
-          text: userText,
-          analysis,
-          timestamp: Date.now()
-        });
-        
-        if (this.shortTermMemory.length > CONFIG.memoryDepth) {
-          this.shortTermMemory.shift();
+        // Check if inspiration is needed
+        if (['sad', 'overwhelmed', 'lonely', 'hopeless'].includes(emotion)) {
+          this.conversationState.needsInspiration = true;
         }
       }
 
-      learnFromInteraction(userText, botResponse, userReactionTime = 0) {
-        if (!CONFIG.learningEnabled) return;
-        
-        const key = this.extractKeyPhrase(userText);
-        if (key) {
-          if (!this.longTermMemory.learnedResponses[key]) {
-            this.longTermMemory.learnedResponses[key] = [];
-          }
-          
-          this.longTermMemory.learnedResponses[key].push({
-            response: botResponse,
-            effectiveness: this.estimateEffectiveness(userReactionTime),
-            timestamp: Date.now()
-          });
-          
-          if (this.longTermMemory.learnedResponses[key].length > 10) {
-            this.longTermMemory.learnedResponses[key].shift();
-          }
-        }
-        
-        localStorage.setItem('mentivio_brain', JSON.stringify(this.longTermMemory));
-      }
-
-      estimateEffectiveness(reactionTime) {
-        if (reactionTime < 2000) return 0.9;
-        if (reactionTime < 5000) return 0.7;
-        if (reactionTime < 10000) return 0.5;
-        return 0.3;
-      }
-
-      extractKeyPhrase(text) {
-        const words = text.toLowerCase().split(' ');
-        const keyWords = words.filter(word => 
-          word.length > 4 && 
-          !['about', 'really', 'actually', 'maybe', 'perhaps'].includes(word)
-        );
-        
-        return keyWords.slice(0, 2).join('_');
-      }
-
-      calculateIntensity(text) {
-        let intensity = 1;
-        
-        intensity += (text.match(/!/g) || []).length * 0.3;
-        
-        const caps = text.match(/[A-Z]{3,}/g) || [];
-        intensity += caps.length * 0.5;
-        
-        const intensifiers = /\b(extremely|incredibly|absolutely|completely|utterly)\b/gi;
-        intensity += (text.match(intensifiers) || []).length * 0.4;
-        
-        if (text.length < 20) intensity += 0.3;
-        if (text.length > 200) intensity += 0.2;
-        
-        return Math.min(10, Math.max(1, intensity));
-      }
-
-      analyzePronouns(text) {
-        const words = text.toLowerCase().split(' ');
-        const iCount = words.filter(w => w === 'i' || w === "i'm" || w === "i'll").length;
-        const youCount = words.filter(w => w === 'you' || w === "you're").length;
-        const theyCount = words.filter(w => w === 'they' || w === 'them').length;
-        
-        const total = iCount + youCount + theyCount;
-        return total > 0 ? iCount / total : 0;
-      }
-
-      countQualifiers(text) {
-        const qualifiers = /\b(just|only|maybe|perhaps|sort of|kind of|a little)\b/gi;
-        return (text.match(qualifiers) || []).length;
-      }
-
-      detectPassiveVoice(text) {
-        return /\b(was|were) \w+ed\b/gi.test(text) ||
-              /\b(can't|cannot|won't) \w+\b/gi.test(text);
-      }
-
-      assessRisk(text) {
-        const risks = [];
-        const crisisWords = /\b(suicide|kill myself|end it all|don't want to live)\b/gi;
-        const selfHarm = /\b(cut|hurt myself|pain|bleed)\b/gi;
-        const hopelessness = /\b(hopeless|pointless|nothing matters|why try)\b/gi;
-        
-        if (crisisWords.test(text)) risks.push('immediate_crisis');
-        if (selfHarm.test(text)) risks.push('self_harm_risk');
-        if (hopelessness.test(text)) risks.push('severe_hopelessness');
-        
-        return risks;
-      }
-
-      assessProtectiveFactors(text) {
-        const factors = [];
-        
-        if (text.includes('try') || text.includes('want to feel better')) {
-          factors.push('motivation_for_change');
-        }
-        if (text.includes('friend') || text.includes('family') || text.includes('support')) {
-          factors.push('social_support');
-        }
-        if (text.includes('therapy') || text.includes('counselor') || text.includes('medication')) {
-          factors.push('professional_help');
-        }
-        if (text.includes('hope') || text.includes('better') || text.includes('improve')) {
-          factors.push('hope');
-        }
-        
-        return factors;
-      }
-
-      detectVulnerability(text) {
-        return text.includes('I feel') ||
-              text.includes('scared to admit') ||
-              text.includes('never told anyone') ||
-              (this.countQualifiers(text) > 2 && text.length > 30);
-      }
-
-      detectHope(text) {
-        const hopeWords = /\b(hope|better|improve|heal|recover|growth|learn)\b/gi;
-        return (text.match(hopeWords) || []).length;
-      }
-
-      identifyCopingStyle(text) {
-        if (text.match(/\b(avoid|ignore|distract|busy)\b/gi)) return 'avoidant';
-        if (text.match(/\b(ruminate|overthink|analyze|figure out)\b/gi)) return 'ruminative';
-        if (text.match(/\b(talk|share|express|vent)\b/gi)) return 'expressive';
-        if (text.match(/\b(exercise|walk|breathe|meditate)\b/gi)) return 'active';
-        return 'unknown';
-      }
-
-      extractBeliefs(text) {
-        const beliefs = [];
-        
-        const beliefPatterns = [
-          /\b(I am|I'm) (.*?)(\.|but|and)/gi,
-          /\b(people are|everyone is|no one) (.*?)(\.|but|and)/gi,
-          /\b(the world is|life is) (.*?)(\.|but|and)/gi
-        ];
-        
-        beliefPatterns.forEach(pattern => {
-          const matches = text.match(pattern) || [];
-          matches.forEach(match => {
-            beliefs.push(match.trim());
-          });
-        });
-        
-        return beliefs;
-      }
-
-      determinePacing(analysis) {
-        if (analysis.emotionalIntensity > 7) return 'slow';
-        if (analysis.emotionalIntensity < 3) return 'moderate';
-        return 'normal';
-      }
-
-      determineTone(analysis) {
-        if (analysis.underlyingEmotion === 'shame') return 'gentle';
-        if (analysis.riskFactors.length > 0) return 'grounded';
-        if (analysis.vulnerabilitySignal) return 'tender';
-        return 'warm';
+      getConversationContext() {
+        return this.conversationHistory.slice(-10).map(msg => ({
+          role: msg.role,
+          content: msg.text,
+          emotion: msg.emotion
+        }));
       }
     }
 
     // ================================
-    // SIMPLE, RESPONSIVE CHATBOT UI
+    // ENHANCED BACKEND API COMMUNICATION
     // ================================
-    // Create and inject the chatbot HTML
+    async function callBackendAPI(userMessage, conversationContext, emotion) {
+      try {
+        const response = await fetch(CONFIG.apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: userMessage,
+            context: conversationContext,
+            emotion: emotion,
+            safety_mode: CONFIG.safetyMode,
+            allowed_topics: CONFIG.allowedTopics,
+            conversation_state: {
+              phase: ai.conversationState.phase,
+              trust_level: ai.conversationState.trustLevel,
+              needs_inspiration: ai.conversationState.needsInspiration
+            }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error);
+        }
+
+        return data;
+      } catch (error) {
+        console.error('API Error:', error);
+        return {
+          response: "I'm here with you, even when connections falter. Your words matter deeply. What's one true thing you want to share?",
+          emotion: "steadfast",
+          is_safe: true,
+          suggested_topics: ["What's in your heart", "Small hopes", "Quiet thoughts"]
+        };
+      }
+    }
+
+    // ================================
+    // ENHANCED FRONTEND AI EMOTION DETECTION
+    // ================================
+    function detectEmotion(text) {
+      const emotionKeywords = {
+        overwhelmed: /(overwhelmed|too much|can't handle|drowning|buried|sinking)/gi,
+        anxious: /(anxious|worried|nervous|scared|afraid|panic|stress|uncertain)/gi,
+        sad: /(sad|depressed|down|hopeless|empty|alone|tired|numb|heavy|lost)/gi,
+        angry: /(angry|mad|frustrated|annoyed|hate|pissed|resent)/gi,
+        happy: /(happy|good|great|excited|wonderful|amazing|love|joy|smile)/gi,
+        hopeful: /(hope|better|possible|maybe|could|future|light|progress)/gi,
+        grateful: /(thankful|grateful|appreciate|blessed|lucky|fortunate)/gi,
+        lonely: /(lonely|alone|isolated|no one|by myself|abandoned|separate)/gi,
+        curious: /(curious|wonder|interesting|fascinating|learn|discover|explore)/gi,
+        peaceful: /(calm|peace|quiet|serene|still|tranquil|centered|balanced)/gi
+      };
+      
+      let detectedEmotion = 'neutral';
+      let maxCount = 0;
+      
+      for (const [emotion, pattern] of Object.entries(emotionKeywords)) {
+        const matches = text.match(pattern) || [];
+        if (matches.length > maxCount) {
+          maxCount = matches.length;
+          detectedEmotion = emotion;
+        }
+      }
+      
+      return detectedEmotion;
+    }
+
+    // ================================
+    // CHATBOT UI (ENHANCED WITH HIGH EQ)
+    // ================================
     const mentivioHTML = `
     <div id="mentivio-root">
       <!-- Floating avatar -->
@@ -588,8 +267,8 @@
           <div class="header-content">
             <div id="activeEmotion" class="active-emotion"></div>
             <div class="header-text">
-              <strong class="mentivio-title">Mentivio (Demo)</strong>
-              <small id="currentDay" class="mentivio-subtitle">Thinking with you</small>
+              <strong class="mentivio-title">Mentivio: Your Friend</strong>
+              <small id="currentDay" class="mentivio-subtitle">Safe space for real conversations</small>
             </div>
           </div>
           <button id="closeMentivio" class="close-btn" aria-label="Close chat">×</button>
@@ -602,7 +281,10 @@
         <div id="mentivioMessages" class="messages-container">
           <div class="message bot welcome-message">
             <div class="message-content">
-              <div class="message-text">Hello. I'm here to listen and think alongside you. No judgment, just presence.</div>
+              <div class="message-text">
+                <div style="font-size: 20px; margin-bottom: 8px;">🌱</div>
+                Hello. I'm Mentivio, your mental health companion. I'm here to listen deeply, understand without judgment, and help you find light even on dark days. Your feelings are welcome here, all of them.
+              </div>
               <div class="message-time">just now</div>
             </div>
           </div>
@@ -621,17 +303,25 @@
         <!-- Input area -->
         <div class="input-container">
           <div class="input-wrapper">
-            <textarea id="mentivioInput" placeholder="What's on your mind?" class="message-input" rows="1"></textarea>
+            <textarea id="mentivioInput" placeholder="Share what's in your heart... (All feelings welcome)" class="message-input" rows="1"></textarea>
             <button id="sendBtn" class="send-btn" aria-label="Send message">➤</button>
           </div>
           
-          <!-- Quick emotional check-in -->
+          <!-- Enhanced quick emotional check-in -->
           <div id="quickEmotions" class="quick-emotions">
-            <button class="quick-emotion" data-emotion="overwhelmed">😰 Overwhelmed</button>
-            <button class="quick-emotion" data-emotion="anxious">😟 Anxious</button>
-            <button class="quick-emotion" data-emotion="sad">😔 Sad</button>
-            <button class="quick-emotion" data-emotion="angry">😠 Angry</button>
-            <button class="quick-emotion" data-emotion="neutral">😐 Neutral</button>
+            <button class="quick-emotion" data-emotion="overwhelmed">😰 Heavy Heart</button>
+            <button class="quick-emotion" data-emotion="anxious">😟 Anxious Thoughts</button>
+            <button class="quick-emotion" data-emotion="sad">😔 Feeling Low</button>
+            <button class="quick-emotion" data-emotion="lonely">🌌 Feeling Alone</button>
+            <button class="quick-emotion" data-emotion="curious">🤔 Seeking Meaning</button>
+            <button class="quick-emotion" data-emotion="hopeful">✨ Looking for Hope</button>
+          </div>
+          
+          <!-- Enhanced safety notice -->
+          <div class="safety-notice" style="font-size: 11px; color: #64748b; text-align: center; margin-top: 8px; padding: 8px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="fas fa-heart" style="color: #ec4899;"></i>
+            Safe space • High EQ • Always here for you
+            <span style="color: #ef4444; cursor: pointer; margin-left: 8px;" onclick="window.showEnhancedCrisisResources()">Need urgent support?</span>
           </div>
         </div>
       </div>
@@ -640,7 +330,7 @@
     document.body.insertAdjacentHTML('beforeend', mentivioHTML);
 
     // ================================
-    // ADD FIXED + RESPONSIVE CSS
+    // ADD CSS (SAME STRUCTURE, SLIGHT ENHANCEMENTS)
     // ================================
     const style = document.createElement('style');
     style.textContent = `
@@ -651,7 +341,7 @@
         right: 20px;
         width: 60px;
         height: 60px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -659,7 +349,7 @@
         color: white;
         font-size: 28px;
         cursor: pointer;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
         z-index: 10000;
         transition: all 0.3s ease;
         border: 3px solid white;
@@ -667,10 +357,10 @@
       
       #mentivioAvatar:hover {
         transform: scale(1.1);
-        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        box-shadow: 0 6px 30px rgba(139, 92, 246, 0.6);
       }
       
-      /* DESKTOP VIEW - Fixed size always */
+      /* DESKTOP VIEW - Slightly larger */
       #mentivioWindow {
         position: fixed;
         display: none;
@@ -680,8 +370,8 @@
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
         z-index: 9999;
         overflow: hidden;
-        width: 380px; /* Fixed width for desktop */
-        height: 600px; /* Fixed height for desktop */
+        width: 420px; /* Increased from 380px */
+        height: 650px; /* Increased from 600px */
         bottom: 100px;
         right: 20px;
         transition: opacity 0.3s ease, transform 0.3s ease;
@@ -792,7 +482,7 @@
       /* Header styles */
       .mentivio-header {
         padding: 18px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
         color: white;
         position: relative;
       }
@@ -853,7 +543,7 @@
       /* Connection Bar */
       .connection-bar {
         height: 3px;
-        background: linear-gradient(90deg, #667eea 0%, #e2e8f0 100%);
+        background: linear-gradient(90deg, #8b5cf6 0%, #e2e8f0 100%);
         transition: all 1s ease;
       }
       
@@ -893,12 +583,14 @@
         background: white;
         border: 1px solid #e2e8f0;
         border-bottom-left-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
       }
       
       .message.user .message-content {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
         color: white;
         border-bottom-right-radius: 6px;
+        box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
       }
       
       .message-text {
@@ -911,6 +603,12 @@
         opacity: 0.6;
         margin-top: 4px;
         text-align: right;
+      }
+      
+      /* Welcome message enhancement */
+      .welcome-message .message-content {
+        background: linear-gradient(135deg, #f0f9ff, #fef2f2);
+        border-left: 4px solid #8b5cf6;
       }
       
       /* Typing Indicator */
@@ -934,7 +632,7 @@
       .typing-dots span {
         width: 6px;
         height: 6px;
-        background: #667eea;
+        background: #8b5cf6;
         border-radius: 50%;
         animation: typingDots 1.4s infinite;
       }
@@ -965,14 +663,15 @@
         margin-bottom: 10px;
       }
       
+      /* Enhanced message input - taller on desktop */
       .message-input {
         width: 100%;
-        padding: 12px 45px 12px 12px;
+        padding: 14px 45px 14px 12px; /* Increased top/bottom padding from 12px to 14px */
         border: 1px solid #e2e8f0;
         border-radius: 12px;
         resize: none;
-        min-height: 20px;
-        max-height: 80px;
+        min-height: 24px; /* Increased from 20px */
+        max-height: 100px; /* Increased from 80px */
         font-family: inherit;
         font-size: 14px;
         background: #f8fafc;
@@ -982,15 +681,15 @@
       
       .message-input:focus {
         outline: none;
-        border-color: #667eea;
-        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
       }
       
       .send-btn {
         position: absolute;
         right: 8px;
         bottom: 8px;
-        background: #667eea;
+        background: #8b5cf6;
         color: white;
         border: none;
         width: 32px;
@@ -1006,47 +705,93 @@
       }
       
       .send-btn:hover {
-        background: #5a6fd8;
+        background: #7c3aed;
       }
       
-      /* Quick Emotions */
+      /* Enhanced Quick Emotions - Scrollable on Desktop */
       .quick-emotions {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start; /* Changed from space-between */
         gap: 6px;
         overflow-x: auto;
-        padding-bottom: 2px;
+        padding: 8px 2px 12px 2px; /* Added more padding at bottom */
         -webkit-overflow-scrolling: touch;
+        margin-bottom: 8px;
+        
+        /* Hide scrollbar by default, show on hover for desktop */
+        scrollbar-width: thin; /* Firefox */
+        scrollbar-color: #cbd5e1 #f1f5f9; /* Firefox */
       }
       
+      /* Custom scrollbar styling for webkit browsers */
       .quick-emotions::-webkit-scrollbar {
-        height: 2px;
+        height: 6px; /* Made thicker */
       }
       
       .quick-emotions::-webkit-scrollbar-track {
         background: #f1f5f9;
+        border-radius: 3px;
       }
       
       .quick-emotions::-webkit-scrollbar-thumb {
         background: #cbd5e1;
-        border-radius: 2px;
+        border-radius: 3px;
+        transition: background 0.3s;
+      }
+      
+      .quick-emotions::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      
+      /* Show scrollbar on desktop (non-touch devices) */
+      @media (hover: hover) and (pointer: fine) {
+        .quick-emotions {
+          /* Always show scrollbar on desktop */
+          scrollbar-width: thin;
+          overflow-x: auto;
+          padding-bottom: 12px; /* Space for scrollbar */
+        }
+        
+        .quick-emotions::-webkit-scrollbar {
+          display: block;
+          height: 6px;
+        }
+      }
+      
+      /* Hide scrollbar on mobile (touch devices) by default */
+      @media (hover: none) and (pointer: coarse) {
+        .quick-emotions::-webkit-scrollbar {
+          display: none; /* Hide scrollbar on mobile */
+        }
+        
+        .quick-emotions {
+          -ms-overflow-style: none; /* IE and Edge */
+          scrollbar-width: none; /* Firefox */
+        }
+        
+        .quick-emotions::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, Opera */
+        }
       }
       
       .quick-emotion {
-        padding: 7px 10px;
-        background: #f1f5f9;
-        border: none;
+        padding: 8px 12px; /* Slightly increased padding */
+        background: linear-gradient(135deg, #f8fafc, #f0f9ff);
+        border: 1px solid #e2e8f0;
         border-radius: 16px;
         font-size: 12px;
         cursor: pointer;
         transition: all 0.2s;
-        flex-shrink: 0;
+        flex-shrink: 0; /* Prevent shrinking */
         white-space: nowrap;
+        color: #475569;
+        min-width: max-content; /* Ensure buttons don't shrink */
       }
       
       .quick-emotion:hover {
-        background: #e2e8f0;
+        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
         transform: translateY(-1px);
+        border-color: #cbd5e1;
       }
       
       /* Animations */
@@ -1079,9 +824,9 @@
         }
       }
       
-      /* Scrollbar Styling */
+      /* Scrollbar Styling for messages */
       .messages-container::-webkit-scrollbar {
-        width: 5px;
+        width: 6px; /* Slightly thicker */
       }
       
       .messages-container::-webkit-scrollbar-track {
@@ -1109,15 +854,80 @@
         #mentivioAvatar:active {
           transform: scale(0.95);
         }
+        
+        /* Make quick emotions easier to scroll on mobile */
+        .quick-emotions {
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+        }
+        
+        .quick-emotion {
+          scroll-snap-align: start;
+        }
+      }
+      
+      /* High EQ specific enhancements */
+      .safety-notice {
+        cursor: pointer;
+        margin-top: 8px;
+      }
+      
+      .safety-notice span:hover {
+        text-decoration: underline;
+      }
+      
+      /* Desktop-specific adjustments */
+      @media (min-width: 769px) {
+        .quick-emotions {
+          max-width: 100%;
+          overflow-x: auto;
+          scrollbar-width: thin; /* Always show scrollbar on desktop */
+        }
+        
+        /* Make sure quick emotions are always visible and scrollable */
+        .quick-emotion {
+          flex: 0 0 auto; /* Don't grow or shrink, just auto basis */
+        }
+        
+        /* Adjust input container padding for taller input */
+        .input-container {
+          padding: 18px 15px 15px 15px; /* Slightly more top padding */
+        }
+        
+        /* Slightly larger message input on desktop */
+        .message-input {
+          font-size: 15px; /* Slightly larger font on desktop */
+          min-height: 26px;
+        }
+        
+        /* Adjust send button position for taller input */
+        .send-btn {
+          bottom: 10px; /* Adjusted for taller input */
+        }
+      }
+      
+      /* Larger desktop screens */
+      @media (min-width: 1200px) {
+        #mentivioWindow {
+          width: 440px; /* Even larger on very big screens */
+          height: 680px;
+        }
+        
+        .message-text {
+          font-size: 15px; /* Slightly larger text on big screens */
+        }
       }
     `;
+    
+
+
     
     document.head.appendChild(style);
 
     // ================================
     // INITIALIZATION
     // ================================
-    const ai = new NeuralMentivio();
+    const ai = new HighEQMentivio();
     let isTyping = false;
     let lastInteractionTime = Date.now();
     let isWindowOpen = false;
@@ -1141,31 +951,28 @@
     
     function updateDay() {
       const day = new Date().toLocaleDateString('en-US', { weekday: 'short' });
-      currentDay.textContent = `Thinking with you • ${day}`;
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      currentDay.textContent = `Heart Space • ${day} • ${time}`;
     }
 
     // ================================
-    // SIMPLE WINDOW MANAGEMENT
+    // WINDOW MANAGEMENT
     // ================================
     function showWindow() {
       if (isWindowOpen) return;
       
       isWindowOpen = true;
       
-      // Lock body scroll on mobile
       if (window.innerWidth <= 768) {
         document.body.classList.add('mentivio-open');
       }
       
-      // Show window with animation
       windowEl.classList.add('open');
       
-      // Focus input
       setTimeout(() => {
         input.focus();
       }, 100);
       
-      // Update avatar emoji
       updateAvatarEmoji('listening');
     }
     
@@ -1173,22 +980,14 @@
       if (!isWindowOpen) return;
       
       isWindowOpen = false;
-      
-      // Remove open class
       windowEl.classList.remove('open');
-      
-      // Remove body scroll lock
       document.body.classList.remove('mentivio-open');
-      
-      // Update avatar emoji
       updateAvatarEmoji('calm');
     }
 
-    // Toggle window
     avatar.addEventListener('click', showWindow);
     closeBtn.addEventListener('click', hideWindow);
 
-    // Close on escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && isWindowOpen) {
         hideWindow();
@@ -1196,72 +995,109 @@
     });
 
     // ================================
-    // MESSAGE HANDLING
+    // ENHANCED MESSAGE HANDLING WITH HIGH EQ
     // ================================
-    function sendMessage() {
+    async function sendMessage() {
       const text = input.value.trim();
       if (!text || isTyping) return;
 
+      // Enhanced frontend filter with high EQ approach
+      const crisisPatterns = [
+        /kill.*myself/i,
+        /suicide.*now/i,
+        /end.*my.*life.*now/i,
+        /self.*harm.*now/i,
+        /emergency.*help/i
+      ];
+      
+      const suicidalThoughtPatterns = [
+        /want.*to.*die/i,
+        /hopeless/i,
+        /worthless/i,
+        /burden/i,
+        /no.*point/i,
+        /can't.*go.*on/i
+      ];
+      
+      if (crisisPatterns.some(pattern => pattern.test(text))) {
+        // Immediate crisis response
+        addMessage("I hear how much pain you're in, and my heart is with you right now. Let me share some immediate support resources.", 'bot');
+        window.showEnhancedCrisisResources();
+        input.value = '';
+        return;
+      }
+      
+      if (suicidalThoughtPatterns.some(pattern => pattern.test(text))) {
+        // Suicidal thoughts - high EQ response
+        addMessage("Thank you for trusting me with these heavy thoughts. I want you to know: your feelings make sense and your pain is real. Let's talk about finding support.", 'bot');
+        setTimeout(() => {
+          window.showEnhancedCrisisResources();
+        }, 1000);
+        input.value = '';
+        return;
+      }
+
       // Add user message
+      const emotion = detectEmotion(text);
       addMessage(text, 'user');
+      ai.updateLocalState(text, emotion);
       input.value = '';
       resetInputHeight();
       
-      // Update avatar
       updateAvatarEmoji('thinking');
-      
-      // Show typing indicator
       showTyping();
       
-      // Simulate thinking time
-      setTimeout(() => {
-        try {
-          const analysis = ai.deepAnalyze(text);
-          ai.updateConversationState(text, analysis);
+      try {
+        // Call enhanced backend API
+        const context = ai.getConversationContext();
+        const response = await callBackendAPI(text, context, emotion);
+        
+        hideTyping();
+        
+        if (response.is_safe) {
+          // Add gentle emojis to bot responses occasionally
+          let botResponse = response.response;
+          if (Math.random() < 0.3 && !botResponse.includes('💭') && !botResponse.includes('🤍')) {
+            const gentleEmojis = [' 💭', ' 🤍', ' 🌱', ' ✨'];
+            botResponse += gentleEmojis[Math.floor(Math.random() * gentleEmojis.length)];
+          }
           
-          // Update emotional indicator
-          updateEmotionalIndicator(analysis.underlyingEmotion);
+          addMessage(botResponse, 'bot');
+          ai.updateLocalState(response.response, 'bot');
           
-          // Generate response
-          const response = ai.generateHumanResponse(analysis, text);
-          
-          // Hide typing and show response
-          hideTyping();
-          addMessage(response, 'bot');
-          updateAvatarEmoji('empathetic');
-          
-          // Update connection strength
+          updateEmotionalIndicator(response.emotion || emotion);
           updateConnectionStrength(ai.conversationState.trustLevel);
-          
-          // Learn from interaction
-          const reactionTime = Date.now() - lastInteractionTime;
-          ai.learnFromInteraction(text, response, reactionTime);
-          lastInteractionTime = Date.now();
-          
-          // Auto-scroll
-          scrollToBottom();
-        } catch (error) {
-          console.error('Error generating response:', error);
-          hideTyping();
-          addMessage("I'm here with you. Let's continue when you're ready.", 'bot');
-          updateAvatarEmoji('calm');
+          updateAvatarEmoji('empathetic');
+        } else {
+          // Handle unsafe response with high EQ
+          addMessage("I'm here to listen deeply to whatever's in your heart. Let's focus on finding light and meaning together.", 'bot');
         }
-      }, 800 + Math.min(text.length * 3, 1000));
+        
+        scrollToBottom();
+        lastInteractionTime = Date.now();
+        
+      } catch (error) {
+        console.error('Error:', error);
+        hideTyping();
+        addMessage("I'm here with you, present and listening. Sometimes technology falters, but our connection doesn't have to. What's one small thing you want to share?", 'bot');
+        updateAvatarEmoji('calm');
+      }
     }
 
-    // Quick emotions
+    // Enhanced quick emotions
     document.querySelectorAll('.quick-emotion').forEach(btn => {
       btn.addEventListener('click', function() {
         const emotion = this.dataset.emotion;
         const prompts = {
-          overwhelmed: "I'm feeling completely overwhelmed",
-          anxious: "I'm really anxious right now",
-          sad: "I'm feeling sad",
-          angry: "I'm angry",
-          neutral: "I feel neutral"
+          overwhelmed: "My heart feels so heavy right now. Everything feels like too much and I'm not sure how to keep going.",
+          anxious: "My mind won't stop racing with worries. I feel so anxious about everything that could go wrong.",
+          sad: "I'm feeling really low and sad today. The sadness feels heavy and I don't know how to lift it.",
+          lonely: "I feel so alone, even when people are around. The loneliness is profound and isolating.",
+          curious: "I'm searching for meaning in all of this. What's the purpose when things feel so hard?",
+          hopeful: "I'm trying to find hope. Can you help me see possibilities and light ahead?"
         };
         
-        input.value = prompts[emotion] || "I'm feeling " + emotion;
+        input.value = prompts[emotion] || `I'm feeling ${emotion} and could use someone to talk to.`;
         input.focus();
       });
     });
@@ -1306,7 +1142,6 @@
     }
 
     function formatMessage(text) {
-      // Simple line break conversion
       return text.replace(/\n/g, '<br>');
     }
 
@@ -1319,9 +1154,10 @@
       typingIndicator.style.display = 'block';
       
       const statuses = [
-        "Mentivio is thinking...",
-        "Processing with care...",
-        "Listening deeply..."
+        "Mentivio is thinking deeply...",
+        "Listening with my whole heart...",
+        "Reflecting on what you've shared...",
+        "Holding space for your words..."
       ];
       
       const statusElement = document.getElementById('typingStatus');
@@ -1338,7 +1174,11 @@
         thinking: '💭',
         listening: '👂',
         empathetic: '🤍',
-        calm: '😌'
+        calm: '😌',
+        warning: '⚠️',
+        hopeful: '✨',
+        present: '🌱',
+        caring: '💗'
       };
       
       const emoji = emojis[state] || '💭';
@@ -1347,12 +1187,17 @@
 
     function updateEmotionalIndicator(emotion) {
       const colors = {
-        joy: '#4ade80',
-        sadness: '#3b82f6',
-        anxiety: '#f59e0b',
-        anger: '#ef4444',
-        shame: '#8b5cf6',
-        neutral: '#94a3b8'
+        happy: '#4ade80',
+        sad: '#3b82f6',
+        anxious: '#f59e0b',
+        angry: '#ef4444',
+        overwhelmed: '#8b5cf6',
+        neutral: '#94a3b8',
+        curious: '#10b981',
+        hopeful: '#ec4899',
+        grateful: '#f59e0b',
+        lonely: '#64748b',
+        peaceful: '#06b6d4'
       };
       
       if (activeEmotion) {
@@ -1363,7 +1208,7 @@
     function updateConnectionStrength(trust) {
       const percentage = Math.min(100, trust * 15);
       if (connectionBar) {
-        connectionBar.style.background = `linear-gradient(90deg, #667eea ${percentage}%, #e2e8f0 ${percentage}%)`;
+        connectionBar.style.background = `linear-gradient(90deg, #8b5cf6 ${percentage}%, #e2e8f0 ${percentage}%)`;
       }
     }
 
@@ -1371,9 +1216,7 @@
       messages.scrollTop = messages.scrollHeight;
     }
 
-    // ================================
-    // INITIAL PULSE ANIMATION
-    // ================================
+    // Initial pulse animation
     setTimeout(() => {
       if (!isWindowOpen) {
         avatar.style.transform = 'scale(1.1)';
@@ -1383,19 +1226,13 @@
       }
     }, 2000);
 
-    // ================================
-    // HANDLE ORIENTATION CHANGES
-    // ================================
-    window.addEventListener('resize', () => {
-      // Just update day on resize
-      updateDay();
-    });
+    window.addEventListener('resize', updateDay);
   }
 
   // ================================
-  // GLOBAL CRISIS FUNCTION
+  // ENHANCED GLOBAL CRISIS FUNCTION
   // ================================
-  window.showCrisisResources = function() {
+  window.showEnhancedCrisisResources = function() {
     const modalHTML = `
     <div id="mentivio-crisis-modal" style="
       position: fixed;
@@ -1403,7 +1240,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.9);
+      background: rgba(0,0,0,0.95);
       z-index: 20000;
       display: flex;
       align-items: center;
@@ -1420,33 +1257,76 @@
         overflow-y: auto;
         box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       ">
-        <h2 style="color: #ef4444; margin-top: 0; font-size: 20px; text-align: center;">🆘 Immediate Support</h2>
-        <p style="color: #4b5563; margin-bottom: 20px; font-size: 14px; text-align: center;">You're not alone. Help is available:</p>
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="font-size: 40px; margin-bottom: 10px;">🤍</div>
+          <h2 style="color: #ef4444; margin-top: 0; font-size: 20px;">Your Life Matters</h2>
+          <p style="color: #4b5563; margin-bottom: 20px; font-size: 14px; line-height: 1.5;">
+            You're not alone in this darkness. There are people waiting to help you find your way back to light.
+          </p>
+        </div>
         
         <div style="margin: 15px 0; padding: 15px; background: #fef2f2; border-radius: 10px;">
-          <h3 style="color: #dc2626; margin-top: 0; font-size: 16px;">🇺🇸 United States</h3>
-          <p style="margin: 8px 0; font-size: 14px;">
-            <strong style="color: #111827;">988</strong> - Crisis Lifeline (24/7)<br>
-            <strong style="color: #111827;">741741</strong> - Crisis Text Line
-          </p>
+          <h3 style="color: #dc2626; margin-top: 0; font-size: 16px;">🌿 Immediate Support (24/7)</h3>
+          <div style="margin-top: 12px;">
+            <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #fecaca;">
+              <div style="font-size: 24px; font-weight: 800; color: #dc2626;">988</div>
+              <div style="color: #374151; font-size: 13px;">Suicide & Crisis Lifeline</div>
+              <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Call or text • Completely confidential</div>
+            </div>
+            
+            <div style="background: white; padding: 12px; border-radius: 8px; border: 1px solid #bae6fd;">
+              <div style="font-size: 20px; font-weight: 700; color: #0369a1;">Text HOME to 741741</div>
+              <div style="color: #374151; font-size: 13px;">Crisis Text Line</div>
+              <div style="color: #6b7280; font-size: 12px; margin-top: 4px;">Trained crisis counselors via text</div>
+            </div>
+          </div>
         </div>
         
         <div style="margin: 15px 0; padding: 15px; background: #f0f9ff; border-radius: 10px;">
-          <h3 style="color: #0369a1; margin-top: 0; font-size: 16px;">🌍 International</h3>
-          <p style="margin: 8px 0; font-size: 14px;">
-            <strong style="color: #111827;">116 123</strong> - Samaritans (UK)<br>
-            <strong style="color: #111827;">13 11 14</strong> - Lifeline Australia
-          </p>
+          <h3 style="color: #0369a1; margin-top: 0; font-size: 16px;">🌍 International Support</h3>
+          <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <div style="font-weight: 700; color: #111827;">116 123</div>
+              <div style="font-size: 11px; color: #6b7280;">Samaritans (UK)</div>
+            </div>
+            <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <div style="font-weight: 700; color: #111827;">13 11 14</div>
+              <div style="font-size: 11px; color: #6b7280;">Lifeline (AUS)</div>
+            </div>
+            <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <div style="font-weight: 700; color: #111827;">686868</div>
+              <div style="font-size: 11px; color: #6b7280;">Kids Help (CA)</div>
+            </div>
+            <div style="background: white; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <div style="font-weight: 700; color: #111827;">1737</div>
+              <div style="font-size: 11px; color: #6b7280;">Need to Talk (NZ)</div>
+            </div>
+          </div>
         </div>
         
-        <p style="font-size: 12px; color: #6b7280; font-style: italic; margin: 15px 0; text-align: center;">
-          Mentivio is an AI companion, not a substitute for professional care.
+        <div style="background: #fef3c7; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #f59e0b;">
+          <div style="display: flex; align-items: flex-start; gap: 10px;">
+            <div style="font-size: 24px;">💭</div>
+            <div>
+              <div style="font-weight: 600; color: #92400e; margin-bottom: 5px;">Right Now, Try This:</div>
+              <div style="color: #78350f; font-size: 13px; line-height: 1.5;">
+                • <strong>Breathe:</strong> In for 4, hold for 4, out for 6<br>
+                • <strong>Ground:</strong> Name 5 things you can see<br>
+                • <strong>Reach:</strong> Text one person "I'm struggling"<br>
+                • <strong>Wait:</strong> Give yourself 24 hours before any decision
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <p style="font-size: 13px; color: #6b7280; text-align: center; margin: 15px 0; line-height: 1.6; font-style: italic;">
+          "The world needs what only you can give. Please stay."
         </p>
         
-        <button onclick="document.getElementById('mentivio-crisis-modal').remove()" style="
+        <button onclick="document.getElementById('mentivio-crisis-modal').remove(); document.querySelector('#mentivioInput')?.focus();" style="
           margin-top: 15px;
           padding: 12px 20px;
-          background: #667eea;
+          background: linear-gradient(135deg, #8b5cf6, #ec4899);
           color: white;
           border: none;
           border-radius: 10px;
@@ -1456,7 +1336,7 @@
           font-weight: 600;
           transition: background 0.3s;
         ">
-          I Understand
+          I'll Reach Out • You're Not Alone
         </button>
       </div>
     </div>`;
@@ -1469,11 +1349,41 @@
   // ================================
   if (!window.mentivioGlobal) {
     window.mentivioGlobal = {
-      showCrisisHelp: window.showCrisisResources,
+      showCrisisHelp: window.showEnhancedCrisisResources,
       quickCheckIn: () => {
-        const feelings = ['How are you, really?', 'What needs attention today?', 'Where is your heart at?'];
+        const feelings = [
+          "How's your heart today?",
+          "What's one true thing you're feeling?",
+          "What small hope are you holding?",
+          "What's weighing on your mind?"
+        ];
         const feeling = feelings[Math.floor(Math.random() * feelings.length)];
-        alert(feeling);
+        
+        // Try to open chat window and set the message
+        const input = document.getElementById('mentivioInput');
+        if (input) {
+          input.value = feeling;
+          input.focus();
+          
+          // Show window if not open
+          const windowEl = document.getElementById('mentivioWindow');
+          if (windowEl && !windowEl.classList.contains('open')) {
+            document.getElementById('mentivioAvatar')?.click();
+          }
+        } else {
+          alert(feeling);
+        }
+      },
+      getInspiration: async () => {
+        try {
+          const response = await fetch('/chatbot/api/inspiration');
+          if (response.ok) {
+            const data = await response.json();
+            alert(`${data.quote}\n\n- ${data.story.title}`);
+          }
+        } catch (error) {
+          console.error('Inspiration fetch error:', error);
+        }
       }
     };
   }

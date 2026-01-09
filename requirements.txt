@@ -34,3 +34,5 @@ python-dotenv==1.0.0  # Make sure this is here
 gunicorn==21.2.0  # For production on Render
 waitress==2.1.2
 translations
+google-genai>=0.3.0
+

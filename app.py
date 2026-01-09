@@ -29,31 +29,36 @@ import bcrypt
 from itsdangerous import URLSafeTimedSerializer
 import pytz
 from dateutil import parser, tz as dateutil_tz
+# Import blueprints
+from chatbot_backend import chatbot_bp
+
 
 # ==================== SECURITY CONFIGURATION ====================
 class SecurityConfig:
     SECRET_KEY = os.environ.get('SECRET_KEY', secrets.token_urlsafe(32))
     ENCRYPTION_KEY = os.environ.get('ENCRYPTION_KEY', Fernet.generate_key())
-    
+    GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
     SESSION_TIMEOUT = int(os.environ.get('SESSION_TIMEOUT', 3600))
     MAX_FILE_SIZE = int(os.environ.get('MAX_FILE_SIZE', 16 * 1024 * 1024))
     RATE_LIMIT_REQUESTS = int(os.environ.get('RATE_LIMIT_REQUESTS', 100))
     RATE_LIMIT_WINDOW = int(os.environ.get('RATE_LIMIT_WINDOW', 3600))
     
     SECURITY_HEADERS = {
-        'X-Content-Type-Options': 'nosniff',
-        'X-Frame-Options': 'DENY', 
-        'X-XSS-Protection': '1; mode=block',
-        'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-        'Content-Security-Policy': "default-src 'self'; "
-                                "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
-                                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
-                                "img-src 'self' data: https:; "
-                                "font-src 'self' data: https: fonts.gstatic.com; "
-                                "connect-src 'self'",
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
-        'Permissions-Policy': 'geolocation=(), microphone=()'
-    }
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'DENY', 
+            'X-XSS-Protection': '1; mode=block',
+            'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
+            'Content-Security-Policy': "default-src 'self'; "
+                                    "script-src 'self' 'unsafe-inline' https://kit.fontawesome.com; "
+                                    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
+                                    "img-src 'self' data: https:; "
+                                    "font-src 'self' data: https: fonts.gstatic.com; "
+                                    "connect-src 'self' http://localhost:8000 ws://localhost:8000;",  # Add localhost here
+            'Referrer-Policy': 'strict-origin-when-cross-origin',
+            'Permissions-Policy': 'geolocation=(), microphone=()'
+        }
+
     
     MAX_INPUT_LENGTH = 500
     MAX_RESPONSES = 50
@@ -235,6 +240,11 @@ app = Flask(__name__,
 
 app.secret_key = SecurityConfig.SECRET_KEY
 
+# Register chatbot blueprint
+app.register_blueprint(chatbot_bp)
+
+
+
 # Security middleware
 @app.after_request
 def set_security_headers(response):
@@ -277,7 +287,11 @@ if os.environ.get('RENDER'):
     app.debug = False
     app.config['JSONIFY_PRETTYPRINT_REGULAR'] = False
 else:
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app, resources={
+        r"/api/*": {"origins": "*"},
+        r"/chatbot/api/*": {"origins": "*"}  # Add this line
+    })
+    
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -2592,5 +2606,5 @@ if __name__ == '__main__':
             import sys
             sys.exit(1)
     
-    port = int(os.environ.get("PORT", 5003)) 
+    port = int(os.environ.get("PORT", 8000)) 
     app.run(host="0.0.0.0", port=port)
