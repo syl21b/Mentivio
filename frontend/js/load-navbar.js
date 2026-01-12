@@ -433,20 +433,32 @@
 
     // Language switcher - for all language selects
     document.querySelectorAll('.mentivio-language-select').forEach(select => {
-        select.onchange = function() {
-            const lang = this.value;
-            
-            // Use global language manager if available
-            if (window.globalLangManager) {
-                window.globalLangManager.changeLanguage(lang);
-            } else {
-                // Fallback to original behavior
+            // In the language select change handler, add:
+            select.onchange = function() {
+                const lang = this.value;
+                
+                // Store in localStorage
                 localStorage.setItem('preferred-language', lang);
+                
+                // Dispatch language change events
+                document.dispatchEvent(new CustomEvent('languageChanged', {
+                    detail: { language: lang }
+                }));
+                
+                document.dispatchEvent(new CustomEvent('langChanged', {
+                    detail: { lang: lang }
+                }));
+                
+                // Dispatch custom event for chatbot
+                document.dispatchEvent(new CustomEvent('mentivioLangChange', {
+                    detail: { language: lang }
+                }));
+                
+                // Update URL without reloading
                 const url = new URL(window.location);
                 url.searchParams.set('lang', lang);
-                window.location.href = url.toString();
-            }
-        };
+                window.history.replaceState({}, '', url);
+            };
     });
 
     // Language change event listener
