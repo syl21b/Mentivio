@@ -360,7 +360,8 @@ function initMentivio() {
         updateQuickEmotions(newLang);
         updateInputPlaceholder(newLang);
         updateSafetyNotice(newLang);
-        
+        updateHeaderText(newLang);
+
         // Update current language display if exists
         const currentLangEl = document.getElementById('currentLanguage');
         if (currentLangEl) {
@@ -400,6 +401,44 @@ function initMentivio() {
       detail: { language: newLang }
     }));
   };
+
+
+  // NEW FUNCTION: Update header text based on language
+  function updateHeaderText(lang) {
+    const headerTitles = {
+      en: {
+        title: "Mentivio: Your Friend",
+        subtitlePrefix: "Heart Space"
+      },
+      es: {
+        title: "Mentivio: Tu Amigo",
+        subtitlePrefix: "Espacio del Corazón"
+      },
+      vi: {
+        title: "Mentivio: Người Bạn Của Bạn",
+        subtitlePrefix: "Không Gian Trái Tim"
+      },
+      zh: {
+        title: "Mentivio: 您的朋友",
+        subtitlePrefix: "心灵空间"
+      }
+    };
+    
+    const header = headerTitles[lang] || headerTitles.en;
+    
+    // Update title
+    const titleElement = document.querySelector('.mentivio-title');
+    if (titleElement) {
+      titleElement.textContent = header.title;
+    }
+    
+    // Update day display will be handled by updateDay() function
+    // We just need to trigger updateDay to refresh with new language
+    if (typeof updateDay === 'function') {
+      updateDay();
+    }
+  }
+
 
   function setupLanguageSynchronization() {
     // Listen to global language change events
@@ -1310,13 +1349,59 @@ function initMentivio() {
   const activeEmotion = document.getElementById('activeEmotion');
   const currentDay = document.getElementById('currentDay');
 
-  // Update current day
-  updateDay();
-  
+  // UPDATED: Update current day with language support
   function updateDay() {
-    const day = new Date().toLocaleDateString('en-US', { weekday: 'short' });
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    currentDay.textContent = `Heart Space • ${day} • ${time}`;
+    if (!currentDay) return;
+    
+    const now = new Date();
+    const lang = CONFIG ? CONFIG.language : 'en';
+    
+    // Language-specific day names
+    const dayNames = {
+      en: {
+        short: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        long: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      },
+      es: {
+        short: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+        long: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+      },
+      vi: {
+        short: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
+        long: ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
+      },
+      zh: {
+        short: ['日', '一', '二', '三', '四', '五', '六'],
+        long: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+      }
+    };
+    
+    // Language-specific time formats
+    const timeFormats = {
+      en: { hour12: true, hour: '2-digit', minute: '2-digit' },
+      es: { hour12: true, hour: '2-digit', minute: '2-digit' },
+      vi: { hour12: false, hour: '2-digit', minute: '2-digit' },
+      zh: { hour12: false, hour: '2-digit', minute: '2-digit' }
+    };
+    
+    // Get day and time
+    const dayOfWeek = now.getDay();
+    const dayNameSet = dayNames[lang] || dayNames.en;
+    const dayName = dayNameSet.short[dayOfWeek];
+    
+    const timeFormat = timeFormats[lang] || timeFormats.en;
+    const time = now.toLocaleTimeString([], timeFormat);
+    
+    // Language-specific prefix
+    const prefixes = {
+      en: "Heart Space",
+      es: "Espacio del Corazón",
+      vi: "Không Gian Trái Tim",
+      zh: "心灵空间"
+    };
+    
+    const prefix = prefixes[lang] || prefixes.en;
+    currentDay.textContent = `${prefix} • ${dayName} • ${time}`;
   }
 
   // ================================
@@ -1376,6 +1461,24 @@ function initMentivio() {
         }));
       });
     });
+  }
+
+
+  // ================================
+  // INITIALIZATION CALLS
+  // ================================
+  // Update day display
+  updateDay();
+  
+  // Initialize language selector
+  initLanguageSelector();
+  
+  // Initialize language synchronization
+  setupLanguageSynchronization();
+  
+  // UPDATED: Initialize header text with current language
+  if (CONFIG && CONFIG.language) {
+    updateHeaderText(CONFIG.language);
   }
 
   // ================================
@@ -2300,6 +2403,14 @@ function initMentivio() {
         }
       },
       getLanguage: () => CONFIG ? CONFIG.language : 'en',
+      // NEW: Direct function to update header
+      updateHeader: (lang) => {
+        if (lang) {
+          updateHeaderText(lang);
+        } else if (CONFIG && CONFIG.language) {
+          updateHeaderText(CONFIG.language);
+        }
+      },
       showChat: showWindow,
       hideChat: hideWindow
     };
