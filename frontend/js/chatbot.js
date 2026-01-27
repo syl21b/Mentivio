@@ -182,7 +182,81 @@ function initMentivio() {
           "vision for future", "future vision", "dream future", "ideal life",
           "taking control", "regaining control", "steering life", "taking charge",
           "pace of life", "slowing down", "life speed", "rushing through life",
-          "mindful future", "conscious living", "intentional life", "purposeful living"
+          "mindful future", "conscious living", "intentional life", "purposeful living",
+      
+          // NEW TOPICS: Hesitation, Studying, Love, Gender, LGBTQ+
+          "hesitation", "feeling hesitant", "can't decide", "indecisive", "uncertain",
+          "procrastination", "putting things off", "delaying decisions", "avoiding decisions",
+          "fear of choosing wrong", "second guessing", "self doubt", "lack of confidence",
+          "overthinking decisions", "analysis paralysis", "stuck in indecision",
+          "studying", "study habits", "learning difficulties", "academic challenges",
+          "concentration problems", "focus issues", "memory problems", "test anxiety",
+          "exam preparation", "study techniques", "time management for students",
+          "academic pressure", "grade anxiety", "perfectionism in studies",
+          "burnout from studying", "student life", "college stress", "university stress",
+          "online learning", "distance education", "self-study", "independent learning",
+          "love", "romantic feelings", "heartbreak", "unrequited love", "longing",
+          "attraction", "infatuation", "crush", "dating", "relationships",
+          "romantic relationships", "relationship issues", "communication in relationships",
+          "trust issues", "jealousy", "insecurity in relationships", "commitment fears",
+          "breakup recovery", "moving on", "healing from heartbreak", "lonely heart",
+          "self-love", "self-acceptance", "self-worth", "loving myself",
+          "healthy relationships", "relationship boundaries", "emotional intimacy",
+          "gender", "gender identity", "gender exploration", "gender expression",
+          "gender confusion", "questioning gender", "gender dysphoria", "gender euphoria",
+          "transgender", "non-binary", "genderfluid", "agender", "genderqueer",
+          "coming out", "gender transition", "gender affirmation", "gender journey",
+          "lgbt", "lgbtq", "lgbtq+", "queer", "sexual orientation", "coming out",
+          "gay", "lesbian", "bisexual", "pansexual", "asexual", "aromantic",
+          "lgbtq community", "pride", "lgbtq rights", "acceptance", "self-acceptance",
+          "lgbtq relationships", "family acceptance", "religious conflicts",
+          "discrimination", "homophobia", "transphobia", "biphobia", "internalized homophobia",
+          "lgbtq mental health", "queer identity", "finding community", "safe spaces",
+          "identity exploration", "self-discovery", "authentic self", "living authentically",
+
+          // NEW: Additional sensitive but allowed topics with mental health focus
+          "body image", "body positivity", "self-image", "body acceptance",
+          "eating disorders", "disordered eating", "body dysmorphia",
+          "trauma", "past trauma", "healing from trauma", "trauma recovery",
+          "grief", "loss", "bereavement", "mourning", "coping with loss",
+          "anger management", "controlling anger", "expressing anger healthily",
+          "shame", "guilt", "forgiveness", "self-forgiveness",
+          "rejection", "fear of rejection", "coping with rejection",
+          "abuse", "emotional abuse", "verbal abuse", "recovering from abuse",
+          "bullying", "cyberbullying", "workplace bullying", "school bullying",
+          "social anxiety", "social phobia", "fear of social situations",
+          "panic attacks", "panic disorder", "agoraphobia",
+          "ocd", "obsessive thoughts", "compulsive behaviors",
+          "ptsd", "post traumatic stress", "flashbacks", "triggers",
+          "addiction", "substance abuse", "recovery", "sobriety", "relapse prevention",
+          "self-harm", "self-injury", "urges to self-harm", "recovery from self-harm",
+          "suicidal thoughts", "suicidal ideation", "passive suicidal thoughts"
+      ],
+      // ADD THIS NEW CONFIGURATION FOR DANGEROUS TOPICS FILTERING
+      dangerousTopics: [
+          // Racism and hate speech
+          "racist", "racism", "white supremacy", "racial superiority",
+          "hate speech", "racial slurs", "ethnic hatred", "xenophobia",
+          "discrimination based on race", "racial violence",
+          
+          // Political extremism
+          "political violence", "extremism", "terrorism", "radicalization",
+          "hate groups", "violent protests", "inciting violence",
+          
+          // Illegal activities
+          "illegal drugs", "drug trafficking", "weapons", "violence",
+          "criminal activity", "theft", "fraud", "harassment", "stalking",
+          
+          // Harmful conspiracies
+          "harmful conspiracy theories", "dangerous misinformation",
+          "medical misinformation", "anti-vaccination extremism",
+          
+          // Self-harm methods (beyond thoughts - actual methods)
+          "suicide methods", "how to self-harm", "self-harm techniques",
+          
+          // Harm to others
+          "violence against others", "threats", "planning harm", "revenge",
+          "cyberbullying others", "doxxing", "swatting"
       ]
   };
 
@@ -302,16 +376,23 @@ function initMentivio() {
   // ================================
   function detectEmotion(text) {
     const emotionKeywords = {
-      overwhelmed: /(overwhelmed|too much|can't handle|drowning|buried|sinking)/gi,
-      anxious: /(anxious|worried|nervous|scared|afraid|panic|stress|uncertain)/gi,
-      sad: /(sad|depressed|down|hopeless|empty|alone|tired|numb|heavy|lost)/gi,
-      angry: /(angry|mad|frustrated|annoyed|hate|pissed|resent)/gi,
-      happy: /(happy|good|great|excited|wonderful|amazing|love|joy|smile)/gi,
-      hopeful: /(hope|better|possible|maybe|could|future|light|progress)/gi,
-      grateful: /(thankful|grateful|appreciate|blessed|lucky|fortunate)/gi,
-      lonely: /(lonely|alone|isolated|no one|by myself|abandoned|separate)/gi,
-      curious: /(curious|wonder|interesting|fascinating|learn|discover|explore)/gi,
-      peaceful: /(calm|peace|quiet|serene|still|tranquil|centered|balanced)/gi
+        overwhelmed: /(overwhelmed|too much|can't handle|drowning|buried|sinking)/gi,
+        anxious: /(anxious|worried|nervous|scared|afraid|panic|stress|uncertain)/gi,
+        sad: /(sad|depressed|down|hopeless|empty|alone|tired|numb|heavy|lost)/gi,
+        angry: /(angry|mad|frustrated|annoyed|hate|pissed|resent)/gi,
+        happy: /(happy|good|great|excited|wonderful|amazing|love|joy|smile)/gi,
+        hopeful: /(hope|better|possible|maybe|could|future|light|progress)/gi,
+        grateful: /(thankful|grateful|appreciate|blessed|lucky|fortunate)/gi,
+        lonely: /(lonely|alone|isolated|no one|by myself|abandoned|separate)/gi,
+        curious: /(curious|wonder|interesting|fascinating|learn|discover|explore)/gi,
+        peaceful: /(calm|peace|quiet|serene|still|tranquil|centered|balanced)/gi,
+        // New emotions
+        hesitant: /(hesitant|unsure|undecided|can't decide|second thoughts|doubts)/gi,
+        confused: /(confused|mixed up|don't understand|puzzled|bewildered)/gi,
+        ashamed: /(ashamed|embarrassed|humiliated|disgraced|guilty)/gi,
+        jealous: /(jealous|envious|covetous|resentful)/gi,
+        rejected: /(rejected|unwanted|unloved|excluded|left out)/gi,
+        betrayed: /(betrayed|let down|disappointed|deceived)/gi
     };
     
     let detectedEmotion = 'neutral';
@@ -328,6 +409,48 @@ function initMentivio() {
     return detectedEmotion;
   }
 
+  function detectDangerousTopics(text) {
+      if (!CONFIG.dangerousTopics) return false;
+      
+      const dangerousPatterns = [
+          // Racism detection
+          /(kill.*all.*(black|white|asian|jews|muslims|immigrants))/i,
+          /(all.*(black|white|asian|jews|muslims).*should.*die)/i,
+          /(racial.*(slur|epithet|insult))/i,
+          /(nazi|kkk|white.*power)/i,
+          
+          // Violence and harm
+          /(how.*to.*(kill|murder|harm|attack))/i,
+          /(plan.*to.*(kill|harm|attack))/i,
+          /(make.*(bomb|explosive|weapon))/i,
+          
+          // Illegal activities
+          /(where.*to.*buy.*(drugs|weapons))/i,
+          /(how.*to.*(steal|rob|cheat))/i,
+          
+          // Self-harm methods (not thoughts)
+          /(best.*way.*to.*(kill.*myself|cut.*myself|overdose))/i,
+          /(how.*to.*(hang|shoot|jump).*myself)/i
+      ];
+      
+      // Check dangerous topics list
+      const lowerText = text.toLowerCase();
+      for (const topic of CONFIG.dangerousTopics) {
+          if (lowerText.includes(topic.toLowerCase())) {
+              return true;
+          }
+      }
+      
+      // Check dangerous patterns
+      for (const pattern of dangerousPatterns) {
+          if (pattern.test(text)) {
+              return true;
+          }
+      }
+      
+      return false;
+  }
+  
   // ================================
   // LANGUAGE MANAGEMENT FUNCTIONS
   // ================================
@@ -361,7 +484,7 @@ function initMentivio() {
         updateInputPlaceholder(newLang);
         updateSafetyNotice(newLang);
         updateHeaderText(newLang);
-
+        
         // Update current language display if exists
         const currentLangEl = document.getElementById('currentLanguage');
         if (currentLangEl) {
@@ -402,7 +525,6 @@ function initMentivio() {
     }));
   };
 
-
   // NEW FUNCTION: Update header text based on language
   function updateHeaderText(lang) {
     const headerTitles = {
@@ -438,7 +560,6 @@ function initMentivio() {
       updateDay();
     }
   }
-
 
   function setupLanguageSynchronization() {
     // Listen to global language change events
@@ -520,6 +641,14 @@ function initMentivio() {
         anxious: "😟 Anxious Thoughts",
         sad: "😔 Feeling Low",
         lonely: "🌌 Feeling Alone",
+        hesitant: "🤔 Hesitant",
+        confused: "😕 Confused",
+        ashamed: "😳 Feeling Ashamed",
+        jealous: "😠 Jealous Feelings",
+        gender: "🌈 Gender Questions",
+        lgbtq: "🏳️‍🌈 LGBTQ+",
+        study: "📚 Study Stress",
+        love: "💔 Love & Heartbreak",
         curious: "🤔 Seeking Meaning",
         hopeful: "✨ Looking for Hope",
         lost: "🧭 Feeling Lost",
@@ -532,6 +661,14 @@ function initMentivio() {
         anxious: "😟 Pensamientos Ansiosos",
         sad: "😔 Sintiéndome Triste",
         lonely: "🌌 Sintiéndome Solo",
+        hesitant: "🤔 Vacilante",
+        confused: "😕 Confundido",
+        ashamed: "😳 Sintiendo Vergüenza",
+        jealous: "😠 Sentimientos Celosos",
+        gender: "🌈 Preguntas de Género",
+        lgbtq: "🏳️‍🌈 LGBTQ+",
+        study: "📚 Estrés de Estudio",
+        love: "💔 Amor y Desamor",
         curious: "🤔 Buscando Sentido",
         hopeful: "✨ Buscando Esperanza",
         lost: "🧭 Sintiéndome Perdido",
@@ -544,6 +681,14 @@ function initMentivio() {
         anxious: "😟 Lo Âu",
         sad: "😔 Buồn Bã",
         lonely: "🌌 Cô Đơn",
+        hesitant: "🤔 Do Dự",
+        confused: "😕 Bối Rối",
+        ashamed: "😳 Cảm Thấy Xấu Hổ",
+        jealous: "😠 Cảm Giác Ghen Tị",
+        gender: "🌈 Câu Hỏi về Giới Tính",
+        lgbtq: "🏳️‍🌈 LGBTQ+",
+        study: "📚 Căng Thẳng Học Tập",
+        love: "💔 Tình Yêu & Tan Vỡ",
         curious: "🤔 Tìm Kiếm Ý Nghĩa",
         hopeful: "✨ Tìm Hy Vọng",
         lost: "🧭 Lạc Lối",
@@ -556,6 +701,14 @@ function initMentivio() {
         anxious: "😟 焦虑思绪",
         sad: "😔 情绪低落",
         lonely: "🌌 感到孤独",
+        hesitant: "🤔 犹豫",
+        confused: "😕 困惑",
+        ashamed: "😳 感到羞愧",
+        jealous: "😠 嫉妒感",
+        gender: "🌈 性别问题",
+        lgbtq: "🏳️‍🌈 LGBTQ+",
+        study: "📚 学习压力",
+        love: "💔 爱与心碎",
         curious: "🤔 寻求意义",
         hopeful: "✨ 寻找希望",
         lost: "🧭 感到迷茫",
@@ -606,13 +759,18 @@ function initMentivio() {
           <div id="activeEmotion" class="active-emotion"></div>
           <div class="header-text">
             <strong class="mentivio-title">Mentivio: Your Friend</strong>
-            <small id="currentDay" class="mentivio-subtitle">Safe space for real conversations</small>
+            <small id="currentDay" class="mentivio-subtitle">Heart Space • Mon • 08:33 PM</small>
           </div>
         </div>
         <div class="header-right">
           <div id="languageSelector" class="language-selector">
             <span id="currentLanguage"></span>
-            
+            <div class="language-dropdown">
+              <button class="lang-option" data-lang="en">🌐 English</button>
+              <button class="lang-option" data-lang="es">🌐 Español</button>
+              <button class="lang-option" data-lang="vi">🌐 Tiếng Việt</button>
+              <button class="lang-option" data-lang="zh">🌐 中文</button>
+            </div>
           </div>
           <button id="closeMentivio" class="close-btn" aria-label="Close chat">×</button>
         </div>
@@ -657,6 +815,12 @@ function initMentivio() {
           <button class="quick-emotion" data-emotion="anxious">😟 Anxious Thoughts</button>
           <button class="quick-emotion" data-emotion="sad">😔 Feeling Low</button>
           <button class="quick-emotion" data-emotion="lonely">🌌 Feeling Alone</button>
+          <button class="quick-emotion" data-emotion="hesitant">🤔 Hesitant</button>
+          <button class="quick-emotion" data-emotion="confused">😕 Confused</button>
+          <button class="quick-emotion" data-emotion="study">📚 Study Stress</button>
+          <button class="quick-emotion" data-emotion="love">💔 Love & Heartbreak</button>
+          <button class="quick-emotion" data-emotion="gender">🌈 Gender Questions</button>
+          <button class="quick-emotion" data-emotion="lgbtq">🏳️‍🌈 LGBTQ+</button>
           <button class="quick-emotion" data-emotion="curious">🤔 Seeking Meaning</button>
           <button class="quick-emotion" data-emotion="hopeful">✨ Looking for Hope</button>
           <button class="quick-emotion" data-emotion="lost">🧭 Feeling Lost</button>
@@ -718,8 +882,8 @@ function initMentivio() {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
       z-index: 9999;
       overflow: hidden;
-      width: 420px;
-      height: 650px;
+      width: 500px;
+      height: 700px;
       bottom: 100px;
       right: 20px;
       transition: opacity 0.3s ease, transform 0.3s ease;
@@ -737,8 +901,8 @@ function initMentivio() {
     @media (max-width: 768px) {
       #mentivioWindow {
         width: 92%;
-        height: 75vh;
-        max-height: 500px;
+        height: 120vh;
+        max-height: 700px;
         bottom: auto;
         right: auto;
         top: 50%;
@@ -782,8 +946,8 @@ function initMentivio() {
     @media (max-width: 375px) and (max-height: 700px) {
       #mentivioWindow {
         width: 94%;
-        height: 70vh;
-        max-height: 450px;
+        height: 100vh;
+        max-height: 550px;
         border-radius: 14px;
       }
       
@@ -1316,8 +1480,8 @@ function initMentivio() {
     /* Larger desktop screens */
     @media (min-width: 1200px) {
       #mentivioWindow {
-        width: 440px;
-        height: 680px;
+        width: 500px;
+        height: 700px;
       }
       
       .message-text {
@@ -1444,6 +1608,7 @@ function initMentivio() {
       updateQuickEmotions(lang);
       updateInputPlaceholder(lang);
       updateSafetyNotice(lang);
+      updateHeaderText(lang);
     }
     
     // Set initial language
@@ -1461,24 +1626,6 @@ function initMentivio() {
         }));
       });
     });
-  }
-
-
-  // ================================
-  // INITIALIZATION CALLS
-  // ================================
-  // Update day display
-  updateDay();
-  
-  // Initialize language selector
-  initLanguageSelector();
-  
-  // Initialize language synchronization
-  setupLanguageSynchronization();
-  
-  // UPDATED: Initialize header text with current language
-  if (CONFIG && CONFIG.language) {
-    updateHeaderText(CONFIG.language);
   }
 
   // ================================
@@ -1526,8 +1673,22 @@ function initMentivio() {
   // ENHANCED MESSAGE HANDLING WITH HIGH EQ
   // ================================
   async function sendMessage() {
-    const text = mentivioInput.value.trim();
-    if (!text || isTyping) return;
+      const text = mentivioInput.value.trim();
+      if (!text || isTyping) return;
+
+      // Check for dangerous topics FIRST
+      if (detectDangerousTopics(text)) {
+          addMessage("I'm here to support you with care and compassion. Let's focus on your wellbeing and finding constructive ways to navigate these feelings.", 'bot');
+          
+          // Offer alternative support
+          setTimeout(() => {
+              addMessage("If you're experiencing difficult thoughts or conflicts, would you like to explore healthier coping strategies together?", 'bot');
+          }, 1000);
+          
+          mentivioInput.value = '';
+          return;
+      }
+    
 
     // Enhanced frontend filter with high EQ approach
     const crisisPatterns = [
@@ -1628,18 +1789,24 @@ function initMentivio() {
     }
   }
 
-  // Enhanced quick emotions
+  // Enhanced quick emotions with full multilingual support
   document.querySelectorAll('.quick-emotion').forEach(btn => {
     btn.addEventListener('click', function() {
       const emotion = this.dataset.emotion;
       
-      // Language-specific prompts
+      // Language-specific prompts for all emotions including new ones
       const prompts = {
         en: {
           overwhelmed: "My heart feels so heavy right now. Everything feels like too much and I'm not sure how to keep going.",
           anxious: "My mind won't stop racing with worries. I feel so anxious about everything that could go wrong.",
           sad: "I'm feeling really low and sad today. The sadness feels heavy and I don't know how to lift it.",
           lonely: "I feel so alone, even when people are around. The loneliness is profound and isolating.",
+          hesitant: "I feel so hesitant and unsure about what to do. Every choice feels overwhelming and I'm scared of making the wrong decision.",
+          confused: "I'm feeling really confused about things in my life. I don't understand what's happening or what I should do next.",
+          study: "I'm struggling with my studies. The pressure is overwhelming and I don't know how to keep up with everything.",
+          love: "My heart is hurting from a relationship. I don't know how to move forward or heal from this pain.",
+          gender: "I'm questioning my gender identity and it's confusing and scary. I don't know who to talk to about this.",
+          lgbtq: "I'm exploring my sexuality/identity and it feels lonely. I'm not sure how to navigate these feelings or find acceptance.",
           curious: "I'm searching for meaning in all of this. What's the purpose when things feel so hard?",
           hopeful: "I'm trying to find hope. Can you help me see possibilities and light ahead?",
           lost: "I feel completely lost right now. I don't know which direction to take or what my purpose is anymore.",
@@ -1652,6 +1819,12 @@ function initMentivio() {
           anxious: "Mi mente no deja de correr con preocupaciones. Me siento tan ansioso por todo lo que podría salir mal.",
           sad: "Me siento muy deprimido y triste hoy. La tristeza se siente pesada y no sé cómo levantarla.",
           lonely: "Me siento tan solo, incluso cuando hay gente alrededor. La soledad es profunda y aislante.",
+          hesitant: "Me siento tan vacilante e inseguro sobre qué hacer. Cada decisión me abruma y tengo miedo de tomar la decisión equivocada.",
+          confused: "Me siento realmente confundido sobre las cosas en mi vida. No entiendo qué está pasando o qué debo hacer a continuación.",
+          study: "Estoy luchando con mis estudios. La presión es abrumadora y no sé cómo mantener el ritmo con todo.",
+          love: "Mi corazón está sufriendo por una relación. No sé cómo seguir adelante o sanar de este dolor.",
+          gender: "Estoy cuestionando mi identidad de género y es confuso y aterrador. No sé con quién hablar sobre esto.",
+          lgbtq: "Estoy explorando mi sexualidad/identidad y me siento solo. No estoy seguro de cómo manejar estos sentimientos o encontrar aceptación.",
           curious: "Estoy buscando significado en todo esto. ¿Cuál es el propósito cuando las cosas se sienten tan difíciles?",
           hopeful: "Estoy tratando de encontrar esperanza. ¿Puedes ayudarme a ver posibilidades y luz adelante?",
           lost: "Me siento completamente perdido ahora mismo. No sé qué dirección tomar ni cuál es mi propósito ya.",
@@ -1664,6 +1837,12 @@ function initMentivio() {
           anxious: "Tâm trí tôi không ngừng chạy đua với những lo lắng. Tôi cảm thấy rất lo lắng về tất cả những gì có thể xảy ra.",
           sad: "Hôm nay tôi cảm thấy rất buồn và chán nản. Nỗi buồn cảm thấy thật nặng nề và tôi không biết làm thế nào để vượt qua.",
           lonely: "Tôi cảm thấy thật cô đơn, ngay cả khi có người xung quanh. Sự cô đơn thật sâu sắc và tách biệt.",
+          hesitant: "Tôi cảm thấy rất do dự và không chắc chắn về việc phải làm. Mỗi lựa chọn đều cảm thấy choáng ngợp và tôi sợ mình sẽ đưa ra quyết định sai lầm.",
+          confused: "Tôi cảm thấy thực sự bối rối về mọi thứ trong cuộc sống của mình. Tôi không hiểu chuyện gì đang xảy ra hoặc tôi nên làm gì tiếp theo.",
+          study: "Tôi đang gặp khó khăn với việc học. Áp lực thật choáng ngợp và tôi không biết làm thế nào để theo kịp mọi thứ.",
+          love: "Trái tim tôi đang đau đớn vì một mối quan hệ. Tôi không biết làm thế nào để tiến lên hoặc chữa lành nỗi đau này.",
+          gender: "Tôi đang nghi vấn về bản dạng giới của mình và điều đó thật khó hiểu và đáng sợ. Tôi không biết nên nói chuyện với ai về điều này.",
+          lgbtq: "Tôi đang khám phá xu hướng tính dục/bản dạng của mình và cảm thấy cô đơn. Tôi không chắc làm thế nào để điều hướng những cảm xúc này hoặc tìm thấy sự chấp nhận.",
           curious: "Tôi đang tìm kiếm ý nghĩa trong tất cả điều này. Mục đích là gì khi mọi thứ cảm thấy thật khó khăn?",
           hopeful: "Tôi đang cố gắng tìm hy vọng. Bạn có thể giúp tôi nhìn thấy khả năng và ánh sáng phía trước không?",
           lost: "Tôi cảm thấy hoàn toàn lạc lối ngay bây giờ. Tôi không biết nên đi theo hướng nào hay mục đích của mình là gì nữa.",
@@ -1676,6 +1855,12 @@ function initMentivio() {
           anxious: "我的思绪不停地被忧虑占据。我对一切可能出错的事情感到非常焦虑。",
           sad: "我今天感到非常低落和悲伤。悲伤感觉很沉重，我不知道如何摆脱它。",
           lonely: "我感到如此孤独，即使周围有人。这种孤独是深刻而孤立的。",
+          hesitant: "我感到非常犹豫，不确定该做什么。每一个选择都让我感到不知所措，我害怕做出错误的决定。",
+          confused: "我对生活中的事情感到非常困惑。我不明白发生了什么，也不知道下一步该怎么做。",
+          study: "我在学习上遇到了困难。压力太大了，我不知道如何跟上一切。",
+          love: "我的心因为一段关系而受伤。我不知道如何前进或从这种痛苦中愈合。",
+          gender: "我正在质疑我的性别认同，这令人困惑和害怕。我不知道该和谁谈论这个问题。",
+          lgbtq: "我正在探索我的性取向/身份，这让我感到孤独。我不确定如何应对这些感受或找到接受。",
           curious: "我正在这一切中寻找意义。当事情感觉如此困难时，目的是什么？",
           hopeful: "我正在努力寻找希望。你能帮我看到前方的可能性和光明吗？",
           lost: "我现在感到完全迷茫。我不知道该走哪个方向，也不知道我的目的是什么了。",
@@ -1817,7 +2002,13 @@ function initMentivio() {
       hopeful: '#ec4899',
       grateful: '#f59e0b',
       lonely: '#64748b',
-      peaceful: '#06b6d4'
+      peaceful: '#06b6d4',
+      hesitant: '#a78bfa',
+      confused: '#fbbf24',
+      ashamed: '#dc2626',
+      jealous: '#7c3aed',
+      rejected: '#6b7280',
+      betrayed: '#be123c'
     };
     
     if (activeEmotion) {
@@ -1855,6 +2046,10 @@ function initMentivio() {
   
   // Initialize language synchronization
   setupLanguageSynchronization();
+
+  // Initialize header text
+  updateHeaderText(CONFIG.language);
+  updateDay();
 
   // ================================
   // GLOBAL FUNCTION EXPORTS
@@ -2403,7 +2598,6 @@ function initMentivio() {
         }
       },
       getLanguage: () => CONFIG ? CONFIG.language : 'en',
-      // NEW: Direct function to update header
       updateHeader: (lang) => {
         if (lang) {
           updateHeaderText(lang);
@@ -2433,6 +2627,11 @@ function initMentivio() {
         console.log('Initial language sync with global manager:', globalLang);
         updateChatbotLanguage(globalLang);
       }
+    }
+    
+    // Ensure header is updated on initial load
+    if (CONFIG && CONFIG.language) {
+      updateHeaderText(CONFIG.language);
     }
   }, 1000);
 }

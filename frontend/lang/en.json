@@ -77,7 +77,9 @@
     "resource7-desc": "Understanding trauma responses, PTSD symptoms, and paths to recovery.",
     "resource8-title": "Medication Guide",
     "resource8-desc": "What you need to know about common psychiatric medications, side effects, and talking to your doctor.",
-    "learn-more0": "Read More",
+    "resource9-title": "Physical Health & Mental Wellness",
+    "resource9-desc": "Explore the strong connection between physical health and mental wellbeing, including exercise, nutrition, and sleep.",
+
     "learn-more1": "Read More",
     "learn-more2": "Read More",
     "learn-more3": "Read More",
@@ -86,6 +88,9 @@
     "learn-more6": "Read More",
     "learn-more7": "Read More",
     "learn-more8": "Read More",
+     "learn-more9": "Read More",
+     "learn-more10": "Read More", 
+
     "faq-title": "Common Questions",
     "faq1-question": "How do I know if I need help?",
     "faq1-answer": "If symptoms are causing you distress, affecting your daily life/work, or if you have thoughts of self-harm, please seek professional help immediately.",
@@ -919,6 +924,94 @@
     "source-text": "Source: NAMI. Learn more at",
     "source-link": "NAMI Therapy Info"
   },
+
+
+  "physical-resource": {
+    "page-title": "The Body-Mind Connection",
+     "hero-title": "Your Body & Mind: The Powerful Connection",
+    "hero-subtitle": "How exercise, nutrition, and sleep work together to build a healthier, happier you",
+    
+    "nav-connection": "The Connection",
+    "nav-exercise": "Exercise Benefits",
+    "nav-science": "Brain Science",
+    "nav-conditions": "How It Helps",
+    "nav-sleep-nutrition": "Sleep & Food",
+    "nav-started": "Get Started",
+    
+    "section1-title": "Your Body and Mind Are Connected",
+    "intro1": "Think of your body and mind as best friends who constantly talk to each other. When your body feels good, your mind feels good too. And when your mind is happy, your body gets the message.",
+    "intro2": "Taking care of your physical health isn't just about looking good—it's one of the most powerful ways to boost your mood, reduce stress, and build mental strength.",
+    "highlight1": "Small, consistent actions create big changes over time. You don't need to run marathons to feel better—just start with what feels right for you.",
+    
+    "section2-title": "Exercise: Nature's Mood Booster",
+    "exercise-intro": "Moving your body does more than just burn calories. It's like giving your brain a refreshing shower of good chemicals.",
+    "benefit1-title": "Better Mood & Confidence",
+    "benefit1-desc": "Regular movement makes you feel better about yourself and improves your overall quality of life.",
+    "benefit2-title": "Sharper Thinking",
+    "benefit2-desc": "Even a 20-minute walk can improve your focus and decision-making for hours afterward.",
+    "benefit3-title": "Better Sleep",
+    "benefit3-desc": "Active days lead to deeper, more restorative nights. Your brain cleans itself during quality sleep.",
+    "rule-title": "The \"150-Minute Rule\" (It's Flexible!)",
+    "rule-desc": "Aim for 150 minutes of moderate movement each week. That's just 30 minutes, 5 days a week. Walking counts! This simple habit can reduce your risk of chronic health issues by 20-30%.",
+    
+    "section3-title": "What's Happening in Your Brain?",
+    "science-intro": "When you move your body, amazing things happen inside your head:",
+    "brain-effect1": "<strong>Endorphins:</strong> Your body's natural painkillers that make you feel good",
+    "brain-effect2": "<strong>Endocannabinoids:</strong> Natural chemicals that help you feel calm and relaxed",
+    "brain-effect3": "<strong>BDNF:</strong> \"Brain fertilizer\" that helps your brain cells grow and connect",
+    "brain-effect4": "<strong>Cortisol Control:</strong> Exercise helps lower your main stress hormone",
+    "brain-effect5": "<strong>Hormone Balance:</strong> Helps regulate your appetite and energy levels",
+    "highlight2": "Think of exercise as \"natural medicine\" for your brain. It's free, has no side effects, and you can take it every day.",
+    
+    "section4-title": "How Movement Helps Specific Challenges",
+    "conditions-intro": "Physical activity can be especially helpful when dealing with mental health challenges:",
+    "table-header-condition": "Challenge",
+    "table-header-how": "How Movement Helps",
+    "condition1-name": "<strong>Depression</strong>",
+    "condition1-help": "Can be as effective as medication for some people by naturally boosting mood systems",
+    "condition2-name": "<strong>Anxiety</strong>",
+    "condition2-help": "Burns off nervous energy and teaches your body it can handle stress",
+    "condition3-name": "<strong>Stress & Overwhelm</strong>",
+    "condition3-help": "Creates a healthy outlet for tension and helps reset your nervous system",
+    "condition4-name": "<strong>Focus Issues</strong>",
+    "condition4-help": "Increases blood flow to the brain, helping you concentrate better",
+    "conditions-note-text": "Always work with healthcare providers for serious conditions. Movement complements treatment, doesn't replace it.",
+    
+    "section5-title": "Sleep & Nutrition: The Supporting Cast",
+    "sleep-intro": "Exercise works best when supported by good sleep and nutrition:",
+    "sleep-title": "Sleep: Brain Recharge Time",
+    "sleep-desc": "7-9 hours nightly helps your brain process emotions, store memories, and clear out daily \"mental clutter.\"",
+    "nutrition-title": "Nutrition: Brain Fuel",
+    "nutrition-desc": "Whole foods provide the building blocks for brain chemicals that regulate your mood and energy.",
+    "cycle-title": "The Beautiful Cycle",
+    "cycle-desc": "Exercise helps you sleep better → Better sleep improves food choices → Good nutrition gives you energy to exercise.",
+    "highlight3": "Start with one change at a time. Better sleep often leads to better food choices, which gives you more energy to move.",
+    
+    "section6-title": "Simple Ways to Get Started",
+    "start-intro": "You don't need a gym membership or perfect diet to begin:",
+    "tip1": "<strong>Start small:</strong> 10-minute walks count! Build consistency before intensity.",
+    "tip2": "<strong>Find what you enjoy:</strong> Dance, garden, play with pets—movement should feel good.",
+    "tip3": "<strong>Listen to your body:</strong> Some days will be energetic, others restful. Both are okay.",
+    "tip4": "<strong>Pair activities:</strong> Listen to podcasts while walking, or do stretches during TV breaks.",
+    "tip5": "<strong>Celebrate progress:</strong> Notice how you feel, not just how you look.",
+    "reminder-title": "Remember This",
+    "reminder-desc": "Every bit of movement matters. A 5-minute stretch, choosing stairs, or parking farther away—these small actions add up to big benefits for your mental health.",
+    
+    "sources-title": "Want to Learn More?",
+    "source1-link": "The Body-Mind Connection: Science Made Simple",
+    "source1-note": "Easy-to-understand breakdown of how exercise, sleep, and nutrition affect mental health",
+    "source2-link": "Exercise as Natural Medicine for the Brain",
+    "source2-note": "Research on how physical activity changes brain chemistry and structure",
+    "source3-link": "Practical Tips for Mental Health Through Movement",
+    "source3-note": "Real-world advice for incorporating exercise into daily life"
+
+  
+},
+
+
+
+
+  
   "about": {
     "page-title": "About Us - Mentivio",
     "hero-title": "Our Story",

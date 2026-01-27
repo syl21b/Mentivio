@@ -77,7 +77,11 @@
     "resource7-desc": "Comprendiendo las respuestas al trauma, síntomas del TEPT y caminos hacia la recuperación.",
     "resource8-title": "Guía de Medicación",
     "resource8-desc": "Lo que necesitas saber sobre medicamentos psiquiátricos comunes, efectos secundarios y cómo hablar con tu médico.",
-    "learn-more0": "Leer Más",
+    "resource9-title": "Salud Mental y Salud Física",
+    "resource9-desc": "Explora la fuerte conexión entre la salud física y el bienestar mental, incluyendo ejercicio, nutrición y sueño.",
+
+
+
     "learn-more1": "Leer Más",
     "learn-more2": "Leer Más",
     "learn-more3": "Leer Más",
@@ -86,6 +90,9 @@
     "learn-more6": "Leer Más",
     "learn-more7": "Leer Más",
     "learn-more8": "Leer Más",
+    "learn-more9": "Leer Más",
+    "learn-more10": "Leer Más",
+
     "faq-title": "Preguntas Comunes",
     "faq1-question": "¿Cómo sé si necesito ayuda?",
     "faq1-answer": "Si los síntomas te causan angustia, afectan tu vida/trabajo diario, o si tienes pensamientos de autolesión, busca ayuda profesional inmediatamente.",
@@ -919,6 +926,89 @@
     "source-text": "Fuente: NAMI. Más información en",
     "source-link": "Información sobre Terapia de NAMI"
   },
+
+  
+  "physical-resource": {
+    "page-title": "Tu Cuerpo y Mente",
+    "hero-title": "Tu Cuerpo y Mente: La Conexión Poderosa",
+    "hero-subtitle": "Cómo el ejercicio, la nutrición y el sueño trabajan juntos para construir un tú más saludable y feliz",
+    
+    "nav-connection": "La Conexión",
+    "nav-exercise": "Beneficios del Ejercicio",
+    "nav-science": "Ciencia Cerebral",
+    "nav-conditions": "Cómo Ayuda",
+    "nav-sleep-nutrition": "Sueño y Comida",
+    "nav-started": "Comenzar",
+    
+    "section1-title": "Tu Cuerpo y Mente Están Conectados",
+    "intro1": "Piensa en tu cuerpo y mente como mejores amigos que hablan constantemente entre sí. Cuando tu cuerpo se siente bien, tu mente también se siente bien. Y cuando tu mente está feliz, tu cuerpo recibe el mensaje.",
+    "intro2": "Cuidar tu salud física no se trata solo de verte bien: es una de las formas más poderosas de mejorar tu estado de ánimo, reducir el estrés y desarrollar fortaleza mental.",
+    "highlight1": "Acciones pequeñas y consistentes crean grandes cambios con el tiempo. No necesitas correr maratones para sentirte mejor: simplemente comienza con lo que te parezca bien.",
+    
+    "section2-title": "Ejercicio: El Mejorador Natural del Ánimo",
+    "exercise-intro": "Mover tu cuerpo hace más que solo quemar calorías. Es como darle a tu cerebro una ducha refrescante de buenos químicos.",
+    "benefit1-title": "Mejor Ánimo y Confianza",
+    "benefit1-desc": "El movimiento regular te hace sentir mejor contigo mismo y mejora tu calidad de vida en general.",
+    "benefit2-title": "Pensamiento Más Agudo",
+    "benefit2-desc": "Incluso una caminata de 20 minutos puede mejorar tu concentración y toma de decisiones durante horas después.",
+    "benefit3-title": "Mejor Sueño",
+    "benefit3-desc": "Días activos llevan a noches más profundas y reparadoras. Tu cerebro se limpia durante el sueño de calidad.",
+    "rule-title": "La \"Regla de 150 Minutos\" (¡Es Flexible!)",
+    "rule-desc": "Apunta a 150 minutos de movimiento moderado cada semana. Eso son solo 30 minutos, 5 días a la semana. ¡Caminar cuenta! Este simple hábito puede reducir tu riesgo de problemas de salud crónicos en un 20-30%.",
+    
+    "section3-title": "¿Qué Pasa en Tu Cerebro?",
+    "science-intro": "Cuando mueves tu cuerpo, suceden cosas asombrosas dentro de tu cabeza:",
+    "brain-effect1": "<strong>Endorfinas:</strong> Los analgésicos naturales de tu cuerpo que te hacen sentir bien",
+    "brain-effect2": "<strong>Endocannabinoides:</strong> Químicos naturales que te ayudan a sentirte calmado y relajado",
+    "brain-effect3": "<strong>BDNF:</strong> \"Fertilizante cerebral\" que ayuda a que tus células cerebrales crezcan y se conecten",
+    "brain-effect4": "<strong>Control del Cortisol:</strong> El ejercicio ayuda a reducir tu principal hormona del estrés",
+    "brain-effect5": "<strong>Equilibrio Hormonal:</strong> Ayuda a regular tu apetito y niveles de energía",
+    "highlight2": "Piensa en el ejercicio como \"medicina natural\" para tu cerebro. Es gratis, no tiene efectos secundarios y puedes tomarlo todos los días.",
+    
+    "section4-title": "Cómo el Movimiento Ayuda con Desafíos Específicos",
+    "conditions-intro": "La actividad física puede ser especialmente útil al lidiar con desafíos de salud mental:",
+    "table-header-condition": "Desafío",
+    "table-header-how": "Cómo Ayuda el Movimiento",
+    "condition1-name": "<strong>Depresión</strong>",
+    "condition1-help": "Puede ser tan efectivo como la medicación para algunas personas al potenciar naturalmente los sistemas del estado de ánimo",
+    "condition2-name": "<strong>Ansiedad</strong>",
+    "condition2-help": "Quema la energía nerviosa y enseña a tu cuerpo que puede manejar el estrés",
+    "condition3-name": "<strong>Estrés y Agobio</strong>",
+    "condition3-help": "Crea una salida saludable para la tensión y ayuda a reiniciar tu sistema nervioso",
+    "condition4-name": "<strong>Problemas de Concentración</strong>",
+    "condition4-help": "Aumenta el flujo sanguíneo al cerebro, ayudándote a concentrarte mejor",
+    "conditions-note-text": "Siempre trabaja con profesionales de la salud para condiciones serias. El movimiento complementa el tratamiento, no lo reemplaza.",
+    
+    "section5-title": "Sueño y Nutrición: El Equipo de Apoyo",
+    "sleep-intro": "El ejercicio funciona mejor cuando está respaldado por buen sueño y nutrición:",
+    "sleep-title": "Sueño: Tiempo de Recarga Cerebral",
+    "sleep-desc": "7-9 horas nocturnas ayudan a tu cerebro a procesar emociones, almacenar recuerdos y limpiar el \"desorden mental\" diario.",
+    "nutrition-title": "Nutrición: Combustible Cerebral",
+    "nutrition-desc": "Los alimentos integrales proporcionan los componentes básicos para los químicos cerebrales que regulan tu estado de ánimo y energía.",
+    "cycle-title": "El Ciclo Hermoso",
+    "cycle-desc": "El ejercicio te ayuda a dormir mejor → Mejor sueño mejora las elecciones de comida → Buena nutrición te da energía para hacer ejercicio.",
+    "highlight3": "Comienza con un cambio a la vez. Mejor sueño a menudo lleva a mejores elecciones de comida, lo que te da más energía para moverte.",
+    
+    "section6-title": "Formas Simples de Comenzar",
+    "start-intro": "No necesitas membresía de gimnasio o dieta perfecta para empezar:",
+    "tip1": "<strong>Comienza pequeño:</strong> ¡Caminatas de 10 minutos cuentan! Construye consistencia antes que intensidad.",
+    "tip2": "<strong>Encuentra lo que disfrutas:</strong> Baila, jardinea, juega con mascotas: el movimiento debe sentirse bien.",
+    "tip3": "<strong>Escucha a tu cuerpo:</strong> Algunos días serán energéticos, otros de descanso. Ambos están bien.",
+    "tip4": "<strong>Combina actividades:</strong> Escucha podcasts mientras caminas, o haz estiramientos durante los descansos de TV.",
+    "tip5": "<strong>Celebra el progreso:</strong> Nota cómo te sientes, no solo cómo te ves.",
+    "reminder-title": "Recuerda Esto",
+    "reminder-desc": "Cada pequeño movimiento importa. Un estiramiento de 5 minutos, elegir las escaleras o estacionarse más lejos: estas pequeñas acciones se suman a grandes beneficios para tu salud mental.",
+    
+    "sources-title": "¿Quieres Aprender Más?",
+    "source1-link": "La Conexión Cuerpo-Mente: Ciencia Explicada Simple",
+    "source1-note": "Desglose fácil de entender sobre cómo el ejercicio, sueño y nutrición afectan la salud mental",
+    "source2-link": "Ejercicio como Medicina Natural para el Cerebro",
+    "source2-note": "Investigación sobre cómo la actividad física cambia la química y estructura cerebral",
+    "source3-link": "Consejos Prácticos para Salud Mental a Través del Movimiento",
+    "source3-note": "Consejos del mundo real para incorporar ejercicio en la vida diaria"
+  
+},
+
   "about": {
     "page-title": "Sobre Nosotros - Mentivio",
     "hero-title": "Nuestra Historia",

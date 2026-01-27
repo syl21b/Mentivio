@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title id="page-title"></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <base href="/">
+  
+  <!-- Load scripts -->
+  <script src="frontend/js/components.js" defer></script>
+  <script src="frontend/js/load-navbar.js" defer></script>
+  <script src="frontend/js/load-footer.js" defer></script>
+  <script src="frontend/js/main.js" defer></script>
+  <script src="../frontend/js/head-content.js" defer></script>
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    /* Consolidated CSS - matched to anxiety-resource.html */
+    :root {
+      --primary: #4a6fa5;
+      --primary-light: #88a4c7;
+      --primary-dark: #3a5a80;
+      --secondary: #7ba05b;
+      --accent: #d4a5a5;
+      --light: #f8f9fa;
+      --dark: #2c3e50;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --danger-light: #ffebee;
+      --danger-dark: #d32f2f;
+      --gray: #6c757d;
+      --gray-light: #e9ecef;
+      --transition: all 0.3s ease;
+      --radius: 12px;
+      --white: #ffffff;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background-color: var(--white);
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    /* Resource Header */
+    .resource-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding: clamp(2.5rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--primary-dark), var(--secondary));
+      color: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .resource-icon {
+      font-size: clamp(2.5rem, 5vw, 3rem);
+      margin-bottom: 1.5rem;
+    }
+    
+    .resource-header h1 {
+      font-size: clamp(1.75rem, 3vw, 2rem);
+      margin-bottom: 0.75rem;
+      font-weight: 300;
+      line-height: 1.2;
+    }
+    
+    .resource-header h1 strong {
+      font-weight: 600;
+    }
+    
+    .resource-subtitle {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      opacity: 0.9;
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    /* Quick Navigation */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0 2.5rem;
+      justify-content: center;
+    }
+    
+    .nav-btn {
+      padding: 0.75rem 1.5rem;
+      background-color: var(--primary-dark);
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      font-family: inherit;
+      font-weight: 500;
+    }
+    
+    .nav-btn:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    /* Content Sections */
+    .content-section {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3vw, 2rem);
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .content-section h2 {
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      font-size: clamp(1.3rem, 2.5vw, 1.5rem);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .content-section h2 i {
+      color: var(--primary-dark);
+    }
+    
+    .content-section p {
+      margin-bottom: 1.25rem;
+      font-size: clamp(1rem, 2vw, 1.05rem);
+      color: var(--gray);
+      line-height: 1.7;
+    }
+    
+    /* Highlight Box */
+    .highlight-box {
+      background: rgba(74, 111, 165, 0.1);
+      padding: 1.5rem;
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border-left: 4px solid var(--primary-dark);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .highlight-box p {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--primary-dark);
+      margin-bottom: 0;
+      font-style: italic;
+    }
+    
+    /* List Styles */
+    .benefits-list {
+      list-style-type: none;
+      margin: 1.5rem 0;
+    }
+    
+    .benefits-list li {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-light);
+      position: relative;
+      padding-left: 1.75rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+    
+    .benefits-list li:last-child {
+      border-bottom: none;
+    }
+    
+    .benefits-list li:before {
+      content: "✓";
+      color: var(--primary-dark);
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    
+    /* Card Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .card {
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      border-top: 4px solid var(--primary-dark);
+      transition: var(--transition);
+      border: 1px solid var(--gray-light);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+    
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+    }
+    
+    .card h3 {
+      color: var(--primary-dark);
+      margin-bottom: 0.75rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    
+    .card p {
+      margin-bottom: 0;
+      font-size: 0.95rem;
+      color: var(--gray);
+      line-height: 1.6;
+      flex: 1;
+    }
+    
+    /* Table Styles */
+    .connection-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    
+    .connection-table th {
+      background-color: var(--primary-dark);
+      color: white;
+      padding: 1rem;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .connection-table td {
+      padding: 1rem;
+      border-bottom: 1px solid var(--gray-light);
+      color: var(--gray);
+    }
+    
+    .connection-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .connection-table tr:nth-child(even) {
+      background-color: var(--light);
+    }
+    
+    /* Stat Highlight */
+    .stat-highlight {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(74, 111, 165, 0.1), rgba(123, 160, 91, 0.1));
+      border-radius: var(--radius);
+      margin: 1.5rem 0;
+      border: 1px solid var(--gray-light);
+    }
+    
+    .stat-icon {
+      font-size: 2rem;
+      color: var(--primary-dark);
+      flex-shrink: 0;
+    }
+    
+    .stat-text {
+      flex: 1;
+    }
+    
+    .stat-text h4 {
+      color: var(--primary-dark);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    
+    /* Sources Section */
+    .sources-section {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: var(--light);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      color: var(--gray);
+      border: 1px solid var(--gray-light);
+    }
+    
+    .sources-section h3 {
+      color: var(--dark);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    
+    .source-item {
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--gray-light);
+    }
+    
+    .source-item:last-child {
+      border-bottom: none;
+    }
+    
+    .source-item a {
+      color: var(--primary-dark);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .source-item a:hover {
+      text-decoration: underline;
+    }
+    
+    .source-note {
+      font-size: 0.85rem;
+      color: var(--gray);
+      margin-top: 0.25rem;
+      font-style: italic;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.75rem;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-dark);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary);
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--primary-dark);
+      border: 2px solid var(--primary-dark);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(58, 90, 128, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .resource-header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .content-section {
+        padding: 1.5rem;
+      }
+      
+      .resource-header {
+        padding: 2rem 1.5rem;
+      }
+      
+      .connection-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .quick-nav {
+        justify-content: center;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .btn {
+        width: 100%;
+        max-width: 300px;
+      }
+      
+      .stat-highlight {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .resource-header {
+        padding: 1.5rem;
+      }
+      
+      .content-section {
+        padding: 1.25rem;
+      }
+      
+      .nav-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .resource-subtitle {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="resource-detail-container">
+      <!-- Header -->
+      <div class="resource-header">
+        <div class="resource-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1 id="hero-title"></h1>
+        <p class="resource-subtitle" id="hero-subtitle"></p>
+      </div>
+
+      <!-- Quick Navigation -->
+      <div class="quick-nav">
+        <button class="nav-btn" onclick="scrollToSection('mind-body-connection')" id="nav-connection"></button>
+        <button class="nav-btn" onclick="scrollToSection('exercise-benefits')" id="nav-exercise"></button>
+        <button class="nav-btn" onclick="scrollToSection('brain-science')" id="nav-science"></button>
+        <button class="nav-btn" onclick="scrollToSection('condition-help')" id="nav-conditions"></button>
+        <button class="nav-btn" onclick="scrollToSection('sleep-nutrition')" id="nav-sleep-nutrition"></button>
+        <button class="nav-btn" onclick="scrollToSection('get-started')" id="nav-started"></button>
+      </div>
+
+      <!-- Content Sections -->
+      <div class="resource-content">
+        
+        <!-- Mind-Body Connection Section -->
+        <div class="content-section" id="mind-body-connection">
+          <h2><i class="fas fa-link"></i> <span id="section1-title"></span></h2>
+          <p id="intro1"></p>
+          <p id="intro2"></p>
+          
+          <div class="highlight-box">
+            <p id="highlight1"></p>
+          </div>
+        </div>
+
+        <!-- Exercise Benefits Section -->
+        <div class="content-section" id="exercise-benefits">
+          <h2><i class="fas fa-running"></i> <span id="section2-title"></span></h2>
+          <p id="exercise-intro"></p>
+          
+          <div class="cards-grid">
+            <div class="card">
+              <div class="card-icon">😊</div>
+              <h3 id="benefit1-title"></h3>
+              <p id="benefit1-desc"></p>
+            </div>
+            <div class="card">
+              <div class="card-icon">🧠</div>
+              <h3 id="benefit2-title"></h3>
+              <p id="benefit2-desc"></p>
+            </div>
+            <div class="card">
+              <div class="card-icon">💤</div>
+              <h3 id="benefit3-title"></h3>
+              <p id="benefit3-desc"></p>
+            </div>
+          </div>
+          
+          <div class="stat-highlight">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-text">
+              <h4 id="rule-title"></h4>
+              <p id="rule-desc"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Brain Science Section -->
+        <div class="content-section" id="brain-science">
+          <h2><i class="fas fa-brain"></i> <span id="section3-title"></span></h2>
+          <p id="science-intro"></p>
+          
+          <ul class="benefits-list">
+            <li id="brain-effect1"></li>
+            <li id="brain-effect2"></li>
+            <li id="brain-effect3"></li>
+            <li id="brain-effect4"></li>
+            <li id="brain-effect5"></li>
+          </ul>
+          
+          <div class="highlight-box">
+            <p id="highlight2"></p>
+          </div>
+        </div>
+
+        <!-- Conditions & Exercise Section -->
+        <div class="content-section" id="condition-help">
+          <h2><i class="fas fa-hands-helping"></i> <span id="section4-title"></span></h2>
+          <p id="conditions-intro"></p>
+          
+          <table class="connection-table">
+            <thead>
+              <tr>
+                <th id="table-header-condition"></th>
+                <th id="table-header-how"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="condition1-name"></td>
+                <td id="condition1-help"></td>
+              </tr>
+              <tr>
+                <td id="condition2-name"></td>
+                <td id="condition2-help"></td>
+              </tr>
+              <tr>
+                <td id="condition3-name"></td>
+                <td id="condition3-help"></td>
+              </tr>
+              <tr>
+                <td id="condition4-name"></td>
+                <td id="condition4-help"></td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <p style="margin-top: 1rem; font-size: 0.95rem; color: var(--gray);"><i class="fas fa-info-circle"></i> <em id="conditions-note-text"></em></p>
+        </div>
+
+        <!-- Sleep & Nutrition Section -->
+        <div class="content-section" id="sleep-nutrition">
+          <h2><i class="fas fa-bed"></i> <span id="section5-title"></span></h2>
+          <p id="sleep-intro"></p>
+          
+          <div class="cards-grid">
+            <div class="card">
+              <div class="card-icon">😴</div>
+              <h3 id="sleep-title"></h3>
+              <p id="sleep-desc"></p>
+            </div>
+            <div class="card">
+              <div class="card-icon">🥗</div>
+              <h3 id="nutrition-title"></h3>
+              <p id="nutrition-desc"></p>
+            </div>
+            <div class="card">
+              <div class="card-icon">🔄</div>
+              <h3 id="cycle-title"></h3>
+              <p id="cycle-desc"></p>
+            </div>
+          </div>
+          
+          <div class="highlight-box">
+            <p id="highlight3"></p>
+          </div>
+        </div>
+
+        <!-- Get Started Section -->
+        <div class="content-section" id="get-started">
+          <h2><i class="fas fa-play-circle"></i> <span id="section6-title"></span></h2>
+          <p id="start-intro"></p>
+          
+          <ul class="benefits-list">
+            <li id="tip1"></li>
+            <li id="tip2"></li>
+            <li id="tip3"></li>
+            <li id="tip4"></li>
+            <li id="tip5"></li>
+          </ul>
+          
+          <div class="stat-highlight">
+            <div class="stat-icon">🌟</div>
+            <div class="stat-text">
+              <h4 id="reminder-title"></h4>
+              <p id="reminder-desc"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sources Section -->
+        <div class="sources-section">
+          <h3 id="sources-title"></h3>
+          <div class="source-item">
+            <a href="https://ppimhs.org/newspost/unveiling-the-connection-between-physical-and-mental-health-the-power-of-exercise-nutrition-and-sleep/" target="_blank" id="source1-link"></a>
+            <p class="source-note" id="source1-note"></p>
+          </div>
+          <div class="source-item">
+            <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9902068/" target="_blank" id="source2-link"></a>
+            <p class="source-note" id="source2-note"></p>
+          </div>
+          <div class="source-item">
+            <a href="https://www.mentalhealth.org.uk/explore-mental-health/publications/how-look-after-your-mental-health-using-exercise" target="_blank" id="source3-link"></a>
+            <p class="source-note" id="source3-note"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({
+        behavior: 'smooth'
+      });
+    }
+
+    // Function to update text content from language data
+    function updatePhysicalHealthContent(languageData) {
+      if (!languageData || !languageData.physicalHealthHumanized) return;
+      
+      const data = languageData.physicalHealthHumanized;
+      
+      // Update all elements with matching IDs
+      for (const [key, value] of Object.entries(data)) {
+        const element = document.getElementById(key);
+        if (element) {
+          if (element.tagName === 'A') {
+            element.textContent = value;
+          } else if (element.tagName === 'BUTTON') {
+            // For navigation buttons
+            if (key.startsWith('nav-')) {
+              element.textContent = value;
+            } else {
+              // For action buttons with spans inside
+              const span = element.querySelector('span');
+              if (span) {
+                span.textContent = value;
+              }
+            }
+          } else if (element.tagName === 'EM' || element.tagName === 'STRONG') {
+            // Handle emphasis and strong elements
+            element.innerHTML = value;
+          } else if (element.tagName === 'TD' || element.tagName === 'TH' || element.tagName === 'LI') {
+            // Handle table cells and list items (may contain HTML)
+            element.innerHTML = value;
+          } else {
+            // For all other elements
+            element.textContent = value;
+          }
+        }
+      }
+
+    }
+
+    // Initialize when components.js is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if components.js has loaded language data
+      if (window.currentLanguage && window.languageData) {
+        updatePhysicalHealthContent(window.languageData);
+      }
+      
+      // Listen for language changes from components.js
+      document.addEventListener('languageChanged', function(event) {
+        if (event.detail && event.detail.languageData) {
+          updatePhysicalHealthContent(event.detail.languageData);
+        }
+      });
+      
+      // Action button event listeners
+      document.getElementById('action-plan')?.addEventListener('click', function() {
+        window.location.href = '/tools/7-day-plan.html';
+      });
+      
+      document.getElementById('more-resources')?.addEventListener('click', function() {
+        window.location.href = '/resources/self-care.html';
+      });
+    });
+  </script>
+</body>
+</html>

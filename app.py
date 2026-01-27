@@ -54,7 +54,7 @@ class SecurityConfig:
                                     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
                                     "img-src 'self' data: https:; "
                                     "font-src 'self' data: https: fonts.gstatic.com; "
-                                    "connect-src 'self' http://localhost:8000 ws://localhost:8000;",  # Add localhost here
+                                    "connect-src 'self' http://localhost:8001 ws://localhost:8001;",  # Add localhost here
             'Referrer-Policy': 'strict-origin-when-cross-origin',
             'Permissions-Policy': 'geolocation=(), microphone=()'
         }
@@ -1322,7 +1322,7 @@ def serve_html_page(page_name):
     resource_pages = [
         'anxiety-resource', 'bipolar-resource', 'depression-resource',
         'medication-resource', 'mindfulness-resource', 'ptsd-resource',
-        'selfcare-resource', 'therapy-resource'
+        'selfcare-resource', 'therapy-resource', 'physical-resource'
     ]
     
     if page_name in resource_pages:
@@ -1347,7 +1347,7 @@ def serve_resource_page(resource_name):
     resource_pages = [
         'anxiety-resource', 'bipolar-resource', 'depression-resource',
         'medication-resource', 'mindfulness-resource', 'ptsd-resource',
-        'selfcare-resource', 'therapy-resource'
+        'selfcare-resource', 'therapy-resource', 'physical-resource'
     ]
     
     if resource_name in resource_pages:
@@ -2606,5 +2606,5 @@ if __name__ == '__main__':
             import sys
             sys.exit(1)
     
-    port = int(os.environ.get("PORT", 8000)) 
+    port = int(os.environ.get("PORT", 8001)) 
     app.run(host="0.0.0.0", port=port)

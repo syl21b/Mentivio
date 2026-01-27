@@ -272,7 +272,8 @@ class GlobalLanguageManager {
             'selfcare-resource': 'selfcare-resource',
             'therapy-resource': 'therapy-resource',
             'privacy': 'privacy',
-            'terms': 'terms'
+            'terms': 'terms',
+            'physical-resource': 'physical-resource'
         };
         
         return pageMap[fileName] || 'home';
