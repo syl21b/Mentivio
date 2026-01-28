@@ -1480,8 +1480,8 @@ function initMentivio() {
     /* Larger desktop screens */
     @media (min-width: 1200px) {
       #mentivioWindow {
-        width: 500px;
-        height: 700px;
+        width: 550px;
+        height: 750px;
       }
       
       .message-text {
