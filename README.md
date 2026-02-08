@@ -1,6 +1,9 @@
-# 🌟 Mentivio Mental Health Companion Platform
+# 🌟 Mentivio Mental Health Companion Platform 
+
+Live Website: https://mentivio-web.onrender.com/home?lang=en
 
 A comprehensive mental health platform combining clinical assessment with high EQ AI companionship for holistic mental wellness support.
+
 
 ## 🎯 Project Overview
 
