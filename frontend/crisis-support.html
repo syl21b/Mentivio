@@ -3,10 +3,9 @@
 <head>
   <title id="page-title"></title>
 
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-      <!-- Add base tag to ensure all relative URLs work correctly -->
+    <!-- Add base tag to ensure all relative URLs work correctly -->
     <base href="/">
     
     <!-- Load scripts in correct order -->
@@ -313,7 +312,7 @@ body {
 
 .card-content {
   flex: 1;
-  min-width: 0; /* Prevent flex item from overflowing */
+  min-width: 0;
 }
 
 .card-content h4 {
@@ -410,6 +409,155 @@ body {
   line-height: 1.4;
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
+
+/* International Crisis Lines Section */
+.international-section {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #0ea5e9;
+  border-left: 4px solid #0ea5e9;
+}
+
+.country-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  justify-content: center;
+}
+
+.country-tab {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid #cbd5e1;
+  border-radius: 50px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.country-tab:hover {
+  border-color: #0ea5e9;
+  background: #f0f9ff;
+}
+
+.country-tab.active {
+  background: #0ea5e9;
+  color: white;
+  border-color: #0ea5e9;
+}
+
+.country-tab.active:hover {
+  background: #0284c7;
+}
+
+.country-tab:active {
+  transform: scale(0.95);
+}
+
+.country-flag {
+  font-size: 1.2rem;
+}
+
+.country-content {
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+
+.country-content.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.country-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 1.25rem;
+}
+
+.country-line {
+  background: white;
+  padding: 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #e2e8f0;
+  transition: var(--transition);
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.country-line:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.country-line:active {
+  transform: translateY(0);
+}
+
+.line-icon {
+  width: 40px;
+  height: 40px;
+  background: #dbeafe;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2563eb;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.line-content {
+  flex: 1;
+}
+
+.line-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--dark);
+  font-size: 1rem;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+
+.line-number {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.phone-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s;
+}
+
+.phone-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.line-description {
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  word-wrap: break-word;
 }
 
 /* Crisis Information Grid - Clean Cards */
@@ -552,7 +700,7 @@ body {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
-  min-height: 44px; /* Minimum touch target size */
+  min-height: 44px;
 }
 
 .cta-btn.primary {
@@ -750,7 +898,7 @@ body {
   font-size: clamp(0.95rem, 2.5vw, 1rem);
   transition: border-color 0.3s ease;
   font-family: inherit;
-  min-height: 44px; /* Minimum touch target */
+  min-height: 44px;
 }
 
 #locationInput:focus {
@@ -772,7 +920,7 @@ body {
   transition: var(--transition);
   font-family: inherit;
   font-weight: 500;
-  min-height: 44px; /* Minimum touch target */
+  min-height: 44px;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   user-select: none;
@@ -805,8 +953,8 @@ body {
 /* iOS-specific fixes */
 @supports (-webkit-touch-callout: none) {
 .modal {
-  -webkit-backdrop-filter: blur(3px); /* Safari / iOS */
-  backdrop-filter: blur(3px);         /* Standard */
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
 }
   
   .emergency-card,
@@ -814,7 +962,9 @@ body {
   .info-card,
   .option-card,
   .cta-btn,
-  .search-btn {
+  .search-btn,
+  .country-tab,
+  .country-line {
     cursor: pointer;
   }
 }
@@ -843,6 +993,28 @@ body {
   .action-buttons {
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+  
+  .country-tabs {
+    gap: 0.5rem;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  
+  .country-tab {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+  
+  .country-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .country-line {
+    padding: 1rem;
   }
   
   .cta-buttons {
@@ -922,6 +1094,17 @@ body {
     width: 100%;
     justify-content: center;
   }
+  
+  .country-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .line-number {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 360px) {
@@ -986,6 +1169,11 @@ body {
     width: 98%;
     margin: 5% auto;
   }
+  
+  .country-tab {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
 }
 
 /* Ultra-small screens */
@@ -1025,6 +1213,15 @@ body {
   .cta-btn {
     min-width: 100%;
   }
+  
+  .country-tabs {
+    gap: 0.25rem;
+  }
+  
+  .country-tab {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+  }
 }
 
 /* Touch-friendly improvements */
@@ -1034,29 +1231,34 @@ body {
   .info-card:hover,
   .cta-btn:hover,
   .search-btn:hover,
-  .option-card:hover {
+  .option-card:hover,
+  .country-tab:hover,
+  .country-line:hover {
     transform: none;
   }
   
   .emergency-card:active,
   .action-btn:active,
-  .info-card:active {
+  .info-card:active,
+  .country-line:active {
     transform: scale(0.98);
   }
   
   .cta-btn:active,
   .search-btn:active,
-  .option-card:active {
+  .option-card:active,
+  .country-tab:active {
     transform: scale(0.95);
   }
   
-  /* Larger touch targets for very small screens */
   @media (max-width: 480px) {
     .emergency-card,
     .action-btn,
     .option-card,
     .cta-btn,
-    .search-btn {
+    .search-btn,
+    .country-tab,
+    .country-line {
       min-height: 44px;
     }
     
@@ -1104,6 +1306,10 @@ input:focus {
   .modal-content {
     animation: none;
   }
+  
+  .country-content {
+    animation: none;
+  }
 }
 
 /* Print Styles */
@@ -1117,12 +1323,14 @@ input:focus {
   }
   
   .cta-section,
-  .action-buttons {
+  .action-buttons,
+  .country-tabs {
     display: none;
   }
   
   .emergency-card,
-  .info-card {
+  .info-card,
+  .country-line {
     break-inside: avoid;
     box-shadow: none !important;
     border: 1px solid #ddd !important;
@@ -1131,17 +1339,21 @@ input:focus {
   .emergency-alert::before {
     animation: none;
   }
+  
+  .country-content {
+    display: block !important;
+  }
 }
 
 /* Ensure all text is selectable but buttons are not */
-p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action-btn *):not(.cta-btn *):not(.search-btn *):not(.close-modal) {
+p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action-btn *):not(.cta-btn *):not(.search-btn *):not(.close-modal):not(.country-tab *):not(.line-icon) {
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
   user-select: text;
 }
 
-.emergency-card, .action-btn, .cta-btn, .search-btn, .option-card, .close-modal, .timeline-year {
+.emergency-card, .action-btn, .cta-btn, .search-btn, .option-card, .close-modal, .country-tab, .country-line {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -1193,6 +1405,242 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
             <span id="emergency-services-title"></span>
             <small id="emergency-services-desc"></small>
           </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- International Crisis Lines Section -->
+    <section class="content-section fade-in international-section">
+      <div class="section-header">
+        <h2 id="international-title"></h2>
+        <p id="international-subtitle"></p>
+      </div>
+      
+      <div class="country-tabs" id="country-tabs">
+        <button class="country-tab active" data-country="en">
+          <span class="country-flag">🇺🇸</span>
+          <span id="tab-en"></span>
+        </button>
+        <button class="country-tab" data-country="es">
+          <span class="country-flag">🇪🇸</span>
+          <span id="tab-es"></span>
+        </button>
+        <button class="country-tab" data-country="zh">
+          <span class="country-flag">🇨🇳</span>
+          <span id="tab-zh"></span>
+        </button>
+        <button class="country-tab" data-country="vi">
+          <span class="country-flag">🇻🇳</span>
+          <span id="tab-vi"></span>
+        </button>
+      </div>
+      
+      <!-- English (EN) -->
+      <div class="country-content active" id="country-en">
+        <div class="country-grid">
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="en-usa-title"></h4>
+              <div class="line-number">
+                <a href="tel:988" class="phone-link">988</a>
+                <a href="tel:1-800-273-8255" class="phone-link">1-800-273-8255</a>
+              </div>
+              <p id="en-usa-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="en-canada-title"></h4>
+              <div class="line-number">
+                <a href="tel:1-833-456-4566" class="phone-link">1-833-456-4566</a>
+              </div>
+              <p id="en-canada-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="en-uk-title"></h4>
+              <div class="line-number">
+                <a href="tel:116123" class="phone-link">116 123</a>
+                <a href="tel:0800-068-4141" class="phone-link">0800 068 4141</a>
+              </div>
+              <p id="en-uk-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="en-australia-title"></h4>
+              <div class="line-number">
+                <a href="tel:13-11-14" class="phone-link">13 11 14</a>
+                <a href="tel:1300-659-467" class="phone-link">1300 659 467</a>
+              </div>
+              <p id="en-australia-desc"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Spanish (ES) -->
+      <div class="country-content" id="country-es">
+        <div class="country-grid">
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="es-spain-title"></h4>
+              <div class="line-number">
+                <a href="tel:024" class="phone-link">024</a>
+                <a href="tel:911" class="phone-link">911</a>
+              </div>
+              <p id="es-spain-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="es-mexico-title"></h4>
+              <div class="line-number">
+                <a href="tel:800-911-2000" class="phone-link">800 911 2000</a>
+                <a href="tel:55-5658-1111" class="phone-link">55 5658 1111</a>
+              </div>
+              <p id="es-mexico-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="es-argentina-title"></h4>
+              <div class="line-number">
+                <a href="tel:135" class="phone-link">135</a>
+                <a href="tel:0800-345-1435" class="phone-link">0800 345 1435</a>
+              </div>
+              <p id="es-argentina-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="es-colombia-title"></h4>
+              <div class="line-number">
+                <a href="tel:106" class="phone-link">106</a>
+                <a href="tel:018000-113113" class="phone-link">018000 113113</a>
+              </div>
+              <p id="es-colombia-desc"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chinese (ZH) -->
+      <div class="country-content" id="country-zh">
+        <div class="country-grid">
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="zh-china-title"></h4>
+              <div class="line-number">
+                <a href="tel:400-161-9995" class="phone-link">400-161-9995</a>
+                <a href="tel:010-8295-1332" class="phone-link">010-8295-1332</a>
+              </div>
+              <p id="zh-china-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="zh-taiwan-title"></h4>
+              <div class="line-number">
+                <a href="tel:1995" class="phone-link">1995</a>
+                <a href="tel:0800-788-995" class="phone-link">0800-788-995</a>
+              </div>
+              <p id="zh-taiwan-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="zh-hongkong-title"></h4>
+              <div class="line-number">
+                <a href="tel:2389-2222" class="phone-link">2389 2222</a>
+                <a href="tel:2896-0000" class="phone-link">2896 0000</a>
+              </div>
+              <p id="zh-hongkong-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="zh-singapore-title"></h4>
+              <div class="line-number">
+                <a href="tel:1800-221-4444" class="phone-link">1800-221-4444</a>
+                <a href="tel:6389-2222" class="phone-link">6389 2222</a>
+              </div>
+              <p id="zh-singapore-desc"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Vietnamese (VI) -->
+      <div class="country-content" id="country-vi">
+        <div class="country-grid">
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="vi-vietnam-title"></h4>
+              <div class="line-number">
+                <a href="tel:1900-8009" class="phone-link">1900 8009</a>
+                <a href="tel:1900-1567" class="phone-link">1900 1567</a>
+              </div>
+              <p id="vi-vietnam-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="vi-hotline-title"></h4>
+              <div class="line-number">
+                <a href="tel:111" class="phone-link">111</a>
+              </div>
+              <p id="vi-hotline-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="vi-women-title"></h4>
+              <div class="line-number">
+                <a href="tel:1900-969680" class="phone-link">1900 969680</a>
+              </div>
+              <p id="vi-women-desc"></p>
+            </div>
+          </div>
+          
+          <div class="country-line">
+            <div class="line-icon"><i class="fas fa-phone"></i></div>
+            <div class="line-content">
+              <h4 id="vi-youth-title"></h4>
+              <div class="line-number">
+                <a href="tel:1800-1567" class="phone-link">1800 1567</a>
+                <a href="tel:1088" class="phone-link">1088</a>
+              </div>
+              <p id="vi-youth-desc"></p>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1319,8 +1767,57 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
 
   <!-- JSON Injection Script -->
   <script>
-   
-   
+    // International crisis lines tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Tab switching
+      const tabs = document.querySelectorAll('.country-tab');
+      const contents = document.querySelectorAll('.country-content');
+      
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          const country = this.getAttribute('data-country');
+          
+          // Update active tab
+          tabs.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update active content
+          contents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `country-${country}`) {
+              content.classList.add('active');
+            }
+          });
+        });
+      });
+      
+      // Scroll animation
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+      
+      document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+      });
+      
+      // Initialize mobile view class
+      if (window.innerWidth <= 768) {
+        document.body.classList.add('mobile-view');
+      }
+    });
 
     // Crisis Support Functions
     function openCrisisModal() {
@@ -1329,7 +1826,6 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
 
     function closeCrisisModal() {
       document.getElementById('crisisModal').style.display = 'none';
-      // Reset manual search
       document.getElementById('manualSearch').style.display = 'none';
       document.getElementById('locationInput').value = '';
     }
@@ -1344,7 +1840,6 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
 
     function useCurrentLocationForMaps() {
       if (navigator.geolocation) {
-        // Show loading state
         const optionCard = event.currentTarget;
         const originalHTML = optionCard.innerHTML;
         optionCard.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
@@ -1358,7 +1853,6 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
             window.open(googleMapsUrl, '_blank');
             closeCrisisModal();
             
-            // Restore button
             optionCard.innerHTML = originalHTML;
             optionCard.style.pointerEvents = 'auto';
           },
@@ -1366,7 +1860,6 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
             alert('Unable to access your location. Please try manual search.');
             enableManualSearch();
             
-            // Restore button
             optionCard.innerHTML = originalHTML;
             optionCard.style.pointerEvents = 'auto';
           }
@@ -1403,39 +1896,9 @@ p, h1, h2, h3, h4, h5, h6, span:not(.emergency-icon):not(.card-icon):not(.action
       }
     });
 
-    // Add scroll animation
-    document.addEventListener('DOMContentLoaded', function() {
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-          }
-        });
-      }, observerOptions);
-      
-      // Observe all fade-in elements
-      document.querySelectorAll('.fade-in').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-      });
-      
-      // Handle window resize for better mobile experience
-      window.addEventListener('resize', function() {
-        document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
-      });
-      
-      // Initialize mobile view class
-      if (window.innerWidth <= 768) {
-        document.body.classList.add('mobile-view');
-      }
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      document.body.classList.toggle('mobile-view', window.innerWidth <= 768);
     });
   </script>
 

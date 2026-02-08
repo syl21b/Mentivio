@@ -884,6 +884,29 @@
                     </div>
                 </div>
 
+                <!-- Timeline 2026 -->
+                <div class="timeline-item">
+                    <button class="timeline-year" id="timeline-2026-year"></button>
+                    <div class="year-content" id="content-2026">
+                        <button class="toggle-indicator" aria-label="Toggle content">▼</button>
+                        <h3 id="timeline-2026-title"></h3>
+                        <p id="timeline-2026-content"></p>
+
+                        <div class="sub-timeline" id="subtimeline-2026">
+                            <div class="sub-timeline-item">
+                                <div class="sub-timeline-date">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span id="subtimeline-january26-date"></span>
+                                </div>
+                                <div class="sub-timeline-content">
+                                    <h4 id="subtimeline-january26-title"></h4>
+                                    <p id="subtimeline-january26-content"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Timeline Now -->
                 <div class="timeline-item">
                     <button class="timeline-year" id="timeline-now-year"></button>
@@ -976,95 +999,126 @@
         </section>
     </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            // Fade-in animation observer (consistent with home.html)
-            const observer = new IntersectionObserver(entries => {
-                entries.forEach(e => {
-                    if (e.isIntersecting) e.target.classList.add("active-fade");
-                });
-            }, { threshold: 0.15 });
 
-            document.querySelectorAll(".fade-section").forEach(sec => observer.observe(sec));
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // Fade-in animation observer
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) e.target.classList.add("active-fade");
+            });
+        }, { threshold: 0.15 });
 
-            // Timeline toggle functionality
-            const timelineYears = document.querySelectorAll('.timeline-year');
-            const toggleButtons = document.querySelectorAll('.toggle-indicator');
+        document.querySelectorAll(".fade-section").forEach(sec => observer.observe(sec));
+
+        // Improved timeline toggle functionality with event delegation
+        function toggleTimelineContent(contentId, year = null) {
+            const content = document.getElementById(contentId);
+            if (!content) return;
             
-            function toggleTimelineContent(contentId, year = null) {
-                const content = document.getElementById(contentId);
-                if (!content) return;
-                
-                const isCollapsed = content.classList.contains('collapsed');
-                const toggleBtn = content.querySelector('.toggle-indicator');
-                
-                // Toggle main content
-                content.classList.toggle('collapsed');
-                
-                // Update toggle button
-                if (toggleBtn) {
-                    toggleBtn.textContent = isCollapsed ? '▼' : '▲';
-                }
-                
-                // Handle sub-timeline for 2025
-                if (year === '2025' || contentId === 'content-2025') {
-                    const subTimeline = document.getElementById('subtimeline-2025');
-                    if (subTimeline) {
-                        subTimeline.classList.toggle('collapsed');
-                        // Keep sub-timeline expanded when main content is expanded
-                        if (isCollapsed) {
-                            subTimeline.classList.remove('collapsed');
-                        }
-                    }
-                }
-                
-                // Smooth scroll into view if expanding on mobile
-                if (window.innerWidth <= 768 && isCollapsed) {
-                    setTimeout(() => {
-                        content.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }, 300);
+            const isCollapsed = content.classList.contains('collapsed');
+            const toggleBtn = content.querySelector('.toggle-indicator');
+            
+            // Toggle main content
+            content.classList.toggle('collapsed');
+            
+            // Update toggle button
+            if (toggleBtn) {
+                toggleBtn.textContent = isCollapsed ? '▼' : '▲';
+            }
+            
+            // Handle sub-timeline based on year
+            const subTimelineId = `subtimeline-${year}`;
+            const subTimeline = document.getElementById(subTimelineId);
+            
+            if (subTimeline) {
+                subTimeline.classList.toggle('collapsed');
+                // Keep sub-timeline expanded when main content is expanded
+                if (isCollapsed) {
+                    subTimeline.classList.remove('collapsed');
                 }
             }
             
-            // Year button click handlers
-            timelineYears.forEach(button => {
-                button.addEventListener('click', function() {
-                    const year = this.textContent.trim();
-                    let contentId;
-                    
-                    if (year === '2024') contentId = 'content-2024';
-                    else if (year === '2025') contentId = 'content-2025';
-                    else if (year === 'Now') contentId = 'content-now';
-                    
-                    if (contentId) toggleTimelineContent(contentId, year);
+            // Smooth scroll into view if expanding on mobile
+            if (window.innerWidth <= 768 && isCollapsed) {
+                setTimeout(() => {
+                    content.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'nearest' 
+                    });
+                }, 300);
+            }
+        }
+        
+        // Event delegation for timeline years
+        document.addEventListener('click', function(e) {
+            // Handle timeline year clicks
+            if (e.target.classList.contains('timeline-year')) {
+                const year = e.target.textContent.trim();
+                let contentId;
+                
+                if (year === '2024') contentId = 'content-2024';
+                else if (year === '2025') contentId = 'content-2025';
+                else if (year === '2026') contentId = 'content-2026';
+                else if (year === 'Now') contentId = 'content-now';
+                
+                if (contentId) {
+                    toggleTimelineContent(contentId, year);
+                }
+            }
+            
+            // Handle toggle button clicks
+            if (e.target.classList.contains('toggle-indicator')) {
+                e.stopPropagation();
+                const content = e.target.closest('.year-content');
+                if (content) {
+                    const contentId = content.id;
+                    // Extract year from content ID
+                    const yearMatch = contentId.match(/content-(\d+|now)/);
+                    const year = yearMatch ? yearMatch[1] : null;
+                    toggleTimelineContent(contentId, year);
+                }
+            }
+            
+            // Handle sub-timeline item clicks for mobile
+            if (window.innerWidth <= 768 && e.target.closest('.sub-timeline-item')) {
+                const subItem = e.target.closest('.sub-timeline-item');
+                subItem.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
                 });
-            });
-            
-            // Toggle button click handlers
-            toggleButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const content = this.closest('.year-content');
-                    if (content) {
-                        const contentId = content.id;
-                        const year = contentId === 'content-2024' ? '2024' : 
-                                    contentId === 'content-2025' ? '2025' : 'Now';
-                        toggleTimelineContent(contentId, year);
-                    }
-                });
-            });
-            
-            // Initialize all content as expanded
-            document.querySelectorAll('.year-content').forEach(content => {
-                content.classList.remove('collapsed');
-                const toggleBtn = content.querySelector('.toggle-indicator');
-                if (toggleBtn) toggleBtn.textContent = '▲';
-            });
-            
-            // Initialize sub-timeline as expanded
-            const subTimeline = document.getElementById('subtimeline-2025');
-            if (subTimeline) subTimeline.classList.remove('collapsed');
+            }
         });
-    </script>
+        
+        // Initialize all content as expanded
+        document.querySelectorAll('.year-content').forEach(content => {
+            content.classList.remove('collapsed');
+            const toggleBtn = content.querySelector('.toggle-indicator');
+            if (toggleBtn) toggleBtn.textContent = '▲';
+        });
+        
+        // Initialize all sub-timelines as expanded
+        document.querySelectorAll('[id^="subtimeline-"]').forEach(subTimeline => {
+            subTimeline.classList.remove('collapsed');
+        });
+        
+        // Improved touch handling for mobile
+        if ('ontouchstart' in window) {
+            document.querySelectorAll('.timeline-year, .btn, .value-card, .team-member').forEach(el => {
+                el.style.cursor = 'pointer';
+            });
+        }
+        
+        // Keyboard accessibility for timeline
+        document.querySelectorAll('.timeline-year, .toggle-indicator').forEach(button => {
+            button.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

@@ -355,13 +355,14 @@
                     <div class="mentivio-language-wrapper">
                         <select class="mentivio-language-select" id="mentivioLanguageSelect">
                             <option value="en" ${currentLang === 'en' ? 'selected' : ''}>English</option>
-                            <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>Vietnamese</option>
-                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Spanish</option>
-                            <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>Chinese</option>
+                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Español</option>
+                            <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>Tiếng Việt</option>
+                            <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>中文</option>
                         </select>
                         <div class="mentivio-language-display">${langDisplay}</div>
                     </div>
                 </div>
+
                 
                 <!-- Mobile Controls -->
                 <div class="mentivio-mobile-controls">
@@ -369,9 +370,9 @@
                     <div class="mentivio-language-wrapper">
                         <select class="mentivio-language-select mentivio-mobile-language-select" id="mentivioMobileLanguageSelect">
                             <option value="en" ${currentLang === 'en' ? 'selected' : ''}>English</option>
-                            <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>Vietnamese</option>
-                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Spanish</option>
-                            <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>Chinese</option>
+                            <option value="es" ${currentLang === 'es' ? 'selected' : ''}>Español</option>
+                            <option value="vi" ${currentLang === 'vi' ? 'selected' : ''}>Tiếng Việt</option>
+                            <option value="zh" ${currentLang === 'zh' ? 'selected' : ''}>中文</option>
                         </select>
                         <div class="mentivio-language-display">${langDisplay}</div>
                     </div>

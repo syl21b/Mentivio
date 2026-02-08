@@ -155,6 +155,41 @@ class SecurityUtils:
         except Exception as e:
             return False, f"Age validation error: {str(e)}"
 
+    @staticmethod
+    def validate_coded_responses(coded_responses: Dict) -> Tuple[bool, str]:
+        """Validate coded responses format and values"""
+        try:
+            if not isinstance(coded_responses, dict):
+                return False, "Responses must be a dictionary"
+            
+            # Define ALLOWED codes
+            allowed_codes = {
+                'YN1', 'YN2',  # Yes/No
+                'FR1', 'FR2', 'FR3', 'FR4',  # Frequency
+                'CO1', 'CO2', 'CO3', 'CO4', 'CO5',  # Concentration
+                'OP1', 'OP2', 'OP3', 'OP4', 'OP5',  # Optimism
+                'SA1', 'SA2', 'SA3', 'SA4', 'SA5'   # Sexual Activity
+            }
+            
+            # Define ALLOWED questions
+            allowed_questions = {f'Q{i}' for i in range(1, 18)}  # Q1 to Q17
+            
+            # Validate each question and code
+            for question, code in coded_responses.items():
+                if question not in allowed_questions:
+                    return False, f"Invalid question code: {question}"
+                if code not in allowed_codes:
+                    return False, f"Invalid response code: {code} for question {question}"
+            
+            # Check that we have all required questions
+            if len(coded_responses) < 17:
+                missing = allowed_questions - set(coded_responses.keys())
+                return False, f"Missing responses for questions: {sorted(missing)}"
+            
+            return True, "Valid"
+        except Exception as e:
+            return False, f"Validation error: {str(e)}"
+
 class EncryptionService:
     def __init__(self):
         self.fernet = Fernet(SecurityConfig.ENCRYPTION_KEY)
@@ -1492,6 +1527,12 @@ def predict():
         if not coded_responses:
             return jsonify({'error': 'No responses provided'}), 400
         
+        # 🔐 CRITICAL: Validate coded responses format FIRST
+        coded_valid, coded_msg = SecurityUtils.validate_coded_responses(coded_responses)
+        if not coded_valid:
+            logger.warning(f"Invalid coded responses: {coded_msg}")
+            return jsonify({'error': f'Invalid response format: {coded_msg}'}), 400
+        
         # Convert coded responses to English for model processing
         user_responses = convert_coded_to_english(coded_responses)
         
@@ -1670,6 +1711,12 @@ def predict():
             },
             'language': language
         }
+        
+        # 🔥 CRITICAL: Add emergency alert for safety warnings
+        if safety_warnings:
+            response_data['emergency_alert'] = True
+            response_data['emergency_message'] = 'URGENT: Please seek immediate professional help. This assessment detected potential safety concerns. Call emergency services if needed.'
+            logger.warning(f"Safety warnings triggered emergency alert: {safety_warnings}")
         
         if clinical_enhancement:
             response_data['clinical_insights'] = {
@@ -2086,6 +2133,7 @@ def generate_pdf_report():
         pdf_translations = pdf_data.get('pdf_translations', {})
         confidence_percentage = pdf_data.get('confidence_percentage', 0)
         diagnosis_description = pdf_data.get('diagnosis_description', '')
+        safety_warnings = pdf_data.get('safety_warnings', [])
         
         # Extract original data for font fallback
         original_data = pdf_data.get('original_data', {})
@@ -2208,12 +2256,18 @@ def generate_pdf_report():
             base_font = 'Helvetica'
             bold_font = 'Helvetica-Bold'
         
-        # PDF setup with proper fonts
+        # PDF setup with proper fonts and accessibility
         doc = SimpleDocTemplate(buffer, pagesize=A4,
                               topMargin=1*inch,
                               bottomMargin=1*inch,
                               leftMargin=0.75*inch,
-                              rightMargin=0.75*inch)
+                              rightMargin=0.75*inch,
+                              title='Mental Health Assessment Report',
+                              author='Mentivio Clinical System',
+                              subject='Clinical Mental Health Assessment',
+                              creator='Mentivio v3.0',
+                              keywords='mental health, assessment, clinical, report',
+                              lang=language)
         
         styles = getSampleStyleSheet()
         
@@ -2263,6 +2317,22 @@ def generate_pdf_report():
             spaceAfter=0,
             leading=10,
         )
+        
+        # 🔥 CRITICAL: Emergency disclaimer style
+        emergency_style = ParagraphStyle(
+            'Emergency',
+            parent=styles['Normal'],
+            fontName=bold_font,
+            fontSize=9,
+            textColor=colors.red,
+            backColor=colors.yellow,
+            spaceBefore=10,
+            spaceAfter=10,
+            borderPadding=5,
+            borderWidth=1,
+            borderColor=colors.red,
+            borderRadius=2
+        )
 
         story = []
 
@@ -2270,6 +2340,14 @@ def generate_pdf_report():
         title_text = pdf_translations.get('title', 'MENTAL HEALTH ASSESSMENT REPORT')
         story.append(Paragraph(title_text, title_style)) 
         story.append(Spacer(1, 20))
+        
+        # 🔥 CRITICAL: Add emergency disclaimer if safety warnings present
+        if safety_warnings and any('suicidal' in warning.lower() for warning in safety_warnings):
+            emergency_text = pdf_translations.get('emergency_disclaimer', 
+                '**EMERGENCY NOTICE:** This assessment is NOT a substitute for professional medical advice. If you are experiencing a medical emergency, suicidal thoughts, or immediate danger, please call emergency services immediately.')
+            
+            story.append(Paragraph(emergency_text, emergency_style))
+            story.append(Spacer(1, 10))
         
         # Assessment Details
         assessment_details = pdf_translations.get('assessment_details', 'ASSESSMENT DETAILS')
@@ -2474,10 +2552,11 @@ def generate_pdf_report():
         
         story.append(Spacer(1, 20))
         
-        # Disclaimer
-        important_disclaimer = pdf_translations.get('important_disclaimer', 'IMPORTANT DISCLAIMER')
+        # Medical Disclaimer
+        important_disclaimer = pdf_translations.get('important_disclaimer', 'IMPORTANT MEDICAL DISCLAIMER')
         story.append(Paragraph(important_disclaimer, heading_style))
-        disclaimer_text = pdf_translations.get('disclaimer_text', 'This assessment is for informational purposes only and is not a substitute for professional medical advice, diagnosis, or treatment.')
+        disclaimer_text = pdf_translations.get('disclaimer_text', 
+            'This assessment is for informational purposes only and is NOT a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.')
         story.append(Paragraph(disclaimer_text, normal_style))
         story.append(Spacer(1, 10))
         

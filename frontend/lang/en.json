@@ -1022,6 +1022,7 @@
     "timeline-2024-year": "2024",
     "timeline-2024-title": "The Spark",
     "timeline-2024-content": "After facing my own struggles with depression, I saw how many others suffer in silence. I wanted to create a place where no one feels lost.",
+    
     "timeline-2025-year": "2025",
     "timeline-2025-title": "Building Bridges",
     "timeline-2025-content": "I teamed up with experts to build tools that bridge the gap between medical care and daily life. The goal: Help for everyone, everywhere.",
@@ -1037,6 +1038,14 @@
     "subtimeline-december25-date": "December 2025",
     "subtimeline-december25-title": "Going Global",
     "subtimeline-december25-content": "Adding languages to reach people worldwide.",
+    
+    "timeline-2026-year": "2026",
+    "timeline-2026-title": "Expansion and Growth",
+    "timeline-2026-content": "We expanded our services to include more personalized AI therapy sessions and a wider range of resources.",
+     "subtimeline-january26-date": "January 2026",
+      "subtimeline-january26-title": "High-EQ AI Chatbot & Global Launch",
+      "subtimeline-january26-content": "Built an AI chatbot with high emotional intelligence (EQ) for Mentivio with multiple language support, making mental health support accessible worldwide.",
+
     "timeline-now-year": "Today",
     "timeline-now-title": "A Community",
     "timeline-now-content": "Mentivio is a promise that you aren't alone. It's built with heart for anyone seeking support.",
@@ -1066,6 +1075,8 @@
     "cta-assessment": "Take Assessment",
     "cta-learn-more": "Learn More"
   },
+
+
   "crisis": {
     "page-title": "Crisis Support - Mentivio",
     "header-title": "Get Help Now",
@@ -1078,6 +1089,44 @@
     "textline-desc": "Text HOME to 741741.",
     "emergency-services-title": "Emergency Services",
     "emergency-services-desc": "Call 911 or go to the ER.",
+    "international-title": "International Crisis Lines",
+    "international-subtitle": "Find help in your country and language.",
+    "tab-en": "English",
+    "tab-es": "Spanish",
+    "tab-zh": "Chinese",
+    "tab-vi": "Vietnamese",
+    "en-usa-title": "USA",
+    "en-usa-desc": "National Suicide Prevention Lifeline and Crisis Text Line.",
+    "en-canada-title": "Canada",
+    "en-canada-desc": "Crisis Services Canada and Kids Help Phone.",
+    "en-uk-title": "United Kingdom",
+    "en-uk-desc": "Samaritans and CALM (Campaign Against Living Miserably).",
+    "en-australia-title": "Australia",
+    "en-australia-desc": "Lifeline Australia and Beyond Blue.",
+    "es-spain-title": "Spain",
+    "es-spain-desc": "Suicide Prevention Telephone (024) and emergencies.",
+    "es-mexico-title": "Mexico",
+    "es-mexico-desc": "SUDAMER Foundation and National Mental Health Line.",
+    "es-argentina-title": "Argentina",
+    "es-argentina-desc": "Mental Health and Addictions Hotline.",
+    "es-colombia-title": "Colombia",
+    "es-colombia-desc": "Psychosocial Care Line and Bogotá Hotline.",
+    "zh-china-title": "Mainland China",
+    "zh-china-desc": "Beijing Suicide Research and Prevention Center.",
+    "zh-taiwan-title": "Taiwan",
+    "zh-taiwan-desc": "Taiwan Suicide Prevention Center Hotline.",
+    "zh-hongkong-title": "Hong Kong",
+    "zh-hongkong-desc": "The Samaritan Befrienders Hong Kong.",
+    "zh-singapore-title": "Singapore",
+    "zh-singapore-desc": "Samaritans of Singapore and Institute of Mental Health.",
+    "vi-vietnam-title": "Vietnam",
+    "vi-vietnam-desc": "National Child Protection Hotline.",
+    "vi-hotline-title": "General Hotline",
+    "vi-hotline-desc": "Free national psychological counseling.",
+    "vi-women-title": "Women's Support",
+    "vi-women-desc": "National hotline for women facing violence.",
+    "vi-youth-title": "Youth Support",
+    "vi-youth-desc": "Psychological counseling for young people.",
     "crisis-info-title": "In a Crisis?",
     "crisis-info-subtitle": "Know the signs and act fast.",
     "recognize-title": "Signs",
@@ -1105,7 +1154,10 @@
     "search-location-note": "Anywhere",
     "search-placeholder": "Enter location...",
     "search-btn": "Find"
-  },
+  
+},
+
+
   "analogy": {
     "page-title": "Mood Visualizer",
     "analogy_hero_title0": "Mood State Simulator",

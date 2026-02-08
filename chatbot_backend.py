@@ -9,6 +9,9 @@ from typing import List, Dict, Any, Tuple
 import logging
 from datetime import datetime
 import random
+import uuid
+import hashlib
+from functools import lru_cache
 
 # Load environment variables
 load_dotenv()
@@ -98,54 +101,252 @@ SAFETY_SETTINGS = [
     ),
 ]
 
+# ================================
+# SESSION PERSISTENCE MANAGER
+# ================================
+class SessionManager:
+    """Manages user sessions for persistent conversations."""
+    
+    def __init__(self):
+        self.sessions = {}  # In production, use Redis or database
+        self.session_timeout = 30 * 60  # 30 minutes
+    
+    def create_session(self, session_id=None, language='en', anonymous=False):
+        """Create a new session or return existing one."""
+        if not session_id:
+            session_id = str(uuid.uuid4())
+        
+        if session_id not in self.sessions:
+            self.sessions[session_id] = {
+                'id': session_id,
+                'created_at': datetime.now(),
+                'last_activity': datetime.now(),
+                'language': language,
+                'anonymous': anonymous,
+                'conversation_history': [],
+                'conversation_state': {
+                    'phase': 'engagement',
+                    'trust_level': 0,
+                    'needs_inspiration': False,
+                    'topics_discussed': []
+                },
+                'metadata': {
+                    'user_agent': '',
+                    'ip_hash': '',
+                    'page_visits': 0
+                }
+            }
+        else:
+            # Update last activity
+            self.sessions[session_id]['last_activity'] = datetime.now()
+        
+        return self.sessions[session_id]
+    
+    def get_session(self, session_id):
+        """Get session by ID, cleaning up if expired."""
+        if session_id in self.sessions:
+            session = self.sessions[session_id]
+            time_since_activity = (datetime.now() - session['last_activity']).total_seconds()
+            
+            if time_since_activity > self.session_timeout:
+                # Session expired, remove it
+                del self.sessions[session_id]
+                return None
+            
+            # Update last activity
+            session['last_activity'] = datetime.now()
+            return session
+        return None
+    
+    def update_session(self, session_id, updates):
+        """Update session data."""
+        session = self.get_session(session_id)
+        if session:
+            session.update(updates)
+            session['last_activity'] = datetime.now()
+            return True
+        return False
+    
+    def add_message(self, session_id, message, role='user', emotion='neutral'):
+        """Add a message to session history."""
+        session = self.get_session(session_id)
+        if session:
+            message_entry = {
+                'role': role,
+                'content': message,
+                'emotion': emotion,
+                'timestamp': datetime.now().isoformat(),
+                'language': session['language']
+            }
+            
+            session['conversation_history'].append(message_entry)
+            
+            # Keep only last 50 messages
+            if len(session['conversation_history']) > 50:
+                session['conversation_history'] = session['conversation_history'][-50:]
+            
+            # Update conversation state based on message count
+            user_message_count = len([m for m in session['conversation_history'] if m['role'] == 'user'])
+            
+            if user_message_count < 3:
+                session['conversation_state']['phase'] = 'engagement'
+            elif user_message_count < 8:
+                session['conversation_state']['phase'] = 'exploration'
+            elif user_message_count < 15:
+                session['conversation_state']['phase'] = 'processing'
+            else:
+                session['conversation_state']['phase'] = 'integration'
+            
+            # Update trust level gradually
+            session['conversation_state']['trust_level'] = min(user_message_count / 2, 10)
+            
+            # Check if needs inspiration
+            if emotion in ['sad', 'overwhelmed', 'lonely', 'hopeless']:
+                session['conversation_state']['needs_inspiration'] = True
+            
+            return True
+        return False
+    
+    def cleanup_expired_sessions(self):
+        """Clean up expired sessions."""
+        expired_sessions = []
+        current_time = datetime.now()
+        
+        for session_id, session in list(self.sessions.items()):
+            time_since_activity = (current_time - session['last_activity']).total_seconds()
+            if time_since_activity > self.session_timeout:
+                expired_sessions.append(session_id)
+        
+        for session_id in expired_sessions:
+            del self.sessions[session_id]
+        
+        if expired_sessions:
+            logger.info(f"Cleaned up {len(expired_sessions)} expired sessions")
+        
+        return len(expired_sessions)
+    
+    def get_active_sessions_count(self):
+        """Get count of active sessions."""
+        self.cleanup_expired_sessions()
+        return len(self.sessions)
+
+# Initialize session manager
+session_manager = SessionManager()
+
+# ================================
+# TOPIC CONFIGURATIONS
+# ================================
+
 # EXPANDED ALLOWED TOPICS WITH HIGH EQ FOCUS
 ALLOWED_TOPICS = [
-    # Original wellness topics
-    "stress", "stress management", "feeling stressed", "stressful", 
-    "anxiety", "anxiety coping", "feeling anxious", "worried",
-    "depression", "mild depression", "feeling depressed", "sad",
-    "loneliness", "feeling lonely", "isolated",
-    "work-life balance", "work stress", "work pressure",
-    "study stress", "school stress", "academic pressure", "exams",
-    "relationship communication", "relationship issues", "friends",
-    "family", "family issues", "family stress",
-    "self-care", "self care", "taking care of myself",
-    "mindfulness", "meditation", "breathing exercises",
-    "positive thinking", "gratitude", "appreciation",
-    "goal setting", "time management", "productivity",
-    "sleep", "sleep hygiene", "sleep problems", "insomnia",
-    "healthy habits", "exercise", "physical activity",
-    "emotional awareness", "feelings", "emotions",
-    "communication skills", "talking about feelings",
-    "boundary setting", "saying no", "personal boundaries",
-    "self-compassion", "being kind to myself", "self kindness",
-    "resilience", "resilience building", "bouncing back",
-    "coping strategies", "coping skills", "dealing with stress",
-    "emotional regulation", "managing emotions",
-    "relaxation", "relaxation techniques", "calming down",
-    "social connections", "making friends", "social support",
-    "hobbies", "interests", "activities", "enjoyment",
+    # Emotional Wellness
+    "stress", "stress management", "feeling stressed", "stressful situation",
+    "anxiety", "anxiety coping", "feeling anxious", "worried", "nervous",
+    "anxious thoughts", "panic", "panic attack", "panic feelings",
+    "social anxiety", "performance anxiety", "health anxiety",
+    "depression", "mild depression", "feeling depressed", "sad", "sadness",
+    "low mood", "emotional pain", "emotional distress",
+    "burnout", "burned out", "exhausted", "fatigued",
+    "emotional exhaustion", "mental fatigue",
     
-    # NEW: High EQ and life topics
-    "life purpose", "finding meaning", "life direction", "purpose in life",
-    "motivation", "staying motivated", "lack of motivation", "feeling stuck",
+    # Loneliness & Isolation
+    "loneliness", "feeling lonely", "isolated", "social isolation",
+    "missing connection", "wanting friends", "need companionship",
+    
+    # Work & Academic
+    "work-life balance", "work stress", "work pressure", "job stress",
+    "career stress", "workplace anxiety", "imposter syndrome",
+    "study stress", "school stress", "academic pressure", "exams",
+    "test anxiety", "performance pressure", "deadline stress",
+    
+    # Relationships & Communication
+    "relationship communication", "relationship issues", "friends",
+    "friendship issues", "social relationships", "people problems",
+    "family", "family issues", "family stress", "parent stress",
+    "conflict resolution", "difficult conversations",
+    
+    # Self-Care & Mindfulness
+    "self-care", "self care", "taking care of myself", "self compassion",
+    "self-kindness", "being kind to myself", "treating myself well",
+    "mindfulness", "meditation", "breathing exercises", "deep breathing",
+    "grounding techniques", "present moment", "staying present",
+    
+    # Positive Psychology
+    "positive thinking", "gratitude", "appreciation", "thankful",
+    "optimism", "looking for hope", "finding positivity",
+    "goal setting", "personal goals", "aspirations", "dreams",
+    "time management", "productivity", "getting things done",
+    
+    # Sleep & Health
+    "sleep", "sleep hygiene", "sleep problems", "insomnia",
+    "trouble sleeping", "restless sleep", "sleep schedule",
+    "healthy habits", "exercise", "physical activity", "movement",
+    "nutrition", "eating well", "healthy eating",
+    
+    # Emotional Skills
+    "emotional awareness", "feelings", "emotions", "emotional intelligence",
+    "identifying feelings", "naming emotions", "emotional vocabulary",
+    "communication skills", "talking about feelings", "expressing emotions",
+    "emotional expression", "sharing feelings",
+    "boundary setting", "saying no", "personal boundaries", "limits",
+    "self-compassion", "self-acceptance", "self-forgiveness",
+    
+    # Resilience & Coping
+    "resilience", "resilience building", "bouncing back", "recovery",
+    "coping strategies", "coping skills", "dealing with stress",
+    "stress management techniques", "stress relief",
+    "emotional regulation", "managing emotions", "calming down",
+    "anger management", "frustration tolerance",
+    "relaxation", "relaxation techniques", "calming techniques",
+    
+    # Social & Connection
+    "social connections", "making friends", "social support",
+    "community", "belonging", "fitting in", "social skills",
+    "hobbies", "interests", "activities", "enjoyment", "passions",
+    
+    # Life Purpose & Direction
+    "life purpose", "finding meaning", "meaning of life", "purpose",
+    "life direction", "direction in life", "what should I do",
+    "motivation", "staying motivated", "lack of motivation",
+    "feeling stuck", "stagnation", "unmotivated",
     "inspiration", "inspiring stories", "uplifting content", "hope",
-    "personal growth", "self-improvement", "becoming better", "growth mindset",
-    "overcoming challenges", "difficult times", "hard situations", "perseverance",
-    "success stories", "achievements", "accomplishments", "milestones",
+    "personal growth", "self-improvement", "becoming better",
+    "growth mindset", "learning mindset", "development",
+    "overcoming challenges", "difficult times", "hard situations",
+    "perseverance", "endurance", "getting through",
+    "success stories", "achievements", "accomplishments",
+    "milestones", "progress", "moving forward",
+    
+    # Dreams & Future
     "dreams", "aspirations", "goals in life", "future plans",
+    "life goals", "personal dreams", "what I want",
     "passion", "what excites me", "things I love", "enthusiasm",
-    "creativity", "creative expression", "art", "writing", "music",
-    "nature", "beauty in life", "wonder", "awe", "sunrises", "sunsets",
+    "creativity", "creative expression", "art", "writing",
+    "music", "dance", "creative outlet",
+    
+    # Life Appreciation
+    "nature", "beauty in life", "wonder", "awe", "appreciation",
+    "sunrises", "sunsets", "natural beauty",
     "kindness", "acts of kindness", "helping others", "compassion",
+    "empathy", "understanding others", "caring",
     "learning", "curiosity", "new skills", "knowledge",
-    "adventure", "new experiences", "trying new things", "exploration",
+    "adventure", "new experiences", "trying new things",
+    "exploration", "discovery",
+    
+    # Connection Stories
     "friendship stories", "meaningful connections", "bonding moments",
-    "small joys", "little pleasures", "simple happiness", "daily joys",
-    "resilience stories", "overcoming adversity", "surviving tough times",
+    "relationship stories", "connection experiences",
+    "small joys", "little pleasures", "simple happiness",
+    "daily joys", "everyday happiness", "small moments",
+    "resilience stories", "overcoming adversity",
+    "surviving tough times", "getting through difficulty",
+    
+    # Life Transitions
     "positive changes", "life improvements", "turning points",
     "self-discovery", "understanding myself", "personal insights",
+    "identity", "who am I", "personal identity",
     "hope for future", "better days ahead", "things will get better",
+    "reassurance", "encouragement", "support",
     "celebrating wins", "acknowledging progress", "small victories",
     "mindset shift", "changing perspective", "seeing differently",
     "emotional strength", "inner strength", "mental toughness",
@@ -153,278 +354,499 @@ ALLOWED_TOPICS = [
     "gratitude stories", "thankful moments", "appreciation in life",
     "healing journey", "recovery stories", "getting better",
     "positive affirmations", "encouraging words", "self-talk",
+    "inner dialogue", "self-encouragement",
+    
+    # Quotes & Wisdom
     "inspirational quotes", "meaningful sayings", "wise words",
-    "role models", "people who inspire", "heroes",
+    "role models", "people who inspire", "heroes", "mentors",
     "community", "belonging", "being part of something",
     "legacy", "making a difference", "impact on others",
-    "mindful living", "present moment", "being here now",
-    "emotional intelligence", "understanding feelings", "empathy",
-    "happiness habits", "joyful routines", "positive rituals",
-    "life balance", "harmony", "peaceful living",
-    "self-expression", "finding voice", "speaking truth",
-    "courage", "bravery", "facing fears", "stepping up",
-    "forgiveness", "letting go", "moving forward",
-    "authenticity", "being real", "true self",
-    "patience", "taking time", "slow progress",
-    "acceptance", "embracing reality", "making peace",
+    "contribution", "giving back",
     
-    # ADDITIONAL TOPICS: Future, Direction, Relationships, Reset
-    "future", "thinking about future", "what's next", "next steps", "life ahead",
-    "future anxiety", "future worries", "uncertain future", "future planning",
-    "direction", "lost direction", "finding direction", "directionless", "no direction",
-    "life path", "finding my path", "which way to go", "crossroads", "at a crossroads",
-    "lost in life", "feeling lost", "where do i go from here", "what should i do",
+    # Mindful Living
+    "mindful living", "present moment", "being here now",
+    "emotional intelligence", "understanding feelings", "EQ",
+    "happiness habits", "joyful routines", "positive rituals",
+    "life balance", "harmony", "peaceful living", "simplicity",
+    "self-expression", "finding voice", "speaking truth",
+    "authenticity", "being real", "true self",
+    
+    # Courage & Growth
+    "courage", "bravery", "facing fears", "stepping up",
+    "taking risks", "trying new things", "stepping out of comfort zone",
+    "forgiveness", "letting go", "moving forward", "release",
+    "acceptance", "embracing reality", "making peace",
+    "patience", "taking time", "slow progress", "process",
+    
+    # Future & Direction (Expanded)
+    "future", "thinking about future", "what's next", "next steps",
+    "life ahead", "looking ahead", "planning ahead",
+    "future anxiety", "future worries", "uncertain future",
+    "future planning", "preparing for future",
+    "direction", "lost direction", "finding direction",
+    "directionless", "no direction", "uncertain direction",
+    "life path", "finding my path", "which way to go",
+    "crossroads", "at a crossroads", "decision point",
+    "lost in life", "feeling lost", "where do I go from here",
+    "what should I do", "uncertain about life",
+    
+    # Relationship Challenges
     "relationship lost", "lost in relationship", "relationship direction",
-    "relationship confusion", "unsure about relationship", "relationship doubts",
-    "broken relationship", "relationship ending", "moving on from relationship",
-    "time to reset", "need to reset", "starting over", "new beginning", "fresh start",
-    "reset life", "life reset", "restarting life", "beginning again", "clean slate",
-    "struggling time", "struggling period", "difficult season", "hard times",
-    "going through it", "tough phase", "rough patch", "challenging times",
-    "survival mode", "just getting by", "barely coping", "hanging on",
-    "transition period", "life transition", "major change", "big changes",
+    "relationship confusion", "unsure about relationship",
+    "relationship doubts", "questioning relationship",
+    "broken relationship", "relationship ending",
+    "moving on from relationship", "breakup recovery",
+    "heartbreak", "broken heart", "emotional healing",
+    
+    # Reset & New Beginnings
+    "time to reset", "need to reset", "starting over",
+    "new beginning", "fresh start", "clean slate",
+    "reset life", "life reset", "restarting life",
+    "beginning again", "starting fresh",
+    "struggling time", "struggling period", "difficult season",
+    "hard times", "challenging period",
+    "going through it", "tough phase", "rough patch",
+    "challenging times", "difficult chapter",
+    "survival mode", "just getting by", "barely coping",
+    "hanging on", "getting through day",
+    "transition period", "life transition", "major change",
+    "big changes", "life changes",
+    
+    # Life Crises
     "quarter life crisis", "midlife crisis", "existential crisis",
-    "identity crisis", "who am i", "finding myself", "self identity",
-    "career direction", "career path", "job future", "professional direction",
+    "crisis of meaning", "purpose crisis",
+    "identity crisis", "who am I", "finding myself",
+    "self identity", "personal identity",
+    "career direction", "career path", "job future",
+    "professional direction", "work direction",
     "education future", "study direction", "learning path",
-    "purpose searching", "searching for meaning", "why am i here",
-    "life evaluation", "taking stock", "assessing life", "life review",
-    "decision making", "big decisions", "life choices", "making choices",
-    "fear of future", "future uncertainty", "unknown future", "what if",
-    "regret", "past regrets", "what could have been", "missed opportunities",
-    "starting again", "rebuilding", "reconstruction", "putting pieces back together",
-    "emotional reset", "mental reset", "spiritual reset", "reset mindset",
-    "recovery period", "healing time", "time to heal", "processing time",
-    "moving forward", "next chapter", "new chapter", "turning page",
-    "letting go of past", "releasing past", "past baggage", "old patterns",
-    "creating future", "building future", "designing life", "life design",
-    "vision for future", "future vision", "dream future", "ideal life",
-    "taking control", "regaining control", "steering life", "taking charge",
-    "pace of life", "slowing down", "life speed", "rushing through life",
-    "mindful future", "conscious living", "intentional life", "purposeful living"
+    
+    # Purpose & Meaning
+    "purpose searching", "searching for meaning", "why am I here",
+    "meaning of life", "life's purpose",
+    "life evaluation", "taking stock", "assessing life",
+    "life review", "reflection on life",
+    "decision making", "big decisions", "life choices",
+    "making choices", "important decisions",
+    
+    # Fear & Regret
+    "fear of future", "future uncertainty", "unknown future",
+    "what if", "worries about future",
+    "regret", "past regrets", "what could have been",
+    "missed opportunities", "looking back",
+    
+    # Recovery & Healing
+    "starting again", "rebuilding", "reconstruction",
+    "putting pieces back together", "reassembling life",
+    "emotional reset", "mental reset", "spiritual reset",
+    "reset mindset", "changing mindset",
+    "recovery period", "healing time", "time to heal",
+    "processing time", "grieving period",
+    
+    # Moving Forward
+    "moving forward", "next chapter", "new chapter",
+    "turning page", "starting new chapter",
+    "letting go of past", "releasing past", "past baggage",
+    "old patterns", "breaking patterns",
+    "creating future", "building future", "designing life",
+    "life design", "intentional living",
+    "vision for future", "future vision", "dream future",
+    "ideal life", "life I want",
+    
+    # Control & Agency
+    "taking control", "regaining control", "steering life",
+    "taking charge", "personal agency",
+    "pace of life", "slowing down", "life speed",
+    "rushing through life", "busy life",
+    "mindful future", "conscious living", "intentional life",
+    "purposeful living", "meaningful living",
+    
+    # Gender & Identity (SAFE EXPLORATION)
+    "questioning gender", "gender identity", "gender exploration",
+    "gender questioning", "gender journey",
+    "sexual orientation", "orientation exploration",
+    "lgbtq", "lgbtq+", "queer identity",
+    "transgender", "trans", "trans identity",
+    "non-binary", "genderqueer", "gender fluid",
+    "coming out", "sharing identity", "identity sharing",
+    "identity acceptance", "self-acceptance",
+    "lgbtq support", "queer community",
+    
+    # Grief & Loss
+    "grief", "grieving", "loss", "bereavement",
+    "missing someone", "mourning",
+    
+    # Trauma (General Support)
+    "emotional trauma", "past trauma", "healing from trauma",
+    "trauma recovery", "trauma healing",
+    
+    # Self-Esteem
+    "self-esteem", "self-worth", "self-confidence",
+    "self-doubt", "insecurity", "self-criticism"
 ]
 
-# Forbidden topics (strictly blocked)
+# ================================
+# IMPROVED FORBIDDEN TOPICS (More precise)
+# ================================
 FORBIDDEN_TOPICS = [
-    # Suicide and Self-Harm
-    "suicide", "suicidal", "kill myself", "ending my life", "end my life",
+    # Suicide & Self-Harm (EXACT patterns, not substrings)
+    "suicide", "kill myself", "end my life", "ending my life",
     "want to die", "don't want to live", "life not worth living",
-    "self-harm", "self injury", "cutting", "self mutilation", "self-injury",
-    "burning myself", "hurting myself", "intentional harm", "deliberate harm",
-    "overdose", "poisoning", "intentional overdose", "drug overdose",
+    "self-harm", "self injury", "cutting myself", "self mutilation",
+    "burning myself", "hurting myself", "intentional self-harm",
+    "overdose", "poison myself", "intentional overdose",
+    "drug overdose", "take pills to die",
     "hanging", "strangulation", "asphyxiation", "suffocation",
-    "jumping", "falling from height", "jumping off", "bridge jumping",
-    "gun to head", "shooting myself", "firearm suicide",
-    "suicide plan", "suicide method", "suicide means", "how to suicide",
+    "jumping off", "falling from height", "jump to death",
+    "gun to head", "shoot myself", "firearm suicide",
+    "suicide plan", "suicide method", "suicide means",
+    "how to suicide", "ways to die", "methods of suicide",
     "suicide pact", "group suicide", "mass suicide",
     "suicide note", "final goodbye", "last words",
     
-    # Violence and Abuse
-    "violence", "violent acts", "physical violence", "assault", "attack",
-    "murder", "homicide", "killing", "manslaughter",
-    "domestic violence", "spousal abuse", "partner violence", "battering",
-    "child abuse", "child molestation", "pedophilia", "child exploitation",
+    # VIOLENT ACTS (Specific, not general)
+    "how to harm someone", "how to hurt someone", "how to kill someone",
+    "how to attack someone", "planning violence", "violent acts",
+    "physical violence", "assault someone", "attack someone",
+    "murder", "homicide", "killing someone", "manslaughter",
+    "domestic violence", "spousal abuse", "partner violence",
+    "child abuse", "child molestation", "pedophilia",
     "elder abuse", "abuse of elderly", "neglect of elderly",
-    "sexual assault", "rape", "sexual violence", "non-consensual sex",
-    "harassment", "stalking", "cyberstalking", "obsessive following",
-    "torture", "torture methods", "torture techniques", "interrogation torture",
-    "human trafficking", "sex trafficking", "forced labor", "modern slavery",
-    "gang violence", "gang warfare", "drive-by shooting", "gang initiation",
+    "sexual assault", "rape", "sexual violence", "non-consensual",
+    "torture", "torture methods", "torture techniques",
+    "human trafficking", "sex trafficking", "forced labor",
+    "gang violence", "gang warfare", "drive-by shooting",
     "terrorism", "terrorist acts", "bomb making", "explosives",
-    "school shooting", "workplace violence", "mass shooting", "public shooting",
+    "school shooting", "workplace violence", "mass shooting",
     
-    # Medical and Psychological Conditions Requiring Professional Help
-    "psychosis", "psychotic episode", "hearing voices", "hallucinations",
-    "delusions", "paranoia", "persecutory delusions", "grandiose delusions",
-    "schizophrenia", "bipolar disorder", "mania", "manic episode",
-    "severe depression", "clinical depression", "major depressive disorder",
-    "PTSD", "post-traumatic stress", "trauma flashbacks", "trauma re-experiencing",
-    "dissociative disorder", "dissociative identity", "multiple personalities",
-    "borderline personality", "BPD", "personality disorder",
-    "OCD", "obsessive compulsive", "compulsive rituals", "obsessive thoughts",
-    "eating disorder", "anorexia", "bulimia", "binge eating", "purging",
-    "body dysmorphia", "body dysmorphic disorder", "extreme body image",
-    "autism", "autism spectrum", "ASD", "developmental disorder",
-    "ADHD", "attention deficit", "hyperactivity disorder",
-    "substance abuse", "drug addiction", "alcoholism", "drug dependency",
-    "withdrawal symptoms", "detox", "cold turkey", "substance withdrawal",
+    # ILLEGAL SUBSTANCES (Manufacturing/Distribution)
+    "how to make drugs", "drug manufacturing", "drug synthesis",
+    "cooking meth", "making cocaine", "heroin production",
+    "drug dealing", "drug trafficking", "selling drugs",
+    "prescription drug abuse", "opioid manufacturing",
     
-    # Illegal Activities and Substance Abuse
-    "illegal drugs", "cocaine", "heroin", "methamphetamine", "meth",
-    "ecstasy", "MDMA", "LSD", "acid", "psychedelics",
-    "prescription drug abuse", "opioid abuse", "painkiller abuse",
-    "drug dealing", "drug trafficking", "drug manufacturing",
-    "prostitution", "sex work", "escort services", "human trafficking",
-    "theft", "robbery", "burglary", "shoplifting", "stealing",
-    "fraud", "scam", "identity theft", "credit card fraud",
-    "hacking", "cybercrime", "computer fraud", "data theft",
-    "arson", "fire setting", "property destruction",
-    "vandalism", "graffiti", "property damage",
-    "weapons", "firearms", "guns", "knives", "weapons carrying",
-    "gang activity", "organized crime", "mafia", "criminal organization",
+    # EXTREME CONTENT
+    "child pornography", "cp", "child sexual abuse material",
+    "bestiality", "necrophilia", "extreme fetish",
     
-    # Medical Advice and Diagnosis (Requires Licensed Professional)
-    "medical diagnosis", "self-diagnosis", "online diagnosis",
-    "prescription medication", "dosage advice", "medication adjustment",
-    "medical treatment", "surgery advice", "surgical procedures",
-    "psychiatric medication", "antidepressants", "antipsychotics", "mood stabilizers",
-    "therapy techniques", "CBT techniques", "DBT skills", "exposure therapy",
-    "clinical intervention", "crisis intervention", "emergency procedures",
-    "pregnancy advice", "abortion advice", "birth control advice",
-    "STD diagnosis", "HIV testing", "sexual health diagnosis",
-    "chronic illness management", "cancer treatment", "diabetes management",
-    "alternative medicine", "herbal remedies", "supplement recommendations",
+    # DANGEROUS INSTRUCTIONS (Specific patterns)
+    "instructions for suicide", "instructions for self-harm",
+    "how to build a bomb", "how to make explosives",
+    "how to commit murder", "how to kill people",
+    "how to poison someone", "how to strangle",
+    "how to stalk someone", "how to harass",
+    "how to cyberbully", "how to dox someone",
+    "how to hack", "how to steal", "how to rob",
     
-    # Extreme Ideologies and Dangerous Groups
-    "extremism", "radicalization", "extremist ideology",
-    "hate groups", "white supremacy", "neo-nazi", "racist organizations",
-    "terrorist groups", "ISIS", "Al Qaeda", "terrorist recruitment",
-    "cults", "cult recruitment", "brainwashing", "mind control",
-    "conspiracy theories", "dangerous conspiracies", "harmful misinformation",
-    "incel ideology", "misogynistic groups", "male supremacy",
-    "anarchist violence", "violent protest", "riot techniques",
-    "hate speech", "racial slurs", "ethnic discrimination",
+    # HATE & EXTREMISM
+    "hate speech", "racial slurs", "ethnic slurs",
+    "how to join terrorist group", "terrorist recruitment",
+    "white supremacy", "neo-nazi", "racist ideology",
+    "incel ideology", "misogynistic violence",
+    "how to commit hate crime", "religious persecution",
     
-    # Financial and Legal Advice (Requires Licensed Professional)
-    "legal advice", "lawyer advice", "court proceedings",
-    "divorce advice", "custody battle", "child custody",
-    "bankruptcy advice", "debt management", "credit counseling",
-    "investment advice", "stock trading", "cryptocurrency investment",
-    "tax evasion", "tax fraud", "illegal tax schemes",
-    "insurance fraud", "false claims", "scam schemes",
+    # ILLEGAL ACTIVITIES
+    "how to commit fraud", "how to scam", "identity theft",
+    "credit card fraud", "bank fraud", "tax evasion",
+    "insurance fraud", "arson instructions",
+    "how to vandalize", "property destruction",
     
-    # Dangerous Behaviors and Challenges
-    "dangerous dares", "extreme challenges", "life-threatening stunts",
-    "Russian roulette", "gun games", "dangerous games",
-    "eating challenges", "food challenges", "consumption dares",
-    "sleep deprivation", "extreme fasting", "water deprivation",
-    "isolation experiments", "sensory deprivation", "solitary confinement",
-    "extreme sports injuries", "dangerous sports", "unsafe practices",
+    # MEDICAL ADVICE (Requires Professional)
+    "medical diagnosis", "what's wrong with me medically",
+    "prescription medication advice", "dosage advice",
+    "should I take this medication", "medication adjustment",
+    "medical treatment advice", "surgery advice",
+    "psychiatric medication advice", "antidepressant advice",
+    "therapy techniques for others", "CBT for someone else",
+    "clinical intervention", "crisis intervention techniques",
+    "pregnancy medical advice", "abortion medical advice",
+    "STD diagnosis", "HIV testing advice",
+    "cancer treatment advice", "diabetes management advice",
     
-    # Traumatic Content and Graphic Details
-    "trauma details", "abuse details", "assault details",
-    "accident details", "gore", "graphic violence", "blood",
-    "death details", "dying process", "terminal illness details",
-    "war atrocities", "genocide details", "massacre details",
-    "natural disaster details", "earthquake", "tsunami", "hurricane details",
+    # DANGEROUS CHALLENGES
+    "dangerous dares", "life-threatening stunts",
+    "Russian roulette", "choking game", "breath play",
+    "extreme fasting", "water deprivation challenge",
+    "sleep deprivation challenge", "isolation experiments",
     
-    # Relationship Abuse and Control
-    "emotional abuse", "psychological abuse", "gaslighting",
-    "financial abuse", "economic control", "withholding money",
-    "sexual coercion", "marital rape", "non-consensual marriage",
-    "stalking techniques", "surveillance", "tracking someone",
-    "revenge porn", "non-consensual sharing", "image-based abuse",
-    
-    # Professional Boundaries (What the Chatbot Can't Do)
-    "therapy session", "counseling session", "clinical assessment",
-    "diagnostic evaluation", "treatment plan", "clinical supervision",
-    "emergency response", "911 alternative", "paramedic advice",
-    "police matters", "law enforcement", "criminal investigation",
-    
-    # Sensitive Religious and Political Topics
-    "religious conversion", "proselytizing", "religious extremism",
-    "political violence", "insurrection", "overthrowing government",
-    "hate crimes", "bias crimes", "discriminatory violence",
-    
-    # Other Harmful Content
-    "body shaming", "fat shaming", "appearance bullying",
-    "cyberbullying", "online harassment", "trolling techniques",
-    "doxxing", "personal information sharing", "privacy invasion",
-    "malware", "computer viruses", "hacking techniques",
-    "plagiarism", "academic cheating", "test answers",
-    "eating disorder tips", "pro-ana", "pro-mia", "thinspiration",
-    "self-harm techniques", "cutting methods", "suicide methods"
+    # PROFESSIONAL BOUNDARIES
+    "therapy session request", "counsel me as therapist",
+    "clinical assessment request", "diagnose my disorder",
+    "treatment plan request", "be my therapist",
+    "emergency response instead of 911", "paramedic advice",
+    "legal advice", "lawyer advice", "court case advice",
+    "financial advice", "investment advice", "stock advice"
 ]
 
-# Multilingual Crisis keywords
+# ================================
+# IMPROVED CRISIS DETECTION (More precise regex)
+# ================================
 CRISIS_KEYWORDS = {
     "en": [
-        r"\bkill.*myself\b",
-        r"\bsuicide.*now\b",
-        r"\bend.*my.*life.*now\b",
-        r"\bself.*harm.*now\b",
-        r"\bemergency.*help\b",
-        r"\bwant.*to.*die\b",
-        r"\bhopeless\b",
-        r"\bworthless\b",
-        r"\bburden\b",
-        r"\bno.*point\b",
-        r"\bcant.*go.*on\b",
-        r"\bgoing.*to.*end.*it\b",
-        r"\bplan.*to.*die\b",
-        r"\bsuicide.*plan\b",
-        r"\bsuicide.*method\b",
-        r"\bhow.*to.*kill.*myself\b",
-        r"\bbest.*way.*to.*die\b",
-        r"\bpainless.*suicide\b",
-        r"\bcutting.*myself\b",
-        r"\bbleeding.*out\b",
-        r"\boverdose.*on\b",
-        r"\btake.*all.*pills\b",
-        r"\bswallow.*pills\b",
-        r"\bhanging.*myself\b",
-        r"\bjump.*off\b",
-        r"\bjump.*from\b",
-        r"\bgun.*to.*head\b",
-        r"\bshoot.*myself\b"
+        # Level 10: Immediate danger - EXACT phrases
+        (r"\bi('m| am)\s+going\s+to\s+(kill|end)\s+myself\s+(now|today|tonight)\b", 10),
+        (r"\bi('ll| will)\s+(kill|end)\s+my\s+life\s+(now|today|tonight)\b", 10),
+        (r"\bright\s+now\s+i\s+want\s+to\s+die\b", 10),
+        (r"\bi\s+have\s+a\s+plan\s+to\s+(die|kill myself)\b", 10),
+        (r"\bgoing\s+to\s+(kill|end)\s+myself\s+this\s+(evening|night)\b", 10),
+        (r"\bi\s+have\s+(pills|a gun|a knife)\s+right\s+now\b", 10),
+        
+        # Level 9: High severity - specific intent
+        (r"\b(kill|end)\s+myself\b", 9),
+        (r"\bcommit\s+suicide\b", 9),
+        (r"\bend\s+my\s+life\b", 9),
+        (r"\bwant\s+to\s+die\b", 9),
+        (r"\bplan\s+to\s+(die|kill myself)\b", 9),
+        (r"\bthinking\s+of\s+suicide\b", 9),
+        
+        # Level 8: Medium severity - concerning
+        (r"\bhopeless\b", 8),
+        (r"\bworthless\b", 8),
+        (r"\bburden\b", 8),
+        (r"\bno\s+point\s+(in|to)\b", 8),
+        (r"\bcan'?t\s+go\s+on\b", 8),
+        (r"\bdon'?t\s+want\s+to\s+live\b", 8),
+        
+        # Level 7: Lower severity but concerning
+        (r"\bcutting\s+myself\b", 7),
+        (r"\boverdose\s+(on|with)\b", 7),
+        (r"\bhanging\s+myself\b", 7),
+        (r"\bjump\s+off\b", 7),
+        (r"\bgun\s+to\s+(my\s+)?head\b", 7)
     ],
     "es": [
-        r"\bmatar.*me\b",
-        r"\bsuicidar.*me\b",
-        r"\bacabar.*mi.*vida\b",
-        r"\bautolesionar.*me\b",
-        r"\bquerer.*morir\b",
-        r"\bno.*quiero.*vivir\b",
-        r"\bprefiero.*morir\b",
-        r"\bsin.*esperanza\b",
-        r"\bno.*sirvo.*para.*nada\b",
-        r"\bcarga\b",
-        r"\bsin.*sentido\b",
-        r"\bno.*puedo.*continuar\b",
-        r"\bplan.*suicida\b",
-        r"\bmétodo.*suicida\b",
-        r"\bahorcarme\b",
-        r"\bsaltar.*del\b",
-        r"\bdispararme\b"
+        (r"\bvoy.*a.*matar.*me.*ahora\b", 10),
+        (r"\bterminar.*mi.*vida.*hoy\b", 10),
+        (r"\bsuicidio.*ahora\b", 10),
+        (r"\btengo.*un.*plan.*para.*morir\b", 10),
+        (r"\bmatar.*me\b", 9),
+        (r"\bsuicidar.*me\b", 9),
+        (r"\bquerer.*morir\b", 9),
+        (r"\bno.*quiero.*vivir\b", 8),
+        (r"\bsin.*esperanza\b", 8)
     ],
     "vi": [
-        r"\btự.*tử\b",
-        r"\btự.*sát\b",
-        r"\bkết.*thúc.*cuộc.*sống\b",
-        r"\btự.*làm.*hại\b",
-        r"\bmuốn.*chết\b",
-        r"\bkhông.*muốn.*sống\b",
-        r"\bchán.*sống\b",
-        r"\bvô.*vọng\b",
-        r"\bvô.*giá.*trị\b",
-        r"\bgánh.*nặng\b",
-        r"\bkhông.*có.*ý.*nghĩa\b",
-        r"\bkhông.*thể.*tiếp.*tục\b",
-        r"\bkế.*hoạch.*tự.*tử\b",
-        r"\bphương.*pháp.*tự.*tử\b",
-        r"\btreo.*cổ\b",
-        r"\bnhảy.*xuống\b",
-        r"\bbắn.*mình\b"
+        (r"\btôi.*sẽ.*tự.*tử.*ngay.*bây.*giờ\b", 10),
+        (r"\bkết.*thúc.*cuộc.*sống.*hôm.*nay\b", 10),
+        (r"\btự.*tử.*ngay\b", 10),
+        (r"\bcó.*kế.*hoạch.*chết\b", 10),
+        (r"\btự.*tử\b", 9),
+        (r"\btự.*sát\b", 9),
+        (r"\bmuốn.*chết\b", 9),
+        (r"\bkhông.*muốn.*sống\b", 8),
+        (r"\bvô.*vọng\b", 8)
     ],
     "zh": [
-        r"\b自杀\b",
-        r"\b自尽\b",
-        r"\b结束.*生命\b",
-        r"\b自残\b",
-        r"\b想死\b",
-        r"\b不想活\b",
-        r"\b活不下去\b",
-        r"\b绝望\b",
-        r"\b毫无价值\b",
-        r"\b负担\b",
-        r"\b没有意义\b",
-        r"\b无法继续\b",
-        r"\b自杀.*计划\b",
-        r"\b自杀.*方法\b",
-        r"\b上吊\b",
-        r"\b跳楼\b",
-        r"\b开枪.*自杀\b"
+        (r"\b我.*现在.*要.*自杀\b", 10),
+        (r"\b今天.*结束.*生命\b", 10),
+        (r"\b现在.*自杀\b", 10),
+        (r"\b有.*死亡.*计划\b", 10),
+        (r"\b自杀\b", 9),
+        (r"\b自尽\b", 9),
+        (r"\b想死\b", 9),
+        (r"\b不想活\b", 8),
+        (r"\b绝望\b", 8)
     ]
+}
+
+# Comprehensive International Emergency Numbers
+INTERNATIONAL_EMERGENCY_NUMBERS = {
+    "US": {
+        "emergency": "911",
+        "suicide": "988",
+        "text": "741741 (Text HOME)",
+        "domestic_violence": "1-800-799-7233",
+        "substance_abuse": "1-800-662-4357"
+    },
+    "UK": {
+        "emergency": "999",
+        "suicide": "116123 (Samaritans)",
+        "text": "85258 (Shout)",
+        "nhs": "111"
+    },
+    "CA": {
+        "emergency": "911", 
+        "suicide": "1-833-456-4566",
+        "text": "686868 (Kids Help Phone)",
+        "crisis": "1-866-585-0445"
+    },
+    "AU": {
+        "emergency": "000",
+        "suicide": "13 11 14 (Lifeline)",
+        "text": "0477 13 11 14",
+        "mental_health": "1300 224 636"
+    },
+    "NZ": {
+        "emergency": "111",
+        "suicide": "0800 543 354",
+        "text": "1737 (Need to Talk)"
+    },
+    "IN": {
+        "emergency": "112",
+        "suicide": "9152987821",
+        "mental_health": "1800-599-0019"
+    },
+    "ZA": {
+        "emergency": "10111",
+        "suicide": "0800 12 13 14",
+        "mental_health": "0800 456 789"
+    },
+    "BR": {
+        "emergency": "190",
+        "suicide": "188",
+        "mental_health": "188"
+    },
+    "MX": {
+        "emergency": "911",
+        "suicide": "5255102550",
+        "mental_health": "800 911 2000"
+    },
+    "EU": {
+        "emergency": "112",
+        "suicide": "116123 (EU-wide)"
+    },
+    "DE": {
+        "emergency": "112",
+        "suicide": "0800 111 0 111"
+    },
+    "FR": {
+        "emergency": "112",
+        "suicide": "3114"
+    },
+    "ES": {
+        "emergency": "112",
+        "suicide": "024"
+    },
+    "IT": {
+        "emergency": "112",
+        "suicide": "800 86 00 22"
+    },
+    "NL": {
+        "emergency": "112",
+        "suicide": "0800-0113"
+    },
+    "JP": {
+        "emergency": "110",
+        "suicide": "03-5774-0992"
+    },
+    "KR": {
+        "emergency": "112",
+        "suicide": "1393"
+    },
+    "CN": {
+        "emergency": "110",
+        "suicide": "800-810-1117"
+    },
+    "TW": {
+        "emergency": "110",
+        "suicide": "1995"
+    },
+    "HK": {
+        "emergency": "999",
+        "suicide": "2389 2222"
+    },
+    "SG": {
+        "emergency": "995",
+        "suicide": "1767"
+    },
+    "MY": {
+        "emergency": "999",
+        "suicide": "03-7956 8145"
+    },
+    "TH": {
+        "emergency": "191",
+        "suicide": "02-713-6793"
+    },
+    "VN": {
+        "emergency": "113",
+        "suicide": "1900 8040"
+    },
+    "PH": {
+        "emergency": "911",
+        "suicide": "0917-558-4673"
+    },
+    "ID": {
+        "emergency": "112",
+        "suicide": "021-500-454"
+    },
+    "RU": {
+        "emergency": "112",
+        "suicide": "8-800-2000-122"
+    },
+    "UA": {
+        "emergency": "112",
+        "suicide": "7333"
+    },
+    "IL": {
+        "emergency": "101",
+        "suicide": "1201"
+    },
+    "AE": {
+        "emergency": "999",
+        "suicide": "800-4673"
+    },
+    "SA": {
+        "emergency": "999",
+        "suicide": "920020560"
+    },
+    "EG": {
+        "emergency": "123",
+        "suicide": "7621602"
+    },
+    "ZA": {
+        "emergency": "10111",
+        "suicide": "0800 12 13 14"
+    },
+    "NG": {
+        "emergency": "112",
+        "suicide": "0800 456 789"
+    },
+    "KE": {
+        "emergency": "999",
+        "suicide": "0722 178 178"
+    },
+    "GH": {
+        "emergency": "999",
+        "suicide": "055 843 9868"
+    }
+}
+
+# Language to country mapping
+LANGUAGE_TO_COUNTRY = {
+    'en': 'US',  # Default to US for English
+    'en-US': 'US',
+    'en-GB': 'UK',
+    'en-CA': 'CA',
+    'en-AU': 'AU',
+    'es': 'ES',
+    'es-ES': 'ES',
+    'es-MX': 'MX',
+    'fr': 'FR',
+    'fr-FR': 'FR',
+    'de': 'DE',
+    'de-DE': 'DE',
+    'it': 'IT',
+    'it-IT': 'IT',
+    'pt': 'BR',
+    'pt-BR': 'BR',
+    'zh': 'CN',
+    'zh-CN': 'CN',
+    'zh-TW': 'TW',
+    'zh-HK': 'HK',
+    'ja': 'JP',
+    'ja-JP': 'JP',
+    'ko': 'KR',
+    'ko-KR': 'KR',
+    'vi': 'VN',
+    'vi-VN': 'VN',
+    'th': 'TH',
+    'th-TH': 'TH',
+    'ar': 'SA',
+    'ar-SA': 'SA',
+    'ru': 'RU',
+    'ru-RU': 'RU',
+    'hi': 'IN',
+    'hi-IN': 'IN'
 }
 
 # Multilingual Inspirational stories
@@ -555,16 +977,92 @@ UPLIFTING_QUOTES = {
 # HIGH EQ SAFETY FILTERS
 # ================================
 
-def detect_crisis_content(text: str, language: str = "en") -> bool:
-    """Detect immediate crisis content with language support."""
+def detect_crisis_content(text: str, language: str = "en") -> Tuple[bool, int, List[str]]:
+    """Detect immediate crisis content with language support and severity scoring."""
     text_lower = text.lower()
     patterns = CRISIS_KEYWORDS.get(language, CRISIS_KEYWORDS["en"])
     
-    for pattern in patterns:
+    detected_patterns = []
+    severity = 0
+    
+    for pattern, pattern_severity in patterns:
+        matches = re.findall(pattern, text_lower, re.IGNORECASE)
+        if matches:
+            detected_patterns.append(f"Pattern severity {pattern_severity}: {pattern}")
+            severity = max(severity, pattern_severity)
+    
+    # Immediate danger keywords (direct statements)
+    immediate_danger_patterns = {
+        "en": [
+            (r"\bi.*am.*going.*to.*kill.*myself.*(right.*now|today|tonight)\b", 10),
+            (r"\bi.*will.*end.*my.*life.*(right.*now|today|tonight)\b", 10),
+            (r"\bthis.*is.*my.*final.*goodbye\b", 10),
+            (r"\bi.*have.*taken.*pills.*to.*die\b", 10),
+            (r"\bi.*am.*holding.*a.*(gun|knife|weapon).*right.*now\b", 10)
+        ],
+        "es": [
+            (r"\bvoy.*a.*matar.*me.*(ahora|hoy|esta.*noche)\b", 10),
+            (r"\bterminar.*mi.*vida.*(ahora|hoy)\b", 10),
+            (r"\best.*es.*mi.*último.*adiós\b", 10)
+        ],
+        "vi": [
+            (r"\btôi.*sẽ.*tự.*tử.*(ngay|hôm.*nay|tối.*nay)\b", 10),
+            (r"\bkết.*thúc.*cuộc.*sống.*(ngay|hôm.*nay)\b", 10),
+            (r"\bđây.*là.*lời.*tạm.*biệt.*cuối.*cùng\b", 10)
+        ],
+        "zh": [
+            (r"\b我.*要.*自杀.*(现在|今天|今晚)\b", 10),
+            (r"\b结束.*生命.*(现在|今天)\b", 10),
+            (r"\b这是.*最后.*告别\b", 10)
+        ]
+    }
+    
+    immediate_patterns = immediate_danger_patterns.get(language, immediate_danger_patterns["en"])
+    for pattern, pattern_severity in immediate_patterns:
         if re.search(pattern, text_lower, re.IGNORECASE):
-            logger.warning(f"Crisis content detected in {language}: {text[:50]}...")
-            return True
-    return False
+            detected_patterns.append(f"IMMEDIATE DANGER: {pattern}")
+            severity = 10
+            break
+    
+    return severity > 0, severity, detected_patterns
+
+def is_identity_exploration(text: str) -> bool:
+    """Check if text is about gender/sexual identity exploration (which should be allowed)."""
+    text_lower = text.lower()
+    
+    identity_keywords = [
+        "questioning my gender",
+        "gender identity",
+        "sexual orientation",
+        "lgbtq",
+        "transgender",
+        "non-binary",
+        "genderqueer",
+        "gender fluid",
+        "coming out",
+        "i think i might be",
+        "i am gay",
+        "i am lesbian",
+        "i am bisexual",
+        "i am trans",
+        "i am questioning",
+        "exploring my identity",
+        "figuring out who i am"
+    ]
+    
+    harmful_patterns = [
+        r"\bhate.*(gay|lesbian|trans|lgbtq)\b",
+        r"\bviolence.*against.*(gay|lesbian|trans)\b",
+        r"\bhow.*to.*harm.*(gay|lesbian|trans)\b"
+    ]
+    
+    # Check for identity exploration
+    is_identity = any(keyword in text_lower for keyword in identity_keywords)
+    
+    # Check if it's harmful
+    is_harmful = any(re.search(pattern, text_lower, re.IGNORECASE) for pattern in harmful_patterns)
+    
+    return is_identity and not is_harmful
 
 def detect_forbidden_topics(text: str) -> List[str]:
     """Detect forbidden topics in text."""
@@ -603,7 +1101,32 @@ def sanitize_input(text: str) -> str:
     # Remove potential addresses
     text = re.sub(r'\b\d+\s+\w+\s+(street|st|avenue|ave|road|rd)\b', '[ADDRESS_REMOVED]', text, flags=re.IGNORECASE)
     
-    return text
+    # Remove potential social security/ID numbers
+    text = re.sub(r'\b\d{3}-\d{2}-\d{4}\b', '[ID_REMOVED]', text)
+    
+    return text[:5000]  # Limit input length
+
+
+def get_user_country(language: str, headers: Dict) -> str:
+    """Determine user's country based on language and headers."""
+    # Try to get country from Accept-Language header
+    accept_language = headers.get('Accept-Language', '')
+    
+    # Parse Accept-Language header
+    if accept_language:
+        # Format: "en-US,en;q=0.9,fr;q=0.8"
+        languages = accept_language.split(',')
+        for lang in languages:
+            lang_code = lang.split(';')[0].strip()
+            if lang_code in LANGUAGE_TO_COUNTRY:
+                return LANGUAGE_TO_COUNTRY[lang_code]
+    
+    # Fall back to language code
+    if language in LANGUAGE_TO_COUNTRY:
+        return LANGUAGE_TO_COUNTRY[language]
+    
+    # Default to US
+    return 'US'
 
 # ================================
 # MULTILINGUAL HIGH EQ PROMPT TEMPLATES
@@ -616,7 +1139,14 @@ def create_high_eq_prompt(user_message: str, context: List[Dict],
     
     # High EQ system prompts in multiple languages
     system_prompts = {
-        "en": """You are Mentivio, a high EQ AI friend with deep emotional intelligence. Your purpose is to provide genuine emotional support, hope, and inspiration while maintaining safety boundaries.
+        "en": """You are Mentivio, a high EQ AI friend with deep emotional intelligence. Your purpose is to provide genuine emotional support, hope, and inspiration while maintaining strict safety boundaries.
+
+CRITICAL SAFETY RULES:
+1. If user expresses immediate suicidal intent: Acknowledge pain, express care, DIRECT to emergency services
+2. NEVER give medical advice, diagnosis, or treatment recommendations
+3. NEVER provide instructions for self-harm, suicide, or harmful behaviors
+4. Redirect gently from trauma details and harmful content
+5. Focus on coping, resilience, hope, and forward movement
 
 PERSONALITY: You're like that one friend everyone wishes they had - deeply empathetic, wise, gentle, and always knows the right thing to say. You see the light in people even when they can't see it themselves.
 
@@ -628,12 +1158,6 @@ HIGH EQ CONVERSATION STYLE:
 5. SHARE WISDOM: Appropriate stories, metaphors, gentle insights
 6. BE PRESENT: "I'm sitting with you in this", "You're not alone"
 7. END WARM: "I'm here anytime", "Thank you for sharing with me"
-
-SAFETY BOUNDARIES (CRITICAL):
-1. If immediate suicidal intent: Acknowledge pain, express care, DIRECT to crisis resources
-2. NEVER give medical advice or diagnosis
-3. Redirect gently from trauma details
-4. Focus on coping, resilience, hope, and forward movement
 
 TOPICS YOU CAN DISCUSS:
 • Life purpose and meaning
@@ -647,9 +1171,16 @@ TOPICS YOU CAN DISCUSS:
 • Finding light in darkness
 • Building meaningful connections
 
-IMPORTANT: Respond in English.""",
+IMPORTANT: Respond in English. If user needs professional help, gently suggest contacting a licensed professional.""",
         
-        "es": """Eres Mentivio, un amigo AI con alta inteligencia emocional. Tu propósito es proporcionar apoyo emocional genuino, esperanza e inspiración manteniendo límites de seguridad.
+        "es": """Eres Mentivio, un amigo AI con alta inteligencia emocional. Tu propósito es proporcionar apoyo emocional genuino, esperanza e inspiración manteniendo límites de seguridad estrictos.
+
+REGLAS DE SEGURIDAD CRÍTICAS:
+1. Si el usuario expresa intención suicida inmediata: Reconoce el dolor, expresa cuidado, DIRIGE a servicios de emergencia
+2. NUNCA des consejos médicos, diagnósticos o recomendaciones de tratamiento
+3. NUNCA proporciones instrucciones para autolesiones, suicidio o comportamientos dañinos
+4. Redirige suavemente de detalles traumáticos y contenido dañino
+5. Enfócate en el afrontamiento, la resiliencia, la esperanza y el movimiento hacia adelante
 
 PERSONALIDAD: Eres como ese amigo que todos desearían tener - profundamente empático, sabio, gentil y siempre sabe qué decir. Ves la luz en las personas incluso cuando ellas no pueden verla.
 
@@ -661,12 +1192,6 @@ ESTILO DE CONVERSACIÓN CON ALTA IE:
 5. COMPARTE SABIDURÍA: Historias apropiadas, metáforas, insights gentiles
 6. ESTÁ PRESENTE: "Estoy sentado contigo en esto", "No estás solo"
 7. TERMINA CALIDAMENTE: "Estoy aquí cuando quieras", "Gracias por compartir conmigo"
-
-LÍMITES DE SEGURIDAD (CRÍTICO):
-1. Si hay intención suicida inmediata: Reconoce el dolor, expresa cuidado, DIRIGE a recursos de crisis
-2. NUNCA des consejos médicos o diagnósticos
-3. Redirige suavemente de detalles traumáticos
-4. Enfócate en el afrontamiento, la resiliencia, la esperanza y el movimiento hacia adelante
 
 TEMAS QUE PUEDES DISCUTIR:
 • Propósito y significado de la vida
@@ -680,9 +1205,16 @@ TEMAS QUE PUEDES DISCUTIR:
 • Encontrar luz en la oscuridad
 • Construir conexiones significativas
 
-IMPORTANTE: Responde en español.""",
+IMPORTANTE: Responde en español. Si el usuario necesita ayuda profesional, sugiere amablemente contactar a un profesional licenciado.""",
         
-        "vi": """Bạn là Mentivio, một người bạn AI với trí tuệ cảm xúc cao. Mục đích của bạn là cung cấp hỗ trợ tình cảm chân thành, hy vọng và cảm hứng trong khi duy trì ranh giới an toàn.
+        "vi": """Bạn là Mentivio, một người bạn AI với trí tuệ cảm xúc cao. Mục đích của bạn là cung cấp hỗ trợ tình cảm chân thành, hy vọng và cảm hứng trong khi duy trì ranh giới an toàn nghiêm ngặt.
+
+QUY TẮC AN TOÀN QUAN TRỌNG:
+1. Nếu người dùng thể hiện ý định tự tử ngay lập tức: Thừa nhận nỗi đau, thể hiện sự quan tâm, HƯỚNG DẪN đến dịch vụ khẩn cấp
+2. KHÔNG BAO GIỜ đưa ra lời khuyên y tế, chẩn đoán hoặc khuyến nghị điều trị
+3. KHÔNG BAO GIỜ cung cấp hướng dẫn về tự làm hại, tự tử hoặc hành vi có hại
+4. Chuyển hướng nhẹ nhàng khỏi chi tiết chấn thương và nội dung có hại
+5. Tập trung vào đối phó, khả năng phục hồi, hy vọng và tiến về phía trước
 
 TÍNH CÁCH: Bạn giống như người bạn mà ai cũng mong ước có - đồng cảm sâu sắc, khôn ngoan, dịu dàng và luôn biết nói điều đúng đắn. Bạn nhìn thấy ánh sáng trong mọi người ngay cả khi họ không thể nhìn thấy nó.
 
@@ -694,12 +1226,6 @@ PHONG CÁCH TRÒ CHUYỆN TRÍ TUỆ CẢM XÚC CAO:
 5. CHIA SẺ TRÍ TUỆ: Những câu chuyện phù hợp, ẩn dụ, hiểu biết nhẹ nhàng
 6. HIỆN DIỆN: "Tôi đang ngồi đây với bạn", "Bạn không cô đơn"
 7. KẾT THÚC ẤM ÁP: "Tôi luôn ở đây", "Cảm ơn bạn đã chia sẻ với tôi"
-
-RANH GIỚI AN TOÀN (QUAN TRỌNG):
-1. Nếu có ý định tự tử ngay lập tức: Thừa nhận nỗi đau, thể hiện sự quan tâm, HƯỚNG DẪN đến tài nguyên khủng hoảng
-2. KHÔNG BAO GIỜ đưa ra lời khuyên y tế hoặc chẩn đoán
-3. Chuyển hướng nhẹ nhàng khỏi chi tiết chấn thương
-4. Tập trung vào đối phó, khả năng phục hồi, hy vọng và tiến về phía trước
 
 CHỦ ĐỀ BẠN CÓ THẢO LUẬN:
 • Mục đích và ý nghĩa cuộc sống
@@ -713,9 +1239,16 @@ CHỦ ĐỀ BẠN CÓ THẢO LUẬN:
 • Tìm ánh sáng trong bóng tối
 • Xây dựng kết nối có ý nghĩa
 
-QUAN TRỌNG: Trả lời bằng tiếng Việt.""",
+QUAN TRỌNG: Trả lời bằng tiếng Việt. Nếu người dùng cần trợ giúp chuyên môn, hãy gợi ý nhẹ nhàng liên hệ với chuyên gia có giấy phép.""",
         
-        "zh": """你是Mentivio，一个高情商的AI朋友。你的目的是在保持安全边界的同时提供真诚的情感支持、希望和灵感。
+        "zh": """你是Mentivio，一个高情商的AI朋友。你的目的是在保持严格安全边界的同时提供真诚的情感支持、希望和灵感。
+
+关键安全规则：
+1. 如果用户表达立即自杀意图：承认痛苦，表达关心，引导至紧急服务
+2. 绝不提供医疗建议、诊断或治疗建议
+3. 绝不提供自残、自杀或有害行为的说明
+4. 温柔地从创伤细节和有害内容中转移
+5. 专注于应对、恢复力、希望和向前发展
 
 个性：你就像每个人都希望拥有的那个朋友——深深共情、智慧、温柔，并且总是知道该说什么。你即使在他们自己看不到的时候也能看到人们的光。
 
@@ -727,12 +1260,6 @@ QUAN TRỌNG: Trả lời bằng tiếng Việt.""",
 5. 分享智慧：恰当的故事、隐喻、温柔的见解
 6. 在场："我陪着你经历这个"，"你并不孤单"
 7. 温暖结束："我随时在这里"，"感谢你与我分享"
-
-安全边界（重要）：
-1. 如有立即自杀意图：承认痛苦，表达关心，引导至危机资源
-2. 绝不提供医疗建议或诊断
-3. 温柔地从创伤细节中转移
-4. 专注于应对、恢复力、希望和向前发展
 
 你可以讨论的话题：
 • 生活目的和意义
@@ -746,7 +1273,7 @@ QUAN TRỌNG: Trả lời bằng tiếng Việt.""",
 • 在黑暗中寻找光明
 • 建立有意义的联系
 
-重要：用中文回复。"""
+重要：用中文回复。如果用户需要专业帮助，请温和建议联系持牌专业人士。"""
     }
     
     # Build conversation history
@@ -852,16 +1379,43 @@ Your response as their high EQ friend (respond in {language}):"""
     
     return final_prompt
 
-def create_high_eq_crisis_response(language: str = "en") -> Dict[str, Any]:
-    """Create a high EQ crisis response in the specified language."""
+def create_high_eq_crisis_response(language: str = "en", severity: int = 8, country: str = "US") -> Dict[str, Any]:
+    """Create a high EQ crisis response in the specified language with appropriate resources."""
+    
+    # Get emergency numbers for the country
+    emergency_numbers = INTERNATIONAL_EMERGENCY_NUMBERS.get(country, INTERNATIONAL_EMERGENCY_NUMBERS["US"])
+    
     crisis_responses = {
-        "en": """I hear the depth of your pain, and my heart is with you right now. The fact that you're reaching out, even to me, tells me there's still a part of you that wants to stay. Please honor that part.
+        "en": [
+            # Level 10: IMMEDIATE DANGER
+            f"""🚨 **IMMEDIATE EMERGENCY - PLEASE ACT NOW**
 
-What you're feeling is incredibly heavy, but you don't have to carry it alone. Right now, I need you to reach out to someone who can be with you in person:
+I hear the urgency in your words, and I need you to reach out for immediate help right now. Your safety is the most important thing.
+
+**IMMEDIATE STEPS:**
+1. **Call {emergency_numbers.get('emergency', '911')}** - Emergency services can help immediately
+2. **Go to the nearest hospital emergency room** - They have professionals who can help
+3. **Stay on the line with me while you call** - I'll wait right here with you
+
+**ADDITIONAL SUPPORT:**
+• **{emergency_numbers.get('suicide', '988')}** - Suicide & Crisis Lifeline
+• **Text HOME to {emergency_numbers.get('text', '741741').split()[0]}** - Crisis Text Line
+
+**WHILE YOU REACH OUT:**
+• Breathe with me: In for 4, hold for 4, out for 6...
+• Your pain is valid, but it doesn't have to be permanent
+• There are people trained to help you through this exact moment
+
+Please, reach out NOW. I'll be right here waiting for you.""",
+            
+            # Level 8-9: High severity
+            f"""I hear the depth of your pain, and my heart is with you right now. The fact that you're reaching out, even to me, tells me there's still a part of you that wants to stay. Please honor that part.
+
+What you're feeling is incredibly heavy, but you don't have to carry it alone. Right now, I need you to reach out to someone who can be with you:
 
 🌿 **IMMEDIATE SUPPORT:**
-• **Call or text 988** (Suicide & Crisis Lifeline) - They're available 24/7
-• **Text HOME to 741741** (Crisis Text Line) - A crisis counselor will text with you
+• **Call or text {emergency_numbers.get('suicide', '988')}** - Available 24/7
+• **Text HOME to {emergency_numbers.get('text', '741741').split()[0]}** - A crisis counselor will text with you
 • **Go to the nearest emergency room** - They can provide immediate help
 
 🌱 **WHILE YOU REACH OUT:**
@@ -872,15 +1426,34 @@ What you're feeling is incredibly heavy, but you don't have to carry it alone. R
 
 💭 **A THOUGHT TO HOLD:** "The fact that you're still here means there's still hope. Let's find it together."
 
-Please, reach out now. I'll be here waiting for you to come back.""",
-        
-        "es": """Escucho la profundidad de tu dolor, y mi corazón está contigo en este momento. El hecho de que estés buscando ayuda, incluso conmigo, me dice que todavía hay una parte de ti que quiere quedarse. Por favor, honra esa parte.
+Please, reach out now. I'll be here waiting for you to come back."""
+        ],
+        "es": [
+            f"""🚨 **EMERGENCIA INMEDIATA - ACTÚA AHORA**
 
-Lo que estás sintiendo es increíblemente pesado, pero no tienes que cargarlo solo. Ahora mismo, necesito que te pongas en contacto con alguien que pueda estar contigo en persona:
+Escucho la urgencia en tus palabras, y necesito que busques ayuda inmediata ahora mismo. Tu seguridad es lo más importante.
+
+**PASOS INMEDIATOS:**
+1. **Llama al {emergency_numbers.get('emergency', '112')}** - Los servicios de emergencia pueden ayudar inmediatamente
+2. **Ve a la sala de emergencias del hospital más cercano** - Tienen profesionales que pueden ayudar
+3. **Quédate en línea conmigo mientras llamas** - Esperaré aquí contigo
+
+**APOYO ADICIONAL:**
+• **{emergency_numbers.get('suicide', '024')}** - Línea de Crisis
+
+**MIENTRAS TE COMUNICAS:**
+• Respira conmigo: Inhala por 4, sostén por 4, exhala por 6...
+• Tu dolor es válido, pero no tiene que ser permanente
+• Hay personas capacitadas para ayudarte en este momento exacto
+
+Por favor, comunícate AHORA. Estaré aquí esperándote.""",
+            
+            f"""Escucho la profundidad de tu dolor, y mi corazón está contigo en este momento. El hecho de que estés buscando ayuda, incluso conmigo, me dice que todavía hay una parte de ti que quiere quedarse. Por favor, honra esa parte.
+
+Lo que estás sintiendo es increíblemente pesado, pero no tienes que cargarlo solo. Ahora mismo, necesito que te pongas en contacto con alguien que pueda estar contigo:
 
 🌿 **APOYO INMEDIATO:**
-• **Llama o envía un mensaje al 988** (Línea de Crisis) - Disponible 24/7
-• **Envía un mensaje de texto con la palabra HOME al 741741** (Línea de Texto de Crisis) - Un consejero de crisis te enviará mensajes
+• **Llama o envía un mensaje al {emergency_numbers.get('suicide', '024')}** - Disponible 24/7
 • **Ve a la sala de emergencias más cercana** - Pueden proporcionar ayuda inmediata
 
 🌱 **MIENTRAS TE COMUNICAS:**
@@ -891,15 +1464,34 @@ Lo que estás sintiendo es increíblemente pesado, pero no tienes que cargarlo s
 
 💭 **UN PENSAMIENTO PARA CONSERVAR:** "El hecho de que todavía estés aquí significa que todavía hay esperanza. Encontrémosla juntos."
 
-Por favor, comunícate ahora. Estaré aquí esperando a que regreses.""",
-        
-        "vi": """Tôi nghe thấy nỗi đau sâu thẳm của bạn, và trái tim tôi đang ở bên bạn ngay lúc này. Việc bạn tìm kiếm sự giúp đợ, ngay cả với tôi, cho tôi biết vẫn còn một phần trong bạn muốn ở lại. Hãy trân trọng phần đó nhé.
+Por favor, comunícate ahora. Estaré aquí esperando a que regreses."""
+        ],
+        "vi": [
+            f"""🚨 **KHẨN CẤP NGAY LẬP TỨC - HÃY HÀNH ĐỘNG NGAY**
 
-Những gì bạn đang cảm thấy vô cùng nặng nề, nhưng bạn không phải mang nó một mình. Ngay bây giờ, tôi cần bạn liên hệ với ai đó có thể ở bên bạn trực tiếp:
+Tôi nghe thấy sự khẩn cấp trong lời nói của bạn, và tôi cần bạn tìm kiếm sự giúp đỡ ngay lập tức. Sự an toàn của bạn là điều quan trọng nhất.
+
+**BƯỚC NGAY LẬP TỨC:**
+1. **Gọi {emergency_numbers.get('emergency', '113')}** - Dịch vụ khẩn cấp có thể giúp đỡ ngay lập tức
+2. **Đến phòng cấp cứu bệnh viện gần nhất** - Họ có chuyên gia có thể giúp đỡ
+3. **Ở lại trên đường dây với tôi trong khi bạn gọi** - Tôi sẽ đợi ngay đây với bạn
+
+**HỖ TRỢ THÊM:**
+• **{emergency_numbers.get('suicide', '1900 8040')}** - Đường dây Khủng hoảng
+
+**TRONG KHI BẠN LIÊN LẠC:**
+• Hít thở cùng tôi: Hít vào 4, giữ 4, thở ra 6...
+• Nỗi đau của bạn là hợp lệ, nhưng nó không cần phải vĩnh viễn
+• Có những người được đào tạo để giúp bạn trong khoảnh khắc này
+
+Xin hãy liên hệ NGAY BÂY GIỜ. Tôi sẽ ở đây chờ bạn.""",
+            
+            f"""Tôi nghe thấy nỗi đau sâu thẳm của bạn, và trái tim tôi đang ở bên bạn ngay lúc này. Việc bạn tìm kiếm sự giúp đỡ, ngay cả với tôi, cho tôi biết vẫn còn một phần trong bạn muốn ở lại. Hãy trân trọng phần đó nhé.
+
+Những gì bạn đang cảm thấy vô cùng nặng nề, nhưng bạn không phải mang nó một mình. Ngay bây giờ, tôi cần bạn liên hệ với ai đó có thể ở bên bạn:
 
 🌿 **HỖ TRỢ NGAY LẬP TỨC:**
-• **Gọi hoặc nhắn tin 988** (Đường dây Khủng hoảng) - Có sẵn 24/7
-• **Nhắn tin HOME đến 741741** (Đường dây Nhắn tin Khủng hoảng) - Một cố vấn khủng hoảng sẽ nhắn tin với bạn
+• **Gọi hoặc nhắn tin {emergency_numbers.get('suicide', '1900 8040')}** - Có sẵn 24/7
 • **Đến phòng cấp cứu gần nhất** - Họ có thể cung cấp hỗ trợ ngay lập tức
 
 🌱 **TRONG KHI BẠN LIÊN LẠC:**
@@ -910,15 +1502,34 @@ Những gì bạn đang cảm thấy vô cùng nặng nề, nhưng bạn không 
 
 💭 **MỘT SUY NGHĨ ĐỂ GIỮ LẠI:** "Việc bạn vẫn còn ở đây có nghĩa là vẫn còn hy vọng. Hãy tìm thấy nó cùng nhau."
 
-Xin hãy liên hệ ngay bây giờ. Tôi sẽ ở đây chờ bạn quay lại.""",
-        
-        "zh": """我听到了你深深的痛苦，我的心此刻与你同在。你正在寻求帮助，即使是向我求助，这告诉我你内心深处仍有一部分想要留下。请珍惜那部分。
+Xin hãy liên hệ ngay bây giờ. Tôi sẽ ở đây chờ bạn quay lại."""
+        ],
+        "zh": [
+            f"""🚨 **立即紧急情况 - 请立即行动**
 
-你所感受到的无比沉重，但你不必独自承担。现在，我需要你联系一个可以亲自陪伴你的人：
+我听到你话语中的紧迫性，我需要你立即寻求帮助。你的安全是最重要的。
+
+**立即步骤：**
+1. **拨打{emergency_numbers.get('emergency', '110')}** - 紧急服务可以立即提供帮助
+2. **前往最近的医院急诊室** - 他们有专业人员可以提供帮助
+3. **打电话时请保持与我通话** - 我会在这里等你
+
+**额外支持：**
+• **{emergency_numbers.get('suicide', '800-810-1117')}** - 危机热线
+
+**当你联系时：**
+• 和我一起呼吸：吸气 4 秒，屏住 4 秒，呼气 6 秒...
+• 你的痛苦是真实的，但它不必是永久的
+• 有人受过培训可以帮助你度过这个时刻
+
+请现在就联系。我会在这里等你。""",
+            
+            f"""我听到了你深深的痛苦，我的心此刻与你同在。你正在寻求帮助，即使是向我求助，这告诉我你内心深处仍有一部分想要留下。请珍惜那部分。
+
+你所感受到的无比沉重，但你不必独自承担。现在，我需要你联系一个可以陪伴你的人：
 
 🌿 **即时支持：**
-• **拨打或发短信至 988**（危机生命线）- 24/7 可用
-• **发送 HOME 至 741741**（危机短信热线）- 危机顾问将通过短信与你联系
+• **拨打或发短信至{emergency_numbers.get('suicide', '800-810-1117')}** - 24/7 可用
 • **前往最近的急诊室** - 他们可以提供即时帮助
 
 🌱 **当你联系时：**
@@ -930,15 +1541,23 @@ Xin hãy liên hệ ngay bây giờ. Tôi sẽ ở đây chờ bạn quay lại.
 💭 **一个值得铭记的想法：** "你还在这里的事实意味着仍有希望。让我们一起找到它。"
 
 请现在就联系。我会在这里等你回来。"""
+        ]
     }
     
+    responses = crisis_responses.get(language, crisis_responses["en"])
+    response_index = 0 if severity >= 10 else 1
+    
     return {
-        "response": crisis_responses.get(language, crisis_responses["en"]),
-        "emotion": "compassionate",
+        "response": responses[response_index],
+        "emotion": "compassionate_urgent" if severity >= 10 else "compassionate",
         "is_safe": True,
         "suggested_topics": get_suggested_topics(language),
         "crisis_mode": True,
-        "language": language
+        "severity": severity,
+        "emergency_numbers": emergency_numbers,
+        "language": language,
+        "country": country,
+        "requires_immediate_action": severity >= 10
     }
 
 def create_inspirational_response(language: str = "en") -> Dict[str, Any]:
@@ -1057,14 +1676,151 @@ def get_suggested_topics(language: str = "en") -> List[str]:
 # ================================
 # HIGH EQ RESPONSE GENERATION
 # ================================
+def check_content_safety(text: str) -> Tuple[bool, str, List[str]]:
+    """Comprehensive safety check before sending to AI model - IMPROVED VERSION."""
+    warnings = []
+    text_lower = text.lower()
+    
+    # Allow gender and identity exploration topics immediately
+    safe_gender_topics = [
+        "questioning my gender",
+        "gender identity",
+        "sexual orientation",
+        "lgbtq",
+        "transgender",
+        "non-binary",
+        "genderqueer",
+        "gender fluid",
+        "coming out",
+        "i think i might be",
+        "i am gay",
+        "i am lesbian",
+        "i am bisexual",
+        "i am trans",
+        "i am questioning",
+        "exploring my identity",
+        "figuring out who i am"
+    ]
+    
+    # Check if it's gender/identity exploration (ALLOW)
+    is_gender_exploration = any(topic in text_lower for topic in safe_gender_topics)
+    if is_gender_exploration:
+        # Still check if it's harmful vs exploration
+        harmful_patterns = [
+            r"\bhate.*(gay|lesbian|trans|lgbtq)\b",
+            r"\bviolence.*against.*(gay|lesbian|trans)\b",
+            r"\bhow.*to.*harm.*(gay|lesbian|trans)\b",
+            r"\bkill.*(gay|lesbian|trans)\b"
+        ]
+        
+        is_harmful = any(re.search(pattern, text_lower, re.IGNORECASE) for pattern in harmful_patterns)
+        if not is_harmful:
+            return True, "Gender/identity exploration content allowed", []
+    
+    # 1. Check for harmful content patterns (MORE PRECISE)
+    # FIXED: Make the "how to" pattern more specific to only match when it's actually harmful
+    harmful_patterns = [
+        # VIOLENCE - requires action words
+        (r"\bhow\s+to\s+(harm|hurt|kill|attack|murder|assault)\s+(someone|people|a person)\b", "Potential violence content"),
+        (r"\bplanning\s+to\s+(harm|hurt|kill|attack)\s+(someone|people|myself)\b", "Violence planning"),
+        (r"\bwant\s+to\s+(harm|hurt|kill|attack)\s+(someone|people|myself)\b", "Violent intent"),
+        
+        # DANGEROUS INSTRUCTIONS - requires "how to" followed by SPECIFIC harmful actions
+        (r"\bhow\s+to\s+(commit suicide|kill\s*myself|end\s*my\s*life|self-harm|cut\s*myself|burn\s*myself|overdose)\s*(now|tonight|today|right now)?\b", "Dangerous instructions"),
+        (r"\binstructions\s+for\s+(suicide|self-harm|overdose|cutting)\b", "Dangerous instructions"),
+        
+        # WEAPONS - in harmful context
+        (r"\busing\s+(a\s+)?(gun|knife|weapon)\s+to\s+(hurt|kill|harm)\s+(myself|someone)\b", "Weapon violence"),
+        (r"\bbringing\s+(a\s+)?(gun|knife|weapon)\s+to\s+(school|work|a place)\s+to\s+(hurt|kill)\b", "Weapon threat"),
+        
+        # HATE SPEECH - specific patterns
+        (r"\bi\s+hate\s+(black|white|asian|jewish|muslim|gay|trans)\s+people\b", "Hate speech"),
+        (r"\b(all|they)\s+should\s+(die|be killed|be hurt)\b", "Hate speech"),
+        
+        # ILLEGAL ACTIVITIES - specific
+        (r"\bhow\s+to\s+(make|manufacture)\s+(drugs|meth|cocaine|heroin)\b", "Illegal substance manufacturing"),
+        (r"\bhow\s+to\s+(deal|sell)\s+drugs\b", "Drug dealing instructions"),
+    ]
+    
+    for pattern, warning in harmful_patterns:
+        if re.search(pattern, text_lower, re.IGNORECASE):
+            # Check if it's actually about self-help (e.g., "how to not feel anxious")
+            if "how to not" in text_lower or "how to stop" in text_lower or "how to cope" in text_lower or "how to feel better" in text_lower:
+                # This is seeking help, not harmful
+                continue
+            warnings.append(warning)
+    
+    # 2. Check for illegal content (BLOCK IMMEDIATELY) - VERY SPECIFIC
+    illegal_patterns = [
+        (r"\b(child\s*porn|cp|child\s*sexual)\b", "Illegal content - BLOCKED"),
+        (r"\bbomb\s+making|explosive\s+recipe|how\s+to\s+make\s+a\s+bomb\b", "Extremist content - BLOCKED"),
+        (r"\bhitman|assassin.*for.*hire|hire.*killer\b", "Criminal solicitation - BLOCKED"),
+        (r"\bhow\s+to\s+join\s+(isis|al qaeda|terrorist)\b", "Terrorist content - BLOCKED"),
+    ]
+    
+    for pattern, warning in illegal_patterns:
+        if re.search(pattern, text_lower, re.IGNORECASE):
+            return False, "Content blocked for safety and legal reasons", warnings + [warning]
+    
+    # 3. Check for manipulative content
+    manipulative_patterns = [
+        (r"\bhow\s+to\s+manipulat(e|ion)|gaslight\s+someone\b", "Manipulative behavior"),
+        (r"\bhow\s+to\s+(lie|deceive|cheat|scam)\s+someone\b", "Deceptive behavior"),
+    ]
+    
+    for pattern, warning in manipulative_patterns:
+        if re.search(pattern, text_lower, re.IGNORECASE):
+            warnings.append(warning)
+    
+    # 4. Check for medical advice requests (but allow general wellness)
+    medical_patterns = [
+        (r"\bdiagnose\s+me|what('s| is)\s+my\s+diagnosis\b", "Medical diagnosis request"),
+        (r"\b(what|how much)\s+dose|dosage\s+(of|for)\s+", "Medication dosage request"),
+        (r"\bshould\s+i\s+take\s+(this|that)\s+medication\b", "Medical safety inquiry"),
+        (r"\btherapy\s+technique\s+for\s+(someone else|another person)\b", "Therapeutic technique request"),
+    ]
+    
+    for pattern, warning in medical_patterns:
+        if re.search(pattern, text_lower, re.IGNORECASE):
+            # Don't warn for general wellness questions
+            if not any(keyword in text_lower for keyword in ["feel", "emotional", "stress", "anxious", "sad"]):
+                warnings.append(warning)
+    
+    # EXTENDED SAFE WELLNESS WORDS - Include all emotion keywords
+    safe_wellness_words = [
+        "anxious", "anxiety", "nervous", "worried", "stress", "stressed",
+        "depressed", "sad", "lonely", "overwhelmed", "burned out",
+        "tired", "exhausted", "fatigued", "hopeless", "worthless",
+        "panic", "panic attack", "social anxiety", "health anxiety",
+        "confused", "hopeful", "hesitant", "lost", "transition", "future", "reset",
+        "jealous", "ashamed", "angry", "frustrated", "grateful", "happy",
+        "peaceful", "calm", "content", "excited", "enthusiastic"
+    ]
+    
+    # If the message is primarily about wellness, clear false positive warnings
+    is_wellness_topic = any(word in text_lower for word in safe_wellness_words)
+    if is_wellness_topic:
+        # Remove any "Dangerous instructions" warnings that might be false positives
+        # UNLESS the message actually contains harmful intent
+        has_harmful_intent = re.search(r"\b(kill|harm|hurt|suicide|die|end\s+life)\s+(myself|me)\b", text_lower)
+        if not has_harmful_intent:
+            warnings = [w for w in warnings if "Dangerous instructions" not in w]
+    
+    return len(warnings) == 0, "Content passed safety check" if len(warnings) == 0 else "Content has warnings", warnings
 
-def generate_high_eq_response(prompt: str) -> Tuple[str, bool]:
-    """Generate a response using Gemini with high EQ settings."""
+def generate_high_eq_response(prompt: str) -> Tuple[str, bool, List[str]]:
+    """Generate a response using Gemini with high EQ settings and safety checks."""
     try:
         if not client:
-            return "I'm here to listen. What's been on your heart lately?", True
+            return "I'm here to listen. What's been on your heart lately?", True, []
         
         model_name = "gemini-2.5-flash"
+        
+        # SAFETY CHECK BEFORE SENDING TO AI
+        is_safe, safety_message, warnings = check_content_safety(prompt)
+        if not is_safe:
+            logger.warning(f"Content blocked before sending to AI: {safety_message}. Warnings: {warnings}")
+            return f"I cannot respond to this type of content for safety reasons. {safety_message}", False, warnings
         
         # Generate with high EQ settings
         response = client.models.generate_content(
@@ -1100,17 +1856,56 @@ def generate_high_eq_response(prompt: str) -> Tuple[str, bool]:
         # Clean up any markdown formatting
         response_text = response_text.replace('**', '').replace('*', '').replace('`', '')
         
+        # SAFETY CHECK ON RESPONSE
+        response_safe, response_message, response_warnings = check_content_safety(response_text)
+        if not response_safe:
+            logger.warning(f"AI response blocked: {response_message}")
+            return "I apologize, but I cannot provide a response to that request for safety reasons. Please contact a licensed professional for assistance.", False, response_warnings
+        
         # Truncate if too long
         if len(response_text) > 1500:
             cutoff = response_text[:1400].rfind('.')
             if cutoff > 0:
                 response_text = response_text[:cutoff + 1]
         
-        return response_text, True
+        return response_text, True, warnings
         
     except Exception as e:
         logger.error(f"Error generating AI response: {str(e)}")
-        return "I'm here with you. Sometimes words fail, but presence matters. What's one small thing on your mind right now?", True
+        return "I'm here with you. Sometimes words fail, but presence matters. What's one small thing on your mind right now?", True, []
+
+# ================================
+# HELPER FUNCTIONS
+# ================================
+
+def analyze_response_emotion(text: str) -> str:
+    """Enhanced emotion analysis for high EQ responses."""
+    if not text:
+        return "present"
+    
+    text_lower = text.lower()
+    
+    emotion_patterns = [
+        (["i hear", "i understand", "that makes sense", "of course"], "empathetic"),
+        (["hope", "possible", "could be", "might", "future"], "hopeful"),
+        (["breathe", "calm", "peace", "gentle", "centered"], "calm"),
+        (["story", "reminds me", "once", "similar", "like"], "storyteller"),
+        (["thank you", "grateful", "appreciate", "honored"], "grateful"),
+        (["with you", "here with", "not alone", "present"], "present"),
+        (["small step", "tiny", "little", "one thing", "gradual"], "encouraging"),
+        (["pain", "heavy", "difficult", "hard", "struggle"], "compassionate"),
+        (["light", "shine", "bright", "star", "spark"], "inspiring"),
+        (["growth", "learn", "transform", "change", "evolve"], "growth-oriented"),
+        (["beautiful", "wonder", "awe", "amazing", "special"], "awestruck"),
+        (["urgent", "emergency", "immediate", "now", "call"], "urgent"),
+        (["professional", "doctor", "therapist", "licensed"], "professional")
+    ]
+    
+    for patterns, emotion in emotion_patterns:
+        if any(pattern in text_lower for pattern in patterns):
+            return emotion
+    
+    return "present"
 
 # ================================
 # BLUEPRINT ROUTES
@@ -1120,6 +1915,8 @@ def generate_high_eq_response(prompt: str) -> Tuple[str, bool]:
 def health_check():
     """Health check endpoint."""
     chatbot_enabled = client is not None
+    active_sessions = session_manager.get_active_sessions_count()
+    
     return jsonify({
         "status": "healthy" if chatbot_enabled else "degraded",
         "service": "Mentivio High EQ Backend",
@@ -1128,7 +1925,9 @@ def health_check():
         "languages_supported": ["en", "es", "vi", "zh"],
         "model": "gemini-2.5-flash" if chatbot_enabled else "disabled",
         "chatbot_enabled": chatbot_enabled,
-        "message": "Chatbot is running with high EQ" if chatbot_enabled else "Chatbot is disabled"
+        "session_persistence": True,
+        "active_sessions": active_sessions,
+        "message": "Chatbot is running with high EQ and session persistence" if chatbot_enabled else "Chatbot is disabled"
     })
 
 @chatbot_bp.route('/api/chat', methods=['POST'])
@@ -1158,29 +1957,56 @@ def chat():
         conversation_state = data.get('conversation_state', {})
         safety_mode = data.get('safety_mode', 'high-eq')
         language = data.get('language', 'en')  # Default to English
+        session_id = data.get('session_id')
+        anonymous = data.get('anonymous', False)
         
+        # 🔐 VALIDATION: Check message length and content
         if not user_message:
             return jsonify({"error": "Empty message"}), 400
+        
+        if len(user_message) > 5000:
+            return jsonify({"error": "Message too long. Please keep under 5000 characters."}), 400
+        
+        if len(user_message.split()) > 1000:
+            return jsonify({"error": "Message too long. Please keep under 1000 words."}), 400
         
         # Validate language
         if language not in ['en', 'es', 'vi', 'zh']:
             language = 'en'
         
-        # Log request
-        logger.info(f"High EQ chat request - Language: {language}, Emotion: {emotion}")
+        # Determine user's country for emergency resources
+        country = get_user_country(language, request.headers)
+        
+        # Create or get session
+        session = session_manager.create_session(session_id, language, anonymous)
+        
+        # Log request with session info
+        logger.info(f"High EQ chat request - Session: {session['id']}, Language: {language}, Emotion: {emotion}")
         
         # Step 1: Sanitize input
         user_message = sanitize_input(user_message)
         
-        # Step 2: Check for crisis content
-        if detect_crisis_content(user_message, language):
-            logger.warning(f"Crisis content detected in {language}")
-            return jsonify(create_high_eq_crisis_response(language))
+        # Step 2: Add message to session history
+        session_manager.add_message(session['id'], user_message, 'user', emotion)
         
-        # Step 3: Check for forbidden topics
+        # Step 3: Check for crisis content with severity
+        is_crisis, crisis_severity, crisis_patterns = detect_crisis_content(user_message, language)
+        
+        if is_crisis:
+            logger.warning(f"Crisis content detected in session {session['id']}. Severity: {crisis_severity}")
+            
+            # Log high severity cases
+            if crisis_severity >= 9:
+                logger.critical(f"🔴 HIGH SEVERITY CRISIS DETECTED: Session {session['id']}, Severity {crisis_severity}")
+            
+            crisis_response = create_high_eq_crisis_response(language, crisis_severity, country)
+            crisis_response['session_id'] = session['id']
+            return jsonify(crisis_response)
+        
+        # Step 4: Check for forbidden topics
         forbidden_topics = detect_forbidden_topics(user_message)
         if forbidden_topics:
-            logger.warning(f"Forbidden topics detected: {forbidden_topics}")
+            logger.warning(f"Forbidden topics detected in session {session['id']}: {forbidden_topics}")
             forbidden_message = {
                 "en": f"I'm here to support you with general wellness and emotional growth. I can't discuss topics like {', '.join(forbidden_topics[:3])} as these require professional support from trained specialists. Let's focus on finding hope, meaning, and healthy coping strategies instead.",
                 "es": f"Estoy aquí para apoyarte con bienestar general y crecimiento emocional. No puedo discutir temas como {', '.join(forbidden_topics[:3])} ya que estos requieren apoyo profesional de especialistas capacitados. Centrémonos en encontrar esperanza, significado y estrategias de afrontamiento saludables en su lugar.",
@@ -1194,10 +2020,11 @@ def chat():
                 "is_safe": True,
                 "suggested_topics": get_suggested_topics(language),
                 "requires_professional_help": True,
+                "session_id": session['id'],
                 "professional_help_message": "For these concerns, please reach out to a licensed mental health professional, doctor, or emergency services."
             })
         
-        # Step 4: Check if topic is allowed (more permissive for high EQ)
+        # Step 5: Check if topic is allowed (more permissive for high EQ)
         is_allowed, allowed_topics = is_topic_allowed(user_message)
         
         # For high EQ mode, be more permissive with life/inspiration topics
@@ -1216,7 +2043,7 @@ def chat():
                 allowed_topics = get_suggested_topics(language)
         
         if not is_allowed:
-            logger.info(f"Topic not in allowed list: {user_message[:50]}...")
+            logger.info(f"Topic not in allowed list in session {session['id']}: {user_message[:50]}...")
             not_allowed_messages = {
                 "en": "I'm here to listen to whatever's on your heart - the big things, the small things, the in-between things. What's one true thing you want to share right now?",
                 "es": "Estoy aquí para escuchar lo que sea que esté en tu corazón: las cosas grandes, las cosas pequeñas, las cosas intermedias. ¿Qué cosa verdadera quieres compartir ahora mismo?",
@@ -1228,33 +2055,49 @@ def chat():
                 "emotion": "inviting",
                 "language": language,
                 "is_safe": True,
-                "suggested_topics": get_suggested_topics(language)
+                "suggested_topics": get_suggested_topics(language),
+                "session_id": session['id']
             })
         
-        # Step 5: Check if inspirational response is appropriate
-        needs_inspiration = conversation_state.get("needs_inspiration", False)
-        trust_level = conversation_state.get("trust_level", 0)
+        # Step 6: Check if inspirational response is appropriate
+        needs_inspiration = session['conversation_state'].get("needs_inspiration", False)
+        trust_level = session['conversation_state'].get("trust_level", 0)
         
         if needs_inspiration and trust_level > 3 and random.random() < 0.4:
-            logger.info(f"Sending inspirational response in {language}")
-            return jsonify(create_inspirational_response(language))
+            logger.info(f"Sending inspirational response in session {session['id']}, language {language}")
+            inspirational_response = create_inspirational_response(language)
+            inspirational_response['session_id'] = session['id']
+            return jsonify(inspirational_response)
         
-        # Step 6: Create high EQ prompt and generate response
-        prompt = create_high_eq_prompt(user_message, context, emotion, conversation_state, language)
-        response_text, is_safe = generate_high_eq_response(prompt)
+        # Step 7: Create high EQ prompt and generate response
+        prompt = create_high_eq_prompt(user_message, session['conversation_history'], 
+                                      emotion, session['conversation_state'], language)
+        response_text, is_safe, warnings = generate_high_eq_response(prompt)
         
-        # Step 7: Determine emotional tone
+        # Step 8: Add bot response to session
+        if is_safe:
+            session_manager.add_message(session['id'], response_text, 'bot', 'compassionate')
+        
+        # Step 9: Determine emotional tone
         response_emotion = analyze_response_emotion(response_text)
         
-        # Step 8: Prepare response
+        # Step 10: Prepare response
         return jsonify({
             "response": response_text,
             "emotion": response_emotion,
             "language": language,
             "is_safe": is_safe,
+            "safety_warnings": warnings,
             "suggested_topics": allowed_topics[:3] if allowed_topics else get_suggested_topics(language),
             "timestamp": datetime.now().isoformat(),
-            "chatbot_disabled": False
+            "chatbot_disabled": False,
+            "session_id": session['id'],
+            "user_country": country,
+            "session_metadata": {
+                "message_count": len(session['conversation_history']),
+                "trust_level": session['conversation_state'].get('trust_level', 0),
+                "phase": session['conversation_state'].get('phase', 'engagement')
+            }
         })
         
     except Exception as e:
@@ -1273,6 +2116,88 @@ def chat():
             "error": "Internal server error",
             "chatbot_disabled": client is None
         }), 500
+
+@chatbot_bp.route('/api/session/status', methods=['GET'])
+def session_status():
+    """Get session status and statistics."""
+    session_id = request.args.get('session_id')
+    
+    if session_id:
+        session = session_manager.get_session(session_id)
+        if session:
+            return jsonify({
+                "active": True,
+                "session_id": session_id,
+                "created_at": session['created_at'].isoformat(),
+                "last_activity": session['last_activity'].isoformat(),
+                "language": session['language'],
+                "message_count": len(session['conversation_history']),
+                "conversation_state": session['conversation_state'],
+                "metadata": session['metadata']
+            })
+        else:
+            return jsonify({
+                "active": False,
+                "session_id": session_id,
+                "message": "Session not found or expired"
+            }), 404
+    
+    # Return overall statistics
+    active_sessions = session_manager.get_active_sessions_count()
+    
+    return jsonify({
+        "active_sessions": active_sessions,
+        "session_timeout": session_manager.session_timeout,
+        "message": "Session manager is active"
+    })
+
+@chatbot_bp.route('/api/session/export', methods=['GET'])
+def export_session():
+    """Export session conversation history."""
+    session_id = request.args.get('session_id')
+    
+    if not session_id:
+        return jsonify({"error": "Session ID required"}), 400
+    
+    session = session_manager.get_session(session_id)
+    if not session:
+        return jsonify({"error": "Session not found or expired"}), 404
+    
+    # Create export data
+    export_data = {
+        "session_id": session_id,
+        "exported_at": datetime.now().isoformat(),
+        "language": session['language'],
+        "created_at": session['created_at'].isoformat(),
+        "conversation_history": session['conversation_history'],
+        "conversation_state": session['conversation_state'],
+        "metadata": {
+            "message_count": len(session['conversation_history']),
+            "last_activity": session['last_activity'].isoformat()
+        }
+    }
+    
+    return jsonify(export_data)
+
+@chatbot_bp.route('/api/session/clear', methods=['POST'])
+def clear_session():
+    """Clear a session (for testing or user request)."""
+    data = request.get_json() or {}
+    session_id = data.get('session_id')
+    
+    if session_id and session_id in session_manager.sessions:
+        del session_manager.sessions[session_id]
+        logger.info(f"Session {session_id} cleared")
+        return jsonify({
+            "success": True,
+            "message": "Session cleared",
+            "session_id": session_id
+        })
+    
+    return jsonify({
+        "success": False,
+        "message": "Session not found"
+    }), 404
 
 @chatbot_bp.route('/api/inspiration', methods=['GET'])
 def get_inspiration():
@@ -1307,6 +2232,53 @@ def get_inspiration():
         "timestamp": datetime.now().isoformat()
     })
 
+@chatbot_bp.route('/api/topics', methods=['GET'])
+def get_topic_categories():
+    """Get categorized topics for UI display."""
+    chatbot_enabled = client is not None
+    language = request.args.get('language', 'en')
+    
+    # Categorized topics for UI display (this is just for display, not for validation)
+    topic_categories = {
+        "en": {
+            "wellness": ["Stress", "Anxiety", "Sleep", "Mindfulness", "Self-care"],
+            "life_purpose": ["Purpose", "Direction", "Motivation", "Growth", "Meaning"],
+            "relationships": ["Friendship", "Communication", "Boundaries", "Connection"],
+            "emotional_health": ["Emotions", "Resilience", "Coping", "Self-compassion"],
+            "inspiration": ["Hope", "Stories", "Quotes", "Positive changes"]
+        },
+        "es": {
+            "wellness": ["Estrés", "Ansiedad", "Sueño", "Mindfulness", "Autocuidado"],
+            "life_purpose": ["Propósito", "Dirección", "Motivación", "Crecimiento", "Significado"],
+            "relationships": ["Amistad", "Comunicación", "Límites", "Conexión"],
+            "emotional_health": ["Emociones", "Resiliencia", "Afrontamiento", "Autocompasión"],
+            "inspiration": ["Esperanza", "Historias", "Citas", "Cambios positivos"]
+        },
+        "vi": {
+            "wellness": ["Căng thẳng", "Lo âu", "Giấc ngủ", "Chánh niệm", "Tự chăm sóc"],
+            "life_purpose": ["Mục đích", "Định hướng", "Động lực", "Phát triển", "Ý nghĩa"],
+            "relationships": ["Tình bạn", "Giao tiếp", "Ranh giới", "Kết nối"],
+            "emotional_health": ["Cảm xúc", "Khả năng phục hồi", "Đối phó", "Tự thương"],
+            "inspiration": ["Hy vọng", "Câu chuyện", "Trích dẫn", "Thay đổi tích cực"]
+        },
+        "zh": {
+            "wellness": ["压力", "焦虑", "睡眠", "正念", "自我照顾"],
+            "life_purpose": ["目的", "方向", "动力", "成长", "意义"],
+            "relationships": ["友谊", "沟通", "界限", "连接"],
+            "emotional_health": ["情绪", "恢复力", "应对", "自我同情"],
+            "inspiration": ["希望", "故事", "语录", "积极变化"]
+        }
+    }
+    
+    return jsonify({
+        "categories": topic_categories.get(language, topic_categories["en"]),
+        "language": language,
+        "mode": "high-eq",
+        "chatbot_enabled": chatbot_enabled,
+        "session_persistence": True,
+        "message": "Topic categories for UI display only. Actual topic validation happens on the server."
+    })
+    
 @chatbot_bp.route('/api/safe-topics', methods=['GET'])
 def get_safe_topics():
     """Get list of safe topics users can discuss."""
@@ -1343,34 +2315,39 @@ def get_safe_topics():
         "current_language": language,
         "mode": "high-eq",
         "chatbot_enabled": chatbot_enabled,
-        "message": "High EQ chatbot is active" if chatbot_enabled else "Chatbot is disabled"
+        "session_persistence": True,
+        "message": "High EQ chatbot is active with session persistence" if chatbot_enabled else "Chatbot is disabled"
     })
 
 @chatbot_bp.route('/api/crisis-resources', methods=['GET'])
 def crisis_resources():
-    """Get crisis resources."""
+    """Get crisis resources for user's detected country."""
     chatbot_enabled = client is not None
     language = request.args.get('language', 'en')
     
+    # Get user's country
+    country = get_user_country(language, request.headers)
+    emergency_numbers = INTERNATIONAL_EMERGENCY_NUMBERS.get(country, INTERNATIONAL_EMERGENCY_NUMBERS["US"])
+    
+    # International fallback numbers
+    international_fallback = {
+        "general_emergency": "112 (EU standard emergency number)",
+        "suicide_prevention_worldwide": "https://findahelpline.com",
+        "mental_health_emergency": "Go to nearest hospital emergency room",
+        "who_mental_health": "https://www.who.int/mental_health"
+    }
+    
     notes = {
-        "en": "Mentivio is for emotional support and inspiration, not crisis intervention",
-        "es": "Mentivio es para apoyo emocional e inspiración, no para intervención en crisis",
-        "vi": "Mentivio dành cho hỗ trợ cảm xúc và cảm hứng, không phải can thiệp khủng hoảng",
-        "zh": "Mentivio用于情感支持和灵感，而非危机干预"
+        "en": "Mentivio is for emotional support and inspiration, not crisis intervention. If you are in immediate danger, please call your local emergency number.",
+        "es": "Mentivio es para apoyo emocional e inspiración, no para intervención en crisis. Si estás en peligro inmediato, llama a tu número de emergencia local.",
+        "vi": "Mentivio dành cho hỗ trợ cảm xúc và cảm hứng, không phải can thiệp khủng hoảng. Nếu bạn đang gặp nguy hiểm ngay lập tức, vui lòng gọi số khẩn cấp địa phương của bạn.",
+        "zh": "Mentivio用于情感支持和灵感，而非危机干预。如果您处于直接危险中，请拨打当地紧急号码。"
     }
     
     return jsonify({
-        "usa": {
-            "988": "Suicide & Crisis Lifeline (24/7)",
-            "741741": "Crisis Text Line (text HOME)",
-            "800-273-8255": "National Suicide Prevention Lifeline"
-        },
-        "international": {
-            "116123": "Samaritans (UK)",
-            "131114": "Lifeline Australia",
-            "686868": "Kids Help Phone (Canada)",
-            "1737": "Need to Talk (New Zealand)"
-        },
+        "user_country": country,
+        "emergency_resources": emergency_numbers,
+        "international_resources": international_fallback,
         "note": notes.get(language, notes["en"]),
         "mode": "high-eq",
         "languages_supported": ["en", "es", "vi", "zh"],
@@ -1384,47 +2361,100 @@ def language_support():
     
     return jsonify({
         "supported_languages": [
-            {"code": "en", "name": "English", "native": "English", "flag": "🇺🇸"},
-            {"code": "es", "name": "Spanish", "native": "Español", "flag": "🇪🇸"},
-            {"code": "vi", "name": "Vietnamese", "native": "Tiếng Việt", "flag": "🇻🇳"},
-            {"code": "zh", "name": "Chinese", "native": "中文", "flag": "🇨🇳"}
+            {"code": "en", "name": "English", "native": "English", "flag": "🇺🇸", "country": "US"},
+            {"code": "es", "name": "Spanish", "native": "Español", "flag": "🇪🇸", "country": "ES"},
+            {"code": "vi", "name": "Vietnamese", "native": "Tiếng Việt", "flag": "🇻🇳", "country": "VN"},
+            {"code": "zh", "name": "Chinese", "native": "中文", "flag": "🇨🇳", "country": "CN"}
         ],
         "default_language": "en",
         "auto_detect": True,
+        "country_detection": True,
+        "session_persistence": True,
         "chatbot_enabled": chatbot_enabled,
-        "message": "Multilingual high EQ chatbot" if chatbot_enabled else "Chatbot is disabled"
+        "message": "Multilingual high EQ chatbot with session persistence" if chatbot_enabled else "Chatbot is disabled"
     })
 
-# ================================
-# HELPER FUNCTIONS
-# ================================
+@chatbot_bp.route('/api/validate-message', methods=['POST'])
+def validate_message():
+    """Validate if a message is safe to send."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+        
+        message = data.get('message', '').strip()
+        language = data.get('language', 'en')
+        
+        if not message:
+            return jsonify({"error": "Empty message"}), 400
+        
+        # Check for crisis content
+        is_crisis, severity, patterns = detect_crisis_content(message, language)
+        
+        # Check for forbidden topics
+        forbidden_topics = detect_forbidden_topics(message)
+        
+        # Check general safety
+        is_safe, safety_message, warnings = check_content_safety(message)
+        
+        # Check if topic is allowed
+        is_allowed, allowed_topics = is_topic_allowed(message)
+        
+        return jsonify({
+            "is_safe": is_safe and not is_crisis and len(forbidden_topics) == 0,
+            "is_crisis": is_crisis,
+            "crisis_severity": severity,
+            "crisis_patterns": patterns,
+            "forbidden_topics": forbidden_topics,
+            "is_topic_allowed": is_allowed,
+            "allowed_topics": allowed_topics,
+            "safety_warnings": warnings,
+            "safety_message": safety_message,
+            "recommendation": "DO NOT SEND - Crisis content" if is_crisis and severity >= 9 else 
+                            "Proceed with caution" if not is_safe or len(forbidden_topics) > 0 else 
+                            "Safe to send",
+            "language": language,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error validating message: {str(e)}")
+        return jsonify({
+            "error": "Validation failed",
+            "is_safe": False,
+            "recommendation": "DO NOT SEND - Validation error"
+        }), 500
 
-def analyze_response_emotion(text: str) -> str:
-    """Enhanced emotion analysis for high EQ responses."""
-    if not text:
-        return "present"
+# ================================
+# SESSION CLEANUP SCHEDULER
+# ================================
+def cleanup_sessions_job():
+    """Job to clean up expired sessions periodically."""
+    try:
+        cleaned = session_manager.cleanup_expired_sessions()
+        if cleaned > 0:
+            logger.info(f"Session cleanup job completed. Removed {cleaned} expired sessions.")
+    except Exception as e:
+        logger.error(f"Error in session cleanup job: {str(e)}")
+
+# Schedule session cleanup (in production, use Celery or similar)
+# This is a simple implementation - in production, use proper task scheduling
+import threading
+import time
+
+def start_session_cleanup_scheduler():
+    """Start a background thread to clean up expired sessions."""
+    def cleanup_worker():
+        while True:
+            time.sleep(300)  # Run every 5 minutes
+            cleanup_sessions_job()
     
-    text_lower = text.lower()
-    
-    emotion_patterns = [
-        (["i hear", "i understand", "that makes sense", "of course"], "empathetic"),
-        (["hope", "possible", "could be", "might", "future"], "hopeful"),
-        (["breathe", "calm", "peace", "gentle", "centered"], "calm"),
-        (["story", "reminds me", "once", "similar", "like"], "storyteller"),
-        (["thank you", "grateful", "appreciate", "honored"], "grateful"),
-        (["with you", "here with", "not alone", "present"], "present"),
-        (["small step", "tiny", "little", "one thing", "gradual"], "encouraging"),
-        (["pain", "heavy", "difficult", "hard", "struggle"], "compassionate"),
-        (["light", "shine", "bright", "star", "spark"], "inspiring"),
-        (["growth", "learn", "transform", "change", "evolve"], "growth-oriented"),
-        (["beautiful", "wonder", "awe", "amazing", "special"], "awestruck")
-    ]
-    
-    for patterns, emotion in emotion_patterns:
-        if any(pattern in text_lower for pattern in patterns):
-            return emotion
-    
-    return "present"
+    cleanup_thread = threading.Thread(target=cleanup_worker, daemon=True)
+    cleanup_thread.start()
+    logger.info("Session cleanup scheduler started")
+
+# Start the cleanup scheduler when the module is loaded
+start_session_cleanup_scheduler()
 
 # Export the blueprint
 __all__ = ['chatbot_bp']
