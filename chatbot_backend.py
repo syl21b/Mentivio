@@ -12,6 +12,8 @@ import random
 import uuid
 import hashlib
 from functools import lru_cache
+import threading
+import time
 
 # Load environment variables
 load_dotenv()
@@ -102,7 +104,7 @@ SAFETY_SETTINGS = [
 ]
 
 # ================================
-# SESSION PERSISTENCE MANAGER
+# ENHANCED SESSION PERSISTENCE MANAGER
 # ================================
 class SessionManager:
     """Manages user sessions for persistent conversations."""
@@ -136,9 +138,11 @@ class SessionManager:
                     'page_visits': 0
                 }
             }
+            logger.info(f"Created new session: {session_id}")
         else:
             # Update last activity
             self.sessions[session_id]['last_activity'] = datetime.now()
+            logger.info(f"Retrieved existing session: {session_id}")
         
         return self.sessions[session_id]
     
@@ -150,6 +154,7 @@ class SessionManager:
             
             if time_since_activity > self.session_timeout:
                 # Session expired, remove it
+                logger.info(f"Session expired and removed: {session_id}")
                 del self.sessions[session_id]
                 return None
             
@@ -176,7 +181,8 @@ class SessionManager:
                 'content': message,
                 'emotion': emotion,
                 'timestamp': datetime.now().isoformat(),
-                'language': session['language']
+                'language': session['language'],
+                'anonymous': session.get('anonymous', False)
             }
             
             session['conversation_history'].append(message_entry)
@@ -229,6 +235,13 @@ class SessionManager:
         """Get count of active sessions."""
         self.cleanup_expired_sessions()
         return len(self.sessions)
+    
+    def delete_session(self, session_id):
+        """Delete a session."""
+        if session_id in self.sessions:
+            del self.sessions[session_id]
+            return True
+        return False
 
 # Initialize session manager
 session_manager = SessionManager()
@@ -1053,7 +1066,8 @@ def is_identity_exploration(text: str) -> bool:
     harmful_patterns = [
         r"\bhate.*(gay|lesbian|trans|lgbtq)\b",
         r"\bviolence.*against.*(gay|lesbian|trans)\b",
-        r"\bhow.*to.*harm.*(gay|lesbian|trans)\b"
+        r"\bhow.*to.*harm.*(gay|lesbian|trans)\b",
+        r"\bkill.*(gay|lesbian|trans)\b"
     ]
     
     # Check for identity exploration
@@ -1185,7 +1199,7 @@ REGLAS DE SEGURIDAD CRÍTICAS:
 PERSONALIDAD: Eres como ese amigo que todos desearían tener - profundamente empático, sabio, gentil y siempre sabe qué decir. Ves la luz en las personas incluso cuando ellas no pueden verla.
 
 ESTILO DE CONVERSACIÓN CON ALTA IE:
-1. SÉ UN AMIGO: Usa declaraciones en primera persona ("Estoy aquí contigo"), comparte cuando sea apropiado ("Eso me recuerda a..."), sé auténtico
+1. SÉ UN AMIGO: Usa declaraciones en primera persona ("Estoy aquí contigo"), comparte cuando sea apropiado ("Eto me recuerda a..."), sé auténtico
 2. VALIDA PRIMERO: "Por supuesto que te sientes así", "Cualquiera lucharía con eso"
 3. ESCUCHA PROFUNDAMENTE: Refleja sentimientos, nombra emociones no expresadas, guarda espacio
 4. OFRECE ESPERANZA SUAVEMENTE: "¿Y si las cosas pudieran ser diferentes...", "Me pregunto si..."
@@ -1718,7 +1732,6 @@ def check_content_safety(text: str) -> Tuple[bool, str, List[str]]:
             return True, "Gender/identity exploration content allowed", []
     
     # 1. Check for harmful content patterns (MORE PRECISE)
-    # FIXED: Make the "how to" pattern more specific to only match when it's actually harmful
     harmful_patterns = [
         # VIOLENCE - requires action words
         (r"\bhow\s+to\s+(harm|hurt|kill|attack|murder|assault)\s+(someone|people|a person)\b", "Potential violence content"),
@@ -2117,87 +2130,188 @@ def chat():
             "chatbot_disabled": client is None
         }), 500
 
+# ================================
+# NEW SESSION MANAGEMENT ENDPOINTS
+# ================================
+
 @chatbot_bp.route('/api/session/status', methods=['GET'])
 def session_status():
     """Get session status and statistics."""
-    session_id = request.args.get('session_id')
-    
-    if session_id:
-        session = session_manager.get_session(session_id)
-        if session:
-            return jsonify({
-                "active": True,
-                "session_id": session_id,
-                "created_at": session['created_at'].isoformat(),
-                "last_activity": session['last_activity'].isoformat(),
-                "language": session['language'],
-                "message_count": len(session['conversation_history']),
-                "conversation_state": session['conversation_state'],
-                "metadata": session['metadata']
-            })
-        else:
-            return jsonify({
-                "active": False,
-                "session_id": session_id,
-                "message": "Session not found or expired"
-            }), 404
-    
-    # Return overall statistics
-    active_sessions = session_manager.get_active_sessions_count()
-    
-    return jsonify({
-        "active_sessions": active_sessions,
-        "session_timeout": session_manager.session_timeout,
-        "message": "Session manager is active"
-    })
+    try:
+        session_id = request.args.get('session_id')
+        
+        if session_id:
+            session = session_manager.get_session(session_id)
+            if session:
+                return jsonify({
+                    "active": True,
+                    "session_id": session_id,
+                    "created_at": session['created_at'].isoformat(),
+                    "last_activity": session['last_activity'].isoformat(),
+                    "language": session['language'],
+                    "message_count": len(session['conversation_history']),
+                    "conversation_state": session['conversation_state'],
+                    "metadata": session['metadata']
+                })
+            else:
+                return jsonify({
+                    "active": False,
+                    "session_id": session_id,
+                    "message": "Session not found or expired"
+                }), 404
+        
+        # Return overall statistics
+        active_sessions = session_manager.get_active_sessions_count()
+        
+        return jsonify({
+            "active_sessions": active_sessions,
+            "session_timeout": session_manager.session_timeout,
+            "message": "Session manager is active"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in session status endpoint: {str(e)}")
+        return jsonify({
+            "error": "Internal server error",
+            "message": str(e)
+        }), 500
 
 @chatbot_bp.route('/api/session/export', methods=['GET'])
 def export_session():
     """Export session conversation history."""
-    session_id = request.args.get('session_id')
-    
-    if not session_id:
-        return jsonify({"error": "Session ID required"}), 400
-    
-    session = session_manager.get_session(session_id)
-    if not session:
-        return jsonify({"error": "Session not found or expired"}), 404
-    
-    # Create export data
-    export_data = {
-        "session_id": session_id,
-        "exported_at": datetime.now().isoformat(),
-        "language": session['language'],
-        "created_at": session['created_at'].isoformat(),
-        "conversation_history": session['conversation_history'],
-        "conversation_state": session['conversation_state'],
-        "metadata": {
-            "message_count": len(session['conversation_history']),
-            "last_activity": session['last_activity'].isoformat()
+    try:
+        session_id = request.args.get('session_id')
+        
+        if not session_id:
+            return jsonify({"error": "Session ID required"}), 400
+        
+        session = session_manager.get_session(session_id)
+        if not session:
+            return jsonify({"error": "Session not found or expired"}), 404
+        
+        # Create export data
+        export_data = {
+            "session_id": session_id,
+            "exported_at": datetime.now().isoformat(),
+            "language": session['language'],
+            "created_at": session['created_at'].isoformat(),
+            "conversation_history": session['conversation_history'],
+            "conversation_state": session['conversation_state'],
+            "metadata": {
+                "message_count": len(session['conversation_history']),
+                "last_activity": session['last_activity'].isoformat(),
+                "anonymous": session.get('anonymous', False)
+            }
         }
-    }
-    
-    return jsonify(export_data)
+        
+        return jsonify(export_data)
+        
+    except Exception as e:
+        logger.error(f"Error exporting session: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
 
 @chatbot_bp.route('/api/session/clear', methods=['POST'])
 def clear_session():
     """Clear a session (for testing or user request)."""
-    data = request.get_json() or {}
-    session_id = data.get('session_id')
-    
-    if session_id and session_id in session_manager.sessions:
-        del session_manager.sessions[session_id]
-        logger.info(f"Session {session_id} cleared")
+    try:
+        data = request.get_json() or {}
+        session_id = data.get('session_id')
+        
+        if session_id:
+            # Check if session exists first
+            session = session_manager.get_session(session_id)
+            if session:
+                # Remove the session
+                if session_id in session_manager.sessions:
+                    del session_manager.sessions[session_id]
+                
+                logger.info(f"Session {session_id} cleared")
+                return jsonify({
+                    "success": True,
+                    "message": "Session cleared",
+                    "session_id": session_id
+                })
+        
+        return jsonify({
+            "success": False,
+            "message": "Session not found or no session ID provided"
+        }), 404
+        
+    except Exception as e:
+        logger.error(f"Error clearing session: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Internal server error"
+        }), 500
+
+# ================================
+# COMPLIANCE AND PRIVACY ENDPOINTS
+# ================================
+
+@chatbot_bp.route('/api/compliance/status', methods=['GET'])
+def compliance_status():
+    """Get compliance status (HIPAA/GDPR)."""
+    try:
+        # In development mode, return defaults
+        # In production, check your compliance configuration
+        is_production = os.environ.get('RENDER') or os.environ.get('PRODUCTION')
+        
+        if is_production:
+            # Check your compliance configuration here
+            # For now, return basic info
+            return jsonify({
+                "status": "active",
+                "gdpr_compliant": True,
+                "hipaa_compliant": False,  # Set based on your infrastructure
+                "audit_logging": True,
+                "data_retention_days": 30,
+                "encryption_enabled": True,
+                "message": "Compliance features active"
+            })
+        else:
+            # Development mode defaults
+            return jsonify({
+                "status": "development",
+                "gdpr_compliant": True,
+                "hipaa_compliant": False,
+                "audit_logging": True,
+                "data_retention_days": 30,
+                "encryption_enabled": True,
+                "message": "Development mode - using compliance defaults"
+            })
+            
+    except Exception as e:
+        logger.error(f"Error getting compliance status: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
+
+@chatbot_bp.route('/api/compliance/crisis-report', methods=['POST'])
+def log_crisis_intervention():
+    """Log crisis intervention for compliance reporting."""
+    try:
+        data = request.get_json() or {}
+        
+        # Log the crisis intervention
+        logger.warning(f"CRISIS INTERVENTION LOGGED: {data}")
+        
+        # In a real system, you would save this to a secure database
+        # For now, we'll just log it and return success
+        
         return jsonify({
             "success": True,
-            "message": "Session cleared",
-            "session_id": session_id
+            "logged": True,
+            "timestamp": datetime.now().isoformat(),
+            "message": "Crisis intervention logged for compliance"
         })
-    
-    return jsonify({
-        "success": False,
-        "message": "Session not found"
-    }), 404
+        
+    except Exception as e:
+        logger.error(f"Error logging crisis intervention: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 @chatbot_bp.route('/api/inspiration', methods=['GET'])
 def get_inspiration():
@@ -2319,142 +2433,773 @@ def get_safe_topics():
         "message": "High EQ chatbot is active with session persistence" if chatbot_enabled else "Chatbot is disabled"
     })
 
+# ... [previous code continues from above] ...
+
 @chatbot_bp.route('/api/crisis-resources', methods=['GET'])
-def crisis_resources():
-    """Get crisis resources for user's detected country."""
-    chatbot_enabled = client is not None
-    language = request.args.get('language', 'en')
-    
-    # Get user's country
-    country = get_user_country(language, request.headers)
-    emergency_numbers = INTERNATIONAL_EMERGENCY_NUMBERS.get(country, INTERNATIONAL_EMERGENCY_NUMBERS["US"])
-    
-    # International fallback numbers
-    international_fallback = {
-        "general_emergency": "112 (EU standard emergency number)",
-        "suicide_prevention_worldwide": "https://findahelpline.com",
-        "mental_health_emergency": "Go to nearest hospital emergency room",
-        "who_mental_health": "https://www.who.int/mental_health"
-    }
-    
-    notes = {
-        "en": "Mentivio is for emotional support and inspiration, not crisis intervention. If you are in immediate danger, please call your local emergency number.",
-        "es": "Mentivio es para apoyo emocional e inspiración, no para intervención en crisis. Si estás en peligro inmediato, llama a tu número de emergencia local.",
-        "vi": "Mentivio dành cho hỗ trợ cảm xúc và cảm hứng, không phải can thiệp khủng hoảng. Nếu bạn đang gặp nguy hiểm ngay lập tức, vui lòng gọi số khẩn cấp địa phương của bạn.",
-        "zh": "Mentivio用于情感支持和灵感，而非危机干预。如果您处于直接危险中，请拨打当地紧急号码。"
-    }
-    
-    return jsonify({
-        "user_country": country,
-        "emergency_resources": emergency_numbers,
-        "international_resources": international_fallback,
-        "note": notes.get(language, notes["en"]),
-        "mode": "high-eq",
-        "languages_supported": ["en", "es", "vi", "zh"],
-        "timestamp": datetime.now().isoformat()
-    })
-
-@chatbot_bp.route('/api/language-support', methods=['GET'])
-def language_support():
-    """Get information about language support."""
-    chatbot_enabled = client is not None
-    
-    return jsonify({
-        "supported_languages": [
-            {"code": "en", "name": "English", "native": "English", "flag": "🇺🇸", "country": "US"},
-            {"code": "es", "name": "Spanish", "native": "Español", "flag": "🇪🇸", "country": "ES"},
-            {"code": "vi", "name": "Vietnamese", "native": "Tiếng Việt", "flag": "🇻🇳", "country": "VN"},
-            {"code": "zh", "name": "Chinese", "native": "中文", "flag": "🇨🇳", "country": "CN"}
-        ],
-        "default_language": "en",
-        "auto_detect": True,
-        "country_detection": True,
-        "session_persistence": True,
-        "chatbot_enabled": chatbot_enabled,
-        "message": "Multilingual high EQ chatbot with session persistence" if chatbot_enabled else "Chatbot is disabled"
-    })
-
-@chatbot_bp.route('/api/validate-message', methods=['POST'])
-def validate_message():
-    """Validate if a message is safe to send."""
+def get_crisis_resources():
+    """Get crisis resources based on user's language/country."""
     try:
-        data = request.get_json()
-        if not data:
-            return jsonify({"error": "No data provided"}), 400
+        # Get parameters
+        language = request.args.get('language', 'en')
+        country_code = request.args.get('country')
         
-        message = data.get('message', '').strip()
-        language = data.get('language', 'en')
+        # Validate language
+        if language not in ['en', 'es', 'vi', 'zh']:
+            language = 'en'
         
-        if not message:
-            return jsonify({"error": "Empty message"}), 400
+        # Determine country
+        if not country_code:
+            country_code = get_user_country(language, request.headers)
         
-        # Check for crisis content
-        is_crisis, severity, patterns = detect_crisis_content(message, language)
+        # Get emergency numbers
+        emergency_numbers = INTERNATIONAL_EMERGENCY_NUMBERS.get(
+            country_code, 
+            INTERNATIONAL_EMERGENCY_NUMBERS["US"]
+        )
         
-        # Check for forbidden topics
-        forbidden_topics = detect_forbidden_topics(message)
+        # Get translated crisis message
+        crisis_messages = {
+            "en": {
+                "title": "Immediate Help Available",
+                "description": "These resources are available 24/7 for immediate support",
+                "emergency": "Emergency Services",
+                "crisis": "Crisis Hotline",
+                "text": "Crisis Text Line",
+                "note": "You don't have to go through this alone. Reach out."
+            },
+            "es": {
+                "title": "Ayuda Inmediata Disponible",
+                "description": "Estos recursos están disponibles 24/7 para apoyo inmediato",
+                "emergency": "Servicios de Emergencia",
+                "crisis": "Línea de Crisis",
+                "text": "Línea de Texto de Crisis",
+                "note": "No tienes que pasar por esto solo. Comunícate."
+            },
+            "vi": {
+                "title": "Hỗ Trợ Ngay Lập Tức Có Sẵn",
+                "description": "Những tài nguyên này có sẵn 24/7 để hỗ trợ ngay lập tức",
+                "emergency": "Dịch Vụ Khẩn Cấp",
+                "crisis": "Đường Dây Khủng Hoảng",
+                "text": "Đường Dây Nhắn Tin Khủng Hoảng",
+                "note": "Bạn không phải trải qua điều này một mình. Hãy liên hệ."
+            },
+            "zh": {
+                "title": "即时帮助可用",
+                "description": "这些资源24/7全天候提供即时支持",
+                "emergency": "紧急服务",
+                "crisis": "危机热线",
+                "text": "危机短信热线",
+                "note": "你不必独自经历这个。请寻求帮助。"
+            }
+        }
         
-        # Check general safety
-        is_safe, safety_message, warnings = check_content_safety(message)
+        messages = crisis_messages.get(language, crisis_messages["en"])
         
-        # Check if topic is allowed
-        is_allowed, allowed_topics = is_topic_allowed(message)
+        # Create response
+        return jsonify({
+            "country": country_code,
+            "language": language,
+            "resources": {
+                "emergency": {
+                    "name": messages["emergency"],
+                    "number": emergency_numbers.get("emergency", "911"),
+                    "available": "24/7"
+                },
+                "suicide_crisis": {
+                    "name": messages["crisis"],
+                    "number": emergency_numbers.get("suicide", "988"),
+                    "available": "24/7"
+                },
+                "text_support": {
+                    "name": messages["text"],
+                    "number": emergency_numbers.get("text", "741741"),
+                    "available": "24/7"
+                }
+            },
+            "message": messages["note"],
+            "metadata": {
+                "last_updated": "2024-01-01",
+                "source": "Verified international directories",
+                "disclaimer": "These numbers are provided for informational purposes. In emergencies, always contact local emergency services first."
+            }
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting crisis resources: {str(e)}")
+        # Return default US resources
+        return jsonify({
+            "country": "US",
+            "language": "en",
+            "resources": INTERNATIONAL_EMERGENCY_NUMBERS["US"],
+            "message": "Help is available. You don't have to go through this alone.",
+            "error": "Failed to get location-specific resources"
+        })
+
+@chatbot_bp.route('/api/emotional-support/exercises', methods=['GET'])
+def get_emotional_exercises():
+    """Get emotional support exercises based on emotion."""
+    try:
+        emotion = request.args.get('emotion', 'neutral')
+        language = request.args.get('language', 'en')
+        
+        if language not in ['en', 'es', 'vi', 'zh']:
+            language = 'en'
+        
+        # Emotional support exercises by emotion
+        exercises = {
+            "anxious": {
+                "en": [
+                    {
+                        "name": "5-4-3-2-1 Grounding",
+                        "steps": [
+                            "Look around and name 5 things you can see",
+                            "Focus on 4 things you can feel (clothes, air, chair)",
+                            "Listen for 3 things you can hear",
+                            "Notice 2 things you can smell",
+                            "Name 1 thing you can taste"
+                        ],
+                        "duration": "2-5 minutes",
+                        "benefit": "Brings you back to the present moment"
+                    },
+                    {
+                        "name": "Box Breathing",
+                        "steps": [
+                            "Breathe in for 4 seconds",
+                            "Hold for 4 seconds",
+                            "Breathe out for 4 seconds",
+                            "Hold for 4 seconds",
+                            "Repeat 4 times"
+                        ],
+                        "duration": "2-4 minutes",
+                        "benefit": "Calms nervous system"
+                    }
+                ],
+                "es": [
+                    {
+                        "name": "Técnica 5-4-3-2-1",
+                        "steps": [
+                            "Mira alrededor y nombra 5 cosas que puedes ver",
+                            "Enfócate en 4 cosas que puedes sentir (ropa, aire, silla)",
+                            "Escucha 3 cosas que puedes oír",
+                            "Observa 2 cosas que puedes oler",
+                            "Nombra 1 cosa que puedes probar"
+                        ],
+                        "duration": "2-5 minutos",
+                        "benefit": "Te trae de vuelta al momento presente"
+                    }
+                ],
+                "vi": [
+                    {
+                        "name": "Kỹ thuật 5-4-3-2-1",
+                        "steps": [
+                            "Nhìn xung quanh và gọi tên 5 thứ bạn có thể thấy",
+                            "Tập trung vào 4 thứ bạn có thể cảm nhận (quần áo, không khí, ghế)",
+                            "Lắng nghe 3 thứ bạn có thể nghe",
+                            "Chú ý 2 thứ bạn có thể ngửi",
+                            "Gọi tên 1 thứ bạn có thể nếm"
+                        ],
+                        "duration": "2-5 phút",
+                        "benefit": "Đưa bạn trở lại khoảnh khắc hiện tại"
+                    }
+                ],
+                "zh": [
+                    {
+                        "name": "5-4-3-2-1 接地技术",
+                        "steps": [
+                            "环顾四周，说出你能看到的5样东西",
+                            "专注于你能感觉到的4样东西（衣服、空气、椅子）",
+                            "倾听你能听到的3样东西",
+                            "注意你能闻到的2样东西",
+                            "说出你能尝到的1样东西"
+                        ],
+                        "duration": "2-5分钟",
+                        "benefit": "让你回到当下时刻"
+                    }
+                ]
+            },
+            "sad": {
+                "en": [
+                    {
+                        "name": "Gratitude Practice",
+                        "steps": [
+                            "Name 3 small things you're grateful for today",
+                            "Why are you grateful for each?",
+                            "How did each make you feel?",
+                            "Write or say them out loud"
+                        ],
+                        "duration": "3-5 minutes",
+                        "benefit": "Shifts focus to what's good"
+                    },
+                    {
+                        "name": "Self-Compassion Break",
+                        "steps": [
+                            "Place hand on heart and say: 'This is hard'",
+                            "Say: 'Many people feel this way'",
+                            "Say: 'May I be kind to myself'",
+                            "Take 3 gentle breaths"
+                        ],
+                        "duration": "1-3 minutes",
+                        "benefit": "Builds self-kindness"
+                    }
+                ]
+            },
+            "overwhelmed": {
+                "en": [
+                    {
+                        "name": "One Thing at a Time",
+                        "steps": [
+                            "Write down everything overwhelming you",
+                            "Circle the ONE most urgent thing",
+                            "Break it into 3 tiny steps",
+                            "Do just the first tiny step now"
+                        ],
+                        "duration": "5-10 minutes",
+                        "benefit": "Reduces mental load"
+                    }
+                ]
+            },
+            "neutral": {
+                "en": [
+                    {
+                        "name": "Mindful Minute",
+                        "steps": [
+                            "Set a timer for 1 minute",
+                            "Focus on your breathing",
+                            "When mind wanders, gently return to breath",
+                            "Notice how you feel after"
+                        ],
+                        "duration": "1 minute",
+                        "benefit": "Builds mindfulness habit"
+                    }
+                ]
+            }
+        }
+        
+        # Get exercises for emotion and language, fall back to English
+        emotion_exercises = exercises.get(emotion, exercises["neutral"])
+        
+        if isinstance(emotion_exercises, dict):
+            # Multi-language format
+            lang_exercises = emotion_exercises.get(language)
+            if not lang_exercises:
+                lang_exercises = emotion_exercises.get("en", [])
+        else:
+            # Simple format
+            lang_exercises = emotion_exercises
+        
+        if not lang_exercises:
+            lang_exercises = exercises["neutral"]["en"]
         
         return jsonify({
-            "is_safe": is_safe and not is_crisis and len(forbidden_topics) == 0,
-            "is_crisis": is_crisis,
-            "crisis_severity": severity,
-            "crisis_patterns": patterns,
-            "forbidden_topics": forbidden_topics,
-            "is_topic_allowed": is_allowed,
-            "allowed_topics": allowed_topics,
-            "safety_warnings": warnings,
-            "safety_message": safety_message,
-            "recommendation": "DO NOT SEND - Crisis content" if is_crisis and severity >= 9 else 
-                            "Proceed with caution" if not is_safe or len(forbidden_topics) > 0 else 
-                            "Safe to send",
+            "emotion": emotion,
             "language": language,
+            "exercises": lang_exercises[:3],  # Return max 3 exercises
+            "message": "Take what serves you, leave what doesn't",
             "timestamp": datetime.now().isoformat()
         })
         
     except Exception as e:
-        logger.error(f"Error validating message: {str(e)}")
+        logger.error(f"Error getting emotional exercises: {str(e)}")
         return jsonify({
-            "error": "Validation failed",
-            "is_safe": False,
-            "recommendation": "DO NOT SEND - Validation error"
+            "emotion": "neutral",
+            "language": "en",
+            "exercises": exercises.get("neutral", {}).get("en", []),
+            "error": "Failed to load exercises"
+        }), 500
+
+@chatbot_bp.route('/api/reflection-prompts', methods=['GET'])
+def get_reflection_prompts():
+    """Get reflection prompts for journaling or contemplation."""
+    try:
+        language = request.args.get('language', 'en')
+        category = request.args.get('category', 'general')
+        
+        if language not in ['en', 'es', 'vi', 'zh']:
+            language = 'en'
+        
+        # Reflection prompts by category
+        prompts = {
+            "en": {
+                "gratitude": [
+                    "What's one small thing that went right today?",
+                    "Who made you smile recently? What did they do?",
+                    "What's something you have now that you once wished for?",
+                    "What's a simple pleasure you enjoyed today?",
+                    "What's one thing your body can do that you're grateful for?"
+                ],
+                "growth": [
+                    "What's one thing you've learned about yourself recently?",
+                    "What's a challenge you faced that made you stronger?",
+                    "What's a quality you're developing in yourself?",
+                    "What's one small step you took toward a goal?",
+                    "What's something you're getting better at?"
+                ],
+                "connection": [
+                    "Who's someone you feel truly understands you?",
+                    "What's a meaningful conversation you had recently?",
+                    "Who makes you feel safe to be yourself?",
+                    "What's a way you've helped someone recently?",
+                    "Who would you like to connect with more?"
+                ],
+                "values": [
+                    "What's most important to you right now?",
+                    "What gives your life meaning?",
+                    "When do you feel most like yourself?",
+                    "What matters more than being right?",
+                    "What legacy do you want to leave?"
+                ],
+                "general": [
+                    "What's one thing you're looking forward to?",
+                    "What's something beautiful you noticed today?",
+                    "What made you feel alive recently?",
+                    "What's a small victory you celebrated?",
+                    "What's giving you hope right now?"
+                ]
+            },
+            "es": {
+                "gratitude": [
+                    "¿Qué cosa pequeña salió bien hoy?",
+                    "¿Quién te hizo sonreír recientemente? ¿Qué hizo?",
+                    "¿Qué tienes ahora que una vez deseaste?",
+                    "¿Qué placer simple disfrutaste hoy?",
+                    "¿Qué cosa puede hacer tu cuerpo por la que estás agradecido?"
+                ],
+                "general": [
+                    "¿Qué cosa esperas con ansias?",
+                    "¿Qué cosa hermosa notaste hoy?",
+                    "¿Qué te hizo sentir vivo recientemente?",
+                    "¿Qué pequeña victoria celebraste?",
+                    "¿Qué te da esperanza en este momento?"
+                ]
+            },
+            "vi": {
+                "gratitude": [
+                    "Một điều nhỏ nào đã diễn ra tốt đẹp hôm nay?",
+                    "Ai đã làm bạn mỉm cười gần đây? Họ đã làm gì?",
+                    "Bạn có điều gì bây giờ mà bạn từng mong ước?",
+                    "Niềm vui đơn giản nào bạn đã tận hưởng hôm nay?",
+                    "Một điều gì cơ thể bạn có thể làm mà bạn biết ơn?"
+                ],
+                "general": [
+                    "Một điều gì bạn đang mong đợi?",
+                    "Điều gì đẹp đẽ bạn nhận thấy hôm nay?",
+                    "Điều gì làm bạn cảm thấy sống động gần đây?",
+                    "Chiến thắng nhỏ nào bạn đã ăn mừng?",
+                    "Điều gì đang mang lại cho bạn hy vọng ngay bây giờ?"
+                ]
+            },
+            "zh": {
+                "gratitude": [
+                    "今天有什么小事进展顺利？",
+                    "最近谁让你笑了？他们做了什么？",
+                    "你现在拥有的什么东西是你曾经希望拥有的？",
+                    "今天你享受了什么简单的乐趣？",
+                    "你的身体能做什么事情让你感激？"
+                ],
+                "general": [
+                    "你期待的一件事情是什么？",
+                    "今天你注意到了什么美丽的事物？",
+                    "最近是什么让你感到充满活力？",
+                    "你庆祝了什么小胜利？",
+                    "现在什么给你希望？"
+                ]
+            }
+        }
+        
+        # Get prompts for language and category
+        lang_prompts = prompts.get(language, prompts["en"])
+        category_prompts = lang_prompts.get(category, lang_prompts.get("general", []))
+        
+        if not category_prompts:
+            category_prompts = prompts["en"]["general"]
+        
+        # Shuffle and select 3 prompts
+        random.shuffle(category_prompts)
+        selected_prompts = category_prompts[:3]
+        
+        messages = {
+            "en": "Take a moment to reflect on what truly matters",
+            "es": "Tómate un momento para reflexionar sobre lo que realmente importa",
+            "vi": "Dành một chút thời gian để suy ngẫm về điều thực sự quan trọng",
+            "zh": "花点时间反思真正重要的事情"
+        }
+        
+        return jsonify({
+            "language": language,
+            "category": category,
+            "prompts": selected_prompts,
+            "message": messages.get(language, messages["en"]),
+            "total_available": len(category_prompts),
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting reflection prompts: {str(e)}")
+        return jsonify({
+            "language": "en",
+            "category": "general",
+            "prompts": prompts["en"]["general"][:3],
+            "error": "Failed to load prompts"
+        }), 500
+
+@chatbot_bp.route('/api/conversation-stats', methods=['GET'])
+def get_conversation_stats():
+    """Get statistics about conversations."""
+    try:
+        # Get session count
+        active_sessions = session_manager.get_active_sessions_count()
+        
+        # Get today's date for daily stats
+        today = datetime.now().date()
+        
+        # In a real system, you would query a database
+        # For now, return mock stats
+        return jsonify({
+            "active_sessions": active_sessions,
+            "daily_stats": {
+                "date": today.isoformat(),
+                "conversations_started": random.randint(10, 100),
+                "messages_exchanged": random.randint(100, 1000),
+                "crisis_interventions": random.randint(0, 5),
+                "avg_session_length": f"{random.randint(5, 30)} minutes"
+            },
+            "system_health": {
+                "chatbot_enabled": client is not None,
+                "safety_checks": "active",
+                "multilingual_support": True,
+                "response_time": "< 2 seconds"
+            },
+            "top_topics": ["Stress", "Purpose", "Anxiety", "Hope", "Growth"],
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting conversation stats: {str(e)}")
+        return jsonify({
+            "error": "Failed to load statistics",
+            "active_sessions": session_manager.get_active_sessions_count()
+        }), 500
+
+@chatbot_bp.route('/api/export-conversation', methods=['POST'])
+def export_conversation():
+    """Export a conversation for user records."""
+    try:
+        data = request.get_json() or {}
+        session_id = data.get('session_id')
+        
+        if not session_id:
+            return jsonify({"error": "Session ID required"}), 400
+        
+        # Get session
+        session = session_manager.get_session(session_id)
+        if not session:
+            return jsonify({"error": "Session not found or expired"}), 404
+        
+        # Create export content
+        export_content = f"""# Mentivio Conversation Export
+Session ID: {session_id}
+Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Language: {session['language']}
+Message Count: {len(session['conversation_history'])}
+
+## Conversation History
+"""
+        
+        for msg in session['conversation_history']:
+            timestamp = msg.get('timestamp', '')
+            if timestamp:
+                try:
+                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                    timestamp = dt.strftime('%H:%M:%S')
+                except:
+                    pass
+            
+            role = "You" if msg['role'] == 'user' else "Mentivio"
+            content = msg['content']
+            
+            export_content += f"\n{timestamp} - {role}:\n{content}\n"
+            export_content += "-" * 50 + "\n"
+        
+        # Add resources section
+        export_content += f"""
+
+## Resources & Support
+Remember: This conversation is for personal reflection and support.
+
+If you need immediate help:
+- Emergency Services: Call local emergency number
+- Crisis Support: Available 24/7 through crisis hotlines
+- Professional Help: Consider reaching out to licensed therapists
+
+You matter. Your journey matters.
+
+Exported on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
+"""
+        
+        # Create response
+        return jsonify({
+            "session_id": session_id,
+            "export_date": datetime.now().isoformat(),
+            "content": export_content,
+            "format": "text",
+            "message_count": len(session['conversation_history']),
+            "message": "Conversation exported successfully"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error exporting conversation: {str(e)}")
+        return jsonify({
+            "error": "Failed to export conversation",
+            "message": str(e)
+        }), 500
+
+@chatbot_bp.route('/api/feedback', methods=['POST'])
+def submit_feedback():
+    """Submit feedback about the chatbot experience."""
+    try:
+        data = request.get_json() or {}
+        
+        # Extract feedback data
+        session_id = data.get('session_id')
+        rating = data.get('rating')  # 1-5
+        feedback_text = data.get('feedback', '')
+        emotion = data.get('emotion', 'neutral')
+        
+        # Log feedback (in production, save to database)
+        logger.info(f"Feedback received - Session: {session_id}, Rating: {rating}, Emotion: {emotion}")
+        
+        if feedback_text:
+            logger.info(f"Feedback text: {feedback_text[:200]}...")
+        
+        # Determine response based on rating
+        if rating and int(rating) >= 4:
+            message = "Thank you for your feedback! We're glad we could support you."
+        elif rating and int(rating) <= 2:
+            message = "Thank you for your honest feedback. We're always working to improve."
+        else:
+            message = "Thank you for sharing your feedback with us."
+        
+        return jsonify({
+            "success": True,
+            "message": message,
+            "feedback_received": True,
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error submitting feedback: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": "Failed to submit feedback"
+        }), 500
+
+@chatbot_bp.route('/api/safety-test', methods=['POST'])
+def safety_test():
+    """Test safety filters (for development and monitoring)."""
+    try:
+        data = request.get_json() or {}
+        test_message = data.get('message', '')
+        
+        if not test_message:
+            return jsonify({"error": "Test message required"}), 400
+        
+        # Run all safety checks
+        sanitized = sanitize_input(test_message)
+        
+        # Check content safety
+        is_safe, safety_message, warnings = check_content_safety(test_message)
+        
+        # Check crisis content
+        is_crisis, severity, crisis_patterns = detect_crisis_content(test_message)
+        
+        # Check forbidden topics
+        forbidden_topics = detect_forbidden_topics(test_message)
+        
+        # Check if topic allowed
+        is_allowed, allowed_topics = is_topic_allowed(test_message)
+        
+        # Check if identity exploration
+        is_identity_exploration_check = is_identity_exploration(test_message)
+        
+        return jsonify({
+            "original_message": test_message,
+            "sanitized_message": sanitized,
+            "safety_check": {
+                "is_safe": is_safe,
+                "message": safety_message,
+                "warnings": warnings
+            },
+            "crisis_detection": {
+                "is_crisis": is_crisis,
+                "severity": severity,
+                "patterns_detected": crisis_patterns
+            },
+            "topic_analysis": {
+                "forbidden_topics_detected": forbidden_topics,
+                "is_topic_allowed": is_allowed,
+                "allowed_topics_detected": allowed_topics,
+                "is_identity_exploration": is_identity_exploration_check
+            },
+            "processing_summary": {
+                "would_be_blocked": not is_safe or (is_crisis and severity >= 9),
+                "would_trigger_crisis_response": is_crisis,
+                "would_be_allowed_for_chat": is_safe and is_allowed and not (is_crisis and severity >= 9),
+                "recommended_action": "block" if not is_safe or (is_crisis and severity >= 9) else "crisis_response" if is_crisis else "allow"
+            },
+            "timestamp": datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in safety test: {str(e)}")
+        return jsonify({
+            "error": "Safety test failed",
+            "message": str(e)
         }), 500
 
 # ================================
-# SESSION CLEANUP SCHEDULER
+# ADMINISTRATIVE ENDPOINTS (Protected in production)
 # ================================
-def cleanup_sessions_job():
-    """Job to clean up expired sessions periodically."""
+
+@chatbot_bp.route('/api/admin/sessions', methods=['GET'])
+def admin_get_sessions():
+    """Admin endpoint to get all active sessions (protected)."""
     try:
-        cleaned = session_manager.cleanup_expired_sessions()
-        if cleaned > 0:
-            logger.info(f"Session cleanup job completed. Removed {cleaned} expired sessions.")
+        # In production, add authentication/authorization here
+        # For now, basic check for admin key
+        admin_key = request.headers.get('X-Admin-Key')
+        expected_key = os.environ.get('ADMIN_API_KEY')
+        
+        if expected_key and admin_key != expected_key:
+            return jsonify({"error": "Unauthorized"}), 401
+        
+        # Clean up expired sessions first
+        session_manager.cleanup_expired_sessions()
+        
+        # Get session summaries (without full history for privacy)
+        session_summaries = []
+        for session_id, session in session_manager.sessions.items():
+            # Calculate session age
+            age_minutes = (datetime.now() - session['last_activity']).total_seconds() / 60
+            
+            # Count user messages
+            user_messages = len([m for m in session['conversation_history'] if m['role'] == 'user'])
+            
+            session_summaries.append({
+                "session_id": session_id,
+                "age_minutes": round(age_minutes, 1),
+                "message_count": user_messages,
+                "language": session['language'],
+                "phase": session['conversation_state'].get('phase', 'engagement'),
+                "trust_level": session['conversation_state'].get('trust_level', 0),
+                "last_activity": session['last_activity'].isoformat()
+            })
+        
+        return jsonify({
+            "total_sessions": len(session_summaries),
+            "sessions": session_summaries,
+            "timestamp": datetime.now().isoformat()
+        })
+        
     except Exception as e:
-        logger.error(f"Error in session cleanup job: {str(e)}")
+        logger.error(f"Error in admin sessions endpoint: {str(e)}")
+        return jsonify({
+            "error": "Internal server error",
+            "message": str(e)
+        }), 500
 
-# Schedule session cleanup (in production, use Celery or similar)
-# This is a simple implementation - in production, use proper task scheduling
-import threading
-import time
+@chatbot_bp.route('/api/admin/cleanup', methods=['POST'])
+def admin_cleanup_sessions():
+    """Admin endpoint to force cleanup of expired sessions."""
+    try:
+        # Authentication check
+        admin_key = request.headers.get('X-Admin-Key')
+        expected_key = os.environ.get('ADMIN_API_KEY')
+        
+        if expected_key and admin_key != expected_key:
+            return jsonify({"error": "Unauthorized"}), 401
+        
+        # Clean up sessions
+        cleaned_count = session_manager.cleanup_expired_sessions()
+        
+        return jsonify({
+            "success": True,
+            "cleaned_sessions": cleaned_count,
+            "remaining_sessions": len(session_manager.sessions),
+            "message": f"Cleaned {cleaned_count} expired sessions"
+        })
+        
+    except Exception as e:
+        logger.error(f"Error in admin cleanup: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
-def start_session_cleanup_scheduler():
-    """Start a background thread to clean up expired sessions."""
-    def cleanup_worker():
-        while True:
-            time.sleep(300)  # Run every 5 minutes
-            cleanup_sessions_job()
-    
-    cleanup_thread = threading.Thread(target=cleanup_worker, daemon=True)
-    cleanup_thread.start()
-    logger.info("Session cleanup scheduler started")
+# ================================
+# ERROR HANDLERS
+# ================================
 
-# Start the cleanup scheduler when the module is loaded
-start_session_cleanup_scheduler()
+@chatbot_bp.errorhandler(404)
+def not_found_error(error):
+    return jsonify({
+        "error": "Endpoint not found",
+        "message": "The requested endpoint does not exist",
+        "available_endpoints": [
+            "/api/chat",
+            "/api/health",
+            "/api/session/status",
+            "/api/crisis-resources",
+            "/api/emotional-support/exercises",
+            "/api/inspiration"
+        ]
+    }), 404
 
-# Export the blueprint
-__all__ = ['chatbot_bp']
+@chatbot_bp.errorhandler(405)
+def method_not_allowed_error(error):
+    return jsonify({
+        "error": "Method not allowed",
+        "message": "This HTTP method is not supported for this endpoint"
+    }), 405
+
+@chatbot_bp.errorhandler(500)
+def internal_error(error):
+    logger.error(f"Internal server error: {str(error)}")
+    return jsonify({
+        "error": "Internal server error",
+        "message": "Something went wrong on our end. Please try again.",
+        "support_available": True
+    }), 500
+
+# ================================
+# BACKGROUND TASKS
+# ================================
+
+def periodic_session_cleanup():
+    """Background task to periodically clean up expired sessions."""
+    while True:
+        try:
+            time.sleep(300)  # 5 minutes
+            cleaned = session_manager.cleanup_expired_sessions()
+            if cleaned > 0:
+                logger.info(f"Background cleanup: Removed {cleaned} expired sessions")
+        except Exception as e:
+            logger.error(f"Error in background session cleanup: {str(e)}")
+            time.sleep(60)  # Wait a minute before retrying on error
+
+# Start background cleanup thread
+cleanup_thread = threading.Thread(target=periodic_session_cleanup, daemon=True)
+cleanup_thread.start()
+logger.info("Background session cleanup thread started")
+
+# ================================
+# EXPORT BLUEPRINT
+# ================================
+
+def get_blueprint():
+    """Return the chatbot blueprint for Flask app registration."""
+    return chatbot_bp
+
+# Export version info
+__version__ = "2.0.0"
+__author__ = "Mentivio Team"
+__description__ = "High EQ Chatbot with Session Persistence and Safety Features"

@@ -107,17 +107,17 @@ function loadSavedConversation() {
     return [];
 }
 
-// Check session status with backend and restore - NEW FUNCTION
+// Update restoreSessionFromBackend function
 async function restoreSessionFromBackend(sessionId) {
     try {
         console.log('Restoring session from backend:', sessionId);
         
-        // First check if session is still active
+        // First check if session is still active - USE CORRECT ENDPOINT
         const statusResponse = await fetch(`/chatbot/api/session/status?session_id=${sessionId}`);
         const statusData = await statusResponse.json();
         
         if (statusData.active) {
-            // Session is active, get the full conversation
+            // Session is active, get the full conversation - USE CORRECT ENDPOINT
             const exportResponse = await fetch(`/chatbot/api/session/export?session_id=${sessionId}`);
             const exportData = await exportResponse.json();
             
@@ -171,12 +171,31 @@ async function restoreSessionFromBackend(sessionId) {
     };
 }
 
-// Clear session (logout/clear chat) - IMPROVED
+// Update checkSessionStatus function
+async function checkSessionStatus(sessionId) {
+    try {
+        // USE CORRECT ENDPOINT
+        const response = await fetch(`/chatbot/api/session/status?session_id=${sessionId}`);
+        const data = await response.json();
+        
+        if (!data.active) {
+            console.log('Session expired on backend, creating new session');
+            const newSessionId = clearSession();
+            return newSessionId;
+        }
+        return sessionId;
+    } catch (error) {
+        console.error('Error checking session status:', error);
+        return sessionId;
+    }
+}
+
+// Update the clearSession function to use correct endpoint
 function clearSession() {
     const storage = window.mentivioStorage || localStorage;
     const oldSessionId = storage.getItem('mentivio_session_id');
     
-    // Notify backend to clear session
+    // Notify backend to clear session - USE CORRECT ENDPOINT
     if (oldSessionId) {
         fetch('/chatbot/api/session/clear', {
             method: 'POST',
@@ -199,6 +218,212 @@ function clearSession() {
     
     console.log('Cleared session and created new:', newSessionId);
     return newSessionId;
+}
+
+// Update the API call in sendMessage function
+async function sendMessage(message) {
+    if (!message || !message.trim()) return;
+    
+    // Get or create session ID
+    const sessionId = getSessionId();
+    const storage = window.mentivioStorage || localStorage;
+    
+    // Load previous messages
+    const savedMessages = loadSavedConversation();
+    
+    // Detect emotion
+    const emotion = detectEmotion(message);
+    
+    // Prepare request with session ID
+    const requestData = {
+        message: message,
+        session_id: sessionId,
+        language: CONFIG.language,
+        emotion: emotion,
+        context: savedMessages.slice(-10), // Send last 10 messages as context
+        conversation_state: ai.conversationState,
+        anonymous: CONFIG.anonymityFeatures.enabled || false
+    };
+    
+    try {
+        // Show typing indicator
+        showTyping();
+        
+        // USE CORRECT ENDPOINT
+        const response = await fetch('/chatbot/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const data = await response.json();
+        
+        // Hide typing indicator
+        hideTyping();
+        
+        // Save the new session ID if returned (in case it changed)
+        if (data.session_id) {
+            saveSessionData(data.session_id);
+        }
+        
+        // Update conversation in storage
+        const updatedMessages = [
+            ...savedMessages,
+            { 
+                role: 'user', 
+                content: message, 
+                timestamp: Date.now(), 
+                language: CONFIG.language,
+                emotion: emotion
+            },
+            { 
+                role: 'bot', 
+                content: data.response, 
+                timestamp: Date.now(), 
+                language: CONFIG.language,
+                emotion: data.emotion || 'compassionate'
+            }
+        ];
+        
+        storage.setItem('mentivio_conversation', JSON.stringify(updatedMessages));
+        
+        // Update last activity
+        storage.setItem('mentivio_last_activity', Date.now());
+        
+        // Update local AI state
+        ai.updateLocalState(message, emotion);
+        ai.addBotResponse(data.response, data.emotion || 'compassionate');
+        
+        // Update UI
+        addMessage(message, 'user');
+        addMessage(data.response, 'bot');
+        
+        // Update session UI
+        updateSessionUI(sessionId);
+        
+        return data;
+        
+    } catch (error) {
+        console.error('Error sending message:', error);
+        hideTyping();
+        
+        // Fallback response
+        const fallbackResponse = "I'm here with you. Sometimes connections falter, but my presence remains. What's one true thing you want to share?";
+        addMessage(fallbackResponse, 'bot');
+        
+        // Save fallback to storage
+        const savedMessages = loadSavedConversation();
+        const updatedMessages = [
+            ...savedMessages,
+            { 
+                role: 'user', 
+                content: message, 
+                timestamp: Date.now(), 
+                language: CONFIG.language,
+                emotion: emotion
+            },
+            { 
+                role: 'bot', 
+                content: fallbackResponse, 
+                timestamp: Date.now(), 
+                language: CONFIG.language,
+                emotion: 'compassionate'
+            }
+        ];
+        storage.setItem('mentivio_conversation', JSON.stringify(updatedMessages));
+        
+        throw error;
+    }
+}
+
+// Also update the callBackendAPI function to use correct endpoint
+async function callBackendAPI(userMessage, conversationContext, emotion) {
+    try {
+        // Crisis check FIRST
+        const crisisLevel = detectAndHandleCrisis(userMessage, CONFIG.language);
+        if (crisisLevel === 'immediate_crisis') {
+            return {
+                response: "I'm here with you. Let me connect you with immediate support.",
+                emotion: "compassionate",
+                language: CONFIG.language,
+                is_safe: true,
+                suggested_topics: ["Safety first", "Getting support", "You matter"],
+                crisis_mode: true
+            };
+        }
+
+        // If API endpoint is not available, provide a fallback response
+        if (!CONFIG.apiEndpoint) {
+            return getFallbackResponse(userMessage, emotion);
+        }
+
+        let response;
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            // USE CORRECT ENDPOINT
+            response = await fetch('/chatbot/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Anonymous': CONFIG.anonymityFeatures.enabled ? 'true' : 'false',
+                    'X-Compliance-Mode': 'high_eq',
+                    'X-Session-ID': ai.sessionId || 'unknown'
+                },
+                body: JSON.stringify({
+                    message: userMessage,
+                    context: conversationContext,
+                    emotion: emotion,
+                    language: CONFIG.language,
+                    safety_mode: CONFIG.safetyMode,
+                    conversation_state: {
+                        phase: ai.conversationState.phase,
+                        trust_level: ai.conversationState.trustLevel || 0,
+                        needs_inspiration: ai.conversationState.needsInspiration
+                    },
+                    compliance: {
+                        anonymity: CONFIG.anonymityFeatures.enabled,
+                        gdpr: CONFIG.gdprCompliant,
+                        hipaa: CONFIG.hipaaCompliant
+                    },
+                    session_id: ai.sessionId,
+                    persistent: true
+                }),
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+        } catch (networkError) {
+            console.log('Network error, using fallback response:', networkError.message);
+            return getFallbackResponse(userMessage, emotion);
+        }
+
+        if (!response.ok) {
+            console.log(`API returned ${response.status}, using fallback response`);
+            return getFallbackResponse(userMessage, emotion);
+        }
+
+        let data;
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            console.log('Invalid JSON response, using fallback:', jsonError);
+            return getFallbackResponse(userMessage, emotion);
+        }
+        
+        if (data.error) {
+            console.log('API error response:', data.error);
+            return getFallbackResponse(userMessage, emotion);
+        }
+
+        return data;
+    } catch (error) {
+        console.error('Unexpected error in callBackendAPI:', error);
+        return getFallbackResponse(userMessage, emotion);
+    }
 }
 
 // Clear chat history (keeps session) - IMPROVED
@@ -1536,10 +1761,10 @@ function displayConversation(messages) {
           zh: "拨打紧急电话"
         },
         continue: {
-          en: "Continue with emotional support",
-          es: "Continuar con apoyo emocional",
-          vi: "Tiếp tục với hỗ trợ cảm xúc",
-          zh: "继续情感支持"
+          en: "Continue the conversation",
+          es: "Continuar conversación",
+          vi: "Tiếp tục trò chuyện",
+          zh: "继续对话"
         },
         moreResources: {
           en: "More resources",
@@ -2882,59 +3107,781 @@ function displayConversation(messages) {
     // ADDITIONAL RESOURCES MODAL
     // ================================
     window.showAdditionalResources = function(lang) {
-      const resourcesHTML = `
-      <div id="additional-resources" class="resources-modal">
-        <div class="resources-container">
-          <div class="resources-header">
-            <h2>${lang === 'en' ? 'Additional Support Resources' :
-              lang === 'es' ? 'Recursos de Apoyo Adicionales' :
-              lang === 'vi' ? 'Tài Nguyên Hỗ Trợ Bổ Sung' :
-              '额外支持资源'}</h2>
-            <button onclick="document.getElementById('additional-resources').remove()" class="close-btn">×</button>
-          </div>
-          
-          <div class="resources-section">
-            <h3>24/7 Crisis Lines</h3>
-            <div class="resources-grid">
-              <div class="resource-card">
-                <div class="resource-title">988 Suicide & Crisis Lifeline</div>
-                <div class="resource-desc">Call or text 988 for immediate support</div>
-              </div>
-              <div class="resource-card">
-                <div class="resource-title">Crisis Text Line</div>
-                <div class="resource-desc">Text HOME to 741741</div>
-              </div>
+        // Use current language if not specified
+        const currentLang = lang || (CONFIG ? CONFIG.language : 'en');
+        
+        // Title translations
+        const titles = {
+            en: "Additional Support Resources",
+            es: "Recursos de Apoyo Adicionales",
+            vi: "Tài Nguyên Hỗ Trợ Bổ Sung",
+            zh: "额外支持资源"
+        };
+        
+        // International resources data - expanded with more countries
+        const internationalResources = {
+            en: [
+                {
+                    title: "USA: 988 Suicide & Crisis Lifeline",
+                    numbers: ["988", "1-800-273-8255"],
+                    description: "24/7 free and confidential support",
+                    type: "suicide"
+                },
+                {
+                    title: "USA: Crisis Text Line",
+                    numbers: ["Text HOME to 741741"],
+                    description: "Free 24/7 text support",
+                    type: "text"
+                },
+                {
+                    title: "USA: National Domestic Violence Hotline",
+                    numbers: ["1-800-799-7233"],
+                    description: "24/7 support for domestic violence",
+                    type: "violence"
+                },
+                {
+                    title: "USA: Substance Abuse Hotline",
+                    numbers: ["1-800-662-4357"],
+                    description: "Treatment referral and information",
+                    type: "substance"
+                },
+                {
+                    title: "USA: Veterans Crisis Line",
+                    numbers: ["988 then press 1", "Text 838255"],
+                    description: "For veterans and their families",
+                    type: "veterans"
+                },
+                {
+                    title: "Canada: Crisis Services Canada",
+                    numbers: ["1-833-456-4566", "Text 45645"],
+                    description: "24/7 suicide prevention",
+                    type: "suicide"
+                },
+                {
+                    title: "UK: Samaritans",
+                    numbers: ["116 123"],
+                    description: "24/7 emotional support",
+                    type: "suicide"
+                },
+                {
+                    title: "Australia: Lifeline",
+                    numbers: ["13 11 14"],
+                    description: "24/7 crisis support and suicide prevention",
+                    type: "suicide"
+                },
+                {
+                    title: "International: Befrienders Worldwide",
+                    numbers: ["Find local helpline at befrienders.org"],
+                    description: "Global emotional support network",
+                    type: "international"
+                }
+            ],
+            es: [
+                {
+                    title: "España: Teléfono de la Esperanza",
+                    numbers: ["717 003 717"],
+                    description: "Apoyo emocional 24/7",
+                    type: "suicide"
+                },
+                {
+                    title: "España: Emergencias",
+                    numbers: ["112"],
+                    description: "Emergencias generales",
+                    type: "emergency"
+                },
+                {
+                    title: "México: Línea de la Vida",
+                    numbers: ["800 911 2000"],
+                    description: "Atención en crisis 24/7",
+                    type: "suicide"
+                },
+                {
+                    title: "Argentina: Centro de Asistencia al Suicida",
+                    numbers: ["135"],
+                    description: "Atención a personas en crisis",
+                    type: "suicide"
+                },
+                {
+                    title: "Colombia: Línea 106",
+                    numbers: ["106"],
+                    description: "Apoyo psicológico y en crisis",
+                    type: "suicide"
+                }
+            ],
+            vi: [
+                {
+                    title: "Việt Nam: Tổng đài 111",
+                    numbers: ["111"],
+                    description: "Bảo vệ trẻ em 24/7",
+                    type: "children"
+                },
+                {
+                    title: "Việt Nam: Đường dây nóng Ngày Mai",
+                    numbers: ["1900 8009"],
+                    description: "Hỗ trợ tâm lý và phòng chống tự tử",
+                    type: "suicide"
+                },
+                {
+                    title: "Việt Nam: Tổng đài 1800 1567",
+                    numbers: ["1800 1567"],
+                    description: "Tư vấn tâm lý cho thanh thiếu niên",
+                    type: "youth"
+                },
+                {
+                    title: "Việt Nam: Cấp cứu",
+                    numbers: ["115"],
+                    description: "Cấp cứu y tế",
+                    type: "emergency"
+                }
+            ],
+            zh: [
+                {
+                    title: "中国: 希望24热线",
+                    numbers: ["400-161-9995"],
+                    description: "24小时心理危机干预热线",
+                    type: "suicide"
+                },
+                {
+                    title: "中国: 北京心理援助热线",
+                    numbers: ["010-82951332"],
+                    description: "专业心理危机干预",
+                    type: "suicide"
+                },
+                {
+                    title: "台湾: 安心专线",
+                    numbers: ["1925"],
+                    description: "24小时心理健康咨询",
+                    type: "suicide"
+                },
+                {
+                    title: "香港: 生命热线",
+                    numbers: ["2382 0000"],
+                    description: "防止自杀服务",
+                    type: "suicide"
+                },
+                {
+                    title: "新加坡: 心理卫生学院热线",
+                    numbers: ["6389 2222"],
+                    description: "心理健康支持",
+                    type: "suicide"
+                },
+                {
+                    title: "急救电话",
+                    numbers: ["120"],
+                    description: "中国大陆医疗急救",
+                    type: "emergency"
+                }
+            ]
+        };
+        
+        // Button text translations
+        const buttonTexts = {
+            en: {
+                close: "Return to Chat",
+                immediateHelp: "Need Immediate Help?",
+                international: "International Resources",
+                specialized: "Specialized Support"
+            },
+            es: {
+                close: "Volver al Chat",
+                immediateHelp: "¿Necesita Ayuda Inmediata?",
+                international: "Recursos Internacionales",
+                specialized: "Apoyo Especializado"
+            },
+            vi: {
+                close: "Quay lại Trò chuyện",
+                immediateHelp: "Cần Trợ Giúp Ngay Lập Tức?",
+                international: "Tài Nguyên Quốc Tế",
+                specialized: "Hỗ Trợ Chuyên Biệt"
+            },
+            zh: {
+                close: "返回聊天",
+                immediateHelp: "需要立即帮助？",
+                international: "国际资源",
+                specialized: "专门支持"
+            }
+        };
+        
+        // Emergency action translations
+        const emergencyActions = {
+            en: {
+                title: "Immediate Crisis Support",
+                call988: "Call 988 Now",
+                textHome: "Text HOME to 741741",
+                emergency: "Emergency Services (911)"
+            },
+            es: {
+                title: "Apoyo de Crisis Inmediato",
+                call988: "Llama al 988 Ahora",
+                textHome: "Envía HOME al 741741",
+                emergency: "Servicios de Emergencia (911)"
+            },
+            vi: {
+                title: "Hỗ Trợ Khủng Hoảng Ngay Lập Tức",
+                call988: "Gọi 988 Ngay",
+                textHome: "Nhắn HOME tới 741741",
+                emergency: "Dịch Vụ Khẩn Cấp (911)"
+            },
+            zh: {
+                title: "立即危机支持",
+                call988: "立即拨打988",
+                textHome: "发送HOME至741741",
+                emergency: "紧急服务(911)"
+            }
+        };
+        
+        // Get translations
+        const t = buttonTexts[currentLang] || buttonTexts.en;
+        const e = emergencyActions[currentLang] || emergencyActions.en;
+        const title = titles[currentLang] || titles.en;
+        
+        // Get resources for current language
+        const resources = internationalResources[currentLang] || internationalResources.en;
+        
+        // Organize resources by type
+        const categorizedResources = {
+            suicide: resources.filter(r => r.type === 'suicide'),
+            emergency: resources.filter(r => r.type === 'emergency'),
+            violence: resources.filter(r => r.type === 'violence'),
+            substance: resources.filter(r => r.type === 'substance'),
+            youth: resources.filter(r => r.type === 'youth' || r.type === 'children'),
+            veterans: resources.filter(r => r.type === 'veterans'),
+            text: resources.filter(r => r.type === 'text'),
+            international: resources.filter(r => r.type === 'international'),
+            other: resources.filter(r => !['suicide', 'emergency', 'violence', 'substance', 'youth', 'veterans', 'text', 'international'].includes(r.type))
+        };
+        
+        // Function to format phone numbers
+        function formatPhoneNumber(number) {
+            if (number.includes('Text') || number.includes('Text to') || number.includes('Nhắn') || number.includes('发送') || number.includes('Envía')) {
+                return `<span class="text-support">${number}</span>`;
+            }
+            return `<a href="tel:${number.replace(/\D/g, '')}" class="phone-link">${number}</a>`;
+        }
+        
+        // Create HTML for resources section
+        function createResourcesSection(title, resources) {
+            if (resources.length === 0) return '';
+            
+            return `
+                <div class="resources-category">
+                    <h4>${title}</h4>
+                    <div class="resources-list">
+                        ${resources.map(resource => `
+                            <div class="resource-item">
+                                <div class="resource-title">${resource.title}</div>
+                                <div class="resource-numbers">
+                                    ${resource.numbers.map(num => `
+                                        <div class="resource-number">${formatPhoneNumber(num)}</div>
+                                    `).join('')}
+                                </div>
+                                <div class="resource-description">${resource.description}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Build resources HTML
+        let resourcesHTML = '';
+        
+        // Immediate crisis support section
+        resourcesHTML += `
+            <div class="resources-section immediate-help">
+                <h3><i class="fas fa-exclamation-circle"></i> ${e.title}</h3>
+                <div class="immediate-actions">
+                    <button onclick="window.open('tel:988')" class="crisis-action-btn">
+                        <i class="fas fa-phone-alt"></i> ${e.call988}
+                    </button>
+                    <button onclick="window.open('sms:741741?body=HOME')" class="crisis-action-btn">
+                        <i class="fas fa-comment-alt"></i> ${e.textHome}
+                    </button>
+                    <button onclick="window.open('tel:911')" class="crisis-action-btn emergency">
+                        <i class="fas fa-ambulance"></i> ${e.emergency}
+                    </button>
+                </div>
             </div>
-          </div>
-          
-          <div class="resources-section">
-            <h3>Specialized Support</h3>
-            <div class="resources-grid">
-              <div class="resource-card">
-                <div class="resource-title">The Trevor Project (LGBTQ+)</div>
-                <div class="resource-desc">Call 866-488-7386 or text START to 678678</div>
-              </div>
-              <div class="resource-card">
-                <div class="resource-title">Veterans Crisis Line</div>
-                <div class="resource-desc">Call 988 then press 1, or text 838255</div>
-              </div>
+        `;
+        
+        // Add categorized resources
+        if (categorizedResources.suicide.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Suicide Prevention' :
+                currentLang === 'es' ? 'Prevención del Suicidio' :
+                currentLang === 'vi' ? 'Phòng Chống Tự Tử' :
+                '自杀预防',
+                categorizedResources.suicide
+            );
+        }
+        
+        if (categorizedResources.emergency.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Emergency Services' :
+                currentLang === 'es' ? 'Servicios de Emergencia' :
+                currentLang === 'vi' ? 'Dịch Vụ Khẩn Cấp' :
+                '紧急服务',
+                categorizedResources.emergency
+            );
+        }
+        
+        if (categorizedResources.violence.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Domestic Violence Support' :
+                currentLang === 'es' ? 'Apoyo por Violencia Doméstica' :
+                currentLang === 'vi' ? 'Hỗ Trợ Bạo Hành Gia Đình' :
+                '家庭暴力支持',
+                categorizedResources.violence
+            );
+        }
+        
+        if (categorizedResources.substance.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Substance Abuse Help' :
+                currentLang === 'es' ? 'Ayuda por Abuso de Sustancias' :
+                currentLang === 'vi' ? 'Hỗ Trợ Lạm Dụng Chất Kích Thích' :
+                '药物滥用帮助',
+                categorizedResources.substance
+            );
+        }
+        
+        if (categorizedResources.youth.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Youth & Children Support' :
+                currentLang === 'es' ? 'Apoyo para Jóvenes y Niños' :
+                currentLang === 'vi' ? 'Hỗ Trợ Thanh Thiếu Niên & Trẻ Em' :
+                '青少年与儿童支持',
+                categorizedResources.youth
+            );
+        }
+        
+        if (categorizedResources.veterans.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Veterans Support' :
+                currentLang === 'es' ? 'Apoyo para Veteranos' :
+                currentLang === 'vi' ? 'Hỗ Trợ Cựu Chiến Binh' :
+                '退伍军人支持',
+                categorizedResources.veterans
+            );
+        }
+        
+        if (categorizedResources.text.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Text Support Services' :
+                currentLang === 'es' ? 'Servicios de Apoyo por Texto' :
+                currentLang === 'vi' ? 'Dịch Vụ Hỗ Trợ Qua Tin Nhắn' :
+                '短信支持服务',
+                categorizedResources.text
+            );
+        }
+        
+        if (categorizedResources.international.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'International Resources' :
+                currentLang === 'es' ? 'Recursos Internacionales' :
+                currentLang === 'vi' ? 'Tài Nguyên Quốc Tế' :
+                '国际资源',
+                categorizedResources.international
+            );
+        }
+        
+        if (categorizedResources.other.length > 0) {
+            resourcesHTML += createResourcesSection(
+                currentLang === 'en' ? 'Other Support Services' :
+                currentLang === 'es' ? 'Otros Servicios de Apoyo' :
+                currentLang === 'vi' ? 'Dịch Vụ Hỗ Trợ Khác' :
+                '其他支持服务',
+                categorizedResources.other
+            );
+        }
+        
+        const resourcesModalHTML = `
+        <div id="additional-resources" class="resources-modal">
+            <div class="resources-container">
+                <div class="resources-header">
+                    <h2><i class="fas fa-hands-helping"></i> ${title}</h2>
+                    <button onclick="document.getElementById('additional-resources').remove()" class="close-btn">×</button>
+                </div>
+                
+                <div class="resources-body">
+                    ${resourcesHTML}
+                    
+                    <div class="resources-footer">
+                        <p>
+                            <i class="fas fa-info-circle"></i> 
+                            ${currentLang === 'en' ? 'These services are confidential and available 24/7 in most regions.' :
+                              currentLang === 'es' ? 'Estos servicios son confidenciales y disponibles 24/7 en la mayoría de las regiones.' :
+                              currentLang === 'vi' ? 'Các dịch vụ này là bảo mật và có sẵn 24/7 ở hầu hết các khu vực.' :
+                              '这些服务是保密的，在大多数地区提供24/7支持。'}
+                        </p>
+                        <p>
+                            <i class="fas fa-globe"></i> 
+                            ${currentLang === 'en' ? 'For country-specific resources, visit our full crisis support page.' :
+                              currentLang === 'es' ? 'Para recursos específicos de cada país, visite nuestra página completa de apoyo en crisis.' :
+                              currentLang === 'vi' ? 'Để biết tài nguyên cụ thể theo quốc gia, hãy truy cập trang hỗ trợ khủng hoảng đầy đủ của chúng tôi.' :
+                              '如需特定国家/地区的资源，请访问我们的完整危机支持页面。'}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="resources-actions">
+                    <button onclick="document.getElementById('additional-resources').remove()" class="resources-close-btn">
+                        <i class="fas fa-arrow-left"></i> ${t.close}
+                    </button>
+                    <button onclick="window.open('/crisis-support.html', '_blank')" class="resources-full-btn">
+                        <i class="fas fa-external-link-alt"></i> 
+                        ${currentLang === 'en' ? 'Full Crisis Support Page' :
+                          currentLang === 'es' ? 'Página Completa de Apoyo en Crisis' :
+                          currentLang === 'vi' ? 'Trang Hỗ Trợ Khủng Hoảng Đầy Đủ' :
+                          '完整危机支持页面'}
+                    </button>
+                </div>
             </div>
-          </div>
-          
-          <button onclick="document.getElementById('additional-resources').remove()" class="resources-close-btn">
-            ${lang === 'en' ? 'Return to Chat' :
-              lang === 'es' ? 'Volver al Chat' :
-              lang === 'vi' ? 'Quay lại Trò chuyện' :
-              '返回聊天'}
-          </button>
-        </div>
-      </div>`;
-      
-      const existing = document.getElementById('additional-resources');
-      if (existing) existing.remove();
-      
-      document.body.insertAdjacentHTML('beforeend', resourcesHTML);
+        </div>`;
+        
+        // Remove existing modal if any
+        const existing = document.getElementById('additional-resources');
+        if (existing) existing.remove();
+        
+        document.body.insertAdjacentHTML('beforeend', resourcesModalHTML);
+        
+        // Add CSS styles if not already present
+        addResourcesStyles();
     };
+
+    // Add enhanced CSS styles for the resources modal
+    function addResourcesStyles() {
+        // Check if styles already exist
+        if (document.getElementById('enhanced-resources-styles')) return;
+        
+        const styles = `
+        <style id="enhanced-resources-styles">
+            .resources-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.7);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10001;
+                padding: 20px;
+                backdrop-filter: blur(5px);
+            }
+            
+            .resources-container {
+                background: white;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 800px;
+                max-height: 85vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .resources-header {
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                color: white;
+                padding: 20px;
+                border-radius: 16px 16px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+            }
+            
+            .resources-header h2 {
+                margin: 0;
+                font-size: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .resources-body {
+                padding: 25px;
+                flex: 1;
+                overflow-y: auto;
+            }
+            
+            .resources-section {
+                margin-bottom: 30px;
+            }
+            
+            .resources-section h3 {
+                color: #dc2626;
+                margin-bottom: 15px;
+                font-size: 1.2rem;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .immediate-help {
+                background: #fef2f2;
+                border: 2px solid #fecaca;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 25px;
+            }
+            
+            .immediate-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-top: 15px;
+            }
+            
+            .crisis-action-btn {
+                flex: 1;
+                min-width: 200px;
+                padding: 14px 20px;
+                background: #ef4444;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                font-size: 0.95rem;
+            }
+            
+            .crisis-action-btn:hover {
+                background: #dc2626;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            }
+            
+            .crisis-action-btn.emergency {
+                background: #991b1b;
+            }
+            
+            .crisis-action-btn.emergency:hover {
+                background: #7f1d1d;
+            }
+            
+            .resources-category {
+                margin-bottom: 25px;
+            }
+            
+            .resources-category h4 {
+                color: #374151;
+                margin-bottom: 12px;
+                font-size: 1.1rem;
+                border-bottom: 2px solid #e5e7eb;
+                padding-bottom: 8px;
+            }
+            
+            .resources-list {
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .resource-item {
+                background: #f9fafb;
+                border: 1px solid #e5e7eb;
+                border-radius: 10px;
+                padding: 16px;
+                transition: all 0.3s ease;
+            }
+            
+            .resource-item:hover {
+                border-color: #d1d5db;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            }
+            
+            .resource-title {
+                font-weight: 600;
+                color: #111827;
+                margin-bottom: 10px;
+                font-size: 1rem;
+            }
+            
+            .resource-numbers {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            
+            .resource-number {
+                background: white;
+                border: 1px solid #d1d5db;
+                border-radius: 6px;
+                padding: 8px 12px;
+                font-weight: 500;
+            }
+            
+            .phone-link {
+                color: #2563eb;
+                text-decoration: none;
+                font-weight: 600;
+            }
+            
+            .phone-link:hover {
+                text-decoration: underline;
+                color: #1d4ed8;
+            }
+            
+            .text-support {
+                color: #059669;
+                font-weight: 600;
+            }
+            
+            .resource-description {
+                color: #6b7280;
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+            
+            .resources-footer {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #e5e7eb;
+            }
+            
+            .resources-footer p {
+                color: #6b7280;
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .resources-footer i {
+                color: #6b7280;
+                margin-top: 2px;
+            }
+            
+            .resources-actions {
+                display: flex;
+                gap: 15px;
+                padding: 20px;
+                border-top: 1px solid #e5e7eb;
+                background: #f9fafb;
+                border-radius: 0 0 16px 16px;
+            }
+            
+            .resources-close-btn {
+                flex: 1;
+                padding: 14px 20px;
+                background: #374151;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .resources-close-btn:hover {
+                background: #4b5563;
+            }
+            
+            .resources-full-btn {
+                flex: 1;
+                padding: 14px 20px;
+                background: #3b82f6;
+                color: white;
+                border: none;
+                border-radius: 10px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .resources-full-btn:hover {
+                background: #2563eb;
+            }
+            
+            @media (max-width: 768px) {
+                .resources-container {
+                    width: 95%;
+                    max-height: 90vh;
+                }
+                
+                .resources-header h2 {
+                    font-size: 1.3rem;
+                }
+                
+                .immediate-actions {
+                    flex-direction: column;
+                }
+                
+                .crisis-action-btn {
+                    min-width: 100%;
+                }
+                
+                .resources-actions {
+                    flex-direction: column;
+                }
+                
+                .resource-numbers {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .resources-modal {
+                    padding: 10px;
+                }
+                
+                .resources-container {
+                    width: 100%;
+                    border-radius: 12px;
+                }
+                
+                .resources-header {
+                    padding: 15px;
+                }
+                
+                .resources-body {
+                    padding: 15px;
+                }
+                
+                .resources-section h3 {
+                    font-size: 1.1rem;
+                }
+                
+                .crisis-action-btn {
+                    padding: 12px 15px;
+                    font-size: 0.9rem;
+                }
+                
+                .resource-item {
+                    padding: 12px;
+                }
+                
+                .resources-actions {
+                    padding: 15px;
+                }
+            }
+        </style>
+        `;
+        
+        document.head.insertAdjacentHTML('beforeend', styles);
+    }
 
     // Global functions for crisis modal
     window.confirmHelpReceived = function() {

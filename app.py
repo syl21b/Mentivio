@@ -54,7 +54,7 @@ class SecurityConfig:
                                     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; "
                                     "img-src 'self' data: https:; "
                                     "font-src 'self' data: https: fonts.gstatic.com; "
-                                    "connect-src 'self' http://localhost:8001 ws://localhost:8001;",  # Add localhost here
+                                    "connect-src 'self' http://localhost:5001 ws://localhost:5001;",  # Add localhost here
             'Referrer-Policy': 'strict-origin-when-cross-origin',
             'Permissions-Policy': 'geolocation=(), microphone=()'
         }
@@ -2685,5 +2685,5 @@ if __name__ == '__main__':
             import sys
             sys.exit(1)
     
-    port = int(os.environ.get("PORT", 8001)) 
+    port = int(os.environ.get("PORT", 5001)) 
     app.run(host="0.0.0.0", port=port)
