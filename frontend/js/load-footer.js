@@ -27,7 +27,7 @@
             privacy: 'Privacy Policy',
             terms: 'Terms of Service',
             crisis: '24/7 Crisis Support',
-            email: 'support@mentivio.com',
+            email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio. All rights reserved.',
             disclaimer: 'This tool is for informational purposes only and is not a substitute for professional medical advice.'
         },
@@ -41,7 +41,7 @@
             privacy: 'Chính sách bảo mật',
             terms: 'Điều khoản dịch vụ',
             crisis: 'Hỗ trợ khủng hoảng 24/7',
-            email: 'support@mentivio.com',
+            email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio. Mọi quyền được bảo lưu.',
             disclaimer: 'Công cụ này chỉ dành cho mục đích thông tin và không thay thế cho lời khuyên y tế chuyên nghiệp.'
         },
@@ -55,7 +55,7 @@
             privacy: 'Política de privacidad',
             terms: 'Términos de servicio',
             crisis: 'Apoyo en crisis 24/7',
-            email: 'support@mentivio.com',
+            email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio. Todos los derechos reservados.',
             disclaimer: 'Esta herramienta es solo para fines informativos y no sustituye el asesoramiento médico profesional.'
         },
@@ -69,7 +69,7 @@
             privacy: '隐私政策',
             terms: '服务条款',
             crisis: '24/7 危机支持',
-            email: 'support@mentivio.com',
+            email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio。保留所有权利。',
             disclaimer: '此工具仅用于提供信息，不能替代专业医疗建议。'
         }

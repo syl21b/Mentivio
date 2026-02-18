@@ -4,8 +4,6 @@
    Now using website color variables
    ============================================ */
 
-/* Import Google Font with better font-display */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght&display=swap');
 
 /* Base typography scale (13px message text as reference) */
 :root {

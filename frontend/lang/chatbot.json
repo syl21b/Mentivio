@@ -1,0 +1,746 @@
+{
+  "en": {
+    "session": {
+      "messages": "messages",
+      "anonymous": "Anonymous",
+      "clear": "Clear"
+    },
+    "emergencyContacts": {
+      "suicide_prevention": "988",
+      "crisis_text": "Text HOME to 741741",
+      "emergency": "911",
+      "domestic_violence": "800-799-7233",
+      "substance_abuse": "800-662-4357",
+      "veterans_crisis": "988 then press 1",
+      "trevor_project": "866-488-7386",
+      "international_redirect": true
+    },
+    "fallbackResponses": [
+      "I hear you. Sometimes words carry more weight than we realize. What's one small thing that felt true for you today?",
+      "Thank you for sharing that. Your feelings matter, all of them. Can you tell me more about what's in your heart right now?",
+      "I'm here with you, present and listening. Even in the silence, your presence is enough. What do you need most in this moment?"
+    ],
+    "quickEmotionPrompts": {
+      "overwhelmed": "My heart feels so heavy right now. Everything feels like too much and I'm not sure how to keep going.",
+      "anxious": "My mind won't stop racing with worries. I feel so anxious about everything that could go wrong.",
+      "sad": "I'm feeling really low and sad today. The sadness feels heavy and I don't know how to lift it.",
+      "lonely": "I feel so alone, even when people are around. The loneliness is profound and isolating.",
+      "hesitant": "I feel so hesitant and unsure about what to do. Every choice feels overwhelming and I'm scared of making the wrong decision.",
+      "confused": "I'm feeling really confused about things in my life. I don't understand what's happening or what I should do next.",
+      "ashamed": "I'm feeling ashamed and embarrassed about something. I don't know how to face it.",
+      "jealous": "I'm feeling jealous and envious. I compare myself to others and it hurts.",
+      "gender": "I'm questioning my gender identity and it's confusing and scary. I don't know who to talk to about this.",
+      "lgbtq": "I'm exploring my sexuality/identity and it feels lonely. I'm not sure how to navigate these feelings or find acceptance.",
+      "study": "I'm struggling with my studies. The pressure is overwhelming and I don't know how to keep up with everything.",
+      "love": "My heart is hurting from a relationship. I don't know how to move forward or heal from this pain.",
+      "curious": "I'm searching for meaning in all of this. What's the purpose when things feel so hard?",
+      "hopeful": "I'm trying to find hope. Can you help me see possibilities and light ahead?",
+      "lost": "I feel completely lost right now. I don't know which direction to take or what my purpose is anymore.",
+      "transition": "I'm in a major life transition and everything feels uncertain. I don't know who I am or where I'm going.",
+      "future": "I'm so anxious about the future. All the 'what ifs' are overwhelming me and I can't see a clear path forward.",
+      "reset": "I need a complete reset in my life. Things aren't working and I don't know how to start over."
+    },
+    "header": {
+      "title": "Mentivio: Your Friend",
+      "heartSpace": "Heart Space"
+    },
+    "dayNames": {
+      "short": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      "long": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    },
+    "timeFormats": {
+      "hour12": true
+    },
+    "typingStatuses": [
+      "Mentivio is thinking deeply...",
+      "Listening with my whole heart...",
+      "Reflecting on what you've shared...",
+      "Holding space for your words..."
+    ],
+    "crisisModal": {
+      "immediate": {
+        "title": "Immediate Support Needed",
+        "message": "Your safety is our absolute priority. We've detected that you might need immediate support."
+      },
+      "urgent": {
+        "title": "Support Available",
+        "message": "We're here to support you. It sounds like you're going through something very difficult."
+      },
+      "buttonTexts": {
+        "call": "Call",
+        "emergency": "Emergency Services",
+        "contacted": "I've contacted support",
+        "callEmergency": "Call Emergency",
+        "continue": "Continue the conversation",
+        "moreResources": "More resources"
+      },
+      "importantMessage": "For your safety, chat will remain paused until you confirm you've reached out for help.",
+      "footerMessage": "Mentivio provides emotional support and crisis resources. For immediate emergencies, please contact the numbers above."
+    },
+    "resourcesModal": {
+      "title": "Additional Support Resources",
+      "buttonClose": "Return to Chat",
+      "buttonFullPage": "Full Crisis Support Page",
+      "immediateHelp": {
+        "title": "Immediate Crisis Support",
+        "call988": "Call 988 Now",
+        "textHome": "Text HOME to 741741",
+        "emergency": "Emergency Services (911)"
+      },
+      "categories": {
+        "suicide": "Suicide Prevention",
+        "emergency": "Emergency Services",
+        "violence": "Domestic Violence Support",
+        "substance": "Substance Abuse Help",
+        "youth": "Youth & Children Support",
+        "veterans": "Veterans Support",
+        "text": "Text Support Services",
+        "international": "International Resources",
+        "other": "Other Support Services"
+      },
+      "internationalResources": [
+        {
+          "title": "USA: 988 Suicide & Crisis Lifeline",
+          "numbers": ["988", "1-800-273-8255"],
+          "description": "24/7 free and confidential support",
+          "type": "suicide"
+        },
+        {
+          "title": "USA: Crisis Text Line",
+          "numbers": ["Text HOME to 741741"],
+          "description": "Free 24/7 text support",
+          "type": "text"
+        },
+        {
+          "title": "USA: National Domestic Violence Hotline",
+          "numbers": ["1-800-799-7233"],
+          "description": "24/7 support for domestic violence",
+          "type": "violence"
+        },
+        {
+          "title": "USA: Substance Abuse Hotline",
+          "numbers": ["1-800-662-4357"],
+          "description": "Treatment referral and information",
+          "type": "substance"
+        },
+        {
+          "title": "USA: Veterans Crisis Line",
+          "numbers": ["988 then press 1", "Text 838255"],
+          "description": "For veterans and their families",
+          "type": "veterans"
+        },
+        {
+          "title": "Canada: Crisis Services Canada",
+          "numbers": ["1-833-456-4566", "Text 45645"],
+          "description": "24/7 suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "UK: Samaritans",
+          "numbers": ["116 123"],
+          "description": "24/7 emotional support",
+          "type": "suicide"
+        },
+        {
+          "title": "Australia: Lifeline",
+          "numbers": ["13 11 14"],
+          "description": "24/7 crisis support and suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "International: Befrienders Worldwide",
+          "numbers": ["Find local helpline at befrienders.org"],
+          "description": "Global emotional support network",
+          "type": "international"
+        }
+      ]
+    },
+    "clearChat": {
+      "confirm": "Clear all chat history? This cannot be undone.",
+      "confirmation": "Chat history cleared. Our conversation continues with a fresh start."
+    },
+    "welcomeMessage": "Hello 😊. I'm Mentivio, your mental health companion. I'm here to listen deeply, understand without judgment, and help you find light even on dark days. Your feelings are welcome here, all of them.",
+    "inputPlaceholder": "Share what's in your heart... (All feelings welcome)",
+    "safetyNotice": "Safe space • High EQ • Always here for you",
+    "crisisLinkText": "Need urgent support?",
+    "privacyLinkText": "Privacy",
+    "quickEmotionLabels": {
+      "overwhelmed": "😰 Heavy Heart",
+      "anxious": "😟 Anxious Thoughts",
+      "sad": "😔 Feeling Low",
+      "lonely": "🌌 Feeling Alone",
+      "hesitant": "🤔 Hesitant",
+      "confused": "😕 Confused",
+      "ashamed": "😳 Feeling Ashamed",
+      "jealous": "😠 Jealous Feelings",
+      "gender": "🌈 Gender Questions",
+      "lgbtq": "🏳️‍🌈 LGBTQ+",
+      "study": "📚 Study Stress",
+      "love": "💔 Love & Heartbreak",
+      "curious": "🤔 Seeking Meaning",
+      "hopeful": "✨ Looking for Hope",
+      "lost": "🧭 Feeling Lost",
+      "transition": "🔄 In Transition",
+      "future": "🔮 Future Anxiety",
+      "reset": "🔄 Need Reset"
+    }
+  },
+  "es": {
+    "session": {
+      "messages": "mensajes",
+      "anonymous": "Anónimo",
+      "clear": "Limpiar"
+    },
+    "emergencyContacts": {
+      "suicide_prevention": "988",
+      "crisis_text": "Envía HOME al 741741",
+      "emergency": "911",
+      "domestic_violence": "800-799-7233",
+      "substance_abuse": "800-662-4357",
+      "veterans_crisis": "988 luego presiona 1",
+      "trevor_project": "866-488-7386",
+      "international_redirect": true
+    },
+    "fallbackResponses": [
+      "Te escucho. A veces las palabras llevan más peso del que nos damos cuenta. ¿Qué cosa pequeña sintió verdadera para ti hoy?",
+      "Gracias por compartir eso. Tus sentimientos importan, todos ellos. ¿Puedes contarme más sobre lo que hay en tu corazón ahora mismo?",
+      "Estoy aquí contigo, presente y escuchando. Incluso en el silencio, tu presencia es suficiente. ¿Qué es lo que más necesitas en este momento?"
+    ],
+    "quickEmotionPrompts": {
+      "overwhelmed": "Mi corazón se siente tan pesado ahora mismo. Todo parece demasiado y no estoy seguro de cómo seguir adelante.",
+      "anxious": "Mi mente no deja de correr con preocupaciones. Me siento tan ansioso por todo lo que podría salir mal.",
+      "sad": "Me siento muy deprimido y triste hoy. La tristeza se siente pesada y no sé cómo levantarla.",
+      "lonely": "Me siento tan solo, incluso cuando hay gente alrededor. La soledad es profunda y aislante.",
+      "hesitant": "Me siento tan vacilante e inseguro sobre qué hacer. Cada decisión me abruma y tengo miedo de tomar la decisión equivocada.",
+      "confused": "Me siento realmente confundido sobre las cosas en mi vida. No entiendo qué está pasando o qué debo hacer a continuación.",
+      "ashamed": "Me siento avergonzado y humillado por algo. No sé cómo enfrentarlo.",
+      "jealous": "Me siento celoso y envidioso. Me comparo con los demás y duele.",
+      "gender": "Estoy cuestionando mi identidad de género y es confuso y aterrador. No sé con quién hablar sobre esto.",
+      "lgbtq": "Estoy explorando mi sexualidad/identidad y me siento solo. No estoy seguro de cómo manejar estos sentimientos o encontrar aceptación.",
+      "study": "Estoy luchando con mis estudios. La presión es abrumadora y no sé cómo mantener el ritmo con todo.",
+      "love": "Mi corazón está sufriendo por una relación. No sé cómo seguir adelante o sanar de este dolor.",
+      "curious": "Estoy buscando significado en todo esto. ¿Cuál es el propósito cuando las cosas se sienten tan difíciles?",
+      "hopeful": "Estoy tratando de encontrar esperanza. ¿Puedes ayudarme a ver posibilidades y luz adelante?",
+      "lost": "Me siento completamente perdido ahora mismo. No sé qué dirección tomar ni cuál es mi propósito ya.",
+      "transition": "Estoy en una gran transición de vida y todo se siente incierto. No sé quién soy ni a dónde voy.",
+      "future": "Estoy tan ansioso por el futuro. Todos los 'qué pasaría si' me abruman y no puedo ver un camino claro hacia adelante.",
+      "reset": "Necesito un reinicio completo en mi vida. Las cosas no están funcionando y no sé cómo empezar de nuevo."
+    },
+    "header": {
+      "title": "Mentivio: Tu Amigo",
+      "heartSpace": "Espacio del Corazón"
+    },
+    "dayNames": {
+      "short": ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
+      "long": ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
+    },
+    "timeFormats": {
+      "hour12": true
+    },
+    "typingStatuses": [
+      "Mentivio está pensando profundamente...",
+      "Escuchando con todo mi corazón...",
+      "Reflexionando sobre lo que has compartido...",
+      "Guardando espacio para tus palabras..."
+    ],
+    "crisisModal": {
+      "immediate": {
+        "title": "Apoyo Inmediato Necesario",
+        "message": "Tu seguridad es nuestra máxima prioridad. Hemos detectado que podrías necesitar apoyo inmediato."
+      },
+      "urgent": {
+        "title": "Apoyo Disponible",
+        "message": "Estamos aquí para apoyarte. Parece que estás pasando por algo muy difícil."
+      },
+      "buttonTexts": {
+        "call": "Llamar",
+        "emergency": "Servicios de Emergencia",
+        "contacted": "He contactado con apoyo",
+        "callEmergency": "Llamar Emergencia",
+        "continue": "Continuar conversación",
+        "moreResources": "Más recursos"
+      },
+      "importantMessage": "Para tu seguridad, el chat permanecerá pausado hasta que confirmes que has buscado ayuda.",
+      "footerMessage": "Mentivio proporciona apoyo emocional y recursos de crisis. Para emergencias inmediatas, contacta con los números anteriores."
+    },
+    "resourcesModal": {
+      "title": "Recursos de Apoyo Adicionales",
+      "buttonClose": "Volver al Chat",
+      "buttonFullPage": "Página Completa de Apoyo en Crisis",
+      "immediateHelp": {
+        "title": "Apoyo de Crisis Inmediato",
+        "call988": "Llama al 988 Ahora",
+        "textHome": "Envía HOME al 741741",
+        "emergency": "Servicios de Emergencia (911)"
+      },
+      "categories": {
+        "suicide": "Prevención del Suicidio",
+        "emergency": "Servicios de Emergencia",
+        "violence": "Apoyo por Violencia Doméstica",
+        "substance": "Ayuda por Abuso de Sustancias",
+        "youth": "Apoyo para Jóvenes y Niños",
+        "veterans": "Apoyo para Veteranos",
+        "text": "Servicios de Apoyo por Texto",
+        "international": "Recursos Internacionales",
+        "other": "Otros Servicios de Apoyo"
+      },
+      "internationalResources": [
+        {
+          "title": "USA: 988 Suicide & Crisis Lifeline",
+          "numbers": ["988", "1-800-273-8255"],
+          "description": "24/7 free and confidential support",
+          "type": "suicide"
+        },
+        {
+          "title": "USA: Crisis Text Line",
+          "numbers": ["Text HOME to 741741"],
+          "description": "Free 24/7 text support",
+          "type": "text"
+        },
+        {
+          "title": "USA: National Domestic Violence Hotline",
+          "numbers": ["1-800-799-7233"],
+          "description": "24/7 support for domestic violence",
+          "type": "violence"
+        },
+        {
+          "title": "USA: Substance Abuse Hotline",
+          "numbers": ["1-800-662-4357"],
+          "description": "Treatment referral and information",
+          "type": "substance"
+        },
+        {
+          "title": "USA: Veterans Crisis Line",
+          "numbers": ["988 then press 1", "Text 838255"],
+          "description": "For veterans and their families",
+          "type": "veterans"
+        },
+        {
+          "title": "Canada: Crisis Services Canada",
+          "numbers": ["1-833-456-4566", "Text 45645"],
+          "description": "24/7 suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "UK: Samaritans",
+          "numbers": ["116 123"],
+          "description": "24/7 emotional support",
+          "type": "suicide"
+        },
+        {
+          "title": "Australia: Lifeline",
+          "numbers": ["13 11 14"],
+          "description": "24/7 crisis support and suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "International: Befrienders Worldwide",
+          "numbers": ["Find local helpline at befrienders.org"],
+          "description": "Global emotional support network",
+          "type": "international"
+        }
+      ]
+    },
+    "clearChat": {
+      "confirm": "¿Borrar todo el historial de chat? Esto no se puede deshacer.",
+      "confirmation": "Historial de chat borrado. Nuestra conversación continúa con un nuevo comienzo."
+    },
+    "welcomeMessage": "Hola 😊. Soy Mentivio, tu compañero de salud mental. Estoy aquí para escuchar profundamente, entender sin juzgar y ayudarte a encontrar luz incluso en los días oscuros. Todos tus sentimientos son bienvenidos aquí.",
+    "inputPlaceholder": "Comparte lo que hay en tu corazón... (Todas las emociones son bienvenidas)",
+    "safetyNotice": "Espacio seguro • Alta IE • Siempre aquí para ti",
+    "crisisLinkText": "¿Necesitas apoyo urgente?",
+    "privacyLinkText": "Privacidad",
+    "quickEmotionLabels": {
+      "overwhelmed": "😰 Corazón Pesado",
+      "anxious": "😟 Pensamientos Ansiosos",
+      "sad": "😔 Sintiéndome Triste",
+      "lonely": "🌌 Sintiéndome Solo",
+      "hesitant": "🤔 Vacilante",
+      "confused": "😕 Confundido",
+      "ashamed": "😳 Sintiendo Vergüenza",
+      "jealous": "😠 Sentimientos Celosos",
+      "gender": "🌈 Preguntas de Género",
+      "lgbtq": "🏳️‍🌈 LGBTQ+",
+      "study": "📚 Estrés de Estudio",
+      "love": "💔 Amor y Desamor",
+      "curious": "🤔 Buscando Sentido",
+      "hopeful": "✨ Buscando Esperanza",
+      "lost": "🧭 Sintiéndome Perdido",
+      "transition": "🔄 En Transición",
+      "future": "🔮 Ansiedad Futuro",
+      "reset": "🔄 Necesito Reinicio"
+    }
+  },
+  "vi": {
+    "session": {
+      "messages": "tin nhắn",
+      "anonymous": "Nặc danh",
+      "clear": "Xóa"
+    },
+    "emergencyContacts": {
+      "suicide_prevention": "988",
+      "crisis_text": "Nhắn HOME tới 741741",
+      "emergency": "911",
+      "domestic_violence": "800-799-7233",
+      "substance_abuse": "800-662-4357",
+      "veterans_crisis": "988 sau đó nhấn 1",
+      "trevor_project": "866-488-7386",
+      "international_redirect": true
+    },
+    "fallbackResponses": [
+      "Tôi nghe thấy bạn. Đôi khi lời nói mang nhiều trọng lượng hơn chúng ta nhận ra. Có điều nhỏ nào cảm thấy đúng với bạn hôm nay?",
+      "Cảm ơn bạn đã chia sẻ điều đó. Cảm xúc của bạn quan trọng, tất cả chúng. Bạn có thể nói cho tôi biết thêm về những gì trong trái tim bạn ngay bây giờ?",
+      "Tôi ở đây với bạn, hiện diện và lắng nghe. Ngay cả trong im lặng, sự hiện diện của bạn là đủ. Bạn cần gì nhất trong khoảnh khắc này?"
+    ],
+    "quickEmotionPrompts": {
+      "overwhelmed": "Trái tim tôi cảm thấy thật nặng nề ngay lúc này. Mọi thứ đều cảm thấy quá sức và tôi không chắc làm thế nào để tiếp tục.",
+      "anxious": "Tâm trí tôi không ngừng chạy đua với những lo lắng. Tôi cảm thấy rất lo lắng về tất cả những gì có thể xảy ra.",
+      "sad": "Hôm nay tôi cảm thấy rất buồn và chán nản. Nỗi buồn cảm thấy thật nặng nề và tôi không biết làm thế nào để vượt qua.",
+      "lonely": "Tôi cảm thấy thật cô đơn, ngay cả khi có người xung quanh. Sự cô đơn thật sâu sắc và tách biệt.",
+      "hesitant": "Tôi cảm thấy rất do dự và không chắc chắn về việc phải làm. Mỗi lựa chọn đều cảm thấy choáng ngợp và tôi sợ mình sẽ đưa ra quyết định sai lầm.",
+      "confused": "Tôi cảm thấy thực sự bối rối về mọi thứ trong cuộc sống của mình. Tôi không hiểu chuyện gì đang xảy ra hoặc tôi nên làm gì tiếp theo.",
+      "ashamed": "Tôi cảm thấy xấu hổ và ngượng ngùng về điều gì đó. Tôi không biết phải đối mặt với nó thế nào.",
+      "jealous": "Tôi cảm thấy ghen tị và đố kỵ. Tôi so sánh mình với người khác và điều đó thật đau đớn.",
+      "gender": "Tôi đang nghi vấn về bản dạng giới của mình và điều đó thật khó hiểu và đáng sợ. Tôi không biết nên nói chuyện với ai về điều này.",
+      "lgbtq": "Tôi đang khám phá xu hướng tính dục/bản dạng của mình và cảm thấy cô đơn. Tôi không chắc làm thế nào để điều hướng những cảm xúc này hoặc tìm thấy sự chấp nhận.",
+      "study": "Tôi đang gặp khó khăn với việc học. Áp lực thật choáng ngợp và tôi không biết làm thế nào để theo kịp mọi thứ.",
+      "love": "Trái tim tôi đang đau đớn vì một mối quan hệ. Tôi không biết làm thế nào để tiến lên hoặc chữa lành nỗi đau này.",
+      "curious": "Tôi đang tìm kiếm ý nghĩa trong tất cả điều này. Mục đích là gì khi mọi thứ cảm thấy thật khó khăn?",
+      "hopeful": "Tôi đang cố gắng tìm hy vọng. Bạn có thể giúp tôi nhìn thấy khả năng và ánh sáng phía trước không?",
+      "lost": "Tôi cảm thấy hoàn toàn lạc lối ngay bây giờ. Tôi không biết nên đi theo hướng nào hay mục đích của mình là gì nữa.",
+      "transition": "Tôi đang ở trong một giai đoạn chuyển tiếp lớn của cuộc đời và mọi thứ đều cảm thấy không chắc chắn. Tôi không biết mình là ai hay mình đang đi đâu.",
+      "future": "Tôi rất lo lắng về tương lai. Tất cả những 'sẽ ra sao nếu' đang làm tôi choáng ngợp và tôi không thể thấy một con đường rõ ràng phía trước.",
+      "reset": "Tôi cần một khởi động lại hoàn toàn trong cuộc sống. Mọi thứ không hoạt động và tôi không biết làm thế nào để bắt đầu lại."
+    },
+    "header": {
+      "title": "Mentivio: Người Bạn Của Bạn",
+      "heartSpace": "Không Gian Trái Tim"
+    },
+    "dayNames": {
+      "short": ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+      "long": ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"]
+    },
+    "timeFormats": {
+      "hour12": false
+    },
+    "typingStatuses": [
+      "Mentivio đang suy nghĩ sâu sắc...",
+      "Lắng nghe bằng cả trái tim...",
+      "Suy ngẫm về những gì bạn đã chia sẻ...",
+      "Giữ không gian cho lời nói của bạn..."
+    ],
+    "crisisModal": {
+      "immediate": {
+        "title": "Cần Hỗ Trợ Ngay Lập Tức",
+        "message": "An toàn của bạn là ưu tiên tuyệt đối của chúng tôi. Chúng tôi phát hiện bạn có thể cần hỗ trợ ngay lập tức."
+      },
+      "urgent": {
+        "title": "Hỗ Trợ Có Sẵn",
+        "message": "Chúng tôi ở đây để hỗ trợ bạn. Có vẻ như bạn đang trải qua điều gì đó rất khó khăn."
+      },
+      "buttonTexts": {
+        "call": "Gọi",
+        "emergency": "Dịch Vụ Khẩn Cấp",
+        "contacted": "Tôi đã liên hệ hỗ trợ",
+        "callEmergency": "Gọi Khẩn Cấp",
+        "continue": "Tiếp tục trò chuyện",
+        "moreResources": "Thêm tài nguyên"
+      },
+      "importantMessage": "Để đảm bảo an toàn của bạn, cuộc trò chuyện sẽ tạm dừng cho đến khi bạn xác nhận đã tìm kiếm sự giúp đỡ.",
+      "footerMessage": "Mentivio cung cấp hỗ trợ cảm xúc và tài nguyên khủng hoảng. Đối với trường hợp khẩn cấp ngay lập tức, vui lòng liên hệ với các số trên."
+    },
+    "resourcesModal": {
+      "title": "Tài Nguyên Hỗ Trợ Bổ Sung",
+      "buttonClose": "Quay lại Trò chuyện",
+      "buttonFullPage": "Trang Hỗ Trợ Khủng Hoảng Đầy Đủ",
+      "immediateHelp": {
+        "title": "Hỗ Trợ Khủng Hoảng Ngay Lập Tức",
+        "call988": "Gọi 988 Ngay",
+        "textHome": "Nhắn HOME tới 741741",
+        "emergency": "Dịch Vụ Khẩn Cấp (911)"
+      },
+      "categories": {
+        "suicide": "Phòng Chống Tự Tử",
+        "emergency": "Dịch Vụ Khẩn Cấp",
+        "violence": "Hỗ Trợ Bạo Hành Gia Đình",
+        "substance": "Hỗ Trợ Lạm Dụng Chất Kích Thích",
+        "youth": "Hỗ Trợ Thanh Thiếu Niên & Trẻ Em",
+        "veterans": "Hỗ Trợ Cựu Chiến Binh",
+        "text": "Dịch Vụ Hỗ Trợ Qua Tin Nhắn",
+        "international": "Tài Nguyên Quốc Tế",
+        "other": "Dịch Vụ Hỗ Trợ Khác"
+      },
+      "internationalResources": [
+        {
+          "title": "USA: 988 Suicide & Crisis Lifeline",
+          "numbers": ["988", "1-800-273-8255"],
+          "description": "24/7 free and confidential support",
+          "type": "suicide"
+        },
+        {
+          "title": "USA: Crisis Text Line",
+          "numbers": ["Text HOME to 741741"],
+          "description": "Free 24/7 text support",
+          "type": "text"
+        },
+        {
+          "title": "USA: National Domestic Violence Hotline",
+          "numbers": ["1-800-799-7233"],
+          "description": "24/7 support for domestic violence",
+          "type": "violence"
+        },
+        {
+          "title": "USA: Substance Abuse Hotline",
+          "numbers": ["1-800-662-4357"],
+          "description": "Treatment referral and information",
+          "type": "substance"
+        },
+        {
+          "title": "USA: Veterans Crisis Line",
+          "numbers": ["988 then press 1", "Text 838255"],
+          "description": "For veterans and their families",
+          "type": "veterans"
+        },
+        {
+          "title": "Canada: Crisis Services Canada",
+          "numbers": ["1-833-456-4566", "Text 45645"],
+          "description": "24/7 suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "UK: Samaritans",
+          "numbers": ["116 123"],
+          "description": "24/7 emotional support",
+          "type": "suicide"
+        },
+        {
+          "title": "Australia: Lifeline",
+          "numbers": ["13 11 14"],
+          "description": "24/7 crisis support and suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "International: Befrienders Worldwide",
+          "numbers": ["Find local helpline at befrienders.org"],
+          "description": "Global emotional support network",
+          "type": "international"
+        }
+      ]
+    },
+    "clearChat": {
+      "confirm": "Xóa toàn bộ lịch sử trò chuyện? Hành động này không thể hoàn tác.",
+      "confirmation": "Đã xóa lịch sử trò chuyện. Cuộc trò chuyện của chúng ta tiếp tục với một khởi đầu mới."
+    },
+    "welcomeMessage": "Xin chào 😊. Tôi là Mentivio, người bạn đồng hành sức khỏe tinh thần của bạn. Tôi ở đây để lắng nghe sâu sắc, thấu hiểu không phán xét và giúp bạn tìm thấy ánh sáng ngay cả trong những ngày tăm tối. Tất cả cảm xúc của bạn đều được chào đón ở đây.",
+    "inputPlaceholder": "Chia sẻ những gì trong trái tim bạn... (Tất cả cảm xúc đều được chào đón)",
+    "safetyNotice": "Không gian an toàn • Trí tuệ cảm xúc cao • Luôn ở đây vì bạn",
+    "crisisLinkText": "Cần hỗ trợ khẩn cấp?",
+    "privacyLinkText": "Riêng tư",
+    "quickEmotionLabels": {
+      "overwhelmed": "😰 Trái Tim Nặng Trĩu",
+      "anxious": "😟 Lo Âu",
+      "sad": "😔 Buồn Bã",
+      "lonely": "🌌 Cô Đơn",
+      "hesitant": "🤔 Do Dự",
+      "confused": "😕 Bối Rối",
+      "ashamed": "😳 Cảm Thấy Xấu Hổ",
+      "jealous": "😠 Cảm Giác Ghen Tị",
+      "gender": "🌈 Câu Hỏi về Giới Tính",
+      "lgbtq": "🏳️‍🌈 LGBTQ+",
+      "study": "📚 Căng Thẳng Học Tập",
+      "love": "💔 Tình Yêu & Tan Vỡ",
+      "curious": "🤔 Tìm Kiếm Ý Nghĩa",
+      "hopeful": "✨ Tìm Hy Vọng",
+      "lost": "🧭 Lạc Lối",
+      "transition": "🔄 Giai Đoạn Chuyển Tiếp",
+      "future": "🔮 Lo Âu Tương Lai",
+      "reset": "🔄 Cần Khởi Động Lại"
+    }
+  },
+  "zh": {
+    "session": {
+      "messages": "条消息",
+      "anonymous": "匿名",
+      "clear": "清除"
+    },
+    "emergencyContacts": {
+      "suicide_prevention": "988",
+      "crisis_text": "发送 HOME 至 741741",
+      "emergency": "911",
+      "domestic_violence": "800-799-7233",
+      "substance_abuse": "800-662-4357",
+      "veterans_crisis": "988 然后按 1",
+      "trevor_project": "866-488-7386",
+      "international_redirect": true
+    },
+    "fallbackResponses": [
+      "我听到了。有时言语承载的重量超乎我们的想象。今天有什么小事让你感到真实？",
+      "感谢您的分享。您的感受很重要，所有感受都很重要。您现在能多告诉我一些您内心的想法吗？",
+      "我在这里陪伴您，倾听您的心声。即使在沉默中，您的存在就足够了。此刻您最需要什么？"
+    ],
+    "quickEmotionPrompts": {
+      "overwhelmed": "我的心现在感觉如此沉重。一切都感觉太多了，我不确定如何继续前进。",
+      "anxious": "我的思绪不停地被忧虑占据。我对一切可能出错的事情感到非常焦虑。",
+      "sad": "我今天感到非常低落和悲伤。悲伤感觉很沉重，我不知道如何摆脱它。",
+      "lonely": "我感到如此孤独，即使周围有人。这种孤独是深刻而孤立的。",
+      "hesitant": "我感到非常犹豫，不确定该做什么。每一个选择都让我感到不知所措，我害怕做出错误的决定。",
+      "confused": "我对生活中的事情感到非常困惑。我不明白发生了什么，也不知道下一步该怎么做。",
+      "ashamed": "我感到羞愧和尴尬。我不知道如何面对它。",
+      "jealous": "我感到嫉妒和羡慕。我拿自己和别人比较，这很痛苦。",
+      "gender": "我正在质疑我的性别认同，这令人困惑和害怕。我不知道该和谁谈论这个问题。",
+      "lgbtq": "我正在探索我的性取向/身份，这让我感到孤独。我不确定如何应对这些感受或找到接受。",
+      "study": "我在学习上遇到了困难。压力太大了，我不知道如何跟上一切。",
+      "love": "我的心因为一段关系而受伤。我不知道如何前进或从这种痛苦中愈合。",
+      "curious": "我正在这一切中寻找意义。当事情感觉如此困难时，目的是什么？",
+      "hopeful": "我正在努力寻找希望。你能帮我看到前方的可能性和光明吗？",
+      "lost": "我现在感到完全迷茫。我不知道该走哪个方向，也不知道我的目的是什么了。",
+      "transition": "我正处于人生重大过渡期，一切都感觉不确定。我不知道我是谁，也不知道我要去哪里。",
+      "future": "我对未来感到非常焦虑。所有的'如果'让我不知所措，我看不到明确的前进道路。",
+      "reset": "我需要生活中完全的重启。事情不顺利，我不知道如何重新开始。"
+    },
+    "header": {
+      "title": "Mentivio: 您的朋友",
+      "heartSpace": "心灵空间"
+    },
+    "dayNames": {
+      "short": ["日", "一", "二", "三", "四", "五", "六"],
+      "long": ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"]
+    },
+    "timeFormats": {
+      "hour12": false
+    },
+    "typingStatuses": [
+      "Mentivio正在深入思考...",
+      "用全心倾听...",
+      "反思您分享的内容...",
+      "为您的言语保留空间..."
+    ],
+    "crisisModal": {
+      "immediate": {
+        "title": "需要立即支持",
+        "message": "您的安全是我们的绝对优先事项。我们检测到您可能需要立即支持。"
+      },
+      "urgent": {
+        "title": "支持可用",
+        "message": "我们在这里支持您。听起来您正在经历非常困难的事情。"
+      },
+      "buttonTexts": {
+        "call": "拨打",
+        "emergency": "紧急服务",
+        "contacted": "我已联系支持",
+        "callEmergency": "拨打紧急电话",
+        "continue": "继续对话",
+        "moreResources": "更多资源"
+      },
+      "importantMessage": "为了您的安全，聊天将保持暂停，直到您确认已寻求帮助。",
+      "footerMessage": "Mentivio提供情感支持和危机资源。对于紧急情况，请联系上述号码。"
+    },
+    "resourcesModal": {
+      "title": "额外支持资源",
+      "buttonClose": "返回聊天",
+      "buttonFullPage": "完整危机支持页面",
+      "immediateHelp": {
+        "title": "立即危机支持",
+        "call988": "立即拨打988",
+        "textHome": "发送HOME至741741",
+        "emergency": "紧急服务(911)"
+      },
+      "categories": {
+        "suicide": "自杀预防",
+        "emergency": "紧急服务",
+        "violence": "家庭暴力支持",
+        "substance": "药物滥用帮助",
+        "youth": "青少年与儿童支持",
+        "veterans": "退伍军人支持",
+        "text": "短信支持服务",
+        "international": "国际资源",
+        "other": "其他支持服务"
+      },
+      "internationalResources": [
+        {
+          "title": "USA: 988 Suicide & Crisis Lifeline",
+          "numbers": ["988", "1-800-273-8255"],
+          "description": "24/7 free and confidential support",
+          "type": "suicide"
+        },
+        {
+          "title": "USA: Crisis Text Line",
+          "numbers": ["Text HOME to 741741"],
+          "description": "Free 24/7 text support",
+          "type": "text"
+        },
+        {
+          "title": "USA: National Domestic Violence Hotline",
+          "numbers": ["1-800-799-7233"],
+          "description": "24/7 support for domestic violence",
+          "type": "violence"
+        },
+        {
+          "title": "USA: Substance Abuse Hotline",
+          "numbers": ["1-800-662-4357"],
+          "description": "Treatment referral and information",
+          "type": "substance"
+        },
+        {
+          "title": "USA: Veterans Crisis Line",
+          "numbers": ["988 then press 1", "Text 838255"],
+          "description": "For veterans and their families",
+          "type": "veterans"
+        },
+        {
+          "title": "Canada: Crisis Services Canada",
+          "numbers": ["1-833-456-4566", "Text 45645"],
+          "description": "24/7 suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "UK: Samaritans",
+          "numbers": ["116 123"],
+          "description": "24/7 emotional support",
+          "type": "suicide"
+        },
+        {
+          "title": "Australia: Lifeline",
+          "numbers": ["13 11 14"],
+          "description": "24/7 crisis support and suicide prevention",
+          "type": "suicide"
+        },
+        {
+          "title": "International: Befrienders Worldwide",
+          "numbers": ["Find local helpline at befrienders.org"],
+          "description": "Global emotional support network",
+          "type": "international"
+        }
+      ]
+    },
+    "clearChat": {
+      "confirm": "清除所有聊天记录？此操作无法撤销。",
+      "confirmation": "聊天记录已清除。我们的对话将以全新的开始继续。"
+    },
+    "welcomeMessage": "你好 😊。我是Mentivio，您的心理健康伴侣。我在这里深度倾听，不加评判地理解，并帮助您在黑暗的日子里找到光明。您所有的感受在这里都受到欢迎。",
+    "inputPlaceholder": "分享你心中的感受... (欢迎所有情绪)",
+    "safetyNotice": "安全空间 • 高情商 • 永远在这里陪伴你",
+    "crisisLinkText": "需要紧急支持？",
+    "privacyLinkText": "隐私",
+    "quickEmotionLabels": {
+      "overwhelmed": "😰 沉重的心",
+      "anxious": "😟 焦虑思绪",
+      "sad": "😔 情绪低落",
+      "lonely": "🌌 感到孤独",
+      "hesitant": "🤔 犹豫",
+      "confused": "😕 困惑",
+      "ashamed": "😳 感到羞愧",
+      "jealous": "😠 嫉妒感",
+      "gender": "🌈 性别问题",
+      "lgbtq": "🏳️‍🌈 LGBTQ+",
+      "study": "📚 学习压力",
+      "love": "💔 爱与心碎",
+      "curious": "🤔 寻求意义",
+      "hopeful": "✨ 寻找希望",
+      "lost": "🧭 感到迷茫",
+      "transition": "🔄 过渡期",
+      "future": "🔮 未来焦虑",
+      "reset": "🔄 需要重启"
+    }
+  }
+}
