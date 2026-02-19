@@ -76,6 +76,7 @@
         "continue": "Continue the conversation",
         "moreResources": "More resources"
       },
+      "followUp": "Thank you for reaching out. How are you feeling now?",
       "importantMessage": "For your safety, chat will remain paused until you confirm you've reached out for help.",
       "footerMessage": "Mentivio provides emotional support and crisis resources. For immediate emergencies, please contact the numbers above."
     },
@@ -264,6 +265,7 @@
         "continue": "Continuar conversación",
         "moreResources": "Más recursos"
       },
+      "followUp": "Gracias por comunicarte. ¿Cómo te sientes ahora?",
       "importantMessage": "Para tu seguridad, el chat permanecerá pausado hasta que confirmes que has buscado ayuda.",
       "footerMessage": "Mentivio proporciona apoyo emocional y recursos de crisis. Para emergencias inmediatas, contacta con los números anteriores."
     },
@@ -452,6 +454,7 @@
         "continue": "Tiếp tục trò chuyện",
         "moreResources": "Thêm tài nguyên"
       },
+      "followUp": "Cảm ơn bạn đã liên hệ. Bây giờ bạn cảm thấy thế nào?",
       "importantMessage": "Để đảm bảo an toàn của bạn, cuộc trò chuyện sẽ tạm dừng cho đến khi bạn xác nhận đã tìm kiếm sự giúp đỡ.",
       "footerMessage": "Mentivio cung cấp hỗ trợ cảm xúc và tài nguyên khủng hoảng. Đối với trường hợp khẩn cấp ngay lập tức, vui lòng liên hệ với các số trên."
     },
@@ -640,6 +643,7 @@
         "continue": "继续对话",
         "moreResources": "更多资源"
       },
+      "followUp": "感谢您联系我们。您现在感觉如何？",
       "importantMessage": "为了您的安全，聊天将保持暂停，直到您确认已寻求帮助。",
       "footerMessage": "Mentivio提供情感支持和危机资源。对于紧急情况，请联系上述号码。"
     },

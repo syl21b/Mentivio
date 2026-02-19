@@ -373,7 +373,51 @@ function createMessageElement(msg) {
 
 function formatMessage(text) {
     if (!text) return '';
-    return text.replace(/\n/g, '<br>');
+
+    // Escape HTML to prevent XSS (but we trust the backend, still a good practice)
+    let escaped = text.replace(/[&<>"]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        if (m === '"') return '&quot;';
+        return m;
+    });
+
+    // Convert **bold** to <strong>bold</strong>
+    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Split into lines to handle bullet points
+    const lines = escaped.split('\n');
+    let inList = false;
+    let html = '';
+
+    lines.forEach(line => {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('•')) {
+            // Start a new list if not already in one
+            if (!inList) {
+                html += '<ul>';
+                inList = true;
+            }
+            html += `<li>${trimmed.substring(1).trim()}</li>`;
+        } else {
+            if (inList) {
+                html += '</ul>';
+                inList = false;
+            }
+            // Add the line (if not empty) with a <br> or as a paragraph
+            if (trimmed !== '') {
+                html += `<p>${line}</p>`;
+            } else {
+                html += '<br>';
+            }
+        }
+    });
+
+    // Close any open list
+    if (inList) html += '</ul>';
+
+    return html;
 }
 
 function displayConversation(messages) {
