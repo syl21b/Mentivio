@@ -891,8 +891,7 @@ function showEmergencyCrisisModal(language, severity = 'urgent') {
         <h2 class="crisis-title">${title}</h2>
         <p class="crisis-message">${message}</p>
         <div class="crisis-card immediate">
-          <h3 class="crisis-card-title">${severity === 'immediate' ? 'Immediate Help' : 'Support Available'}</h3>
-          <div class="crisis-buttons">
+        <h3 class="crisis-card-title">${severity === 'immediate' ? t.crisisModal.immediate.cardTitle : t.crisisModal.urgent.cardTitle}</h3>          <div class="crisis-buttons">
             <button onclick="window.open('tel:${contacts.suicide_prevention}')" class="crisis-btn crisis-btn-primary">
               <span class="btn-icon">📞</span> <span>${btn.call} ${contacts.suicide_prevention}</span>
             </button>
@@ -968,6 +967,9 @@ window.showEnhancedCrisisResources = function(lang = null) {
 // ================================
 // ENHANCED LOCAL MEMORY WITH HIGH EQ
 // ================================
+// ================================
+// ENHANCED LOCAL MEMORY WITH HIGH EQ
+// ================================
 class HighEQMentivio {
     constructor() {
         this.conversationHistory = [];
@@ -976,29 +978,58 @@ class HighEQMentivio {
         this.anonymous = CONFIG.anonymityFeatures.enabled;
         this.sessionId = getSessionId();
     }
+    
     updateLocalState(userText, emotion = 'neutral') {
         const text = this.anonymous ? scrubPII(userText) : userText;
-        this.conversationHistory.push({ text, role: 'user', timestamp: Date.now(), emotion, language: this.language, anonymous: this.anonymous, sessionId: this.sessionId });
+        // Add to in-memory history only – storage is handled by sendMessage
+        this.conversationHistory.push({ 
+            text, 
+            role: 'user', 
+            timestamp: Date.now(), 
+            emotion, 
+            language: this.language, 
+            anonymous: this.anonymous, 
+            sessionId: this.sessionId 
+        });
+        
+        // Keep only last 50 messages in memory
         if (this.conversationHistory.length > 50) this.conversationHistory.shift();
-        const savedMessages = loadSavedConversation();
-        savedMessages.push({ role: 'user', content: text, timestamp: Date.now(), language: this.language });
-        localStorage.setItem('mentivio_conversation', JSON.stringify(savedMessages));
+        
+        // Update conversation phase based on message count
         const messageCount = this.conversationHistory.filter(m => m.role === 'user').length;
         if (messageCount < 3) this.conversationState.phase = 'engagement';
         else if (messageCount < 8) this.conversationState.phase = 'exploration';
         else if (messageCount < 15) this.conversationState.phase = 'processing';
         else this.conversationState.phase = 'integration';
-        if (['sad', 'overwhelmed', 'lonely', 'hopeless'].includes(emotion)) this.conversationState.needsInspiration = true;
+        
+        // Flag if inspiration might be needed
+        if (['sad', 'overwhelmed', 'lonely', 'hopeless'].includes(emotion)) {
+            this.conversationState.needsInspiration = true;
+        }
     }
+    
     getConversationContext() {
         const savedMessages = loadSavedConversation();
-        return savedMessages.slice(-10).map(msg => ({ role: msg.role, content: msg.content, emotion: msg.emotion || 'neutral', language: msg.language || 'en', anonymous: this.anonymous, sessionId: this.sessionId }));
+        return savedMessages.slice(-10).map(msg => ({ 
+            role: msg.role, 
+            content: msg.content, 
+            emotion: msg.emotion || 'neutral', 
+            language: msg.language || 'en', 
+            anonymous: this.anonymous, 
+            sessionId: this.sessionId 
+        }));
     }
+    
     addBotResponse(text, emotion = 'compassionate') {
-        this.conversationHistory.push({ text, role: 'bot', timestamp: Date.now(), emotion, language: this.language, sessionId: this.sessionId });
-        const savedMessages = loadSavedConversation();
-        savedMessages.push({ role: 'bot', content: text, timestamp: Date.now(), language: this.language });
-        localStorage.setItem('mentivio_conversation', JSON.stringify(savedMessages));
+        // Add to in-memory history only – storage is handled by sendMessage
+        this.conversationHistory.push({ 
+            text, 
+            role: 'bot', 
+            timestamp: Date.now(), 
+            emotion, 
+            language: this.language, 
+            sessionId: this.sessionId 
+        });
     }
 }
 

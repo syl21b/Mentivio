@@ -60,10 +60,12 @@
     "crisisModal": {
       "immediate": {
         "title": "Immediate Support Needed",
+        "cardTitle": "Immediate Help",
         "message": "Your safety is our absolute priority. We've detected that you might need immediate support."
       },
       "urgent": {
         "title": "Support Available",
+        "cardTitle": "Support Available",
         "message": "We're here to support you. It sounds like you're going through something very difficult."
       },
       "buttonTexts": {
@@ -246,10 +248,12 @@
     "crisisModal": {
       "immediate": {
         "title": "Apoyo Inmediato Necesario",
+        "cardTitle": "Ayuda Inmediata",
         "message": "Tu seguridad es nuestra máxima prioridad. Hemos detectado que podrías necesitar apoyo inmediato."
       },
       "urgent": {
         "title": "Apoyo Disponible",
+        "cardTitle": "Apoyo Disponible",
         "message": "Estamos aquí para apoyarte. Parece que estás pasando por algo muy difícil."
       },
       "buttonTexts": {
@@ -432,10 +436,12 @@
     "crisisModal": {
       "immediate": {
         "title": "Cần Hỗ Trợ Ngay Lập Tức",
+        "cardTitle": "Trợ Giúp Ngay Lập Tức",
         "message": "An toàn của bạn là ưu tiên tuyệt đối của chúng tôi. Chúng tôi phát hiện bạn có thể cần hỗ trợ ngay lập tức."
       },
       "urgent": {
         "title": "Hỗ Trợ Có Sẵn",
+        "cardTitle": "Hỗ Trợ Có Sẵn",
         "message": "Chúng tôi ở đây để hỗ trợ bạn. Có vẻ như bạn đang trải qua điều gì đó rất khó khăn."
       },
       "buttonTexts": {
@@ -618,10 +624,12 @@
     "crisisModal": {
       "immediate": {
         "title": "需要立即支持",
+        "cardTitle": "立即帮助",
         "message": "您的安全是我们的绝对优先事项。我们检测到您可能需要立即支持。"
       },
       "urgent": {
         "title": "支持可用",
+        "cardTitle": "支持可用",
         "message": "我们在这里支持您。听起来您正在经历非常困难的事情。"
       },
       "buttonTexts": {
