@@ -3,18 +3,18 @@ services:
     name: mentivio
     env: python
     plan: free
-    # Updated: Let Render handle Python versioning via Env Var
     buildCommand: |
+      cd backend
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt
-      # If model training is needed once per build:
-      # python train_model.py 
-    startCommand: "gunicorn app:app"     
+      # If you need to run model training once per build:
+      # python train_model.py
+    startCommand: cd backend && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.4"
       - key: GEMINI_API_KEY
-        sync: false # generateValue: false is often replaced by sync: false in newer syntax
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: API_KEY
