@@ -21,6 +21,9 @@ let isChatbotInitialized = false;
 // Global translations object (filled from JSON)
 let translations = {};
 
+// Placeholder to satisfy browser extensions that check for this function early
+window.updateDay = function() {};
+
 // ================================
 // TRANSLATION LOADER
 // ================================
@@ -1900,6 +1903,8 @@ async function initMentivio() {
     // ================================
     window.complianceManager = new ComplianceManager();
     window.complianceManager.initialize();
+
+
 
     // ================================
     // INITIAL LANGUAGE SYNC
