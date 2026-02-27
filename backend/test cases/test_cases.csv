@@ -1,0 +1,21 @@
+test_case,description,expected_diagnosis,Mood Swing,Sadness,Euphoric,Sleep disorder,Exhausted,Suicidal thoughts,Aggressive Response,Overthinking,Nervous Breakdown,Anorexia,Authority Respect,Try-Explanation,Ignore & Move-On,Admit Mistakes,Concentration,Optimism,Sexual Activity
+normal_healthy_balanced,Healthy individual with balanced responses,Normal,NO,Sometimes,Seldom,Sometimes,Sometimes,NO,NO,NO,NO,NO,YES,YES,NO,YES,Good concentration,Optimistic,High interest
+normal_stable_low_risk,Stable individual with minimal symptoms,Normal,NO,Seldom,Seldom,Seldom,Seldom,NO,NO,NO,NO,NO,YES,YES,NO,YES,Excellent concentration,Extremely optimistic,Moderate interest
+normal_high_functioning,High-functioning normal individual,Normal,NO,Seldom,Seldom,Sometimes,Seldom,NO,NO,NO,NO,NO,YES,YES,YES,YES,Excellent concentration,Extremely optimistic,High interest
+bipolar1_manic_dominant,Bipolar Type-1 with strong manic features,Bipolar Type-1,YES,Sometimes,Most-Often,Usually,Seldom,NO,YES,YES,NO,NO,NO,YES,NO,NO,Poor concentration,Extremely optimistic,Very high interest
+bipolar1_mixed_episode,Bipolar Type-1 with mixed manic/depressive features,Bipolar Type-1,YES,Usually,Usually,Most-Often,Usually,YES,YES,YES,YES,YES,NO,NO,YES,NO,Cannot concentrate,Extremely pessimistic,No interest
+bipolar1_severe_manic,Bipolar Type-1 severe manic episode,Bipolar Type-1,YES,Seldom,Most-Often,Most-Often,Seldom,NO,YES,YES,NO,NO,NO,YES,NO,NO,Cannot concentrate,Extremely optimistic,Very high interest
+bipolar2_hypomanic_focus,Bipolar Type-2 with hypomanic patterns,Bipolar Type-2,YES,Sometimes,Usually,Sometimes,Sometimes,NO,NO,YES,NO,NO,YES,YES,NO,YES,Good concentration,Optimistic,High interest
+bipolar2_depressive_lean,Bipolar Type-2 with depressive dominance,Bipolar Type-2,YES,Usually,Sometimes,Usually,Usually,NO,NO,YES,YES,YES,NO,NO,YES,NO,Poor concentration,Pessimistic,Low interest
+bipolar2_cyclical,Bipolar Type-2 cyclical pattern,Bipolar Type-2,YES,Usually,Usually,Usually,Usually,NO,NO,YES,YES,NO,YES,NO,YES,YES,Average concentration,Neutral outlook,Moderate interest
+depression_major_severe,Major depressive episode - severe,Depression,NO,Most-Often,Seldom,Most-Often,Most-Often,YES,NO,YES,YES,YES,NO,NO,YES,NO,Cannot concentrate,Extremely pessimistic,No interest
+depression_moderate_persistent,Moderate persistent depression,Depression,NO,Usually,Seldom,Usually,Usually,NO,NO,YES,NO,YES,NO,NO,YES,NO,Poor concentration,Pessimistic,Low interest
+depression_mild_chronic,Mild chronic depression,Depression,NO,Usually,Seldom,Sometimes,Usually,NO,NO,YES,NO,NO,NO,NO,YES,NO,Poor concentration,Pessimistic,Low interest
+borderline_normal_bipolar,Borderline case between Normal and Bipolar,Bipolar Type-2,YES,Sometimes,Sometimes,Sometimes,Sometimes,NO,NO,YES,NO,NO,YES,YES,NO,YES,Average concentration,Neutral outlook,Moderate interest
+borderline_bipolar_depression,Borderline case between Bipolar and Depression,Bipolar Type-2,YES,Usually,Sometimes,Usually,Usually,NO,NO,YES,YES,YES,NO,NO,YES,NO,Poor concentration,Pessimistic,Low interest
+mixed_features_1,Mixed features case 1,Bipolar Type-2,YES,Sometimes,Usually,Sometimes,Sometimes,NO,NO,YES,NO,NO,YES,YES,YES,YES,Good concentration,Optimistic,High interest
+mixed_features_2,Mixed features case 2,Depression,NO,Usually,Seldom,Usually,Usually,NO,NO,YES,YES,NO,NO,NO,YES,NO,Poor concentration,Pessimistic,Low interest
+extreme_manic,Extreme manic presentation,Bipolar Type-1,YES,Seldom,Most-Often,Most-Often,Seldom,NO,YES,YES,NO,NO,NO,YES,NO,NO,Cannot concentrate,Extremely optimistic,Very high interest
+extreme_depressive,Extreme depressive presentation,Depression,NO,Most-Often,Seldom,Most-Often,Most-Often,YES,NO,YES,YES,YES,NO,NO,YES,NO,Cannot concentrate,Extremely pessimistic,No interest
+balanced_bipolar2,Well-balanced Bipolar Type-2 case,Bipolar Type-2,YES,Sometimes,Sometimes,Sometimes,Sometimes,NO,NO,YES,NO,NO,YES,YES,YES,YES,Good concentration,Optimistic,Moderate interest
+subclinical,Mild subclinical symptoms,Normal,NO,Sometimes,Seldom,Sometimes,Sometimes,NO,NO,NO,NO,NO,YES,YES,YES,YES,Good concentration,Optimistic,Moderate interest
