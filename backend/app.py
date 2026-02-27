@@ -419,8 +419,6 @@ class ClinicalDecisionEnhancer:
 backend_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(backend_dir)          # parent of backend
 frontend_dir = os.path.join(project_root, 'frontend')
-print(f"DEBUG: frontend_dir = {frontend_dir}")
-print(f"DEBUG: Does home.html exist? {os.path.exists(os.path.join(frontend_dir, 'home.html'))}")
 
 # Create Flask app with correct static/template folders
 app = Flask(__name__,
@@ -575,9 +573,5 @@ else:
 from routes import *
 
 if __name__ == '__main__':
-    print("\n=== Registered Routes ===")
-    for rule in app.url_map.iter_rules():
-        print(f"{rule.endpoint}: {rule}")
-    print("==========================\n")
     port = int(os.environ.get("PORT", 5001))
     app.run(host="0.0.0.0", port=port)
