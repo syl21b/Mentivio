@@ -6,13 +6,13 @@ services:
     buildCommand: |
       cd backend
       pip install --upgrade pip setuptools wheel
-      pip install -r requirements.txt
+      pip install -r backend/requirements.txt
       # If you need to run model training once per build:
       # python train_model.py
     startCommand: cd backend && gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: "3.12.4"
+        value: "3.13"
       - key: GEMINI_API_KEY
         sync: false
       - key: SECRET_KEY
