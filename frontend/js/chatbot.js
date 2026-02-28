@@ -50,7 +50,8 @@ async function loadTranslations() {
           urgent: { title: "Support Available", message: "" },
           buttonTexts: { call: "Call", emergency: "Emergency Services", contacted: "I've contacted support", callEmergency: "Call Emergency", continue: "Continue", moreResources: "More resources" },
           importantMessage: "For your safety, chat will remain paused.",
-          footerMessage: "Mentivio provides support."
+          footerMessage: "Mentivio provides support.",
+          importantLabel: "Important:"
         },
         resourcesModal: {
           title: "Resources",
@@ -58,7 +59,9 @@ async function loadTranslations() {
           buttonFullPage: "Full Page",
           immediateHelp: { title: "Immediate Help", call988: "Call 988", textHome: "Text HOME", emergency: "911" },
           categories: {},
-          internationalResources: []
+          internationalResources: [],
+          footerConfidential: "These services are confidential and available 24/7 in most regions.",
+          footerCountrySpecific: "For country-specific resources, visit our full crisis support page."
         },
         clearChat: { confirm: "Clear history?", confirmation: "History cleared." },
         welcomeMessage: "Hello, I'm Mentivio.",
@@ -66,7 +69,47 @@ async function loadTranslations() {
         safetyNotice: "Safe space • High EQ",
         crisisLinkText: "Need help?",
         privacyLinkText: "Privacy",
-        quickEmotionLabels: {}
+        quickEmotionLabels: {},
+        quickEmotionsTitle: "I'm feeling...",
+        messageTimeJustNow: "just now",
+        complianceModal: {
+          title: "Privacy & Safety",
+          intro: "Mentivio is committed to protecting your privacy and safety:",
+          bulletEncryption: "End-to-end encryption for all conversations",
+          bulletAutoDelete: "Auto-delete conversations after {days} days",
+          bulletNoPersonalInfo: "No personal info required - use anonymously",
+          bulletCrisisDetection: "Crisis detection with instant support resources",
+          bulletGDPR: "GDPR compliant for EU users",
+          bulletHIPAA: "HIPAA-ready infrastructure",
+          optionAnalytics: "Allow anonymous analytics",
+          optionAnalyticsDesc: "Help improve Mentivio with completely anonymous usage data",
+          optionStorage: "Store conversations locally",
+          optionStorageDesc: "Remember our conversation in your browser for {days} days",
+          optionCrisis: "Always allow crisis escalation",
+          optionCrisisDesc: "Required for your safety. We'll connect you with emergency resources if needed.",
+          btnAccept: "Accept & Continue",
+          btnAnonymous: "Use Anonymously",
+          footer: "By continuing, you agree to our {privacyPolicy} and {termsOfService}."
+        },
+        privacyControls: {
+          title: "Privacy Controls",
+          sectionData: "Your Data",
+          sectionSettings: "Privacy Settings",
+          sectionCompliance: "Compliance Information",
+          currentMode: "Current mode:",
+          modeAnonymous: "Anonymous (no data stored)",
+          modeStandard: "Standard (data stored locally)",
+          btnExport: "Export My Data",
+          btnDelete: "Delete All Data",
+          toggleAnonymous: "Use anonymous mode (no data stored permanently)",
+          toggleDesc: "Anonymous mode uses session storage only. All data disappears when you close your browser.",
+          retention: "Data retention: {days} days",
+          gdpr: "GDPR compliant: {status}",
+          hipaa: "HIPAA compliant: {status}",
+          encryption: "End-to-end encryption: Yes",
+          crisisLogging: "Crisis intervention logging: {status}"
+        },
+        common: { yes: "Yes", no: "No" }
       }
     };
   }
@@ -177,8 +220,6 @@ async function checkSessionStatus(sessionId) {
         return sessionId;
     }
 }
-
-
 
 function clearSession() {
     const storage = window.mentivioStorage || localStorage;
@@ -364,7 +405,7 @@ function createMessageElement(msg) {
     messageDiv.className = `message ${msg.role}`;
     const time = msg.timestamp ?
         new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).replace(' ', '').toLowerCase() :
-        'just now';
+        getTranslation(CONFIG.language, 'messageTimeJustNow', 'just now');
     messageDiv.innerHTML = `
         <div class="message-content">
             <div class="message-text">${formatMessage(msg.content)}</div>
@@ -436,11 +477,11 @@ function displayConversation(messages) {
     welcomeDiv.innerHTML = `
         <div class="message bot">
             <div class="message-content">
-            <div class="message-text">${getTranslation(CONFIG.language, 'welcomeMessage', 'Hello 😊')}</div>
-            <div class="message-time">${getTranslation(CONFIG.language, 'messageTimeJustNow', 'just now')}</div>
+                <div class="message-text">${getTranslation(CONFIG.language, 'welcomeMessage', 'Hello 😊')}</div>
+                <div class="message-time">${getTranslation(CONFIG.language, 'messageTimeJustNow', 'just now')}</div>
             </div>
         </div>
-        `;
+    `;
     chatContainer.appendChild(welcomeDiv);
     
     // Append all saved messages
@@ -700,23 +741,24 @@ class ComplianceManager {
     showConsentModal() {
         if (document.getElementById('compliance-modal') || CONFIG.anonymityFeatures.enabled) return;
         const t = translations[CONFIG.language] || translations.en;
+        const days = CONFIG.dataRetentionDays;
         const modalHTML = `
         <div id="compliance-modal" class="compliance-modal">
           <div class="compliance-modal-content">
             <div class="compliance-header">
               <div class="compliance-icon">🔒</div>
-              <h2>${t.privacyLinkText} & Safety</h2>
+              <h2>${t.complianceModal.title}</h2>
             </div>
             <div class="compliance-body">
-              <p class="compliance-intro"><strong>Mentivio is committed to protecting your privacy and safety:</strong></p>
+              <p class="compliance-intro"><strong>${t.complianceModal.intro}</strong></p>
               <div class="compliance-features">
                 <ul>
-                  <li>🔒 <strong>End-to-end encryption</strong> for all conversations</li>
-                  <li>🗑️ <strong>Auto-delete</strong> conversations after ${CONFIG.dataRetentionDays} days</li>
-                  <li>🌐 <strong>No personal info required</strong> - use anonymously</li>
-                  <li>🚨 <strong>Crisis detection</strong> with instant support resources</li>
-                  <li>🇪🇺 <strong>GDPR compliant</strong> for EU users</li>
-                  ${CONFIG.hipaaCompliant ? '<li>🇺🇸 <strong>HIPAA-ready infrastructure</strong></li>' : ''}
+                  <li>🔒 ${t.complianceModal.bulletEncryption}</li>
+                  <li>🗑️ ${t.complianceModal.bulletAutoDelete.replace('{days}', days)}</li>
+                  <li>🌐 ${t.complianceModal.bulletNoPersonalInfo}</li>
+                  <li>🚨 ${t.complianceModal.bulletCrisisDetection}</li>
+                  <li>🇪🇺 ${t.complianceModal.bulletGDPR}</li>
+                  ${CONFIG.hipaaCompliant ? `<li>🇺🇸 ${t.complianceModal.bulletHIPAA}</li>` : ''}
                 </ul>
               </div>
             </div>
@@ -725,8 +767,8 @@ class ComplianceManager {
                 <label class="compliance-checkbox">
                   <input type="checkbox" id="consent-analytics">
                   <div class="checkbox-label">
-                    <div class="option-title">Allow anonymous analytics</div>
-                    <div class="option-description">Help improve Mentivio with completely anonymous usage data</div>
+                    <div class="option-title">${t.complianceModal.optionAnalytics}</div>
+                    <div class="option-description">${t.complianceModal.optionAnalyticsDesc}</div>
                   </div>
                 </label>
               </div>
@@ -734,8 +776,8 @@ class ComplianceManager {
                 <label class="compliance-checkbox">
                   <input type="checkbox" id="consent-local-storage" checked>
                   <div class="checkbox-label">
-                    <div class="option-title">Store conversations locally</div>
-                    <div class="option-description">Remember our conversation in your browser for ${CONFIG.dataRetentionDays} days</div>
+                    <div class="option-title">${t.complianceModal.optionStorage}</div>
+                    <div class="option-description">${t.complianceModal.optionStorageDesc.replace('{days}', days)}</div>
                   </div>
                 </label>
               </div>
@@ -743,17 +785,17 @@ class ComplianceManager {
                 <label class="compliance-checkbox critical">
                   <input type="checkbox" id="consent-crisis-escalation" checked disabled>
                   <div class="checkbox-label">
-                    <div class="option-title critical">Always allow crisis escalation</div>
-                    <div class="option-description critical">Required for your safety. We'll connect you with emergency resources if needed.</div>
+                    <div class="option-title critical">${t.complianceModal.optionCrisis}</div>
+                    <div class="option-description critical">${t.complianceModal.optionCrisisDesc}</div>
                   </div>
                 </label>
               </div>
             </div>
             <div class="compliance-actions">
-              <button onclick="window.complianceManager.acceptConsent()" class="btn-accept">Accept & Continue</button>
-              <button onclick="window.complianceManager.useAnonymously()" class="btn-anonymous">Use Anonymously</button>
+              <button onclick="window.complianceManager.acceptConsent()" class="btn-accept">${t.complianceModal.btnAccept}</button>
+              <button onclick="window.complianceManager.useAnonymously()" class="btn-anonymous">${t.complianceModal.btnAnonymous}</button>
             </div>
-            <p class="compliance-footer">By continuing, you agree to our <a href="/privacy" target="_blank">Privacy Policy</a> and <a href="/terms" target="_blank">Terms of Service</a>.</p>
+            <p class="compliance-footer">${t.complianceModal.footer.replace('{privacyPolicy}', '<a href="/privacy" target="_blank">Privacy Policy</a>').replace('{termsOfService}', '<a href="/terms" target="_blank">Terms of Service</a>')}</p>
           </div>
         </div>`;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
@@ -864,42 +906,45 @@ class ComplianceManager {
     }
     showPrivacyControls() {
         const t = translations[CONFIG.language] || translations.en;
+        const days = CONFIG.dataRetentionDays;
+        const yes = t.common.yes;
+        const no = t.common.no;
         const controlsHTML = `
         <div id="privacy-controls" class="privacy-controls">
           <div class="privacy-container">
             <div class="privacy-header">
-              <h2>${t.privacyLinkText} Controls</h2>
+              <h2>${t.privacyControls.title}</h2>
               <button onclick="document.getElementById('privacy-controls').remove()" class="close-btn">×</button>
             </div>
             <div class="privacy-section">
-              <h3>Your Data</h3>
+              <h3>${t.privacyControls.sectionData}</h3>
               <div class="privacy-card">
-                <p class="data-status"><strong>Current mode:</strong> ${CONFIG.anonymityFeatures.enabled ? 'Anonymous (no data stored)' : 'Standard (data stored locally)'}</p>
+                <p class="data-status"><strong>${t.privacyControls.currentMode}</strong> ${CONFIG.anonymityFeatures.enabled ? t.privacyControls.modeAnonymous : t.privacyControls.modeStandard}</p>
                 <div class="data-actions">
-                  <button onclick="window.complianceManager.exportUserData()" class="btn-export">Export My Data</button>
-                  <button onclick="window.complianceManager.deleteAllUserData()" class="btn-delete">Delete All Data</button>
+                  <button onclick="window.complianceManager.exportUserData()" class="btn-export">${t.privacyControls.btnExport}</button>
+                  <button onclick="window.complianceManager.deleteAllUserData()" class="btn-delete">${t.privacyControls.btnDelete}</button>
                 </div>
               </div>
             </div>
             <div class="privacy-section">
-              <h3>Privacy Settings</h3>
+              <h3>${t.privacyControls.sectionSettings}</h3>
               <div class="privacy-card">
                 <label class="privacy-toggle">
                   <input type="checkbox" ${CONFIG.anonymityFeatures.enabled ? 'checked' : ''} onchange="window.complianceManager.toggleAnonymousMode(this.checked)">
-                  Use anonymous mode (no data stored permanently)
+                  ${t.privacyControls.toggleAnonymous}
                 </label>
-                <p class="toggle-description">Anonymous mode uses session storage only. All data disappears when you close your browser.</p>
+                <p class="toggle-description">${t.privacyControls.toggleDesc}</p>
               </div>
             </div>
             <div class="privacy-section">
-              <h3>Compliance Information</h3>
+              <h3>${t.privacyControls.sectionCompliance}</h3>
               <div class="privacy-card">
                 <ul class="compliance-list">
-                  <li>Data retention: ${CONFIG.dataRetentionDays} days</li>
-                  <li>GDPR compliant: ${CONFIG.gdprCompliant ? 'Yes' : 'No'}</li>
-                  <li>HIPAA compliant: ${CONFIG.hipaaCompliant ? 'Yes' : 'No'}</li>
-                  <li>End-to-end encryption: Yes</li>
-                  <li>Crisis intervention logging: ${CONFIG.complianceFeatures.crisisInterventionLogging ? 'Yes' : 'No'}</li>
+                  <li>${t.privacyControls.retention.replace('{days}', days)}</li>
+                  <li>${t.privacyControls.gdpr.replace('{status}', CONFIG.gdprCompliant ? yes : no)}</li>
+                  <li>${t.privacyControls.hipaa.replace('{status}', CONFIG.hipaaCompliant ? yes : no)}</li>
+                  <li>${t.privacyControls.encryption}</li>
+                  <li>${t.privacyControls.crisisLogging.replace('{status}', CONFIG.complianceFeatures.crisisInterventionLogging ? yes : no)}</li>
                 </ul>
               </div>
             </div>
@@ -952,7 +997,7 @@ function showEmergencyCrisisModal(language, severity = 'urgent') {
           </div>
         </div>
         ${severity === 'immediate' ? `
-        `<div class="crisis-warning"><p><strong>${t.crisisModal.importantLabel || 'Important:'}</strong> ${t.crisisModal.importantMessage}</p></div>`
+        <div class="crisis-warning"><p><strong>${t.crisisModal.importantLabel || 'Important:'}</strong> ${t.crisisModal.importantMessage}</p></div>
         <div class="crisis-actions">
           <button onclick="confirmHelpReceived()" class="crisis-action-btn crisis-action-confirm">${btn.contacted}</button>
           <button onclick="window.open('tel:${contacts.emergency}')" class="crisis-action-btn crisis-action-emergency">${btn.callEmergency}</button>
@@ -1220,6 +1265,12 @@ updateChatbotLanguage = function(newLang) {
             updateInputPlaceholder(newLang);
             updateSafetyNotice(newLang);
             updateHeaderText(newLang);
+            
+            // Update emotions title
+            const emotionsTitle = document.getElementById('emotionsTitle');
+            if (emotionsTitle) {
+                emotionsTitle.textContent = getTranslation(newLang, 'quickEmotionsTitle', "I'm feeling...");
+            }
         } catch (error) {
             console.error('Error updating chatbot UI language:', error);
         }
@@ -1514,11 +1565,6 @@ async function initMentivio() {
     const activeEmotion = document.getElementById('activeEmotion');
     const currentDay = document.getElementById('currentDay');
 
-    const emotionsTitle = document.getElementById('emotionsTitle');
-    if (emotionsTitle) {
-    emotionsTitle.textContent = getTranslation(CONFIG.language, 'quickEmotionsTitle', "I'm feeling...");
-    }
-
     // ================================
     // UPDATE DAY FUNCTION
     // ================================
@@ -1768,6 +1814,13 @@ async function initMentivio() {
     updateInputPlaceholder(CONFIG.language);
     updateSafetyNotice(CONFIG.language);
     updateHeaderText(CONFIG.language);
+    
+    // Update emotions title
+    const emotionsTitle = document.getElementById('emotionsTitle');
+    if (emotionsTitle) {
+        emotionsTitle.textContent = getTranslation(CONFIG.language, 'quickEmotionsTitle', "I'm feeling...");
+    }
+    
     updateDay();
 
     // Initialize chat (restore conversation)
@@ -1908,8 +1961,6 @@ async function initMentivio() {
     // ================================
     window.complianceManager = new ComplianceManager();
     window.complianceManager.initialize();
-
-
 
     // ================================
     // INITIAL LANGUAGE SYNC
