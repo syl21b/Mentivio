@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: cd backend && pip install --upgrade pip setuptools wheel && pip install -r requirements.txt
-    startCommand: cd backend && gunicorn app:app
+    startCommand: gunicorn --chdir backend app:app 
     envVars:
       - key: PYTHON_VERSION
         value: "3.12.4"
