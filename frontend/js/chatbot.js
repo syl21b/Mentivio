@@ -436,11 +436,11 @@ function displayConversation(messages) {
     welcomeDiv.innerHTML = `
         <div class="message bot">
             <div class="message-content">
-                <div class="message-text">${getTranslation(CONFIG.language, 'welcomeMessage', 'Hello 😊')}</div>
-                <div class="message-time">just now</div>
+            <div class="message-text">${getTranslation(CONFIG.language, 'welcomeMessage', 'Hello 😊')}</div>
+            <div class="message-time">${getTranslation(CONFIG.language, 'messageTimeJustNow', 'just now')}</div>
             </div>
         </div>
-    `;
+        `;
     chatContainer.appendChild(welcomeDiv);
     
     // Append all saved messages
@@ -952,7 +952,7 @@ function showEmergencyCrisisModal(language, severity = 'urgent') {
           </div>
         </div>
         ${severity === 'immediate' ? `
-        <div class="crisis-warning"><p><strong>Important:</strong> ${t.crisisModal.importantMessage}</p></div>
+        `<div class="crisis-warning"><p><strong>${t.crisisModal.importantLabel || 'Important:'}</strong> ${t.crisisModal.importantMessage}</p></div>`
         <div class="crisis-actions">
           <button onclick="confirmHelpReceived()" class="crisis-action-btn crisis-action-confirm">${btn.contacted}</button>
           <button onclick="window.open('tel:${contacts.emergency}')" class="crisis-action-btn crisis-action-emergency">${btn.callEmergency}</button>
@@ -1514,6 +1514,11 @@ async function initMentivio() {
     const activeEmotion = document.getElementById('activeEmotion');
     const currentDay = document.getElementById('currentDay');
 
+    const emotionsTitle = document.getElementById('emotionsTitle');
+    if (emotionsTitle) {
+    emotionsTitle.textContent = getTranslation(CONFIG.language, 'quickEmotionsTitle', "I'm feeling...");
+    }
+
     // ================================
     // UPDATE DAY FUNCTION
     // ================================
@@ -1826,8 +1831,8 @@ async function initMentivio() {
                     ${createResourcesSection(categories.international, resources.filter(r => r.type === 'international'))}
                     ${createResourcesSection(categories.other, resources.filter(r => !['suicide','emergency','violence','substance','youth','veterans','text','international'].includes(r.type)))}
                     <div class="resources-footer">
-                        <p><i class="fas fa-info-circle"></i> These services are confidential and available 24/7 in most regions.</p>
-                        <p><i class="fas fa-globe"></i> For country-specific resources, visit our full crisis support page.</p>
+                        <p><i class="fas fa-info-circle"></i> ${t.resourcesModal.footerConfidential || 'These services are confidential and available 24/7 in most regions.'}</p>
+                        <p><i class="fas fa-globe"></i> ${t.resourcesModal.footerCountrySpecific || 'For country-specific resources, visit our full crisis support page.'}</p>
                     </div>
                 </div>
                 <div class="resources-actions">

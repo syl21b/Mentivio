@@ -78,7 +78,8 @@
       },
       "followUp": "I'm really glad you reached out ❤️ How are you feeling right now?",
       "importantMessage": "For your safety, chat will remain paused until you confirm you've reached out for help.",
-      "footerMessage": "Mentivio provides emotional support and crisis resources. For immediate emergencies, please contact the numbers above."
+      "footerMessage": "Mentivio provides emotional support and crisis resources. For immediate emergencies, please contact the numbers above.",
+      "importantLabel": "Important:"
     },
     "resourcesModal": {
       "title": "Additional Support Resources",
@@ -156,7 +157,9 @@
           "description": "Global emotional support network",
           "type": "international"
         }
-      ]
+      ],
+      "footerConfidential": "These services are confidential and available 24/7 in most regions.",
+      "footerCountrySpecific": "For country-specific resources, visit our full crisis support page."
     },
     "clearChat": {
       "confirm": "Clear all chat history? This cannot be undone.",
@@ -186,6 +189,49 @@
       "transition": "🔄 In Transition",
       "future": "🔮 Future Anxiety",
       "reset": "🔄 Need Reset"
+    },
+    "quickEmotionsTitle": "I'm feeling...",
+    "messageTimeJustNow": "just now",
+    "complianceModal": {
+      "title": "Privacy & Safety",
+      "intro": "Mentivio is committed to protecting your privacy and safety:",
+      "bulletEncryption": "End-to-end encryption for all conversations",
+      "bulletAutoDelete": "Auto-delete conversations after {days} days",
+      "bulletNoPersonalInfo": "No personal info required - use anonymously",
+      "bulletCrisisDetection": "Crisis detection with instant support resources",
+      "bulletGDPR": "GDPR compliant for EU users",
+      "bulletHIPAA": "HIPAA-ready infrastructure",
+      "optionAnalytics": "Allow anonymous analytics",
+      "optionAnalyticsDesc": "Help improve Mentivio with completely anonymous usage data",
+      "optionStorage": "Store conversations locally",
+      "optionStorageDesc": "Remember our conversation in your browser for {days} days",
+      "optionCrisis": "Always allow crisis escalation",
+      "optionCrisisDesc": "Required for your safety. We'll connect you with emergency resources if needed.",
+      "btnAccept": "Accept & Continue",
+      "btnAnonymous": "Use Anonymously",
+      "footer": "By continuing, you agree to our {privacyPolicy} and {termsOfService}."
+    },
+    "privacyControls": {
+      "title": "Privacy Controls",
+      "sectionData": "Your Data",
+      "sectionSettings": "Privacy Settings",
+      "sectionCompliance": "Compliance Information",
+      "currentMode": "Current mode:",
+      "modeAnonymous": "Anonymous (no data stored)",
+      "modeStandard": "Standard (data stored locally)",
+      "btnExport": "Export My Data",
+      "btnDelete": "Delete All Data",
+      "toggleAnonymous": "Use anonymous mode (no data stored permanently)",
+      "toggleDesc": "Anonymous mode uses session storage only. All data disappears when you close your browser.",
+      "retention": "Data retention: {days} days",
+      "gdpr": "GDPR compliant: {status}",
+      "hipaa": "HIPAA compliant: {status}",
+      "encryption": "End-to-end encryption: Yes",
+      "crisisLogging": "Crisis intervention logging: {status}"
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No"
     }
   },
   "es": {
@@ -267,7 +313,8 @@
       },
       "followUp": "Me alegra mucho que hayas escrito 💙 ¿Cómo te sientes ahora?",
       "importantMessage": "Para tu seguridad, el chat permanecerá pausado hasta que confirmes que has buscado ayuda.",
-      "footerMessage": "Mentivio proporciona apoyo emocional y recursos de crisis. Para emergencias inmediatas, contacta con los números anteriores."
+      "footerMessage": "Mentivio proporciona apoyo emocional y recursos de crisis. Para emergencias inmediatas, contacta con los números anteriores.",
+      "importantLabel": "Importante:"
     },
     "resourcesModal": {
       "title": "Recursos de Apoyo Adicionales",
@@ -345,7 +392,9 @@
           "description": "Global emotional support network",
           "type": "international"
         }
-      ]
+      ],
+      "footerConfidential": "Estos servicios son confidenciales y están disponibles 24/7 en la mayoría de las regiones.",
+      "footerCountrySpecific": "Para recursos específicos de tu país, visita nuestra página completa de apoyo en crisis."
     },
     "clearChat": {
       "confirm": "¿Borrar todo el historial de chat? Esto no se puede deshacer.",
@@ -375,6 +424,49 @@
       "transition": "🔄 En Transición",
       "future": "🔮 Ansiedad Futuro",
       "reset": "🔄 Necesito Reinicio"
+    },
+    "quickEmotionsTitle": "Me siento...",
+    "messageTimeJustNow": "ahora mismo",
+    "complianceModal": {
+      "title": "Privacidad y Seguridad",
+      "intro": "Mentivio está comprometido a proteger tu privacidad y seguridad:",
+      "bulletEncryption": "Cifrado de extremo a extremo para todas las conversaciones",
+      "bulletAutoDelete": "Eliminación automática de conversaciones después de {days} días",
+      "bulletNoPersonalInfo": "No se requiere información personal: úsalo de forma anónima",
+      "bulletCrisisDetection": "Detección de crisis con recursos de apoyo inmediato",
+      "bulletGDPR": "Cumple con el RGPD para usuarios de la UE",
+      "bulletHIPAA": "Infraestructura preparada para HIPAA",
+      "optionAnalytics": "Permitir análisis anónimos",
+      "optionAnalyticsDesc": "Ayuda a mejorar Mentivio con datos de uso completamente anónimos",
+      "optionStorage": "Guardar conversaciones localmente",
+      "optionStorageDesc": "Recordar nuestra conversación en tu navegador durante {days} días",
+      "optionCrisis": "Permitir siempre la escalada de crisis",
+      "optionCrisisDesc": "Requerido para tu seguridad. Te conectaremos con recursos de emergencia si es necesario.",
+      "btnAccept": "Aceptar y Continuar",
+      "btnAnonymous": "Usar de forma anónima",
+      "footer": "Al continuar, aceptas nuestra {privacyPolicy} y {termsOfService}."
+    },
+    "privacyControls": {
+      "title": "Controles de Privacidad",
+      "sectionData": "Tus Datos",
+      "sectionSettings": "Configuración de Privacidad",
+      "sectionCompliance": "Información de Cumplimiento",
+      "currentMode": "Modo actual:",
+      "modeAnonymous": "Anónimo (sin datos almacenados)",
+      "modeStandard": "Estándar (datos almacenados localmente)",
+      "btnExport": "Exportar Mis Datos",
+      "btnDelete": "Eliminar Todos los Datos",
+      "toggleAnonymous": "Usar modo anónimo (sin almacenamiento permanente)",
+      "toggleDesc": "El modo anónimo usa solo almacenamiento de sesión. Todos los datos desaparecen al cerrar el navegador.",
+      "retention": "Retención de datos: {days} días",
+      "gdpr": "Cumple con RGPD: {status}",
+      "hipaa": "Cumple con HIPAA: {status}",
+      "encryption": "Cifrado de extremo a extremo: Sí",
+      "crisisLogging": "Registro de intervención en crisis: {status}"
+    },
+    "common": {
+      "yes": "Sí",
+      "no": "No"
     }
   },
   "vi": {
@@ -456,7 +548,8 @@
       },
       "followUp": "Mình rất vui vì bạn đã liên hệ ❤️ Bây giờ bạn thấy thế nào?",
       "importantMessage": "Để đảm bảo an toàn của bạn, cuộc trò chuyện sẽ tạm dừng cho đến khi bạn xác nhận đã tìm kiếm sự giúp đỡ.",
-      "footerMessage": "Mentivio cung cấp hỗ trợ cảm xúc và tài nguyên khủng hoảng. Đối với trường hợp khẩn cấp ngay lập tức, vui lòng liên hệ với các số trên."
+      "footerMessage": "Mentivio cung cấp hỗ trợ cảm xúc và tài nguyên khủng hoảng. Đối với trường hợp khẩn cấp ngay lập tức, vui lòng liên hệ với các số trên.",
+      "importantLabel": "Quan trọng:"
     },
     "resourcesModal": {
       "title": "Tài Nguyên Hỗ Trợ Bổ Sung",
@@ -534,7 +627,9 @@
           "description": "Global emotional support network",
           "type": "international"
         }
-      ]
+      ],
+      "footerConfidential": "Các dịch vụ này được bảo mật và có sẵn 24/7 ở hầu hết các khu vực.",
+      "footerCountrySpecific": "Để biết tài nguyên cụ thể theo quốc gia, hãy truy cập trang hỗ trợ khủng hoảng đầy đủ của chúng tôi."
     },
     "clearChat": {
       "confirm": "Xóa toàn bộ lịch sử trò chuyện? Hành động này không thể hoàn tác.",
@@ -564,6 +659,49 @@
       "transition": "🔄 Giai Đoạn Chuyển Tiếp",
       "future": "🔮 Lo Âu Tương Lai",
       "reset": "🔄 Cần Khởi Động Lại"
+    },
+    "quickEmotionsTitle": "Tôi đang cảm thấy...",
+    "messageTimeJustNow": "vừa xong",
+    "complianceModal": {
+      "title": "Quyền Riêng Tư & An Toàn",
+      "intro": "Mentivio cam kết bảo vệ quyền riêng tư và sự an toàn của bạn:",
+      "bulletEncryption": "Mã hóa đầu cuối cho mọi cuộc trò chuyện",
+      "bulletAutoDelete": "Tự động xóa cuộc trò chuyện sau {days} ngày",
+      "bulletNoPersonalInfo": "Không yêu cầu thông tin cá nhân - sử dụng ẩn danh",
+      "bulletCrisisDetection": "Phát hiện khủng hoảng với tài nguyên hỗ trợ tức thì",
+      "bulletGDPR": "Tuân thủ GDPR cho người dùng EU",
+      "bulletHIPAA": "Cơ sở hạ tầng sẵn sàng cho HIPAA",
+      "optionAnalytics": "Cho phép phân tích ẩn danh",
+      "optionAnalyticsDesc": "Giúp cải thiện Mentivio với dữ liệu sử dụng hoàn toàn ẩn danh",
+      "optionStorage": "Lưu trữ cuộc trò chuyện cục bộ",
+      "optionStorageDesc": "Ghi nhớ cuộc trò chuyện trong trình duyệt của bạn trong {days} ngày",
+      "optionCrisis": "Luôn cho phép can thiệp khủng hoảng",
+      "optionCrisisDesc": "Cần thiết cho sự an toàn của bạn. Chúng tôi sẽ kết nối bạn với các nguồn lực khẩn cấp nếu cần.",
+      "btnAccept": "Chấp nhận & Tiếp tục",
+      "btnAnonymous": "Sử dụng ẩn danh",
+      "footer": "Bằng cách tiếp tục, bạn đồng ý với {privacyPolicy} và {termsOfService} của chúng tôi."
+    },
+    "privacyControls": {
+      "title": "Kiểm Soát Quyền Riêng Tư",
+      "sectionData": "Dữ Liệu Của Bạn",
+      "sectionSettings": "Cài Đặt Quyền Riêng Tư",
+      "sectionCompliance": "Thông Tin Tuân Thủ",
+      "currentMode": "Chế độ hiện tại:",
+      "modeAnonymous": "Ẩn danh (không lưu trữ dữ liệu)",
+      "modeStandard": "Tiêu chuẩn (dữ liệu lưu cục bộ)",
+      "btnExport": "Xuất Dữ Liệu Của Tôi",
+      "btnDelete": "Xóa Tất Cả Dữ Liệu",
+      "toggleAnonymous": "Sử dụng chế độ ẩn danh (không lưu trữ vĩnh viễn)",
+      "toggleDesc": "Chế độ ẩn danh chỉ sử dụng bộ nhớ phiên. Mọi dữ liệu biến mất khi bạn đóng trình duyệt.",
+      "retention": "Lưu giữ dữ liệu: {days} ngày",
+      "gdpr": "Tuân thủ GDPR: {status}",
+      "hipaa": "Tuân thủ HIPAA: {status}",
+      "encryption": "Mã hóa đầu cuối: Có",
+      "crisisLogging": "Ghi nhật ký can thiệp khủng hoảng: {status}"
+    },
+    "common": {
+      "yes": "Có",
+      "no": "Không"
     }
   },
   "zh": {
@@ -645,7 +783,8 @@
       },
       "followUp": "很高兴你联系了我 ❤️ 你现在感觉怎么样？",
       "importantMessage": "为了您的安全，聊天将保持暂停，直到您确认已寻求帮助。",
-      "footerMessage": "Mentivio提供情感支持和危机资源。对于紧急情况，请联系上述号码。"
+      "footerMessage": "Mentivio提供情感支持和危机资源。对于紧急情况，请联系上述号码。",
+      "importantLabel": "重要："
     },
     "resourcesModal": {
       "title": "额外支持资源",
@@ -723,7 +862,9 @@
           "description": "Global emotional support network",
           "type": "international"
         }
-      ]
+      ],
+      "footerConfidential": "这些服务是保密的，并且在大多数地区24/7可用。",
+      "footerCountrySpecific": "如需特定国家的资源，请访问我们的完整危机支持页面。"
     },
     "clearChat": {
       "confirm": "清除所有聊天记录？此操作无法撤销。",
@@ -753,6 +894,49 @@
       "transition": "🔄 过渡期",
       "future": "🔮 未来焦虑",
       "reset": "🔄 需要重启"
+    },
+    "quickEmotionsTitle": "我感觉...",
+    "messageTimeJustNow": "刚刚",
+    "complianceModal": {
+      "title": "隐私与安全",
+      "intro": "Mentivio致力于保护您的隐私和安全：",
+      "bulletEncryption": "所有对话的端到端加密",
+      "bulletAutoDelete": "{days}天后自动删除对话",
+      "bulletNoPersonalInfo": "无需个人信息 - 匿名使用",
+      "bulletCrisisDetection": "危机检测与即时支持资源",
+      "bulletGDPR": "符合欧盟GDPR要求",
+      "bulletHIPAA": "符合HIPAA标准的基础设施",
+      "optionAnalytics": "允许匿名分析",
+      "optionAnalyticsDesc": "使用完全匿名的使用数据帮助改进Mentivio",
+      "optionStorage": "在本地存储对话",
+      "optionStorageDesc": "在浏览器中记住我们的对话 {days} 天",
+      "optionCrisis": "始终允许危机升级",
+      "optionCrisisDesc": "为了您的安全所必需。如果需要，我们会为您连接紧急资源。",
+      "btnAccept": "接受并继续",
+      "btnAnonymous": "匿名使用",
+      "footer": "继续即表示您同意我们的{privacyPolicy}和{termsOfService}。"
+    },
+    "privacyControls": {
+      "title": "隐私控制",
+      "sectionData": "您的数据",
+      "sectionSettings": "隐私设置",
+      "sectionCompliance": "合规信息",
+      "currentMode": "当前模式：",
+      "modeAnonymous": "匿名（不存储数据）",
+      "modeStandard": "标准（本地存储数据）",
+      "btnExport": "导出我的数据",
+      "btnDelete": "删除所有数据",
+      "toggleAnonymous": "使用匿名模式（不永久存储数据）",
+      "toggleDesc": "匿名模式仅使用会话存储。关闭浏览器后所有数据消失。",
+      "retention": "数据保留：{days}天",
+      "gdpr": "符合GDPR：{status}",
+      "hipaa": "符合HIPAA：{status}",
+      "encryption": "端到端加密：是",
+      "crisisLogging": "危机干预记录：{status}"
+    },
+    "common": {
+      "yes": "是",
+      "no": "否"
     }
   }
 }
