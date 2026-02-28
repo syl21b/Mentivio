@@ -9,6 +9,7 @@ import joblib
 import time
 from typing import Dict, List, Tuple, Optional, Any
 
+
 # Import security components
 from security import (
     SecurityConfig, SecurityUtils, EncryptionService,
@@ -17,7 +18,7 @@ from security import (
 
 # Import database functions
 from database import get_postgres_connection, init_database, save_assessment_to_db, \
-    load_assessments_from_db, load_single_assessment_from_db, delete_assessment_from_db
+    load_assessments_from_db, load_single_assessment_from_db, delete_assessment_from_db, init_connection_pool
 
 # Import chatbot blueprint
 from chatbot_backend import chatbot_bp
@@ -474,8 +475,9 @@ def validate_api_input():
             except Exception as e:
                 return jsonify({'error': 'Invalid JSON data'}), 400
 
-# Initialize database
-init_database()
+# Initialize database and connection pool
+init_database()          # creates tables if needed
+init_connection_pool()   # sets up connection pool
 
 # Load model components
 def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Optional[Any], Optional[List[str]], Optional[Dict[str, Any]]]:

@@ -3,6 +3,7 @@ import json
 import logging
 import psycopg
 from psycopg.rows import dict_row
+import psycopg_pool
 import sqlite3
 from typing import Dict, List, Tuple, Optional, Any
 
@@ -10,38 +11,68 @@ from security import SecurityUtils
 
 logger = logging.getLogger(__name__)
 
+# Global connection pool
+connection_pool = None
 
-def get_postgres_connection():
-    """Get PostgreSQL database connection using psycopg"""
-    conn = None
+def init_connection_pool():
+    """Initialize PostgreSQL connection pool."""
+    global connection_pool
     try:
         from dotenv import load_dotenv
         load_dotenv()
-
+        
         database_url = os.environ.get('DATABASE_URL')
-
         if not database_url:
-            raise ValueError("DATABASE_URL environment variable is not set")
-
-        logger.info(f"Attempting to connect to database with URL: {database_url[:30]}...")
-
+            logger.warning("DATABASE_URL not set, connection pool disabled")
+            return
+        
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
-
-        conn = psycopg.connect(database_url, row_factory=dict_row)
-
-        with conn.cursor() as cur:
-            cur.execute("SELECT 1")
-            cur.fetchone()
-
-        logger.info("PostgreSQL connection successful")
-        return conn
-
+        
+        # Create pool with min 1, max 10 connections
+        connection_pool = psycopg_pool.ConnectionPool(
+            database_url,
+            min_size=1,
+            max_size=10,
+            open=False,  # we'll open manually
+            kwargs={"row_factory": dict_row}
+        )
+        connection_pool.open()
+        logger.info("Database connection pool initialized")
     except Exception as e:
-        logger.error(f"PostgreSQL connection failed: {e}")
+        logger.error(f"Failed to initialize connection pool: {e}")
+        connection_pool = None
 
+def get_postgres_connection():
+    """Get a database connection from the pool, or fallback to direct connection."""
+    global connection_pool
+    if connection_pool:
         try:
-            logger.info("Attempting SQLite fallback...")
+            return connection_pool.getconn()
+        except Exception as e:
+            logger.error(f"Failed to get connection from pool: {e}")
+            # fall through to direct connection
+    return get_postgres_connection_direct()
+
+def get_postgres_connection_direct():
+    """Direct connection (fallback if pool not available)."""
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+        
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable is not set")
+        
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        
+        conn = psycopg.connect(database_url, row_factory=dict_row)
+        return conn
+    except Exception as e:
+        logger.error(f"Direct PostgreSQL connection failed: {e}")
+        # SQLite fallback
+        try:
             sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
             conn = sqlite3.connect(sqlite_path)
             conn.row_factory = sqlite3.Row
@@ -51,12 +82,19 @@ def get_postgres_connection():
             logger.error(f"SQLite fallback also failed: {sqlite_error}")
             raise e
 
+def close_connection(conn):
+    """Return connection to pool or close it."""
+    global connection_pool
+    if connection_pool and hasattr(conn, 'pgconn'):  # it's a psycopg connection from pool
+        connection_pool.putconn(conn)
+    elif conn:
+        conn.close()   # FIXED: call close() on the connection, not recursively
 
 def init_database():
-    """Initialize database with required tables"""
+    """Initialize database with required tables."""
+    conn = None
     try:
         conn = get_postgres_connection()
-
         with conn.cursor() as cur:
             # Check if table exists
             cur.execute('''
@@ -66,7 +104,7 @@ def init_database():
                 );
             ''')
             table_exists = cur.fetchone()['exists']
-
+            
             if not table_exists:
                 cur.execute('''
                     CREATE TABLE assessments (
@@ -89,43 +127,38 @@ def init_database():
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
-
                 cur.execute('CREATE INDEX idx_patient_number ON assessments(patient_number)')
                 cur.execute('CREATE INDEX idx_timestamp ON assessments(report_timestamp)')
-                logger.info("Created new assessments table with coded_responses_json column")
+                logger.info("Created new assessments table")
             else:
-                # Check if responses_json column exists - remove it
+                # Check for old columns and add new ones if needed
                 cur.execute('''
                     SELECT column_name 
                     FROM information_schema.columns 
                     WHERE table_name = 'assessments' 
                     AND column_name = 'responses_json';
                 ''')
-                responses_column_exists = cur.fetchone()
-
-                if responses_column_exists:
+                if cur.fetchone():
                     cur.execute('ALTER TABLE assessments DROP COLUMN responses_json;')
-                    logger.info("Removed responses_json column from existing assessments table")
-
-                # Check if coded_responses_json column exists - add if missing
+                    logger.info("Removed responses_json column")
+                
                 cur.execute('''
                     SELECT column_name 
                     FROM information_schema.columns 
                     WHERE table_name = 'assessments' 
                     AND column_name = 'coded_responses_json';
                 ''')
-                coded_column_exists = cur.fetchone()
-
-                if not coded_column_exists:
+                if not cur.fetchone():
                     cur.execute('ALTER TABLE assessments ADD COLUMN coded_responses_json TEXT;')
-                    logger.info("Added coded_responses_json column to existing assessments table")
-
+                    logger.info("Added coded_responses_json column")
+        
         conn.commit()
-        conn.close()
         logger.info("Database initialization completed successfully")
-
     except Exception as e:
         logger.warning(f"Database initialization warning: {e}")
+    finally:
+        if conn:
+            close_connection(conn)
 
 
 def convert_to_canonical_key(diagnosis_text: str) -> str:
@@ -242,7 +275,7 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
             ))
 
         conn.commit()
-        conn.close()
+        close_connection(conn)
 
         logger.info(f"Successfully saved assessment {sanitized_data.get('id')}")
         return True
@@ -252,7 +285,7 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
         if conn:
             try:
                 conn.rollback()
-                conn.close()
+                close_connection(conn)
             except:
                 pass
         return False
@@ -275,7 +308,7 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
 
             rows = cur.fetchall()
 
-        conn.close()
+        close_connection(conn)
 
         assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
 
@@ -359,11 +392,11 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
             row = cur.fetchone()
 
             if not row:
-                conn.close()
+                close_connection(conn)
                 return None
 
         row_dict = dict(row)
-        conn.close()
+        close_connection(conn)
 
         if not row_dict:
             return None
@@ -421,7 +454,7 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
     except Exception as e:
         logger.error(f"Error loading single assessment from database: {e}")
         try:
-            conn.close()
+            close_connection(conn)
         except:
             pass
         return None
@@ -439,7 +472,7 @@ def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
             ''', (patient_number, assessment_id))
 
         conn.commit()
-        conn.close()
+        close_connection(conn)
 
         return True
 

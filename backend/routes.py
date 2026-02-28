@@ -2,9 +2,11 @@ from flask import request, jsonify, send_from_directory, redirect
 from app import app, model_package, scaler, label_encoder, feature_names, category_mappings, clinical_enhancer, preprocessor
 from database import (
     save_assessment_to_db, load_assessments_from_db, load_single_assessment_from_db,
-    delete_assessment_from_db, get_postgres_connection, convert_to_canonical_key
+    delete_assessment_from_db, get_postgres_connection, convert_to_canonical_key,
+    close_connection, init_connection_pool
 )
 from security import SecurityUtils, rate_limiter, SecurityConfig
+from chatbot_backend import client as gemini_client, SAFETY_SETTINGS, get_gemini_api_key
 import logging
 import numpy as np
 import pandas as pd
@@ -253,14 +255,160 @@ def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
         return assessment
 
 
+# ================================
+# NEW: AI Report helpers
+# ================================
+
+def format_responses_for_prompt(coded_responses):
+    CODE_TO_ENGLISH = {
+        'YN1': 'NO', 'YN2': 'YES',
+        'FR1': 'Seldom', 'FR2': 'Sometimes', 'FR3': 'Usually', 'FR4': 'Most-Often',
+        'CO1': 'Cannot concentrate', 'CO2': 'Poor concentration', 'CO3': 'Average concentration',
+        'CO4': 'Good concentration', 'CO5': 'Excellent concentration',
+        'OP1': 'Extremely pessimistic', 'OP2': 'Pessimistic', 'OP3': 'Neutral outlook',
+        'OP4': 'Optimistic', 'OP5': 'Extremely optimistic',
+        'SA1': 'No interest', 'SA2': 'Low interest', 'SA3': 'Moderate interest',
+        'SA4': 'High interest', 'SA5': 'Very high interest'
+    }
+    QUESTION_TO_FEATURE = {
+        'Q1': 'Mood Swing', 'Q2': 'Sadness', 'Q3': 'Euphoric',
+        'Q4': 'Sleep disorder', 'Q5': 'Exhausted',
+        'Q6': 'Suicidal thoughts', 'Q7': 'Aggressive Response',
+        'Q8': 'Nervous Breakdown', 'Q9': 'Overthinking',
+        'Q10': 'Anorexia', 'Q11': 'Authority Respect',
+        'Q12': 'Try Explanation', 'Q13': 'Ignore & Move-On',
+        'Q14': 'Admit Mistakes', 'Q15': 'Concentration',
+        'Q16': 'Optimism', 'Q17': 'Sexual Activity'
+    }
+    lines = []
+    for q, a in coded_responses.items():
+        question = QUESTION_TO_FEATURE.get(q, q)
+        answer = CODE_TO_ENGLISH.get(a, a)
+        lines.append(f"{question}: {answer}")
+    return "\n".join(lines)
+
+def create_ai_report_prompt(patient_info, responses_text, language='en'):
+    base_prompt = f"""
+You are an empathetic mental health assistant. Based on the following assessment answers, provide a kind, supportive narrative that summarizes the user's responses and offers gentle, practical suggestions for well‑being. Do not give a medical diagnosis – the model's diagnosis is provided separately. Write in {language} and keep the tone warm and encouraging.
+
+Patient: {patient_info.get('name', 'Anonymous')}, age {patient_info.get('age', 'unknown')}, gender {patient_info.get('gender', 'not specified')}.
+
+Assessment answers:
+{responses_text}
+
+Please write a short report (around 200‑300 words) that:
+- Acknowledges the user's feelings and experiences.
+- Offers hope and encouragement.
+- Suggests simple, positive actions (e.g., mindfulness, talking to a friend, professional help if indicated).
+- Reminds them that they are not alone and that seeking help is a sign of strength.
+
+Write the report below:
+"""
+    return base_prompt
+
+def call_gemini_for_report(prompt):
+    if not gemini_client:
+        logger.warning("Gemini client not available")
+        return "AI report generation is currently unavailable."
+    try:
+        from google.genai import types
+        response = gemini_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=1000,
+                safety_settings=SAFETY_SETTINGS
+            )
+        )
+        return response.text.strip()
+    except Exception as e:
+        logger.error(f"Gemini report generation failed: {e}")
+        return "Unable to generate AI report at this time."
+
+# ================================
+# NEW: Warmup and readiness endpoints
+# ================================
+
+@app.route('/api/warmup', methods=['GET'])
+def warmup():
+    """Trigger model loading and DB connection to warm up the instance."""
+    try:
+        # Force a DB connection
+        conn = get_postgres_connection()
+        close_connection(conn)
+        # Models are already loaded at startup, but we can check
+        if model_package is None:
+            # Try loading again (maybe first attempt failed)
+            from app import load_model_components
+            load_model_components()
+        return jsonify({
+            'status': 'warm',
+            'models_loaded': model_package is not None,
+            'database_ok': True
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/ready', methods=['GET'])
+def ready():
+    """Readiness probe for orchestration platforms."""
+    if model_package and scaler and label_encoder:
+        try:
+            conn = get_postgres_connection()
+            close_connection(conn)
+            return jsonify({'status': 'ready'}), 200
+        except Exception as e:
+            return jsonify({'status': 'db not ready', 'error': str(e)}), 503
+    else:
+        return jsonify({'status': 'loading models'}), 503
+
+# ================================
+# NEW: AI Report endpoint
+# ================================
+
+@app.route('/api/ai-report', methods=['POST'])
+def ai_report():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        coded_responses = data.get('coded_responses', {})
+        patient_info = data.get('patientInfo', {})
+        language = data.get('language', 'en')
+
+        if not coded_responses:
+            return jsonify({'error': 'No responses provided'}), 400
+
+        # Validate the coded responses (same as in predict)
+        coded_valid, coded_msg = SecurityUtils.validate_coded_responses(coded_responses)
+        if not coded_valid:
+            return jsonify({'error': f'Invalid response format: {coded_msg}'}), 400
+
+        # Generate the AI narrative
+        human_readable = format_responses_for_prompt(coded_responses)
+        prompt = create_ai_report_prompt(patient_info, human_readable, language)
+        ai_text = call_gemini_for_report(prompt)
+
+        return jsonify({
+            'ai_narrative': ai_text,
+            'language': language
+        })
+
+    except Exception as e:
+        logger.error(f"AI report error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+
 # Static routes
 @app.route('/')
 def serve_index():
     return redirect('/home', code=302)
 
-
 @app.route('/<page_name>')
 def serve_html_page(page_name):
+    print(f"Serving page: {page_name}, static_folder: {app.static_folder}")
     main_pages = {
         'home': 'home.html',
         'about': 'about.html',
@@ -272,7 +420,6 @@ def serve_html_page(page_name):
         'privacy': 'privacy.html',
         'terms': 'terms.html'
     }
-
     if page_name in main_pages:
         return send_from_directory(app.static_folder, main_pages[page_name])
 
@@ -281,7 +428,6 @@ def serve_html_page(page_name):
         'medication-resource', 'mindfulness-resource', 'ptsd-resource',
         'selfcare-resource', 'therapy-resource', 'physical-resource'
     ]
-
     if page_name in resource_pages:
         return send_from_directory(os.path.join(app.static_folder, 'resources'), f'{page_name}.html')
 
@@ -293,11 +439,9 @@ def serve_html_page(page_name):
         except:
             return send_from_directory(app.static_folder, 'home.html')
 
-
 @app.route('/<page_name>.html')
 def serve_html_page_with_extension(page_name):
     return redirect(f'/{page_name}')
-
 
 @app.route('/resources/<resource_name>')
 def serve_resource_page(resource_name):
@@ -306,17 +450,14 @@ def serve_resource_page(resource_name):
         'medication-resource', 'mindfulness-resource', 'ptsd-resource',
         'selfcare-resource', 'therapy-resource', 'physical-resource'
     ]
-
     if resource_name in resource_pages:
         return send_from_directory(os.path.join(app.static_folder, 'resources'), f'{resource_name}.html')
     else:
         return send_from_directory(app.static_folder, 'resources.html')
 
-
 @app.route('/resources/<resource_name>.html')
 def serve_resource_page_with_extension(resource_name):
     return redirect(f'/resources/{resource_name}')
-
 
 @app.route('/css/<path:filename>')
 def serve_css(filename):
@@ -325,26 +466,21 @@ def serve_css(filename):
     except:
         return send_from_directory(os.path.join(app.static_folder, 'resources'), filename)
 
-
 @app.route('/js/<path:filename>')
 def serve_js(filename):
     return send_from_directory(os.path.join(app.static_folder, 'js'), filename)
-
 
 @app.route('/resources/css/<path:filename>')
 def serve_resource_css(filename):
     return send_from_directory(os.path.join(app.static_folder, 'resources'), filename)
 
-
 @app.route('/assets/<path:filename>')
 def serve_assets(filename):
     return send_from_directory(os.path.join(app.static_folder, 'assets'), filename)
 
-
 @app.route('/resource-detail.css')
 def serve_resource_detail_css():
     return send_from_directory(os.path.join(app.static_folder, 'resources'), 'resource-detail.css')
-
 
 @app.route('/<path:path>')
 def serve_static_files(path):
@@ -356,12 +492,10 @@ def serve_static_files(path):
             return send_from_directory(app.static_folder, path)
         except:
             pass
-
     try:
         return serve_html_page(path)
     except:
         return send_from_directory(app.static_folder, 'home.html')
-
 
 # API routes
 @app.route('/api/health', methods=['GET'])
@@ -1377,17 +1511,14 @@ def not_found(error):
         except:
             return jsonify({'error': 'Page not found'}), 404
 
-
 @app.errorhandler(500)
 def internal_error(error):
     logger.error(f"Internal server error: {error}")
     return jsonify({'error': 'Internal server error'}), 500
 
-
 @app.errorhandler(413)
 def too_large(error):
     return jsonify({'error': 'File too large'}), 413
-
 
 @app.errorhandler(429)
 def too_many_requests(error):
@@ -1395,3 +1526,4 @@ def too_many_requests(error):
         'error': 'Too many requests',
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
+

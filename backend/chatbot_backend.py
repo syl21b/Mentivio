@@ -3186,6 +3186,12 @@ def periodic_session_cleanup():
             logger.error(f"Error in background session cleanup: {str(e)}")
             time.sleep(60)  # Wait a minute before retrying on error
 
+
+
+# Export the client and safety settings for reuse in routes.py
+__all__ = ['chatbot_bp', 'client', 'SAFETY_SETTINGS', 'get_gemini_api_key']
+
+
 # Start background cleanup thread
 cleanup_thread = threading.Thread(target=periodic_session_cleanup, daemon=True)
 cleanup_thread.start()
