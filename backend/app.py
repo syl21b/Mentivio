@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_compress import Compress
 import logging
 import os
 import numpy as np
@@ -8,6 +9,7 @@ import pickle
 import joblib
 import time
 from typing import Dict, List, Tuple, Optional, Any
+import atexit
 
 
 # Import security components
@@ -18,7 +20,7 @@ from security import (
 
 # Import database functions
 from database import get_postgres_connection, init_database, save_assessment_to_db, \
-    load_assessments_from_db, load_single_assessment_from_db, delete_assessment_from_db, init_connection_pool
+    load_assessments_from_db, load_single_assessment_from_db, delete_assessment_from_db, init_connection_pool, close_connection_pool
 
 # Import chatbot blueprint
 from chatbot_backend import chatbot_bp
@@ -27,13 +29,105 @@ from chatbot_backend import chatbot_bp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Global model variables
-model_package: Optional[Dict[str, Any]] = None
-scaler: Optional[Any] = None
-label_encoder: Optional[Any] = None
-feature_names: Optional[List[str]] = None
-category_mappings: Optional[Dict[str, Any]] = None
-clinical_enhancer: Optional[Any] = None
+# Global model variables – initially None, loaded lazily
+_model_package: Optional[Dict[str, Any]] = None
+_scaler: Optional[Any] = None
+_label_encoder: Optional[Any] = None
+_feature_names: Optional[List[str]] = None
+_category_mappings: Optional[Dict[str, Any]] = None
+_clinical_enhancer: Optional[Any] = None
+_preprocessor: Optional[Any] = None
+
+# Lazy loading functions
+def get_model_package():
+    global _model_package
+    if _model_package is None:
+        _model_package, _scaler, _label_encoder, _feature_names, _category_mappings = _load_model_components()
+    return _model_package
+
+def get_scaler():
+    global _scaler
+    if _scaler is None:
+        _model_package, _scaler, _label_encoder, _feature_names, _category_mappings = _load_model_components()
+    return _scaler
+
+def get_label_encoder():
+    global _label_encoder
+    if _label_encoder is None:
+        _model_package, _scaler, _label_encoder, _feature_names, _category_mappings = _load_model_components()
+    return _label_encoder
+
+def get_feature_names():
+    global _feature_names
+    if _feature_names is None:
+        _model_package, _scaler, _label_encoder, _feature_names, _category_mappings = _load_model_components()
+    return _feature_names
+
+def get_category_mappings():
+    global _category_mappings
+    if _category_mappings is None:
+        _model_package, _scaler, _label_encoder, _feature_names, _category_mappings = _load_model_components()
+    return _category_mappings
+
+def get_clinical_enhancer():
+    global _clinical_enhancer
+    if _clinical_enhancer is None and get_feature_names() and get_label_encoder():
+        from app import ClinicalDecisionEnhancer  # local import to avoid circular
+        _clinical_enhancer = ClinicalDecisionEnhancer(get_feature_names(), get_label_encoder())
+    return _clinical_enhancer
+
+def get_preprocessor():
+    global _preprocessor
+    if _preprocessor is None:
+        from app import ClinicalPreprocessor  # local import
+        _preprocessor = ClinicalPreprocessor(get_category_mappings())
+    return _preprocessor
+
+def _load_model_components():
+    """Internal loader – returns tuple of (model_package, scaler, label_encoder, feature_names, category_mappings)."""
+    try:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        models_dir = os.path.join(current_dir, 'models')
+
+        required_files = [
+            'mental_health_model.pkl',
+            'scaler.pkl',
+            'label_encoder.pkl',
+            'feature_names.pkl',
+            'category_mappings.pkl'
+        ]
+
+        for file in required_files:
+            file_path = os.path.join(models_dir, file)
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"Required model file not found: {file}")
+            if os.path.getsize(file_path) == 0:
+                raise ValueError(f"Model file is empty: {file}")
+
+        # Load with compression (assumes they were saved with compress=3)
+        model_path = os.path.join(models_dir, 'mental_health_model.pkl')
+        model_package = joblib.load(model_path)
+
+        scaler_path = os.path.join(models_dir, 'scaler.pkl')
+        scaler = joblib.load(scaler_path)
+
+        encoder_path = os.path.join(models_dir, 'label_encoder.pkl')
+        label_encoder = joblib.load(encoder_path)
+
+        feature_names_path = os.path.join(models_dir, 'feature_names.pkl')
+        with open(feature_names_path, 'rb') as f:
+            feature_names = pickle.load(f)
+
+        category_mappings_path = os.path.join(models_dir, 'category_mappings.pkl')
+        with open(category_mappings_path, 'rb') as f:
+            category_mappings = pickle.load(f)
+
+        logger.info("Model components loaded successfully")
+        return model_package, scaler, label_encoder, feature_names, category_mappings
+
+    except Exception as e:
+        logger.error(f"Error loading model components: {e}")
+        return None, None, None, None, None
 
 
 class ClinicalPreprocessor:
@@ -416,17 +510,21 @@ class ClinicalDecisionEnhancer:
 
 
 # Create Flask app
-# Determine absolute paths
 backend_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.dirname(backend_dir)          # parent of backend
+project_root = os.path.dirname(backend_dir)
 frontend_dir = os.path.join(project_root, 'frontend')
 
-# Create Flask app with correct static/template folders
 app = Flask(__name__,
             static_folder=frontend_dir,
             template_folder=frontend_dir)
 
 app.secret_key = SecurityConfig.SECRET_KEY
+
+# Enable gzip compression
+Compress(app)
+
+# Cache static files for one year
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
 
 # Configure CORS based on environment
 if os.environ.get('RENDER'):
@@ -475,101 +573,18 @@ def validate_api_input():
             except Exception as e:
                 return jsonify({'error': 'Invalid JSON data'}), 400
 
-# Initialize database and connection pool
-init_database()          # creates tables if needed
-init_connection_pool()   # sets up connection pool
+# Initialize database and connection pool (but NOT models)
+init_database()
+init_connection_pool()
 
-# Load model components
-def load_model_components() -> Tuple[Optional[Dict[str, Any]], Optional[Any], Optional[Any], Optional[List[str]], Optional[Dict[str, Any]]]:
-    global model_package, scaler, label_encoder, feature_names, category_mappings
-
-    try:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        models_dir = os.path.join(current_dir, 'models')
-
-        required_files = [
-            'mental_health_model.pkl',
-            'scaler.pkl',
-            'label_encoder.pkl',
-            'feature_names.pkl',
-            'category_mappings.pkl'
-        ]
-
-        for file in required_files:
-            file_path = os.path.join(models_dir, file)
-            if not os.path.exists(file_path):
-                raise FileNotFoundError(f"Required model file not found: {file}")
-
-            if os.path.getsize(file_path) == 0:
-                raise ValueError(f"Model file is empty: {file}")
-
-        model_path = os.path.join(models_dir, 'mental_health_model.pkl')
-        model_package = joblib.load(model_path)
-
-        scaler_path = os.path.join(models_dir, 'scaler.pkl')
-        scaler = joblib.load(scaler_path)
-
-        encoder_path = os.path.join(models_dir, 'label_encoder.pkl')
-        label_encoder = joblib.load(encoder_path)
-
-        feature_names_path = os.path.join(models_dir, 'feature_names.pkl')
-        with open(feature_names_path, 'rb') as f:
-            feature_names = pickle.load(f)
-
-        category_mappings_path = os.path.join(models_dir, 'category_mappings.pkl')
-        with open(category_mappings_path, 'rb') as f:
-            category_mappings = pickle.load(f)
-
-        return model_package, scaler, label_encoder, feature_names, category_mappings
-
-    except Exception as e:
-        logger.error(f"Error loading model components: {e}")
-        return None, None, None, None, None
-
-# Load models
-model_package, scaler, label_encoder, feature_names, category_mappings = load_model_components()
-
-# Initialize clinical enhancer and preprocessor
-def initialize_clinical_enhancer():
-    global clinical_enhancer
-    if feature_names and label_encoder:
-        clinical_enhancer = ClinicalDecisionEnhancer(feature_names, label_encoder)
-    else:
-        logger.warning("Could not initialize Clinical Decision Enhancer")
-
-initialize_clinical_enhancer()
-preprocessor = ClinicalPreprocessor(category_mappings)
+# Register shutdown handler
+atexit.register(close_connection_pool)
 
 # Register chatbot blueprint
 app.register_blueprint(chatbot_bp)
 
-# Log startup status
-if all([model_package, scaler, label_encoder, feature_names, category_mappings]):
-    logger.info("All model components loaded successfully!")
-    logger.info(f"Features: {len(feature_names)}")
-    logger.info(f"Classes: {label_encoder.classes_.tolist()}")
-    logger.info("Enhanced preprocessing pipeline: ACTIVE")
-    logger.info("EXACT training pipeline replication: VERIFIED")
-    logger.info("Confidence calibration: ENABLED")
-    logger.info("SECURITY FEATURES: ACTIVE")
-    logger.info(f"Rate limiting: {SecurityConfig.RATE_LIMIT_REQUESTS} requests per {SecurityConfig.RATE_LIMIT_WINDOW}s")
-    logger.info(f"Input validation: MAX {SecurityConfig.MAX_INPUT_LENGTH} chars")
-
-    try:
-        conn = get_postgres_connection()
-        conn.close()
-    except Exception as e:
-        logger.error(f"Database connection test failed: {e}")
-
-    if clinical_enhancer:
-        logger.info("Clinical Decision Enhancer: ACTIVE")
-    else:
-        logger.warning("Clinical Decision Enhancer: NOT AVAILABLE")
-else:
-    logger.error("Failed to load model components!")
-    if not os.environ.get('RENDER'):
-        import sys
-        sys.exit(1)
+# No longer load models at startup – they will be loaded on first request.
+logger.info("Application started. Models will load on first request.")
 
 # Import routes after app is created to avoid circular imports
 from routes import *

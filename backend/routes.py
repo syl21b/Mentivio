@@ -1,5 +1,5 @@
 from flask import request, jsonify, send_from_directory, redirect
-from app import app, model_package, scaler, label_encoder, feature_names, category_mappings, clinical_enhancer, preprocessor
+from app import app, get_model_package, get_scaler, get_label_encoder, get_feature_names, get_category_mappings, get_clinical_enhancer, get_preprocessor
 from database import (
     save_assessment_to_db, load_assessments_from_db, load_single_assessment_from_db,
     delete_assessment_from_db, get_postgres_connection, convert_to_canonical_key,
@@ -129,6 +129,7 @@ def validate_assessment_responses(responses: Dict[str, Any]) -> Tuple[bool, str]
 
 def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Optional[pd.DataFrame]:
     try:
+        feature_names = get_feature_names()
         if feature_names is None:
             logger.error("Feature names not loaded")
             return None
@@ -206,6 +207,7 @@ def convert_responses_to_features(processed_responses: Dict[str, Any]) -> Option
 
 def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
     try:
+        feature_names = get_feature_names()
         if not assessment.get('primary_diagnosis') and assessment.get('all_diagnoses'):
             assessment['primary_diagnosis'] = assessment['all_diagnoses'][0].get('diagnosis', '')
             if not assessment.get('confidence_percentage') and assessment['all_diagnoses']:
@@ -337,14 +339,13 @@ def warmup():
         # Force a DB connection
         conn = get_postgres_connection()
         close_connection(conn)
-        # Models are already loaded at startup, but we can check
-        if model_package is None:
-            # Try loading again (maybe first attempt failed)
-            from app import load_model_components
-            load_model_components()
+        # Force model loading
+        model_pkg = get_model_package()
+        scaler = get_scaler()
+        label_enc = get_label_encoder()
         return jsonify({
             'status': 'warm',
-            'models_loaded': model_package is not None,
+            'models_loaded': model_pkg is not None,
             'database_ok': True
         })
     except Exception as e:
@@ -353,7 +354,10 @@ def warmup():
 @app.route('/api/ready', methods=['GET'])
 def ready():
     """Readiness probe for orchestration platforms."""
-    if model_package and scaler and label_encoder:
+    model_pkg = get_model_package()
+    scaler = get_scaler()
+    label_enc = get_label_encoder()
+    if model_pkg and scaler and label_enc:
         try:
             conn = get_postgres_connection()
             close_connection(conn)
@@ -514,10 +518,17 @@ def health_check():
         except Exception as e:
             logger.warning(f"Database health check warning: {e}")
 
+        model_pkg = get_model_package()
+        scaler = get_scaler()
+        label_enc = get_label_encoder()
+        feature_names = get_feature_names()
+        category_mappings = get_category_mappings()
+        clinical_enhancer = get_clinical_enhancer()
+
         components_loaded = all([
-            model_package is not None,
+            model_pkg is not None,
             scaler is not None,
-            label_encoder is not None,
+            label_enc is not None,
             feature_names is not None,
             category_mappings is not None
         ])
@@ -530,13 +541,13 @@ def health_check():
             'components_loaded': components_loaded,
             'database_healthy': db_healthy,
             'database_type': db_type,
-            'model_loaded': model_package is not None,
+            'model_loaded': model_pkg is not None,
             'scaler_loaded': scaler is not None,
-            'encoder_loaded': label_encoder is not None,
+            'encoder_loaded': label_enc is not None,
             'features_loaded': feature_names is not None,
             'category_mappings_loaded': category_mappings is not None,
             'total_features': len(feature_names) if feature_names else 0,
-            'available_classes': label_encoder.classes_.tolist() if label_encoder else [],
+            'available_classes': label_enc.classes_.tolist() if label_enc else [],
             'clinical_enhancer_available': clinical_enhancer is not None,
             'security': {
                 'rate_limiting': True,
@@ -634,6 +645,18 @@ def predict():
         logger.info(f"Predict - Coded responses: {coded_responses}")
         logger.info(f"Predict - Converted to English: {user_responses}")
 
+        # Lazy-load model components
+        model_pkg = get_model_package()
+        scaler = get_scaler()
+        label_enc = get_label_encoder()
+        feature_names = get_feature_names()
+        cat_mappings = get_category_mappings()
+        clinical_enhancer = get_clinical_enhancer()
+        preprocessor = get_preprocessor()
+
+        if not all([model_pkg, scaler, label_enc, feature_names, preprocessor]):
+            return jsonify({'error': 'Model components not loaded'}), 503
+
         try:
             processed_responses, processing_log, safety_warnings = preprocessor.preprocess(user_responses)
         except Exception as e:
@@ -652,15 +675,15 @@ def predict():
             return jsonify({'error': 'Feature scaling failed'}), 500
 
         try:
-            prediction = model_package['model'].predict(feature_df_scaled)
-            probabilities = model_package['model'].predict_proba(feature_df_scaled)
+            prediction = model_pkg['model'].predict(feature_df_scaled)
+            probabilities = model_pkg['model'].predict_proba(feature_df_scaled)
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
             return jsonify({'error': 'Model prediction failed'}), 500
 
         all_diagnoses = []
         for idx, prob in enumerate(probabilities[0]):
-            diagnosis_name = label_encoder.inverse_transform([idx])[0]
+            diagnosis_name = label_enc.inverse_transform([idx])[0]
             confidence_percentage = round(float(prob * 100), 0)
 
             diagnosis_data = {
@@ -988,6 +1011,8 @@ def delete_assessment():
 
 @app.route('/api')
 def api_info():
+    model_pkg = get_model_package()
+    clinical_enhancer = get_clinical_enhancer()
     return jsonify({
         'message': 'Enhanced Mental Health Assessment API is running!',
         'version': '3.0',
@@ -1526,4 +1551,3 @@ def too_many_requests(error):
         'error': 'Too many requests',
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
-

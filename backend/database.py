@@ -6,6 +6,7 @@ from psycopg.rows import dict_row
 import psycopg_pool
 import sqlite3
 from typing import Dict, List, Tuple, Optional, Any
+from functools import lru_cache
 
 from security import SecurityUtils
 
@@ -29,12 +30,14 @@ def init_connection_pool():
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
         
-        # Create pool with min 1, max 10 connections
+        # Tuned pool: min 1, max 5 – adjust based on your concurrency needs
         connection_pool = psycopg_pool.ConnectionPool(
             database_url,
             min_size=1,
-            max_size=10,
-            open=False,  # we'll open manually
+            max_size=5,
+            max_idle=300,          # 5 minutes idle timeout
+            max_lifetime=3600,      # 1 hour max connection lifetime
+            open=False,
             kwargs={"row_factory": dict_row}
         )
         connection_pool.open()
@@ -88,10 +91,10 @@ def close_connection(conn):
     if connection_pool and hasattr(conn, 'pgconn'):  # it's a psycopg connection from pool
         connection_pool.putconn(conn)
     elif conn:
-        conn.close()   # FIXED: call close() on the connection, not recursively
+        conn.close()
 
 def init_database():
-    """Initialize database with required tables."""
+    """Initialize database with required tables and indexes."""
     conn = None
     try:
         conn = get_postgres_connection()
@@ -119,38 +122,51 @@ def init_database():
                         primary_diagnosis TEXT,
                         confidence REAL,
                         confidence_percentage REAL,
-                        all_diagnoses_json TEXT,
-                        coded_responses_json TEXT,
-                        processing_details_json TEXT,
-                        technical_details_json TEXT,
-                        clinical_insights_json TEXT,
+                        all_diagnoses_json JSONB,
+                        coded_responses_json JSONB,
+                        processing_details_json JSONB,
+                        technical_details_json JSONB,
+                        clinical_insights_json JSONB,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
                 cur.execute('CREATE INDEX idx_patient_number ON assessments(patient_number)')
                 cur.execute('CREATE INDEX idx_timestamp ON assessments(report_timestamp)')
-                logger.info("Created new assessments table")
+                # Composite index for patient_number + id (used in load_single)
+                cur.execute('CREATE INDEX idx_patient_id ON assessments(patient_number, id)')
+                logger.info("Created new assessments table with JSONB columns")
             else:
-                # Check for old columns and add new ones if needed
+                # Check for old TEXT columns and migrate to JSONB
                 cur.execute('''
-                    SELECT column_name 
+                    SELECT data_type 
                     FROM information_schema.columns 
-                    WHERE table_name = 'assessments' 
-                    AND column_name = 'responses_json';
+                    WHERE table_name = 'assessments' AND column_name = 'coded_responses_json';
                 ''')
-                if cur.fetchone():
-                    cur.execute('ALTER TABLE assessments DROP COLUMN responses_json;')
-                    logger.info("Removed responses_json column")
+                col_type = cur.fetchone()
+                if col_type and col_type['data_type'] == 'text':
+                    # Convert TEXT to JSONB (PostgreSQL will validate JSON)
+                    cur.execute('ALTER TABLE assessments ALTER COLUMN coded_responses_json TYPE JSONB USING coded_responses_json::jsonb;')
+                    logger.info("Migrated coded_responses_json to JSONB")
                 
+                # Repeat for other JSON columns
+                for col in ['all_diagnoses_json', 'processing_details_json', 'technical_details_json', 'clinical_insights_json']:
+                    cur.execute(f'''
+                        SELECT data_type FROM information_schema.columns 
+                        WHERE table_name = 'assessments' AND column_name = '{col}';
+                    ''')
+                    col_type = cur.fetchone()
+                    if col_type and col_type['data_type'] == 'text':
+                        cur.execute(f'ALTER TABLE assessments ALTER COLUMN {col} TYPE JSONB USING {col}::jsonb;')
+                        logger.info(f"Migrated {col} to JSONB")
+                
+                # Ensure composite index exists
                 cur.execute('''
-                    SELECT column_name 
-                    FROM information_schema.columns 
-                    WHERE table_name = 'assessments' 
-                    AND column_name = 'coded_responses_json';
+                    SELECT 1 FROM pg_indexes 
+                    WHERE tablename = 'assessments' AND indexname = 'idx_patient_id';
                 ''')
                 if not cur.fetchone():
-                    cur.execute('ALTER TABLE assessments ADD COLUMN coded_responses_json TEXT;')
-                    logger.info("Added coded_responses_json column")
+                    cur.execute('CREATE INDEX idx_patient_id ON assessments(patient_number, id);')
+                    logger.info("Added composite index idx_patient_id")
         
         conn.commit()
         logger.info("Database initialization completed successfully")
@@ -160,9 +176,9 @@ def init_database():
         if conn:
             close_connection(conn)
 
-
+@lru_cache(maxsize=128)
 def convert_to_canonical_key(diagnosis_text: str) -> str:
-    """Convert any diagnosis text back to its canonical key"""
+    """Convert any diagnosis text back to its canonical key (cached)."""
     canonical_keys = ['Normal', 'Bipolar Type-1', 'Bipolar Type-2', 'Depression']
 
     if diagnosis_text in canonical_keys:
@@ -178,7 +194,6 @@ def convert_to_canonical_key(diagnosis_text: str) -> str:
         return 'Normal'
 
     return diagnosis_text
-
 
 def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
     """Save assessment data to database"""
@@ -228,6 +243,13 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
 
         logger.info(f"Database save - Coded responses: {json.dumps(coded_responses)[:200]}")
 
+        # Serialize JSON once
+        all_diagnoses_json = json.dumps(canonical_diagnoses)
+        coded_responses_json = json.dumps(coded_responses)
+        processing_json = json.dumps(sanitized_data.get('processing_details', {}))
+        technical_json = json.dumps(sanitized_data.get('technical_details', {}))
+        clinical_json = json.dumps(sanitized_data.get('clinical_insights', {}))
+
         conn = get_postgres_connection()
 
         with conn.cursor() as cur:
@@ -267,11 +289,11 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
                 primary_diagnosis_canonical,
                 sanitized_data.get('confidence', 0),
                 sanitized_data.get('confidence_percentage', 0),
-                json.dumps(canonical_diagnoses),
-                json.dumps(coded_responses),
-                json.dumps(sanitized_data.get('processing_details', {})),
-                json.dumps(sanitized_data.get('technical_details', {})),
-                json.dumps(sanitized_data.get('clinical_insights', {}))
+                all_diagnoses_json,
+                coded_responses_json,
+                processing_json,
+                technical_json,
+                clinical_json
             ))
 
         conn.commit()
@@ -292,19 +314,32 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
 
 
 def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
-    """Load assessments from database"""
+    """Load assessments from database (explicit columns)."""
     try:
         conn = get_postgres_connection()
 
         with conn.cursor() as cur:
             if patient_number:
                 cur.execute('''
-                    SELECT * FROM assessments 
+                    SELECT id, assessment_timestamp, report_timestamp, timezone,
+                           patient_name, patient_number, patient_age, patient_gender,
+                           primary_diagnosis, confidence, confidence_percentage,
+                           all_diagnoses_json, coded_responses_json,
+                           processing_details_json, technical_details_json, clinical_insights_json
+                    FROM assessments 
                     WHERE patient_number ILIKE %s 
                     ORDER BY report_timestamp DESC
                 ''', (f'%{patient_number}%',))
             else:
-                cur.execute('SELECT * FROM assessments ORDER BY report_timestamp DESC')
+                cur.execute('''
+                    SELECT id, assessment_timestamp, report_timestamp, timezone,
+                           patient_name, patient_number, patient_age, patient_gender,
+                           primary_diagnosis, confidence, confidence_percentage,
+                           all_diagnoses_json, coded_responses_json,
+                           processing_details_json, technical_details_json, clinical_insights_json
+                    FROM assessments 
+                    ORDER BY report_timestamp DESC
+                ''')
 
             rows = cur.fetchall()
 
@@ -319,11 +354,12 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
             if patient_num not in assessments_by_patient:
                 assessments_by_patient[patient_num] = []
 
-            all_diagnoses_canonical = json.loads(row_dict['all_diagnoses_json']) if row_dict['all_diagnoses_json'] else []
-            coded_responses = json.loads(row_dict['coded_responses_json']) if row_dict.get('coded_responses_json') else {}
-            processing_details = json.loads(row_dict['processing_details_json']) if row_dict['processing_details_json'] else {}
-            technical_details = json.loads(row_dict['technical_details_json']) if row_dict['technical_details_json'] else {}
-            clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict['clinical_insights_json'] else {}
+            # JSON fields are already parsed as dicts because of JSONB + dict_row
+            all_diagnoses_canonical = row_dict['all_diagnoses_json'] or []
+            coded_responses = row_dict['coded_responses_json'] or {}
+            processing_details = row_dict['processing_details_json'] or {}
+            technical_details = row_dict['technical_details_json'] or {}
+            clinical_insights = row_dict['clinical_insights_json'] or {}
 
             primary_diagnosis_canonical = row_dict['primary_diagnosis']
 
@@ -379,13 +415,18 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
 
 
 def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
-    """Load a single specific assessment from database"""
+    """Load a single specific assessment from database (explicit columns)."""
     try:
         conn = get_postgres_connection()
 
         with conn.cursor() as cur:
             cur.execute('''
-                SELECT * FROM assessments 
+                SELECT id, assessment_timestamp, report_timestamp, timezone,
+                       patient_name, patient_number, patient_age, patient_gender,
+                       primary_diagnosis, confidence, confidence_percentage,
+                       all_diagnoses_json, coded_responses_json,
+                       processing_details_json, technical_details_json, clinical_insights_json
+                FROM assessments 
                 WHERE patient_number = %s AND id = %s AND patient_name = %s
             ''', (patient_number, assessment_id, patient_name))
 
@@ -401,11 +442,12 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
         if not row_dict:
             return None
 
-        coded_responses = json.loads(row_dict['coded_responses_json']) if row_dict.get('coded_responses_json') else {}
-        all_diagnoses = json.loads(row_dict['all_diagnoses_json']) if row_dict.get('all_diagnoses_json') else []
-        processing_details = json.loads(row_dict['processing_details_json']) if row_dict.get('processing_details_json') else {}
-        technical_details = json.loads(row_dict['technical_details_json']) if row_dict.get('technical_details_json') else {}
-        clinical_insights = json.loads(row_dict['clinical_insights_json']) if row_dict.get('clinical_insights_json') else {}
+        # JSON fields automatically parsed
+        coded_responses = row_dict['coded_responses_json'] or {}
+        all_diagnoses = row_dict['all_diagnoses_json'] or []
+        processing_details = row_dict['processing_details_json'] or {}
+        technical_details = row_dict['technical_details_json'] or {}
+        clinical_insights = row_dict['clinical_insights_json'] or {}
 
         primary_diagnosis = row_dict.get('primary_diagnosis', '')
 
@@ -479,3 +521,16 @@ def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
     except Exception as e:
         logger.error(f"Error deleting from database: {e}")
         return False
+
+def close_connection_pool():
+    """Close the global connection pool (used at shutdown)."""
+    global connection_pool
+    if connection_pool:
+        try:
+            connection_pool.close()
+            logger.info("Database connection pool closed")
+        except Exception as e:
+            logger.error(f"Error closing connection pool: {e}")
+        finally:
+            connection_pool = None
+

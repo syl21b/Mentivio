@@ -36,3 +36,4 @@ waitress==2.1.2
 translations
 google-genai>=0.3.0
 psycopg_pool==3.2.3 
+flask_compress==1.13.0

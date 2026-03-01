@@ -3209,3 +3209,4 @@ def get_blueprint():
 __version__ = "2.0.0"
 __author__ = "Mentivio Team"
 __description__ = "High EQ Chatbot with Session Persistence and Safety Features"
+
