@@ -10,8 +10,8 @@
     
     <!-- Load scripts in correct order -->
     <script src="frontend/js/components.js" defer></script>
-    <script src="frontend/js/load-navbar.js" defer></script>
-    <script src="frontend/js/load-footer.js" defer></script>
+    <script src="frontend/js/load-navbar.js?v=2" defer></script>
+    <script src="frontend/js/load-footer.js?v=2" defer></script>
     <script src="frontend/js/main.js" defer></script>
      <script src="../frontend/js/head-content.js" defer></script>
         <script src="../frontend/js/chatbot.js" defer></script>
@@ -1036,58 +1036,70 @@ p, h1, h2, h3, h4, h5, h6, span:not(.btn *):not(.feature-link *):not(.resource-l
     </p>
   </div>
 
-  <!-- Features Section -->
-  <section class="features fade-section">
-    <div class="container">
-      <div class="section-title">
-        <h2 id="features.title"></h2>
-        <p id="features.subtitle"></p>
-      </div>
-
-      <div class="features-grid">
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-clipboard-check"></i>
-          </div>
-          <h3 id="features.assessment.title"></h3>
-          <p id="features.assessment.desc"></p>
-
-          <a href="prediction.html" class="feature-link">
-            <span id="features.assessment.link"></span>
-            <i class="fas fa-arrow-right"></i>
-          </a>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-chart-line"></i>
-          </div>
-          <h3 id="features.insights.title"></h3>
-          <p id="features.insights.desc"></p>
-
-          <a href="analogy.html" class="feature-link">
-            <span id="features.insights.link"></span>
-            <i class="fas fa-arrow-right"></i>
-          </a>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <i class="fas fa-book-medical"></i>
-          </div>
-          <h3 id="features.resources.title"></h3>
-          <p id="features.resources.desc"></p>
-
-          <a href="resources.html" class="feature-link">
-            <span id="features.resources.link"></span>
-            <i class="fas fa-arrow-right"></i>
-          </a>
-        </div>
-
-      </div>
+<!-- Features Section -->
+<section class="features fade-section">
+  <div class="container">
+    <div class="section-title">
+      <h2 id="features.title">Explore our tools</h2>
+      <p id="features.subtitle">Evidence‑based resources to support your mental health journey.</p>
     </div>
-  </section>
+
+    <div class="features-grid">
+      <!-- Assessment -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-clipboard-check"></i>
+        </div>
+        <h3 id="features.assessment.title">Self‑Assessment</h3>
+        <p id="features.assessment.desc">Take a private, clinically‑informed screening to understand your mental health better.</p>
+        <a href="prediction.html" class="feature-link">
+          <span id="features.assessment.link">Start assessment</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Insights (Analogy) -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3 id="features.insights.title">Visual Insights</h3>
+        <p id="features.insights.desc">See how different conditions compare with interactive analogies and timelines.</p>
+        <a href="analogy.html" class="feature-link">
+          <span id="features.insights.link">Explore</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Global Mood Map – NEW -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-globe-americas"></i>
+        </div>
+        <h3 id="features.map.title">Global Mood Map</h3>
+        <p id="features.map.desc">Share how you’re feeling right now, and see messages from people around the world. Every pin is a real voice.</p>
+        <a href="map.html" class="feature-link">
+          <span id="features.map.link">View Map</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <!-- Resources -->
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-book-medical"></i>
+        </div>
+        <h3 id="features.resources.title">Resource Library</h3>
+        <p id="features.resources.desc">Access curated articles, guides, and external support for various mental health topics.</p>
+        <a href="resources.html" class="feature-link">
+          <span id="features.resources.link">Browse resources</span>
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
 
   <!-- Wellness Tips -->
   <section class="wellness-tips fade-section">

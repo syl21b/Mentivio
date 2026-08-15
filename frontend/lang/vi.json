@@ -2,7 +2,7 @@
   "home": {
     "page-title": "Mentivio - Người Bạn Đồng Hành Chăm Sóc Sức Khỏe Tinh Thần Của Bạn",
     "hero.logo": "Mentivio",
-    "hero.title": "Mentivio – Điểm Tựa Bình Yên Cho Tâm Hồn",
+    "hero.title": "Mentivio - Điểm Tựa Bình Yên Cho Tâm Hồn",
     "hero.subtitle": "Hãy lắng nghe và thấu hiểu sức khỏe tinh thần của bạn thông qua các công cụ đánh giá an toàn, khoa học và đầy sự sẻ chia của chúng tôi.",
     "hero.cta_assessment": "Bắt đầu Đánh giá",
     "hero.cta_explore": "Khám phá Kho tài liệu",
@@ -49,7 +49,10 @@
     "resources.textline.link": "Soạn HOME gửi 741741",
     "resources.mentalgov.title": "MentalHealth.gov",
     "resources.mentalgov.desc": "Cổng thông tin của chính phủ Hoa Kỳ về sức khỏe tâm thần và cách tìm kiếm sự giúp đỡ.",
-    "resources.mentalgov.link": "Truy cập MentalHealth.gov"
+    "resources.mentalgov.link": "Truy cập MentalHealth.gov",
+    "features.map.title": "Bản đồ Cảm xúc Toàn cầu",
+    "features.map.desc": "Chia sẻ cảm xúc của bạn ngay bây giờ và xem tin nhắn từ mọi người trên khắp thế giới. Mỗi điểm đánh dấu là một tiếng nói thực.",
+    "features.map.link": "Xem Bản đồ"
   },
   "resources": {
     "page-title": "Tài Liệu Giáo Dục - Mentivio",
@@ -1324,7 +1327,8 @@
     "title": "Mentivio - Nền Tảng Đánh Giá Sức Khỏe Tinh Thần",
     "description": "Đánh giá sức khỏe tinh thần an toàn, bảo mật và chuẩn y khoa.",
     "copyright": "© 2025 Mentivio. Bảo lưu mọi quyền.",
-    "version": "3.0"
+    "version": "3.0",
+    "map": "Bản đồ tâm trạng"
   },
   "prediction": {
     "page-title": "Kiểm Tra Sức Khỏe Tinh Thần - Mentivio",
@@ -1775,6 +1779,61 @@
       "contact-heading": "Cần Làm Rõ?",
       "contact-content": "Nếu bạn có câu hỏi về các điều khoản này, hãy liên hệ với chúng tôi tại: <a href=\"mailto:mentivio9@gmail.com\" id=\"contact-email\">mentivio9@gmail.com</a>",
       "contact-closing": "Chúng tôi tin vào dịch vụ minh bạch, đầy cảm thông hỗ trợ hành trình sức khỏe tinh thần của bạn."
-    }
+    },
+"map": {
+  "hero.title": "🌍 Bản đồ Cảm xúc Toàn cầu",
+  "hero.subtitle": "Chia sẻ cảm xúc của bạn ngay bây giờ và xem tin nhắn từ mọi người trên khắp thế giới. Mỗi điểm đánh dấu là một tiếng nói thực — hãy hỗ trợ lẫn nhau.",
+  "stat.messages": "tin nhắn",
+  "stat.messages.label": "tin nhắn",
+  "stat.moods": "tâm trạng được chia sẻ",
+  "stat.moods.label": "tâm trạng được chia sẻ",
+  "stat.countries": "quốc gia",
+  "stat.countries.label": "quốc gia",
+  "legend.title": "Chìa khóa tâm trạng",
+  "legend.happy": "Vui vẻ",
+  "legend.calm": "Bình tĩnh",
+  "legend.sad": "Buồn",
+  "legend.distressed": "Khổ sở",
+  "legend.frustrated": "Bực bội",
+  "legend.anxious": "Lo lắng",
+  "legend.reflective": "Suy ngẫm",
+  "legend.strong": "Mạnh mẽ",
+  "legend.peaceful": "Bình yên",
+  "button.add": "Thêm tin nhắn của bạn",
+  "button.locate": "Tìm tôi",
+  "button.refresh": "Làm mới",
+  "recent.title": "Tin nhắn gần đây từ khắp thế giới",
+  "empty.message": "Chưa có tin nhắn nào. Hãy là người đầu tiên chia sẻ tâm trạng của bạn! 🌟",
+  "modal.title": "💬 Chia sẻ tâm trạng của bạn",
+  "modal.name.label": "Tên của bạn *",
+  "modal.name.placeholder": "ví dụ: Alex",
+  "modal.age.label": "Tuổi của bạn *",
+  "modal.age.placeholder": "ví dụ: 28",
+  "modal.location.label": "Địa điểm (thành phố/quốc gia)",
+  "modal.location.placeholder": "ví dụ: London, Anh",
+  "modal.location.hint": "Tùy chọn - giúp người khác biết bạn ở đâu.",
+  "modal.message.label": "Tin nhắn của bạn *",
+  "modal.message.placeholder": "Bạn đang nghĩ gì?",
+  "modal.location.detected.label": "Vị trí của bạn đã được phát hiện",
+  "modal.location.detected.hint": "Chúng tôi sử dụng GPS của thiết bị để đặt chính xác vị trí của bạn.",
+  "modal.cancel": "Hủy",
+  "modal.share": "Chia sẻ",
+  "recently": "gần đây",
+  "anonymous": "Ẩn danh",
+  "toast.refreshed": "🔄 Đã làm mới!",
+  "toast.location_detected": "✅ Đã phát hiện vị trí!",
+  "toast.location.error": "Không thể lấy vị trí của bạn.",
+  "toast.permission_denied": "Từ chối quyền. Vui lòng cho phép truy cập vị trí.",
+  "toast.location_unavailable": "Vị trí không có sẵn.",
+  "toast.location_timeout": "Yêu cầu vị trí đã hết thời gian chờ.",
+  "toast.geolocation_not_supported": "Trình duyệt của bạn không hỗ trợ định vị địa lý.",
+  "toast.failed_refresh": "Làm mới thất bại",
+  "toast.no_location": "Không phát hiện vị trí. Vui lòng thử lại.",
+  "toast.enter_name": "Vui lòng nhập tên của bạn.",
+  "toast.enter_age": "Vui lòng nhập tuổi hợp lệ (1-120).",
+  "toast.enter_message": "Vui lòng viết một tin nhắn.",
+  "toast.message_shared": "✨ Tin nhắn của bạn đã được chia sẻ!",
+  "toast.location.finding": "Đang tìm vị trí của bạn…"
+}
 
 }

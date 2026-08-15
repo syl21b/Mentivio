@@ -273,7 +273,8 @@ class GlobalLanguageManager {
             'therapy-resource': 'therapy-resource',
             'privacy': 'privacy',
             'terms': 'terms',
-            'physical-resource': 'physical-resource'
+            'physical-resource': 'physical-resource',
+            'map': 'map'
         };
         
         return pageMap[fileName] || 'home';

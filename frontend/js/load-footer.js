@@ -18,57 +18,49 @@
     // Footer translations
     const translations = {
         en: {
-            home: 'Home', assessment: 'Self-Assessment', visualizer: 'Condition Visualizer', resources: 'Resources', about: 'About', crisis: 'Crisis Support', 
+            home: 'Home', assessment: 'Self-Assessment', visualizer: 'Condition Visualizer', map: 'Mood Map', resources: 'Resources', about: 'About', crisis: 'Crisis Support', 
             tagline: 'Your mental wellness companion',
             quickLinks: 'Quick Links',
-            resources: 'Resources',
             support: 'Support',
             contact: 'Contact',
             privacy: 'Privacy Policy',
             terms: 'Terms of Service',
-            crisis: '24/7 Crisis Support',
             email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio. All rights reserved.',
             disclaimer: 'This tool is for informational purposes only and is not a substitute for professional medical advice.'
         },
         vi: {
-            home: 'Trang chủ', assessment: 'Tự Đánh Giá', visualizer: 'Trình Hiển Thị', resources: 'Tài Nguyên', about: 'Giới Thiệu', crisis: 'Hỗ Trợ Khủng Hoảng', 
+            home: 'Trang chủ', assessment: 'Tự Đánh Giá', visualizer: 'Trình Hiển Thị', map: 'Bản đồ tâm trạng', resources: 'Tài Nguyên', about: 'Giới Thiệu', crisis: 'Hỗ Trợ Khủng Hoảng', 
             tagline: 'Người bạn đồng hành sức khỏe tinh thần của bạn',
             quickLinks: 'Liên kết nhanh',
-            resources: 'Tài nguyên',
             support: 'Hỗ trợ',
             contact: 'Liên hệ',
             privacy: 'Chính sách bảo mật',
             terms: 'Điều khoản dịch vụ',
-            crisis: 'Hỗ trợ khủng hoảng 24/7',
             email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio. Mọi quyền được bảo lưu.',
             disclaimer: 'Công cụ này chỉ dành cho mục đích thông tin và không thay thế cho lời khuyên y tế chuyên nghiệp.'
         },
         es: {
-            home: 'Inicio', assessment: 'Autoevaluación', visualizer: 'Visualizador', resources: 'Recursos', about: 'Acerca de', crisis: 'Apoyo en Crisis', 
+            home: 'Inicio', assessment: 'Autoevaluación', visualizer: 'Visualizador', map: 'Mapa de Ánimo', resources: 'Recursos', about: 'Acerca de', crisis: 'Apoyo en Crisis', 
             tagline: 'Tu compañero de bienestar mental',
             quickLinks: 'Enlaces rápidos',
-            resources: 'Recursos',
             support: 'Apoyo',
             contact: 'Contacto',
             privacy: 'Política de privacidad',
             terms: 'Términos de servicio',
-            crisis: 'Apoyo en crisis 24/7',
             email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio. Todos los derechos reservados.',
             disclaimer: 'Esta herramienta es solo para fines informativos y no sustituye el asesoramiento médico profesional.'
         },
         zh: {
-            home: '首页', assessment: '自我评估', visualizer: '状况可视化', resources: '资源', about: '关于我们', crisis: '危机支持',
+            home: '首页', assessment: '自我评估', visualizer: '状况可视化', map: '情绪地图', resources: '资源', about: '关于我们', crisis: '危机支持',
             tagline: '您的心理健康伴侣',
             quickLinks: '快速链接',
-            resources: '资源',
             support: '支持',
             contact: '联系我们',
             privacy: '隐私政策',
             terms: '服务条款',
-            crisis: '24/7 危机支持',
             email: 'mentivio9@gmail.com',
             copyright: '© 2025 Mentivio。保留所有权利。',
             disclaimer: '此工具仅用于提供信息，不能替代专业医疗建议。'
@@ -281,58 +273,56 @@
                         </a>
                         <a href="https://www.instagram.com/mentivio1?igsh=aTFuNjk4M254NjIy" class="social-link" aria-label="Instagram">
                             <i class="fab fa-instagram"></i>
-                     
-            
-                     </a>
-                         <a href="https://linkedin.com/in/shin-le-b9727a238"  class="social-link" aria-label="LinkedIn">
+                        </a>
+                        <a href="https://linkedin.com/in/shin-le-b9727a238"  class="social-link" aria-label="LinkedIn">
                             <i class="fab fa-linkedin-in"></i>
                         </a>
                         <a href="https://syl21b.github.io/shinle-portfolio/" class="social-link" aria-label="Portfolio" >
-                        <i class="fas fa-briefcase"></i>
+                            <i class="fas fa-briefcase"></i>
                         </a>
                     </div>
                 </div>
                 
-            <!-- Quick Links -->
-            <div class="footer-section">
-                <h3 class="footer-heading">${t.quickLinks}</h3>
-                <ul class="footer-links">
-                    <li><a href="/home.html" class="footer-link"><i class="fas fa-home"></i> ${translations[currentLang].home || 'Home'}</a></li>
-                    <li><a href="/prediction.html" class="footer-link"><i class="fas fa-clipboard-check"></i> ${translations[currentLang].assessment || 'Self-Assessment'}</a></li>
-                    <li><a href="/analogy.html" class="footer-link"><i class="fas fa-eye"></i> ${translations[currentLang].visualizer || 'Condition Visualizer'}</a></li>
-                    <li><a href="/about.html" class="footer-link"><i class="fas fa-info-circle"></i> ${translations[currentLang].about || 'About'}</a></li>
-                </ul>
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3 class="footer-heading">${t.quickLinks}</h3>
+                    <ul class="footer-links">
+                        <li><a href="/home.html" class="footer-link"><i class="fas fa-home"></i> ${t.home}</a></li>
+                        <li><a href="/prediction.html" class="footer-link"><i class="fas fa-clipboard-check"></i> ${t.assessment}</a></li>
+                        <li><a href="/analogy.html" class="footer-link"><i class="fas fa-eye"></i> ${t.visualizer}</a></li>
+                        <li><a href="/map.html" class="footer-link"><i class="fas fa-globe-americas"></i> ${t.map}</a></li>
+                        <li><a href="/about.html" class="footer-link"><i class="fas fa-info-circle"></i> ${t.about}</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Resources & Support -->
+                <div class="footer-section">
+                    <h3 class="footer-heading">${t.support}</h3>
+                    <ul class="footer-links">
+                        <li><a href="/crisis-support.html" class="footer-link crisis"><i class="fas fa-life-ring"></i> ${t.crisis}</a></li>
+                        <li><a href="/resources.html" class="footer-link"><i class="fas fa-book"></i> ${t.resources}</a></li>
+                        <li><a href="/privacy.html" class="footer-link"><i class="fas fa-shield-alt"></i> ${t.privacy}</a></li>
+                        <li><a href="/terms.html" class="footer-link"><i class="fas fa-file-contract"></i> ${t.terms}</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact -->
+                <div class="footer-section">
+                    <h3 class="footer-heading">${t.contact}</h3>
+                    <p class="footer-contact">
+                        <i class="fas fa-envelope" style="margin-right: 8px;"></i>
+                        ${t.email}
+                    </p>
+                </div>
             </div>
             
-            <!-- Resources & Support -->
-            <div class="footer-section">
-                <h3 class="footer-heading">${t.support}</h3>
-                <ul class="footer-links">
-                    <li><a href="/crisis-support.html" class="footer-link crisis"><i class="fas fa-life-ring"></i> ${t.crisis}</a></li>
-                    <li><a href="/resources.html" class="footer-link"><i class="fas fa-book"></i> ${t.resources}</a></li>
-                    <li><a href="/privacy.html" class="footer-link"><i class="fas fa-shield-alt"></i> ${t.privacy}</a></li>
-                    <li><a href="/terms.html" class="footer-link"><i class="fas fa-file-contract"></i> ${t.terms}</a></li>
-                </ul>
+            <!-- Bottom Bar -->
+            <div class="footer-bottom">
+                <p class="footer-copyright">${t.copyright}</p>
+                <p class="footer-disclaimer">${t.disclaimer}</p>
             </div>
-            
-            <!-- Contact -->
-            <div class="footer-section">
-                <h3 class="footer-heading">${t.contact}</h3>
-                <p class="footer-contact">
-                    <i class="fas fa-envelope" style="margin-right: 8px;"></i>
-                    ${t.email}
-                </p>
-                <!-- ... rest of contact section ... -->
-            </div>
-        </div>
-        
-        <!-- Bottom Bar -->
-        <div class="footer-bottom">
-            <p class="footer-copyright">${t.copyright}</p>
-            <p class="footer-disclaimer">${t.disclaimer}</p>
-        </div>
-    </footer>
-`;
+        </footer>
+    `;
     
     // Insert footer at the end of body
     document.body.insertAdjacentHTML('beforeend', footerHTML);
@@ -345,47 +335,48 @@
         document.head.appendChild(faLink);
     }
 
-    // Add this inside the load-footer.js IIFE
+    // Language change event listener
     document.addEventListener('langChanged', (e) => {
-            const newLang = e.detail.lang;
-            const t = translations[newLang] || translations.en;
+        const newLang = e.detail.lang;
+        const t = translations[newLang] || translations.en;
 
-            // 1. Update Footer Headings
-            const headings = document.querySelectorAll('.footer-heading');
-            if (headings[0]) headings[0].textContent = t.quickLinks;
-            if (headings[1]) headings[1].textContent = t.support;
-            if (headings[2]) headings[2].textContent = t.contact;
+        // 1. Update Footer Headings
+        const headings = document.querySelectorAll('.footer-heading');
+        if (headings[0]) headings[0].textContent = t.quickLinks;
+        if (headings[1]) headings[1].textContent = t.support;
+        if (headings[2]) headings[2].textContent = t.contact;
 
-            // 2. Update the Quick Links section
-            const quickLinks = document.querySelectorAll('.footer-section')[1].querySelectorAll('.footer-link');
-            if (quickLinks.length >= 4) {
-                quickLinks[0].innerHTML = `<i class="fas fa-home"></i> ${t.home}`;
-                quickLinks[1].innerHTML = `<i class="fas fa-clipboard-check"></i> ${t.assessment}`;
-                quickLinks[2].innerHTML = `<i class="fas fa-eye"></i> ${t.visualizer}`;
-                quickLinks[3].innerHTML = `<i class="fas fa-info-circle"></i> ${t.about}`;
-            }
+        // 2. Update the Quick Links section (includes map now)
+        const quickLinks = document.querySelectorAll('.footer-section')[1].querySelectorAll('.footer-link');
+        if (quickLinks.length >= 5) {
+            quickLinks[0].innerHTML = `<i class="fas fa-home"></i> ${t.home}`;
+            quickLinks[1].innerHTML = `<i class="fas fa-clipboard-check"></i> ${t.assessment}`;
+            quickLinks[2].innerHTML = `<i class="fas fa-eye"></i> ${t.visualizer}`;
+            quickLinks[3].innerHTML = `<i class="fas fa-globe-americas"></i> ${t.map}`;
+            quickLinks[4].innerHTML = `<i class="fas fa-info-circle"></i> ${t.about}`;
+        }
 
-            // 3. Update the Support section links
-            const supportLinks = document.querySelectorAll('.footer-section')[2].querySelectorAll('.footer-link');
-            if (supportLinks.length >= 4) {
-                supportLinks[0].innerHTML = `<i class="fas fa-life-ring"></i> ${t.crisis}`;
-                supportLinks[1].innerHTML = `<i class="fas fa-book"></i> ${t.resources}`;
-                supportLinks[2].innerHTML = `<i class="fas fa-shield-alt"></i> ${t.privacy}`;
-                supportLinks[3].innerHTML = `<i class="fas fa-file-contract"></i> ${t.terms}`;
-            }
+        // 3. Update the Support section links
+        const supportLinks = document.querySelectorAll('.footer-section')[2].querySelectorAll('.footer-link');
+        if (supportLinks.length >= 4) {
+            supportLinks[0].innerHTML = `<i class="fas fa-life-ring"></i> ${t.crisis}`;
+            supportLinks[1].innerHTML = `<i class="fas fa-book"></i> ${t.resources}`;
+            supportLinks[2].innerHTML = `<i class="fas fa-shield-alt"></i> ${t.privacy}`;
+            supportLinks[3].innerHTML = `<i class="fas fa-file-contract"></i> ${t.terms}`;
+        }
 
-            // 4. Update Tagline, Copyright, and Contact
-            const tagline = document.querySelector('.footer-tagline');
-            if (tagline) tagline.textContent = t.tagline;
-            
-            const copyright = document.querySelector('.footer-copyright');
-            if (copyright) copyright.textContent = t.copyright;
+        // 4. Update Tagline, Copyright, and Contact
+        const tagline = document.querySelector('.footer-tagline');
+        if (tagline) tagline.textContent = t.tagline;
+        
+        const copyright = document.querySelector('.footer-copyright');
+        if (copyright) copyright.textContent = t.copyright;
 
-            const contactEmail = document.querySelector('.footer-contact');
-            if (contactEmail) {
-                contactEmail.innerHTML = `<i class="fas fa-envelope" style="margin-right: 8px;"></i> ${t.email}`;
-            }
-        });
+        const contactEmail = document.querySelector('.footer-contact');
+        if (contactEmail) {
+            contactEmail.innerHTML = `<i class="fas fa-envelope" style="margin-right: 8px;"></i> ${t.email}`;
+        }
+    });
 
     // Add smooth scroll for anchor links within the footer
     document.querySelectorAll('.footer-link[href^="#"]').forEach(link => {

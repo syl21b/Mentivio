@@ -1,4 +1,3 @@
-
 // ULTRA-SIMPLE INSTANT NAVBAR - FORCED FULL WIDTH
 (function() {
     // Get language IMMEDIATELY (no async)
@@ -18,10 +17,10 @@
     
     // Simple translations - EMBEDDED for instant access
     const translations = {
-        en: { home: 'Home', assessment: 'Self-Assessment', visualizer: 'Condition Visualizer', resources: 'Resources', about: 'About', crisis: 'Crisis Support', logo: 'Mentivio' },
-        vi: { home: 'Trang chủ', assessment: 'Tự Đánh Giá', visualizer: 'Trình Hiển Thị', resources: 'Tài Nguyên', about: 'Giới Thiệu', crisis: 'Hỗ Trợ Khủng Hoảng', logo: 'Mentivio' },
-        es: { home: 'Inicio', assessment: 'Autoevaluación', visualizer: 'Visualizador', resources: 'Recursos', about: 'Acerca de', crisis: 'Apoyo en Crisis', logo: 'Mentivio' },
-        zh: { home: '首页', assessment: '自我评估', visualizer: '状况可视化', resources: '资源', about: '关于我们', crisis: '危机支持', logo: 'Mentivio' }
+        en: { home: 'Home', assessment: 'Self-Assessment', visualizer: 'Condition Visualizer', map: 'Mood Map', resources: 'Resources', about: 'About', crisis: 'Crisis Support', logo: 'Mentivio' },
+        vi: { home: 'Trang chủ', assessment: 'Tự Đánh Giá', visualizer: 'Trình Hiển Thị', map: 'Bản đồ tâm trạng', resources: 'Tài Nguyên', about: 'Giới Thiệu', crisis: 'Hỗ Trợ Khủng Hoảng', logo: 'Mentivio' },
+        es: { home: 'Inicio', assessment: 'Autoevaluación', visualizer: 'Visualizador', map: 'Mapa de Ánimo', resources: 'Recursos', about: 'Acerca de', crisis: 'Apoyo en Crisis', logo: 'Mentivio' },
+        zh: { home: '首页', assessment: '自我评估', visualizer: '状况可视化', map: '情绪地图', resources: '资源', about: '关于我们', crisis: '危机支持', logo: 'Mentivio' }
     };
     
     const t = translations[currentLang] || translations.en;
@@ -330,7 +329,6 @@
                     min-width: 50px !important;
                 }
             }
-            }
         </style>
         
         <!-- NAVBAR -->
@@ -347,6 +345,7 @@
                     <a href="/home.html" class="mentivio-nav-link ${currentPage === 'home' ? 'active' : ''}">${t.home}</a>
                     <a href="/prediction.html" class="mentivio-nav-link ${currentPage === 'prediction' ? 'active' : ''}">${t.assessment}</a>
                     <a href="/analogy.html" class="mentivio-nav-link ${currentPage === 'analogy' ? 'active' : ''}">${t.visualizer}</a>
+                    <a href="/map.html" class="mentivio-nav-link ${currentPage === 'map' ? 'active' : ''}">${t.map}</a>
                     <a href="/resources.html" class="mentivio-nav-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
                     <a href="/about.html" class="mentivio-nav-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
                     <a href="/crisis-support.html" class="mentivio-nav-link crisis">${t.crisis}</a>
@@ -363,7 +362,6 @@
                     </div>
                 </div>
 
-                
                 <!-- Mobile Controls -->
                 <div class="mentivio-mobile-controls">
                     <!-- Mobile Language (abbreviation only) -->
@@ -389,6 +387,7 @@
             <a href="/home.html" class="mentivio-mobile-link ${currentPage === 'home' ? 'active' : ''}">${t.home}</a>
             <a href="/prediction.html" class="mentivio-mobile-link ${currentPage === 'prediction' ? 'active' : ''}">${t.assessment}</a>
             <a href="/analogy.html" class="mentivio-mobile-link ${currentPage === 'analogy' ? 'active' : ''}">${t.visualizer}</a>
+            <a href="/map.html" class="mentivio-mobile-link ${currentPage === 'map' ? 'active' : ''}">${t.map}</a>
             <a href="/resources.html" class="mentivio-mobile-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
             <a href="/about.html" class="mentivio-mobile-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
             <a href="/crisis-support.html" class="mentivio-mobile-link crisis">${t.crisis}</a>
@@ -463,7 +462,7 @@
 
         // Update desktop links
         const desktopLinks = document.querySelectorAll('.mentivio-nav-link');
-        const keys = ['home', 'assessment', 'visualizer', 'resources', 'about', 'crisis', 'privacy', 'terms'];
+        const keys = ['home', 'assessment', 'visualizer', 'map', 'resources', 'about', 'crisis'];
         desktopLinks.forEach((link, index) => {
             if (keys[index]) link.textContent = t[keys[index]];
         });

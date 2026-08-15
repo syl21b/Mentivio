@@ -2,7 +2,7 @@
   "home": {
     "page-title": "Mentivio - Your Mental Wellness Companion",
     "hero.logo": "Mentivio",
-    "hero.title": "Mentivio – A Gentle Space for Your Mind",
+    "hero.title": "Mentivio - A Gentle Space for Your Mind",
     "hero.subtitle": "Take a compassionate step toward understanding your mental health with our safe, evidence-based tools and resources.",
     "hero.cta_assessment": "Start Check-in",
     "hero.cta_explore": "Explore Library",
@@ -49,7 +49,10 @@
     "resources.textline.link": "Text HOME to 741741",
     "resources.mentalgov.title": "MentalHealth.gov",
     "resources.mentalgov.desc": "Official U.S. government resource for finding mental health treatment.",
-    "resources.mentalgov.link": "Visit MentalHealth.gov"
+    "resources.mentalgov.link": "Visit MentalHealth.gov",
+    "features.map.title": "Global Mood Map",
+    "features.map.desc": "Share how you're feeling right now, and see messages from people around the world. Every pin is a real voice.",
+    "features.map.link": "View Map"
   },
   "resources": {
     "page-title": "Learning Resources - Mentivio",
@@ -1330,7 +1333,8 @@
     "title": "Mentivio - Mental Health Check",
     "description": "Safe, private, and clinical mental health assessment.",
     "copyright": "© 2025 Mentivio. All rights reserved.",
-    "version": "3.0"
+    "version": "3.0",
+    "map": "Mood Map"
   },
   "prediction": {
     "page-title": "Mental Wellness Check - Mentivio",
@@ -1780,5 +1784,63 @@
       "contact-heading": "Need Clarification?",
       "contact-content": "If you have questions about these terms, contact us at: <a href=\"mailto:mentivio9@gmail.com\" id=\"contact-email\">mentivio9@gmail.com</a>",
       "contact-closing": "We believe in transparent, compassionate service that supports your mental wellness journey."
-    }
+    },
+
+"map": {
+  "hero.title": "🌍 Global Mood Map",
+  "hero.subtitle": "Share how you're feeling right now, and see messages from people around the world. Every pin is a real voice — let's support each other.",
+  "stat.messages": "messages",
+  "stat.messages.label": "messages",
+  "stat.moods": "moods shared",
+  "stat.moods.label": "moods shared",
+  "stat.countries": "countries",
+  "stat.countries.label": "countries",
+  "legend.title": "Mood key",
+  "legend.happy": "Happy",
+  "legend.calm": "Calm",
+  "legend.sad": "Sad",
+  "legend.distressed": "Distressed",
+  "legend.frustrated": "Frustrated",
+  "legend.anxious": "Anxious",
+  "legend.reflective": "Reflective",
+  "legend.strong": "Strong",
+  "legend.peaceful": "Peaceful",
+  "button.add": "Add your message",
+  "button.locate": "Find me",
+  "button.refresh": "Refresh",
+  "recent.title": "Recent messages from around the world",
+  "empty.message": "No messages yet. Be the first to share your mood! 🌟",
+  "modal.title": "💬 Share your mood",
+  "modal.name.label": "Your name *",
+  "modal.name.placeholder": "e.g. Alex",
+  "modal.age.label": "Your age *",
+  "modal.age.placeholder": "e.g. 28",
+  "modal.location.label": "Location (city/country)",
+  "modal.location.placeholder": "e.g. London, UK",
+  "modal.location.hint": "Optional – helps others see where you are.",
+  "modal.message.label": "Your message *",
+  "modal.message.placeholder": "What's on your mind?",
+  "modal.location.detected.label": "Your detected location",
+  "modal.location.detected.hint": "We use your device’s GPS to place your pin accurately.",
+  "modal.cancel": "Cancel",
+  "modal.share": "Share",
+  "recently": "recently",
+  "anonymous": "Anonymous",
+  "toast.refreshed": "🔄 Refreshed!",
+  "toast.location_detected": "✅ Location detected!",
+  "toast.location.error": "Could not get your location.",
+  "toast.permission_denied": "Permission denied. Please allow location access.",
+  "toast.location_unavailable": "Location unavailable.",
+  "toast.location_timeout": "Location request timed out.",
+  "toast.geolocation_not_supported": "Geolocation is not supported by your browser.",
+  "toast.failed_refresh": "Failed to refresh",
+  "toast.no_location": "Location not detected. Please try again.",
+  "toast.enter_name": "Please enter your name.",
+  "toast.enter_age": "Please enter a valid age (1–120).",
+  "toast.enter_message": "Please write a message.",
+  "toast.message_shared": "✨ Your message has been shared!",
+  "toast.location.finding": "Finding your location…"
+}
+
+
 }

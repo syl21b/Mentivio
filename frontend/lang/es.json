@@ -2,7 +2,7 @@
   "home": {
     "page-title": "Mentivio - Tu Compañero de Bienestar Mental",
     "hero.logo": "Mentivio",
-    "hero.title": "Mentivio – Un Refugio para Tu Mente",
+    "hero.title": "Mentivio - Un Refugio para Tu Mente",
     "hero.subtitle": "Da un paso compasivo hacia la comprensión de tu salud mental con nuestras herramientas y recursos seguros, basados en evidencia.",
     "hero.cta_assessment": "Comenzar Autoevaluación",
     "hero.cta_explore": "Explorar Biblioteca",
@@ -49,7 +49,10 @@
     "resources.textline.link": "Envía HOME al 741741",
     "resources.mentalgov.title": "MentalHealth.gov",
     "resources.mentalgov.desc": "Recurso oficial del gobierno de EE. UU. para encontrar tratamiento de salud mental.",
-    "resources.mentalgov.link": "Visitar MentalHealth.gov"
+    "resources.mentalgov.link": "Visitar MentalHealth.gov",
+    "features.map.title": "Mapa de Ánimo Global",
+    "features.map.desc": "Comparte cómo te sientes ahora mismo y ve mensajes de personas de todo el mundo. Cada pin es una voz real.",
+   "features.map.link": "Ver Mapa"
   },
   "resources": {
     "page-title": "Recursos de Aprendizaje - Mentivio",
@@ -1325,7 +1328,8 @@
     "title": "Mentivio - Evaluación de Salud Mental",
     "description": "Evaluación de salud mental segura, privada y clínica.",
     "copyright": "© 2025 Mentivio. Todos los derechos reservados.",
-    "version": "3.0"
+    "version": "3.0",
+    "map": "Mapa de Ánimo"
   },
   "prediction": {
     "page-title": "Autochequeo de Bienestar Mental - Mentivio",
@@ -1772,6 +1776,60 @@
       "contact-heading": "¿Necesitas Aclaración?",
       "contact-content": "Si tienes preguntas sobre estos términos, contáctanos en: <a href=\"mailto:mentivio9@gmail.com\" id=\"contact-email\">mentivio9@gmail.com</a>",
       "contact-closing": "Creemos en un servicio transparente y compasivo que apoye tu viaje de bienestar mental."
-    }
-
+    },
+"map": {
+  "hero.title": "🌍 Mapa de Ánimo Global",
+  "hero.subtitle": "Comparte cómo te sientes ahora mismo y ve mensajes de personas de todo el mundo. Cada pin es una voz real — apoyémonos mutuamente.",
+  "stat.messages": "mensajes",
+  "stat.messages.label": "mensajes",
+  "stat.moods": "estados de ánimo compartidos",
+  "stat.moods.label": "estados de ánimo compartidos",
+  "stat.countries": "países",
+  "stat.countries.label": "países",
+  "legend.title": "Clave de ánimo",
+  "legend.happy": "Feliz",
+  "legend.calm": "Calmado",
+  "legend.sad": "Triste",
+  "legend.distressed": "Angustiado",
+  "legend.frustrated": "Frustrado",
+  "legend.anxious": "Ansioso",
+  "legend.reflective": "Reflexivo",
+  "legend.strong": "Fuerte",
+  "legend.peaceful": "Pacifico",
+  "button.add": "Añadir tu mensaje",
+  "button.locate": "Encuéntrame",
+  "button.refresh": "Actualizar",
+  "recent.title": "Mensajes recientes de todo el mundo",
+  "empty.message": "Aún no hay mensajes. ¡Sé el primero en compartir tu estado de ánimo! 🌟",
+  "modal.title": "💬 Comparte tu estado de ánimo",
+  "modal.name.label": "Tu nombre *",
+  "modal.name.placeholder": "p.ej. Alex",
+  "modal.age.label": "Tu edad *",
+  "modal.age.placeholder": "p.ej. 28",
+  "modal.location.label": "Ubicación (ciudad/país)",
+  "modal.location.placeholder": "p.ej. Londres, Reino Unido",
+  "modal.location.hint": "Opcional – ayuda a otros a ver dónde estás.",
+  "modal.message.label": "Tu mensaje *",
+  "modal.message.placeholder": "¿Qué tienes en mente?",
+  "modal.location.detected.label": "Tu ubicación detectada",
+  "modal.location.detected.hint": "Usamos el GPS de tu dispositivo para colocar tu pin con precisión.",
+  "modal.cancel": "Cancelar",
+  "modal.share": "Compartir",
+  "recently": "recientemente",
+  "anonymous": "Anónimo",
+  "toast.refreshed": "🔄 ¡Actualizado!",
+  "toast.location_detected": "✅ ¡Ubicación detectada!",
+  "toast.location.error": "No se pudo obtener tu ubicación.",
+  "toast.permission_denied": "Permiso denegado. Por favor, permite el acceso a la ubicación.",
+  "toast.location_unavailable": "Ubicación no disponible.",
+  "toast.location_timeout": "La solicitud de ubicación ha caducado.",
+  "toast.geolocation_not_supported": "La geolocalización no es compatible con tu navegador.",
+  "toast.failed_refresh": "Error al actualizar",
+  "toast.no_location": "Ubicación no detectada. Inténtalo de nuevo.",
+  "toast.enter_name": "Por favor, introduce tu nombre.",
+  "toast.enter_age": "Por favor, introduce una edad válida (1–120).",
+  "toast.enter_message": "Por favor, escribe un mensaje.",
+  "toast.message_shared": "✨ ¡Tu mensaje ha sido compartido!",
+  "toast.location.finding": "Buscando tu ubicación…"
+}
 }
