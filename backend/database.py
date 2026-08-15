@@ -99,75 +99,58 @@ def init_database():
     try:
         conn = get_postgres_connection()
         with conn.cursor() as cur:
-            # Check if table exists
+            # ... (assessments table remains unchanged) ...
+
+            # ------------------------------------------------------------
+            # 2. MOOD MESSAGES TABLE (with name, age, location_name)
+            # ------------------------------------------------------------
             cur.execute('''
                 SELECT EXISTS (
                     SELECT FROM information_schema.tables 
-                    WHERE table_name = 'assessments'
+                    WHERE table_name = 'mood_messages'
                 );
             ''')
-            table_exists = cur.fetchone()['exists']
+            mood_table_exists = cur.fetchone()['exists']
             
-            if not table_exists:
+            if not mood_table_exists:
                 cur.execute('''
-                    CREATE TABLE assessments (
+                    CREATE TABLE mood_messages (
                         id TEXT PRIMARY KEY,
-                        assessment_timestamp TEXT,
-                        report_timestamp TEXT,
-                        timezone TEXT,
-                        patient_name TEXT,
-                        patient_number TEXT,
-                        patient_age INT,
-                        patient_gender TEXT,
-                        primary_diagnosis TEXT,
-                        confidence REAL,
-                        confidence_percentage REAL,
-                        all_diagnoses_json JSONB,
-                        coded_responses_json JSONB,
-                        processing_details_json JSONB,
-                        technical_details_json JSONB,
-                        clinical_insights_json JSONB,
+                        lat REAL NOT NULL,
+                        lng REAL NOT NULL,
+                        emoji TEXT NOT NULL,
+                        text TEXT NOT NULL,
+                        name TEXT,
+                        age INT,
+                        location_name TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
                 ''')
-                cur.execute('CREATE INDEX idx_patient_number ON assessments(patient_number)')
-                cur.execute('CREATE INDEX idx_timestamp ON assessments(report_timestamp)')
-                # Composite index for patient_number + id (used in load_single)
-                cur.execute('CREATE INDEX idx_patient_id ON assessments(patient_number, id)')
-                logger.info("Created new assessments table with JSONB columns")
+                cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
+                logger.info("Created mood_messages table with name, age, location_name")
             else:
-                # Check for old TEXT columns and migrate to JSONB
-                cur.execute('''
-                    SELECT data_type 
-                    FROM information_schema.columns 
-                    WHERE table_name = 'assessments' AND column_name = 'coded_responses_json';
-                ''')
-                col_type = cur.fetchone()
-                if col_type and col_type['data_type'] == 'text':
-                    # Convert TEXT to JSONB (PostgreSQL will validate JSON)
-                    cur.execute('ALTER TABLE assessments ALTER COLUMN coded_responses_json TYPE JSONB USING coded_responses_json::jsonb;')
-                    logger.info("Migrated coded_responses_json to JSONB")
-                
-                # Repeat for other JSON columns
-                for col in ['all_diagnoses_json', 'processing_details_json', 'technical_details_json', 'clinical_insights_json']:
+                # Add new columns if they don't exist
+                for col in ['name', 'age', 'location_name']:
                     cur.execute(f'''
-                        SELECT data_type FROM information_schema.columns 
-                        WHERE table_name = 'assessments' AND column_name = '{col}';
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'mood_messages' AND column_name = '{col}';
                     ''')
-                    col_type = cur.fetchone()
-                    if col_type and col_type['data_type'] == 'text':
-                        cur.execute(f'ALTER TABLE assessments ALTER COLUMN {col} TYPE JSONB USING {col}::jsonb;')
-                        logger.info(f"Migrated {col} to JSONB")
+                    if not cur.fetchone():
+                        if col == 'age':
+                            cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} INT;')
+                        else:
+                            cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} TEXT;')
+                        logger.info(f"Added column {col} to mood_messages")
                 
-                # Ensure composite index exists
+                # Ensure index exists
                 cur.execute('''
                     SELECT 1 FROM pg_indexes 
-                    WHERE tablename = 'assessments' AND indexname = 'idx_patient_id';
+                    WHERE tablename = 'mood_messages' AND indexname = 'idx_mood_created';
                 ''')
                 if not cur.fetchone():
-                    cur.execute('CREATE INDEX idx_patient_id ON assessments(patient_number, id);')
-                    logger.info("Added composite index idx_patient_id")
-        
+                    cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
+                    logger.info("Added index idx_mood_created to mood_messages")
+
         conn.commit()
         logger.info("Database initialization completed successfully")
     except Exception as e:
@@ -175,7 +158,7 @@ def init_database():
     finally:
         if conn:
             close_connection(conn)
-
+            
 @lru_cache(maxsize=128)
 def convert_to_canonical_key(diagnosis_text: str) -> str:
     """Convert any diagnosis text back to its canonical key (cached)."""
