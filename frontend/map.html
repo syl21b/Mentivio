@@ -909,40 +909,40 @@
                 return div.innerHTML;
             }
 
-            // ── Update dynamic elements (placeholders and stat labels) ──
-            function updateDynamicElements() {
-                // Update stat labels
-                if (statMessagesLabel) statMessagesLabel.textContent = getMapTranslation('stat.messages.label');
-                if (statMoodsLabel) statMoodsLabel.textContent = getMapTranslation('stat.moods.label');
-                if (statCountriesLabel) statCountriesLabel.textContent = getMapTranslation('stat.countries.label');
+          // ── Update dynamic elements (placeholders and stat labels) ──
+          function updateDynamicElements() {
+          // Update stat labels
+          if (statMessagesLabel) statMessagesLabel.textContent = getMapTranslation('stat.messages.label');
+          if (statMoodsLabel) statMoodsLabel.textContent = getMapTranslation('stat.moods.label');
+          if (statCountriesLabel) statCountriesLabel.textContent = getMapTranslation('stat.countries.label');
 
-                // Update input placeholders
-                const placeholderMap = {
-                    'userName': 'modal.name.placeholder',
-                    'userAge': 'modal.age.placeholder',
-                    'userLocation': 'modal.location.placeholder',
-                    'messageInput': 'modal.message.placeholder'
-                };
-                Object.entries(placeholderMap).forEach(([elId, key]) => {
-                    const el = document.getElementById(elId);
-                    if (el) {
-                        const placeholder = getMapTranslation(key);
-                        if (placeholder) el.placeholder = placeholder;
-                    }
-                });
+          // Update input placeholders
+          const placeholderMap = {
+               'userName': 'modal.name.placeholder',
+               'userAge': 'modal.age.placeholder',
+               'userLocation': 'modal.location.placeholder',
+               'messageInput': 'modal.message.placeholder'
+          };
+          Object.entries(placeholderMap).forEach(([elId, key]) => {
+               const el = document.getElementById(elId);
+               if (el) {
+                    const placeholder = getMapTranslation(key);
+                    if (placeholder) el.placeholder = placeholder;
+               }
+          });
 
-                // Update the "detected location" label (fallback text)
-                const detectedLabel = document.getElementById('modal.location.detected.label');
-                if (detectedLabel) {
-                    const t = getMapTranslation('modal.location.detected.label');
-                    if (t) detectedLabel.textContent = t;
-                }
-                const detectedHint = document.getElementById('modal.location.detected.hint');
-                if (detectedHint) {
-                    const t = getMapTranslation('modal.location.detected.hint');
-                    if (t) detectedHint.textContent = t;
-                }
-            }
+          // Update other dynamic labels
+          const detectedLabel = document.getElementById('modal.location.detected.label');
+          if (detectedLabel) {
+               const t = getMapTranslation('modal.location.detected.label');
+               if (t) detectedLabel.textContent = t;
+          }
+          const detectedHint = document.getElementById('modal.location.detected.hint');
+          if (detectedHint) {
+               const t = getMapTranslation('modal.location.detected.hint');
+               if (t) detectedHint.textContent = t;
+          }
+          }
 
             // ── map functions ──
             function initMap() {
@@ -1208,26 +1208,34 @@
             refreshBtn.addEventListener('click', refreshData);
 
             // ── language change listener ──
-            document.addEventListener('langChanged', function(e) {
-                // Reapply translations to static text (global system already does this)
-                // But we also need to update dynamic elements
-                updateDynamicElements();
-                renderMessageList();
-                if (pendingLatLng) {
-                    updateCoordsDisplay(pendingLatLng);
-                } else {
-                    updateCoordsDisplay(null);
-                }
-                updateStats();
-            });
+          document.addEventListener('langChanged', function(e) {
+          updateDynamicElements();
+          renderMessageList();
+          if (pendingLatLng) {
+               updateCoordsDisplay(pendingLatLng);
+          } else {
+               updateCoordsDisplay(null);
+          }
+          updateStats();
+          });
 
             // ── init ──
-            async function init() {
-                // First, make sure the global language manager has applied translations
-                if (window.globalLangManager) {
+             async function init() {
+               // First, make sure the global language manager has applied translations
+               if (window.globalLangManager) {
                     // Force re-apply translations to ensure static text is updated
                     window.globalLangManager.applyLanguage(window.globalLangManager.currentLang);
-                }
+               }
+
+               // Update dynamic elements (placeholders, stat labels)
+               // But only if translations are already loaded; otherwise the event will handle it.
+                if (window.globalLangManager && window.globalLangManager.translations && window.globalLangManager.translations['map']) {
+                    updateDynamicElements();
+                    renderMessageList();
+                    updateStats();
+                    if (pendingLatLng) updateCoordsDisplay(pendingLatLng);
+                    else updateCoordsDisplay(null);
+               }
 
                 // Update dynamic elements (placeholders, stat labels)
                 updateDynamicElements();
