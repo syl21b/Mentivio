@@ -772,48 +772,15 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        // ── Hardcoded English fallback for map labels ──
-        const DEFAULT_EN_MAP = {
-            'stat.messages.label': 'messages',
-            'stat.moods.label': 'moods shared',
-            'stat.countries.label': 'countries',
-            'modal.name.placeholder': 'e.g. Alex',
-            'modal.age.placeholder': 'e.g. 28',
-            'modal.location.placeholder': 'e.g. London, UK',
-            'modal.message.placeholder': "What's on your mind?",
-            'modal.location.detected.label': 'Your detected location',
-            'modal.location.detected.hint': 'We use your device’s GPS to place your pin accurately.',
-            'toast.failed_refresh': 'Failed to refresh',
-            'toast.refreshed': '🔄 Refreshed!',
-            'toast.geolocation_not_supported': 'Geolocation is not supported by your browser.',
-            'toast.location.error': 'Could not get your location.',
-            'toast.permission_denied': 'Permission denied. Please allow location access.',
-            'toast.location_unavailable': 'Location unavailable.',
-            'toast.location_timeout': 'Location request timed out.',
-            'toast.location.finding': 'Finding your location…',
-            'toast.location_detected': '✅ Location detected!',
-            'toast.enter_name': 'Please enter your name.',
-            'toast.enter_age': 'Please enter a valid age (1–120).',
-            'toast.enter_message': 'Please write a message.',
-            'toast.no_location': 'Location not detected. Please try again.',
-            'toast.message_shared': '✨ Your message has been shared!',
-            'recently': 'recently',
-            'anonymous': 'Anonymous'
-        };
-
+        // ── Helper to get translations from the loaded JSON ──
         function getMapTranslation(key, fallback = '') {
             if (window.globalLangManager) {
                 const translations = window.globalLangManager.translations;
-                // Try to get from loaded translations
                 if (translations && translations['map'] && translations['map'][key] !== undefined) {
                     return translations['map'][key];
                 }
-                // If not found, use the default English fallback (useful when en.json is missing map)
-                if (DEFAULT_EN_MAP[key] !== undefined) {
-                    console.warn(`⚠️ Translation for "${key}" not found in loaded JSON; using fallback.`);
-                    return DEFAULT_EN_MAP[key];
-                }
             }
+            // If translation not found, return the key itself (or a custom fallback)
             return fallback || key;
         }
 
@@ -898,7 +865,7 @@
                 countrySet.add(key);
             });
             statCountries.textContent = countrySet.size || 0;
-            // Update stat labels (these are not automatically updated by global system)
+            // Update stat labels from translations
             if (statMessagesLabel) statMessagesLabel.textContent = getMapTranslation('stat.messages.label');
             if (statMoodsLabel) statMoodsLabel.textContent = getMapTranslation('stat.moods.label');
             if (statCountriesLabel) statCountriesLabel.textContent = getMapTranslation('stat.countries.label');
