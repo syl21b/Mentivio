@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <base href="/">
 
-    <!-- Load scripts -->
-    <script src="frontend/js/components.js?v=2" defer></script>
-    <script src="frontend/js/load-navbar.js?v=2" defer></script>
-    <script src="frontend/js/load-footer.js?v=2" defer></script>
+    <!-- Load scripts (same order as home.html) -->
+    <script src="frontend/js/components.js" defer></script>
+    <script src="frontend/js/load-navbar.js" defer></script>
+    <script src="frontend/js/load-footer.js" defer></script>
     <script src="frontend/js/main.js" defer></script>
     <script src="../frontend/js/head-content.js" defer></script>
     <script src="../frontend/js/chatbot.js" defer></script>
@@ -37,6 +37,7 @@
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             --shadow-lg: 0 8px 15px rgba(0, 0, 0, 0.1);
             --radius: 12px;
+            --radius-sm: 8px;
             --transition: all 0.3s ease;
         }
 
@@ -552,16 +553,32 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
         @keyframes modalSlideIn {
-            from { opacity: 0; transform: translateY(-30px) scale(0.96); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .leaflet-popup-content-wrapper {
@@ -614,38 +631,95 @@
         }
 
         @media (max-width: 768px) {
-            .map-controls { bottom: 12px; gap: 0.5rem; }
-            .map-controls .map-btn { padding: 0.5rem 1rem; font-size: 0.8rem; min-height: 40px; }
-            .map-legend { top: 10px; right: 10px; padding: 0.6rem 0.9rem; min-width: 100px; }
-            .map-legend h4 { font-size: 0.7rem; }
-            .legend-item { font-size: 0.75rem; }
-            .legend-item .emoji { font-size: 1rem; width: 24px; }
-            .hero-stats { gap: 0.75rem; }
-            .hero-stats .stat { padding: 0.5rem 1rem; font-size: 0.8rem; }
-            .message-grid { grid-template-columns: 1fr; }
-            .modal-box { padding: 1.5rem 1rem 1.4rem; }
-            .modal-box .mood-selector .mood-option { font-size: 1.5rem; min-width: 42px; min-height: 42px; padding: 0.3rem 0.4rem; }
+            .map-controls {
+                bottom: 12px;
+                gap: 0.5rem;
+            }
+            .map-controls .map-btn {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+                min-height: 40px;
+            }
+            .map-legend {
+                top: 10px;
+                right: 10px;
+                padding: 0.6rem 0.9rem;
+                min-width: 100px;
+            }
+            .map-legend h4 {
+                font-size: 0.7rem;
+            }
+            .legend-item {
+                font-size: 0.75rem;
+            }
+            .legend-item .emoji {
+                font-size: 1rem;
+                width: 24px;
+            }
+            .hero-stats {
+                gap: 0.75rem;
+            }
+            .hero-stats .stat {
+                padding: 0.5rem 1rem;
+                font-size: 0.8rem;
+            }
+            .message-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-box {
+                padding: 1.5rem 1rem 1.4rem;
+            }
+            .modal-box .mood-selector .mood-option {
+                font-size: 1.5rem;
+                min-width: 42px;
+                min-height: 42px;
+                padding: 0.3rem 0.4rem;
+            }
         }
 
         @media (max-width: 480px) {
-            #world-map { height: 300px; }
-            .map-legend { display: none; }
-            .modal-box .form-actions { flex-direction: column; }
-            .modal-box .form-actions .btn { width: 100%; justify-content: center; }
+            #world-map {
+                height: 300px;
+            }
+            .map-legend {
+                display: none;
+            }
+            .modal-box .form-actions {
+                flex-direction: column;
+            }
+            .modal-box .form-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
-            * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+            * {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
         }
-        button:focus, input:focus, textarea:focus {
+        button:focus,
+        input:focus,
+        textarea:focus {
             outline: 2px solid var(--primary);
             outline-offset: 2px;
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--light); }
-        ::-webkit-scrollbar-thumb { background: var(--primary-light); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--light);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-light);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -653,8 +727,8 @@
     <!-- ─── HERO ─── -->
     <section class="hero">
         <div class="hero-content">
-            <h1 id="hero.title">🌍 <strong>Global Mood Map</strong></h1>
-            <p id="hero.subtitle">Share how you're feeling right now, and see messages from people around the world. Every pin is a real voice — let's support each other.</p>
+            <h1 id="map.hero.title">🌍 <strong>Global Mood Map</strong></h1>
+            <p id="map.hero.subtitle">Share how you're feeling right now, and see messages from people around the world. Every pin is a real voice — let's support each other.</p>
             <div class="hero-stats">
                 <div class="stat"><i class="fas fa-map-pin"></i> <strong id="stat.messages">0</strong> <span id="stat.messages.label">messages</span></div>
                 <div class="stat"><i class="fas fa-smile"></i> <strong id="stat.moods">0</strong> <span id="stat.moods.label">moods shared</span></div>
@@ -670,28 +744,28 @@
 
             <!-- Legend -->
             <div class="map-legend">
-                <h4 id="legend.title">Mood key</h4>
-                <div class="legend-item"><span class="emoji">😊</span> <span id="legend.happy">Happy</span></div>
-                <div class="legend-item"><span class="emoji">😌</span> <span id="legend.calm">Calm</span></div>
-                <div class="legend-item"><span class="emoji">😔</span> <span id="legend.sad">Sad</span></div>
-                <div class="legend-item"><span class="emoji">😢</span> <span id="legend.distressed">Distressed</span></div>
-                <div class="legend-item"><span class="emoji">😤</span> <span id="legend.frustrated">Frustrated</span></div>
-                <div class="legend-item"><span class="emoji">😰</span> <span id="legend.anxious">Anxious</span></div>
-                <div class="legend-item"><span class="emoji">🧠</span> <span id="legend.reflective">Reflective</span></div>
-                <div class="legend-item"><span class="emoji">💪</span> <span id="legend.strong">Strong</span></div>
-                <div class="legend-item"><span class="emoji">🕊️</span> <span id="legend.peaceful">Peaceful</span></div>
+                <h4 id="map.legend.title">Mood key</h4>
+                <div class="legend-item"><span class="emoji">😊</span> <span id="map.legend.happy">Happy</span></div>
+                <div class="legend-item"><span class="emoji">😌</span> <span id="map.legend.calm">Calm</span></div>
+                <div class="legend-item"><span class="emoji">😔</span> <span id="map.legend.sad">Sad</span></div>
+                <div class="legend-item"><span class="emoji">😢</span> <span id="map.legend.distressed">Distressed</span></div>
+                <div class="legend-item"><span class="emoji">😤</span> <span id="map.legend.frustrated">Frustrated</span></div>
+                <div class="legend-item"><span class="emoji">😰</span> <span id="map.legend.anxious">Anxious</span></div>
+                <div class="legend-item"><span class="emoji">🧠</span> <span id="map.legend.reflective">Reflective</span></div>
+                <div class="legend-item"><span class="emoji">💪</span> <span id="map.legend.strong">Strong</span></div>
+                <div class="legend-item"><span class="emoji">🕊️</span> <span id="map.legend.peaceful">Peaceful</span></div>
             </div>
 
             <!-- Controls -->
             <div class="map-controls">
                 <button class="map-btn primary" id="addMessageBtn">
-                    <i class="fas fa-plus-circle"></i> <span id="button.add">Add your message</span>
+                    <i class="fas fa-plus-circle"></i> <span id="map.button.add">Add your message</span>
                 </button>
                 <button class="map-btn success" id="locateMeBtn">
-                    <i class="fas fa-location-dot"></i> <span id="button.locate">Find me</span>
+                    <i class="fas fa-location-dot"></i> <span id="map.button.locate">Find me</span>
                 </button>
                 <button class="map-btn" id="refreshMapBtn">
-                    <i class="fas fa-rotate"></i> <span id="button.refresh">Refresh</span>
+                    <i class="fas fa-rotate"></i> <span id="map.button.refresh">Refresh</span>
                 </button>
             </div>
         </div>
@@ -699,12 +773,12 @@
         <!-- ─── MESSAGE LIST ─── -->
         <section class="message-list-section">
             <div class="section-header">
-                <h2 id="recent.title"><strong>Recent</strong> messages from around the world</h2>
+                <h2 id="map.recent.title"><strong>Recent</strong> messages from around the world</h2>
             </div>
             <div id="messageGrid" class="message-grid"></div>
             <div id="emptyState" class="empty-messages" style="display:none;">
                 <i class="fas fa-comment-slash"></i>
-                <p id="empty.message">No messages yet. Be the first to share your mood! 🌟</p>
+                <p id="map.empty.message">No messages yet. Be the first to share your mood! 🌟</p>
             </div>
         </section>
     </div>
@@ -713,23 +787,23 @@
     <div class="modal-overlay" id="messageModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 id="modal.title">💬 Share your mood</h3>
+                <h3 id="map.modal.title">💬 Share your mood</h3>
                 <button class="close-modal" id="closeModalBtn">&times;</button>
             </div>
 
             <!-- User info fields -->
             <div class="form-group">
-                <label id="modal.name.label" for="userName">Your name *</label>
+                <label id="map.modal.name.label" for="userName">Your name *</label>
                 <input type="text" id="userName" placeholder="e.g. Alex" required maxlength="50">
             </div>
             <div class="form-group">
-                <label id="modal.age.label" for="userAge">Your age *</label>
+                <label id="map.modal.age.label" for="userAge">Your age *</label>
                 <input type="number" id="userAge" placeholder="e.g. 28" min="1" max="120" required>
             </div>
             <div class="form-group">
-                <label id="modal.location.label" for="userLocation">Location (city/country)</label>
+                <label id="map.modal.location.label" for="userLocation">Location (city/country)</label>
                 <input type="text" id="userLocation" placeholder="e.g. London, UK" maxlength="100">
-                <div class="location-hint" id="modal.location.hint">Optional – helps others see where you are.</div>
+                <div class="location-hint" id="map.modal.location.hint">Optional – helps others see where you are.</div>
             </div>
 
             <!-- Mood selector -->
@@ -747,20 +821,20 @@
 
             <!-- Message text -->
             <div class="form-group">
-                <label id="modal.message.label" for="messageInput">Your message *</label>
+                <label id="map.modal.message.label" for="messageInput">Your message *</label>
                 <textarea id="messageInput" placeholder="What's on your mind?" maxlength="280" required></textarea>
             </div>
 
             <!-- Detected location (read-only) -->
             <div class="form-group">
-                <label id="modal.location.detected.label">Your detected location</label>
+                <label id="map.modal.location.detected.label">Your detected location</label>
                 <div id="selectedCoordsDisplay" class="selected-coords">Waiting for location…</div>
-                <div class="location-hint" id="modal.location.detected.hint">We use your device’s GPS to place your pin accurately.</div>
+                <div class="location-hint" id="map.modal.location.detected.hint">We use your device's GPS to place your pin accurately.</div>
             </div>
 
             <div class="form-actions">
-                <button class="btn btn-secondary" id="cancelModalBtn"><span id="modal.cancel">Cancel</span></button>
-                <button class="btn btn-primary" id="submitMessageBtn"><span id="modal.share">Share</span> <i class="fas fa-paper-plane"></i></button>
+                <button class="btn btn-secondary" id="cancelModalBtn"><span id="map.modal.cancel">Cancel</span></button>
+                <button class="btn btn-primary" id="submitMessageBtn"><span id="map.modal.share">Share</span> <i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -769,492 +843,579 @@
     <div class="toast" id="toast"></div>
 
     <!-- ─── SCRIPTS ─── -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-        // ── Helper to get translations from the loaded JSON ──
-        function getMapTranslation(key, fallback = '') {
-            if (window.globalLangManager) {
-                const translations = window.globalLangManager.translations;
-                if (translations && translations['map'] && translations['map'][key] !== undefined) {
-                    return translations['map'][key];
+            // ── Helper: flat translation lookup (same as home.html) ──
+            function t(key, fallback) {
+                if (window.globalLangManager) {
+                    const trans = window.globalLangManager.translations;
+                    if (trans && trans[key] !== undefined) {
+                        return trans[key];
+                    }
+                    // Also try without 'map.' prefix for backward compatibility
+                    if (key.startsWith('map.')) {
+                        const shortKey = key.replace(/^map\./, '');
+                        if (trans && trans[shortKey] !== undefined) {
+                            return trans[shortKey];
+                        }
+                    }
+                }
+                return fallback || key;
+            }
+
+            // ── state ──
+            let messages = [];
+            let map = null;
+            let markers = {};
+            let userMarker = null;
+            let selectedMood = '😊';
+            let isSubmitting = false;
+            let pendingLatLng = null;
+
+            // ── DOM refs ──
+            const messageGrid = document.getElementById('messageGrid');
+            const emptyState = document.getElementById('emptyState');
+            const modal = document.getElementById('messageModal');
+            const moodOptions = document.querySelectorAll('.mood-option');
+            const messageInput = document.getElementById('messageInput');
+            const userNameInput = document.getElementById('userName');
+            const userAgeInput = document.getElementById('userAge');
+            const userLocationInput = document.getElementById('userLocation');
+            const selectedCoordsDisplay = document.getElementById('selectedCoordsDisplay');
+            const submitBtn = document.getElementById('submitMessageBtn');
+            const cancelModalBtn = document.getElementById('cancelModalBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const addMessageBtn = document.getElementById('addMessageBtn');
+            const locateMeBtn = document.getElementById('locateMeBtn');
+            const refreshBtn = document.getElementById('refreshMapBtn');
+            const toast = document.getElementById('toast');
+            const statMessages = document.getElementById('stat.messages');
+            const statMoods = document.getElementById('stat.moods');
+            const statCountries = document.getElementById('stat.countries');
+            const statMessagesLabel = document.getElementById('stat.messages.label');
+            const statMoodsLabel = document.getElementById('stat.moods.label');
+            const statCountriesLabel = document.getElementById('stat.countries.label');
+
+            // ── API functions ──
+
+            async function fetchMessages() {
+                try {
+                    const response = await fetch('/api/mood-messages');
+                    if (!response.ok) throw new Error('Failed to fetch messages');
+                    const data = await response.json();
+                    messages = data;
+                    return messages;
+                } catch (error) {
+                    console.error('Error fetching messages:', error);
+                    showToast(t('map.toast.failed_refresh', 'Failed to refresh'), 'error');
+                    return [];
                 }
             }
-            // If translation not found, return the key itself (or a custom fallback)
-            return fallback || key;
-        }
 
-        // ── state ──
-        let messages = [];
-        let map = null;
-        let markers = {};
-        let userMarker = null;
-        let selectedMood = '😊';
-        let isSubmitting = false;
-        let pendingLatLng = null;
-
-        // ── DOM refs ──
-        const messageGrid = document.getElementById('messageGrid');
-        const emptyState = document.getElementById('emptyState');
-        const modal = document.getElementById('messageModal');
-        const moodOptions = document.querySelectorAll('.mood-option');
-        const messageInput = document.getElementById('messageInput');
-        const userNameInput = document.getElementById('userName');
-        const userAgeInput = document.getElementById('userAge');
-        const userLocationInput = document.getElementById('userLocation');
-        const selectedCoordsDisplay = document.getElementById('selectedCoordsDisplay');
-        const submitBtn = document.getElementById('submitMessageBtn');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const addMessageBtn = document.getElementById('addMessageBtn');
-        const locateMeBtn = document.getElementById('locateMeBtn');
-        const refreshBtn = document.getElementById('refreshMapBtn');
-        const toast = document.getElementById('toast');
-        const statMessages = document.getElementById('stat.messages');
-        const statMoods = document.getElementById('stat.moods');
-        const statCountries = document.getElementById('stat.countries');
-        const statMessagesLabel = document.getElementById('stat.messages.label');
-        const statMoodsLabel = document.getElementById('stat.moods.label');
-        const statCountriesLabel = document.getElementById('stat.countries.label');
-
-        // ── API functions ──
-
-        async function fetchMessages() {
-            try {
-                const response = await fetch('/api/mood-messages');
-                if (!response.ok) throw new Error('Failed to fetch messages');
-                const data = await response.json();
-                messages = data;
-                return messages;
-            } catch (error) {
-                console.error('Error fetching messages:', error);
-                showToast(getMapTranslation('toast.failed_refresh', 'Failed to refresh'), 'error');
-                return [];
+            async function sendMessage(lat, lng, emoji, text, name, age, location_name) {
+                try {
+                    const payload = { lat, lng, emoji, text, name, age, location_name };
+                    const response = await fetch('/api/mood-messages', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Failed to save message');
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    showToast(error.message || t('map.toast.error_send', 'Could not share message.'), 'error');
+                    throw error;
+                }
             }
-        }
 
-        async function sendMessage(lat, lng, emoji, text, name, age, location_name) {
-            try {
-                const payload = { lat, lng, emoji, text, name, age, location_name };
-                const response = await fetch('/api/mood-messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+            // ── update UI ──
+            function updateStats() {
+                const total = messages.length;
+                statMessages.textContent = total;
+                const moodSet = new Set(messages.map(m => m.emoji));
+                statMoods.textContent = moodSet.size;
+                const countrySet = new Set();
+                messages.forEach(m => {
+                    const key = Math.round(m.lat * 2) + ',' + Math.round(m.lng * 2);
+                    countrySet.add(key);
                 });
-                if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.error || 'Failed to save message');
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('Error sending message:', error);
-                showToast(error.message || 'Could not share message.', 'error');
-                throw error;
+                statCountries.textContent = countrySet.size || 0;
+                // Update stat labels from translations
+                if (statMessagesLabel) statMessagesLabel.textContent = t('map.stat.messages.label', 'messages');
+                if (statMoodsLabel) statMoodsLabel.textContent = t('map.stat.moods.label', 'moods shared');
+                if (statCountriesLabel) statCountriesLabel.textContent = t('map.stat.countries.label', 'countries');
             }
-        }
 
-        // ── update UI ──
-        function updateStats() {
-            const total = messages.length;
-            statMessages.textContent = total;
-            const moodSet = new Set(messages.map(m => m.emoji));
-            statMoods.textContent = moodSet.size;
-            const countrySet = new Set();
-            messages.forEach(m => {
-                const key = Math.round(m.lat * 2) + ',' + Math.round(m.lng * 2);
-                countrySet.add(key);
-            });
-            statCountries.textContent = countrySet.size || 0;
-            // Update stat labels from translations
-            if (statMessagesLabel) statMessagesLabel.textContent = getMapTranslation('stat.messages.label');
-            if (statMoodsLabel) statMoodsLabel.textContent = getMapTranslation('stat.moods.label');
-            if (statCountriesLabel) statCountriesLabel.textContent = getMapTranslation('stat.countries.label');
-        }
-
-        function renderMessageList() {
-            if (messages.length === 0) {
-                messageGrid.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-            emptyState.style.display = 'none';
-            const sorted = [...messages].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            const html = sorted.slice(0, 20).map(m => {
-                const time = m.timestamp ? new Date(m.timestamp).toLocaleString() : getMapTranslation('recently', 'recently');
-                const text = m.text || '';
-                const name = m.name || getMapTranslation('anonymous', 'Anonymous');
-                const age = m.age ? `, ${m.age}` : '';
-                const location = m.location_name ? ` · ${m.location_name}` : '';
-                return `
-                    <div class="message-card">
-                        <div class="mood-emoji">${m.emoji || '💬'}</div>
-                        <div class="msg-body">
-                            <div class="text">${escapeHtml(text) || '—'}</div>
-                            <div class="user-info">${escapeHtml(name)}${age}${location}</div>
-                            <div class="meta">
-                                <span><i class="fas fa-map-pin"></i> ${m.lat.toFixed(2)}, ${m.lng.toFixed(2)}</span>
-                                <span><i class="far fa-clock"></i> ${time}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            messageGrid.innerHTML = html;
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ── Update dynamic elements (placeholders and stat labels) ──
-        function updateDynamicElements() {
-            // Update stat labels
-            if (statMessagesLabel) statMessagesLabel.textContent = getMapTranslation('stat.messages.label');
-            if (statMoodsLabel) statMoodsLabel.textContent = getMapTranslation('stat.moods.label');
-            if (statCountriesLabel) statCountriesLabel.textContent = getMapTranslation('stat.countries.label');
-
-            // Update input placeholders
-            const placeholderMap = {
-                'userName': 'modal.name.placeholder',
-                'userAge': 'modal.age.placeholder',
-                'userLocation': 'modal.location.placeholder',
-                'messageInput': 'modal.message.placeholder'
-            };
-            Object.entries(placeholderMap).forEach(([elId, key]) => {
-                const el = document.getElementById(elId);
-                if (el) {
-                    const placeholder = getMapTranslation(key);
-                    if (placeholder) el.placeholder = placeholder;
-                }
-            });
-
-            // Update other dynamic labels
-            const detectedLabel = document.getElementById('modal.location.detected.label');
-            if (detectedLabel) {
-                const t = getMapTranslation('modal.location.detected.label');
-                if (t) detectedLabel.textContent = t;
-            }
-            const detectedHint = document.getElementById('modal.location.detected.hint');
-            if (detectedHint) {
-                const t = getMapTranslation('modal.location.detected.hint');
-                if (t) detectedHint.textContent = t;
-            }
-        }
-
-        // ── map functions ──
-        function initMap() {
-            map = L.map('world-map', {
-                center: [20, 0],
-                zoom: 2,
-                zoomControl: true,
-                fadeAnimation: true,
-                attributionControl: true,
-            });
-
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
-                subdomains: 'abcd',
-                maxZoom: 19,
-            }).addTo(map);
-
-            setTimeout(() => map.invalidateSize(), 300);
-            window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
-        }
-
-        function updateCoordsDisplay(latlng) {
-            if (latlng) {
-                selectedCoordsDisplay.textContent = `📍 ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
-            } else {
-                selectedCoordsDisplay.textContent = getMapTranslation('modal.location.detected.label', 'Waiting for location…');
-            }
-        }
-
-        function createMarker(data) {
-            const emoji = data.emoji || '💬';
-            const text = data.text || '';
-            const name = data.name || getMapTranslation('anonymous', 'Anonymous');
-            const age = data.age ? `, ${data.age}` : '';
-            const location = data.location_name ? ` · ${data.location_name}` : '';
-            const time = data.timestamp ? new Date(data.timestamp).toLocaleString() : getMapTranslation('recently', 'recently');
-
-            const icon = L.divIcon({
-                html: `<span class="custom-marker">${emoji}</span>`,
-                className: '',
-                iconSize: [36, 36],
-                iconAnchor: [18, 36],
-                popupAnchor: [0, -36],
-            });
-
-            const marker = L.marker([data.lat, data.lng], { icon: icon });
-
-            const popupContent = `
-                <div class="popup-emoji">${emoji}</div>
-                <div class="popup-msg">${escapeHtml(text) || '—'}</div>
-                <div class="popup-user">${escapeHtml(name)}${age}${location}</div>
-                <div class="popup-meta">📍 ${data.lat.toFixed(2)}, ${data.lng.toFixed(2)} · ${time}</div>
-            `;
-            marker.bindPopup(popupContent, { maxWidth: 220, className: 'custom-popup' });
-
-            return marker;
-        }
-
-        function loadMarkers() {
-            if (markers) {
-                Object.values(markers).forEach(m => {
-                    if (m && map) map.removeLayer(m);
-                });
-            }
-            markers = {};
-            messages.forEach(m => {
-                if (!m.lat || !m.lng) return;
-                const marker = createMarker(m);
-                if (marker) {
-                    markers[m.id] = marker;
-                    marker.addTo(map);
-                }
-            });
-        }
-
-        // ── refresh data ──
-        async function refreshData() {
-            try {
-                const msgs = await fetchMessages();
-                messages = msgs;
-                loadMarkers();
-                renderMessageList();
-                updateStats();
-                showToast(getMapTranslation('toast.refreshed', '🔄 Refreshed!'), 'success');
-            } catch (e) {
-                showToast(getMapTranslation('toast.failed_refresh', 'Failed to refresh'), 'error');
-            }
-        }
-
-        // ── geolocation helper ──
-        function getCurrentLocation() {
-            return new Promise((resolve, reject) => {
-                if (!navigator.geolocation) {
-                    reject(new Error(getMapTranslation('toast.geolocation_not_supported', 'Geolocation is not supported by your browser.')));
+            function renderMessageList() {
+                if (messages.length === 0) {
+                    messageGrid.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    const emptyMsg = document.getElementById('map.empty.message');
+                    if (emptyMsg) emptyMsg.textContent = t('map.empty.message', 'No messages yet. Be the first to share your mood! 🌟');
                     return;
                 }
-                navigator.geolocation.getCurrentPosition(
-                    pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-                    err => {
-                        let msg = getMapTranslation('toast.location.error', 'Could not get your location.');
-                        if (err.code === 1) msg = getMapTranslation('toast.permission_denied', 'Permission denied. Please allow location access.');
-                        else if (err.code === 2) msg = getMapTranslation('toast.location_unavailable', 'Location unavailable.');
-                        else if (err.code === 3) msg = getMapTranslation('toast.location_timeout', 'Location request timed out.');
-                        reject(new Error(msg));
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-                );
-            });
-        }
-
-        // ── modal ──
-        function openModal() {
-            messageInput.value = '';
-            userNameInput.value = '';
-            userAgeInput.value = '';
-            userLocationInput.value = '';
-            selectedMood = '😊';
-            moodOptions.forEach(el => el.classList.remove('active'));
-            document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
-            modal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-            setTimeout(() => userNameInput.focus(), 100);
-        }
-
-        function closeModal() {
-            modal.classList.remove('open');
-            document.body.style.overflow = '';
-            pendingLatLng = null;
-            isSubmitting = false;
-            submitBtn.disabled = false;
-            updateCoordsDisplay(null);
-        }
-
-        // ── toast ──
-        let toastTimer = null;
-
-        function showToast(msg, type) {
-            toast.textContent = msg;
-            toast.className = 'toast';
-            if (type) toast.classList.add(type);
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3500);
-        }
-
-        // ── geolocation (centering) ──
-        function locateUser() {
-            if (!navigator.geolocation) {
-                showToast(getMapTranslation('toast.geolocation_not_supported', 'Geolocation is not supported.'), 'error');
-                return;
-            }
-            showToast(getMapTranslation('toast.location.finding', 'Finding your location…'), '');
-            navigator.geolocation.getCurrentPosition(
-                function(pos) {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    map.flyTo([lat, lng], 10, { duration: 1.5 });
-                    if (userMarker) map.removeLayer(userMarker);
-                    userMarker = L.marker([lat, lng], {
-                        icon: L.divIcon({
-                            html: '<span style="font-size:2.4rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));">📍</span>',
-                            className: '',
-                            iconSize: [30, 30],
-                            iconAnchor: [15, 30],
-                        })
-                    }).addTo(map);
-                    userMarker.bindPopup('📍 You are here!');
-                    setTimeout(() => userMarker.openPopup(), 300);
-                    showToast(getMapTranslation('toast.location_detected', '📍 Found you!'), 'success');
-                },
-                function(err) {
-                    let msg = getMapTranslation('toast.location.error', 'Could not get your location.');
-                    if (err.code === 1) msg = getMapTranslation('toast.permission_denied', 'Permission denied.');
-                    else if (err.code === 2) msg = getMapTranslation('toast.location_unavailable', 'Location unavailable.');
-                    else if (err.code === 3) msg = getMapTranslation('toast.location_timeout', 'Request timed out.');
-                    showToast(msg, 'error');
-                }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
-            );
-        }
-
-        // ── event listeners ──
-
-        moodOptions.forEach(el => {
-            el.addEventListener('click', function() {
-                moodOptions.forEach(o => o.classList.remove('active'));
-                this.classList.add('active');
-                selectedMood = this.dataset.emoji;
-            });
-        });
-
-        submitBtn.addEventListener('click', async function() {
-            if (isSubmitting) return;
-
-            const name = userNameInput.value.trim();
-            const age = parseInt(userAgeInput.value.trim());
-            const text = messageInput.value.trim();
-            const location = userLocationInput.value.trim();
-
-            if (!name) {
-                showToast(getMapTranslation('toast.enter_name', 'Please enter your name.'), 'error');
-                userNameInput.focus();
-                return;
-            }
-            if (!age || age < 1 || age > 120) {
-                showToast(getMapTranslation('toast.enter_age', 'Please enter a valid age (1–120).'), 'error');
-                userAgeInput.focus();
-                return;
-            }
-            if (!text) {
-                showToast(getMapTranslation('toast.enter_message', 'Please write a message.'), 'error');
-                messageInput.focus();
-                return;
-            }
-            if (!pendingLatLng) {
-                showToast(getMapTranslation('toast.no_location', 'Location not detected. Please try again.'), 'error');
-                return;
+                emptyState.style.display = 'none';
+                const sorted = [...messages].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                const anonymous = t('map.anonymous', 'Anonymous');
+                const recently = t('map.recently', 'recently');
+                const html = sorted.slice(0, 20).map(m => {
+                    const time = m.timestamp ? new Date(m.timestamp).toLocaleString() : recently;
+                    const text = m.text || '';
+                    const name = m.name || anonymous;
+                    const age = m.age ? `, ${m.age}` : '';
+                    const location = m.location_name ? ` · ${m.location_name}` : '';
+                    return `
+                        <div class="message-card">
+                            <div class="mood-emoji">${m.emoji || '💬'}</div>
+                            <div class="msg-body">
+                                <div class="text">${escapeHtml(text) || '—'}</div>
+                                <div class="user-info">${escapeHtml(name)}${age}${location}</div>
+                                <div class="meta">
+                                    <span><i class="fas fa-map-pin"></i> ${m.lat.toFixed(2)}, ${m.lng.toFixed(2)}</span>
+                                    <span><i class="far fa-clock"></i> ${time}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                messageGrid.innerHTML = html;
             }
 
-            isSubmitting = true;
-            submitBtn.disabled = true;
-            const lat = pendingLatLng.lat;
-            const lng = pendingLatLng.lng;
-            try {
-                await sendMessage(lat, lng, selectedMood, text, name, age, location);
-                closeModal();
-                await refreshData();
-                showToast(getMapTranslation('toast.message_shared', '✨ Your message has been shared!'), 'success');
-            } catch (e) {
-                // error already shown in sendMessage
-            } finally {
+            function escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // ── Apply translations to all elements with data-i18n or id matching map.* ──
+            function applyMapTranslations() {
+                if (!window.globalLangManager) return;
+                const trans = window.globalLangManager.translations;
+                if (!trans) return;
+
+                // Find all elements with id starting with "map." and update textContent
+                document.querySelectorAll('[id]').forEach(el => {
+                    const key = el.id;
+                    // Only update if key starts with "map." and translation exists
+                    if (key.startsWith('map.') && trans[key] !== undefined) {
+                        // Don't update inputs, textareas, or elements with dynamic content
+                        const tag = el.tagName;
+                        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+                            // For placeholders, we handle separately via updateDynamicElements
+                            return;
+                        }
+                        // Only update if the element's current content is still the key or empty
+                        const current = el.textContent.trim();
+                        // For buttons/spans inside buttons, we might want to update the inner span
+                        if (tag === 'SPAN' && el.parentElement && el.parentElement.tagName === 'BUTTON') {
+                            // Update button text via the span
+                            const keyWithoutMap = key.replace(/^map\./, '');
+                            if (trans[key] !== undefined) {
+                                el.textContent = trans[key];
+                            }
+                        } else if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'H4' ||
+                            tag === 'P' || tag === 'SPAN' || tag === 'DIV' || tag === 'LABEL' ||
+                            tag === 'BUTTON' || tag === 'A' || tag === 'LI') {
+                            // Only update if content is the key itself (like "map.hero.title") or empty
+                            if (current === key || current === '' || current === '---' || current.startsWith('🌍') ||
+                                current.startsWith('💬')) {
+                                el.textContent = trans[key];
+                            }
+                        }
+                    }
+                });
+
+                // Update stat labels
+                updateStats();
+
+                // Update placeholders
+                const placeholderMap = {
+                    'userName': 'map.modal.name.placeholder',
+                    'userAge': 'map.modal.age.placeholder',
+                    'userLocation': 'map.modal.location.placeholder',
+                    'messageInput': 'map.modal.message.placeholder'
+                };
+                Object.entries(placeholderMap).forEach(([elId, key]) => {
+                    const el = document.getElementById(elId);
+                    if (el && trans[key] !== undefined) {
+                        el.placeholder = trans[key];
+                    }
+                });
+
+                // Update detected location label & hint
+                const detectedLabel = document.getElementById('map.modal.location.detected.label');
+                if (detectedLabel && trans['map.modal.location.detected.label'] !== undefined) {
+                    detectedLabel.textContent = trans['map.modal.location.detected.label'];
+                }
+                const detectedHint = document.getElementById('map.modal.location.detected.hint');
+                if (detectedHint && trans['map.modal.location.detected.hint'] !== undefined) {
+                    detectedHint.textContent = trans['map.modal.location.detected.hint'];
+                }
+
+                // Update the "recent" title
+                const recentTitle = document.getElementById('map.recent.title');
+                if (recentTitle && trans['map.recent.title'] !== undefined) {
+                    // Keep the <strong> wrapper
+                    const strong = recentTitle.querySelector('strong');
+                    if (strong) {
+                        const txt = trans['map.recent.title'];
+                        const parts = txt.split(/\*\*(.*?)\*\*/);
+                        if (parts.length >= 3) {
+                            strong.textContent = parts[1];
+                            const before = document.createTextNode(parts[0]);
+                            const after = document.createTextNode(parts[2] || '');
+                            recentTitle.innerHTML = '';
+                            recentTitle.appendChild(before);
+                            recentTitle.appendChild(strong);
+                            recentTitle.appendChild(after);
+                        } else {
+                            // Fallback: just set the whole text
+                            recentTitle.textContent = txt;
+                        }
+                    } else {
+                        recentTitle.textContent = trans['map.recent.title'];
+                    }
+                }
+
+                // Update empty message
+                const emptyMsg = document.getElementById('map.empty.message');
+                if (emptyMsg && trans['map.empty.message'] !== undefined) {
+                    emptyMsg.textContent = trans['map.empty.message'];
+                }
+
+                // Update toast messages in cache (they'll be used next time toast is shown)
+                // We handle toast messages via the t() function directly
+            }
+
+            // ── map functions ──
+            function initMap() {
+                map = L.map('world-map', {
+                    center: [20, 0],
+                    zoom: 2,
+                    zoomControl: true,
+                    fadeAnimation: true,
+                    attributionControl: true,
+                });
+
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
+                    subdomains: 'abcd',
+                    maxZoom: 19,
+                }).addTo(map);
+
+                setTimeout(() => map.invalidateSize(), 300);
+                window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+            }
+
+            function updateCoordsDisplay(latlng) {
+                if (latlng) {
+                    const label = t('map.modal.location.detected.label', 'Your detected location');
+                    selectedCoordsDisplay.textContent = `📍 ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+                } else {
+                    selectedCoordsDisplay.textContent = t('map.modal.location.detected.waiting', 'Waiting for location…');
+                }
+            }
+
+            function createMarker(data) {
+                const emoji = data.emoji || '💬';
+                const text = data.text || '';
+                const name = data.name || t('map.anonymous', 'Anonymous');
+                const age = data.age ? `, ${data.age}` : '';
+                const location = data.location_name ? ` · ${data.location_name}` : '';
+                const time = data.timestamp ? new Date(data.timestamp).toLocaleString() : t('map.recently', 'recently');
+
+                const icon = L.divIcon({
+                    html: `<span class="custom-marker">${emoji}</span>`,
+                    className: '',
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 36],
+                    popupAnchor: [0, -36],
+                });
+
+                const marker = L.marker([data.lat, data.lng], { icon: icon });
+
+                const popupContent = `
+                    <div class="popup-emoji">${emoji}</div>
+                    <div class="popup-msg">${escapeHtml(text) || '—'}</div>
+                    <div class="popup-user">${escapeHtml(name)}${age}${location}</div>
+                    <div class="popup-meta">📍 ${data.lat.toFixed(2)}, ${data.lng.toFixed(2)} · ${time}</div>
+                `;
+                marker.bindPopup(popupContent, { maxWidth: 220, className: 'custom-popup' });
+
+                return marker;
+            }
+
+            function loadMarkers() {
+                if (markers) {
+                    Object.values(markers).forEach(m => {
+                        if (m && map) map.removeLayer(m);
+                    });
+                }
+                markers = {};
+                messages.forEach(m => {
+                    if (!m.lat || !m.lng) return;
+                    const marker = createMarker(m);
+                    if (marker) {
+                        markers[m.id] = marker;
+                        marker.addTo(map);
+                    }
+                });
+            }
+
+            // ── refresh data ──
+            async function refreshData() {
+                try {
+                    const msgs = await fetchMessages();
+                    messages = msgs;
+                    loadMarkers();
+                    renderMessageList();
+                    updateStats();
+                    showToast(t('map.toast.refreshed', '🔄 Refreshed!'), 'success');
+                } catch (e) {
+                    showToast(t('map.toast.failed_refresh', 'Failed to refresh'), 'error');
+                }
+            }
+
+            // ── geolocation helper ──
+            function getCurrentLocation() {
+                return new Promise((resolve, reject) => {
+                    if (!navigator.geolocation) {
+                        reject(new Error(t('map.toast.geolocation_not_supported',
+                        'Geolocation is not supported by your browser.')));
+                        return;
+                    }
+                    navigator.geolocation.getCurrentPosition(
+                        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                        err => {
+                            let msg = t('map.toast.location.error', 'Could not get your location.');
+                            if (err.code === 1) msg = t('map.toast.permission_denied',
+                            'Permission denied. Please allow location access.');
+                            else if (err.code === 2) msg = t('map.toast.location_unavailable',
+                            'Location unavailable.');
+                            else if (err.code === 3) msg = t('map.toast.location_timeout',
+                            'Location request timed out.');
+                            reject(new Error(msg));
+                        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+                    );
+                });
+            }
+
+            // ── modal ──
+            function openModal() {
+                messageInput.value = '';
+                userNameInput.value = '';
+                userAgeInput.value = '';
+                userLocationInput.value = '';
+                selectedMood = '😊';
+                moodOptions.forEach(el => el.classList.remove('active'));
+                document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => userNameInput.focus(), 100);
+            }
+
+            function closeModal() {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+                pendingLatLng = null;
                 isSubmitting = false;
                 submitBtn.disabled = false;
-            }
-        });
-
-        function handleClose() { closeModal(); }
-        cancelModalBtn.addEventListener('click', handleClose);
-        closeModalBtn.addEventListener('click', handleClose);
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
-        });
-
-        addMessageBtn.addEventListener('click', async function() {
-            try {
-                showToast(getMapTranslation('toast.location.finding', 'Detecting your location…'), '');
-                const coords = await getCurrentLocation();
-                pendingLatLng = coords;
-                updateCoordsDisplay(coords);
-                map.flyTo([coords.lat, coords.lng], 10, { duration: 1.2 });
-                openModal();
-                showToast(getMapTranslation('toast.location_detected', '✅ Location detected!'), 'success');
-            } catch (error) {
-                showToast(error.message || getMapTranslation('toast.location.error', 'Could not get your location.'), 'error');
-            }
-        });
-
-        locateMeBtn.addEventListener('click', locateUser);
-        refreshBtn.addEventListener('click', refreshData);
-
-        // ── language change listener ──
-        document.addEventListener('langChanged', function(e) {
-            updateDynamicElements();
-            renderMessageList();
-            if (pendingLatLng) {
-                updateCoordsDisplay(pendingLatLng);
-            } else {
                 updateCoordsDisplay(null);
             }
-            updateStats();
-        });
 
-        // ── init ──
-        async function init() {
-            // Ensure global language manager has applied translations
-            if (window.globalLangManager) {
-                window.globalLangManager.applyLanguage(window.globalLangManager.currentLang);
+            // ── toast ──
+            let toastTimer = null;
+
+            function showToast(msg, type) {
+                toast.textContent = msg;
+                toast.className = 'toast';
+                if (type) toast.classList.add(type);
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3500);
             }
 
-            // If translations are already loaded, update dynamic elements now
-            if (window.globalLangManager && window.globalLangManager.translations && window.globalLangManager.translations['map']) {
-                updateDynamicElements();
-                renderMessageList();
-                updateStats();
-                if (pendingLatLng) updateCoordsDisplay(pendingLatLng);
-                else updateCoordsDisplay(null);
+            // ── geolocation (centering) ──
+            function locateUser() {
+                if (!navigator.geolocation) {
+                    showToast(t('map.toast.geolocation_not_supported', 'Geolocation is not supported.'), 'error');
+                    return;
+                }
+                showToast(t('map.toast.location.finding', 'Finding your location…'), '');
+                navigator.geolocation.getCurrentPosition(
+                    function(pos) {
+                        const lat = pos.coords.latitude;
+                        const lng = pos.coords.longitude;
+                        map.flyTo([lat, lng], 10, { duration: 1.5 });
+                        if (userMarker) map.removeLayer(userMarker);
+                        userMarker = L.marker([lat, lng], {
+                            icon: L.divIcon({
+                                html: '<span style="font-size:2.4rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,0.3));">📍</span>',
+                                className: '',
+                                iconSize: [30, 30],
+                                iconAnchor: [15, 30],
+                            })
+                        }).addTo(map);
+                        userMarker.bindPopup(t('map.locate.popup', '📍 You are here!'));
+                        setTimeout(() => userMarker.openPopup(), 300);
+                        showToast(t('map.toast.location_detected', '📍 Found you!'), 'success');
+                    },
+                    function(err) {
+                        let msg = t('map.toast.location.error', 'Could not get your location.');
+                        if (err.code === 1) msg = t('map.toast.permission_denied', 'Permission denied.');
+                        else if (err.code === 2) msg = t('map.toast.location_unavailable', 'Location unavailable.');
+                        else if (err.code === 3) msg = t('map.toast.location_timeout', 'Request timed out.');
+                        showToast(msg, 'error');
+                    }, { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+                );
             }
 
-            initMap();
-            await refreshData();
+            // ── event listeners ──
 
-            // Set default mood active
-            document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
+            moodOptions.forEach(el => {
+                el.addEventListener('click', function() {
+                    moodOptions.forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedMood = this.dataset.emoji;
+                });
+            });
 
-            // Keyboard shortcut
-            messageInput.addEventListener('keydown', function(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                    e.preventDefault();
-                    submitBtn.click();
+            submitBtn.addEventListener('click', async function() {
+                if (isSubmitting) return;
+
+                const name = userNameInput.value.trim();
+                const age = parseInt(userAgeInput.value.trim());
+                const text = messageInput.value.trim();
+                const location = userLocationInput.value.trim();
+
+                if (!name) {
+                    showToast(t('map.toast.enter_name', 'Please enter your name.'), 'error');
+                    userNameInput.focus();
+                    return;
+                }
+                if (!age || age < 1 || age > 120) {
+                    showToast(t('map.toast.enter_age', 'Please enter a valid age (1–120).'), 'error');
+                    userAgeInput.focus();
+                    return;
+                }
+                if (!text) {
+                    showToast(t('map.toast.enter_message', 'Please write a message.'), 'error');
+                    messageInput.focus();
+                    return;
+                }
+                if (!pendingLatLng) {
+                    showToast(t('map.toast.no_location', 'Location not detected. Please try again.'), 'error');
+                    return;
+                }
+
+                isSubmitting = true;
+                submitBtn.disabled = true;
+                const lat = pendingLatLng.lat;
+                const lng = pendingLatLng.lng;
+                try {
+                    await sendMessage(lat, lng, selectedMood, text, name, age, location);
+                    closeModal();
+                    await refreshData();
+                    showToast(t('map.toast.message_shared', '✨ Your message has been shared!'), 'success');
+                } catch (e) {
+                    // error already shown in sendMessage
+                } finally {
+                    isSubmitting = false;
+                    submitBtn.disabled = false;
                 }
             });
 
-            console.log('🌍 Global Mood Map loaded. Messages:', messages.length);
-        }
+            function handleClose() { closeModal(); }
+            cancelModalBtn.addEventListener('click', handleClose);
+            closeModalBtn.addEventListener('click', handleClose);
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
 
-        init();
-    });
-</script>
+            addMessageBtn.addEventListener('click', async function() {
+                try {
+                    showToast(t('map.toast.location.finding', 'Detecting your location…'), '');
+                    const coords = await getCurrentLocation();
+                    pendingLatLng = coords;
+                    updateCoordsDisplay(coords);
+                    map.flyTo([coords.lat, coords.lng], 10, { duration: 1.2 });
+                    openModal();
+                    showToast(t('map.toast.location_detected', '✅ Location detected!'), 'success');
+                } catch (error) {
+                    showToast(error.message || t('map.toast.location.error', 'Could not get your location.'), 'error');
+                }
+            });
+
+            locateMeBtn.addEventListener('click', locateUser);
+            refreshBtn.addEventListener('click', refreshData);
+
+            // ── language change listener ──
+            document.addEventListener('langChanged', function(e) {
+                applyMapTranslations();
+                renderMessageList();
+                if (pendingLatLng) {
+                    updateCoordsDisplay(pendingLatLng);
+                } else {
+                    updateCoordsDisplay(null);
+                }
+                updateStats();
+            });
+
+            // ── init ──
+            async function init() {
+                // Ensure translations are applied
+                if (window.globalLangManager) {
+                    // First, apply the language to all elements with id matching translations
+                    if (window.globalLangManager.applyLanguage) {
+                        window.globalLangManager.applyLanguage(window.globalLangManager.currentLang);
+                    }
+                    // Then apply our map-specific translations
+                    applyMapTranslations();
+                }
+
+                initMap();
+                await refreshData();
+
+                // Set default mood active
+                document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
+
+                // Keyboard shortcut
+                messageInput.addEventListener('keydown', function(e) {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        submitBtn.click();
+                    }
+                });
+
+                // Also listen for global language changes via the language manager
+                if (window.globalLangManager) {
+                    // Some language managers trigger a 'languageChanged' event
+                    document.addEventListener('languageChanged', function() {
+                        applyMapTranslations();
+                        renderMessageList();
+                        updateStats();
+                        if (pendingLatLng) updateCoordsDisplay(pendingLatLng);
+                        else updateCoordsDisplay(null);
+                    });
+                }
+
+                console.log('🌍 Global Mood Map loaded. Messages:', messages.length);
+            }
+
+            init();
+        });
+    </script>
 
 </body>
 </html>
