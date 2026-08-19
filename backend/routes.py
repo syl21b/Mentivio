@@ -1551,16 +1551,19 @@ def too_many_requests(error):
         'error': 'Too many requests',
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
-    
+
 # ================================
-# Mood Message endpoints (updated)
+# Mood Message endpoints (fixed)
 # ================================
 
 @app.route('/api/mood-messages', methods=['GET'])
 def get_mood_messages():
     """Retrieve all mood messages (limit 200)."""
+    conn = None
     try:
         conn = get_postgres_connection()
+        # Ensure autocommit to avoid idle transactions
+        conn.autocommit = True
         with conn.cursor() as cur:
             cur.execute('''
                 SELECT id, lat, lng, emoji, text, name, age, location_name, created_at
@@ -1569,7 +1572,6 @@ def get_mood_messages():
                 LIMIT 200
             ''')
             rows = cur.fetchall()
-        close_connection(conn)
         messages = []
         for row in rows:
             messages.append({
@@ -1587,15 +1589,19 @@ def get_mood_messages():
     except Exception as e:
         logger.error(f"Error fetching mood messages: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        if conn:
+            close_connection(conn)
 
 @app.route('/api/mood-messages', methods=['POST'])
 def save_mood_message():
     """Save a new mood message with name, age, and location."""
+    conn = None
     try:
         data = request.json
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-        
+
         lat = data.get('lat')
         lng = data.get('lng')
         emoji = data.get('emoji', '💬')
@@ -1603,7 +1609,7 @@ def save_mood_message():
         name = data.get('name', '').strip()
         age = data.get('age')
         location_name = data.get('location_name', '').strip()
-        
+
         if lat is None or lng is None:
             return jsonify({'error': 'Missing lat/lng'}), 400
         if not text:
@@ -1612,7 +1618,7 @@ def save_mood_message():
             return jsonify({'error': 'Name is required'}), 400
         if age is None:
             return jsonify({'error': 'Age is required'}), 400
-        
+
         # Validate coordinates
         try:
             lat = float(lat)
@@ -1621,7 +1627,7 @@ def save_mood_message():
                 raise ValueError
         except:
             return jsonify({'error': 'Invalid coordinates'}), 400
-        
+
         # Validate age
         try:
             age = int(age)
@@ -1629,10 +1635,10 @@ def save_mood_message():
                 raise ValueError
         except:
             return jsonify({'error': 'Invalid age (must be 1–120)'}), 400
-        
+
         import uuid
         msg_id = str(uuid.uuid4())
-        
+
         conn = get_postgres_connection()
         with conn.cursor() as cur:
             cur.execute('''
@@ -1640,8 +1646,7 @@ def save_mood_message():
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
             ''', (msg_id, lat, lng, emoji, text, name, age, location_name))
         conn.commit()
-        close_connection(conn)
-        
+
         return jsonify({
             'success': True,
             'id': msg_id,
@@ -1649,4 +1654,9 @@ def save_mood_message():
         }), 201
     except Exception as e:
         logger.error(f"Error saving mood message: {e}")
+        if conn:
+            conn.rollback()
         return jsonify({'error': str(e)}), 500
+    finally:
+        if conn:
+            close_connection(conn)
