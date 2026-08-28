@@ -32,7 +32,7 @@
     let currentPage = path.split('/').pop().replace('.html', '') || 'home';
     if (currentPage === 'index') currentPage = 'home';
     
-    // Create navbar HTML with INLINE STYLES - NO EXTERNAL DEPENDENCIES
+    // Create navbar HTML with UNIQUE IDs for each link
     const navbarHTML = `
         <style>
             /* RESET and FORCE full width */
@@ -205,27 +205,22 @@
                     padding: 0 20px !important;
                 }
                 
-                /* Reduce navbar height on mobile */
                 .mentivio-navbar {
-                    height: 60px !important;  /* Changed from 70px to 60px */
+                    height: 60px !important;
                 }
                 
-                /* Adjust body padding to match new navbar height */
                 body {
-                    padding-top: 60px !important;  /* Changed from 70px to 60px */
+                    padding-top: 60px !important;
                 }
                 
-                /* Hide desktop links on mobile */
                 .mentivio-desktop-links {
                     display: none !important;
                 }
                 
-                /* Show mobile controls */
                 .mentivio-mobile-controls {
                     display: flex !important;
                 }
                 
-                /* Show mobile menu button */
                 .mentivio-mobile-menu-btn {
                     display: flex !important;
                     align-items: center !important;
@@ -236,10 +231,9 @@
                     font-size: 1.2rem !important;
                 }
                 
-                /* MOBILE DROPDOWN MENU */
                 .mentivio-mobile-menu {
                     position: fixed !important;
-                    top: 60px !important;  /* Changed from 70px to 60px */
+                    top: 60px !important;
                     left: 0 !important;
                     right: 0 !important;
                     width: 100vw !important;
@@ -302,14 +296,13 @@
                 }
             }
             
-            /* VERY SMALL MOBILE */
             @media (max-width: 480px) {
                 .mentivio-navbar-inner {
                     padding: 0 16px !important;
                 }
                 
                 .mentivio-navbar {
-                    height: 55px !important;  /* Even more compact for very small screens */
+                    height: 55px !important;
                 }
                 
                 body {
@@ -337,18 +330,18 @@
                 <!-- Logo -->
                 <a href="/home.html" class="mentivio-logo">
                     <div style="font-size: 1.5rem;"><i class="fas fa-brain"></i></div>
-                    <div>${t.logo}</div>
+                    <div id="nav-logo-text">${t.logo}</div>
                 </a>
                 
                 <!-- Desktop Navigation -->
                 <div class="mentivio-desktop-links" id="mentivioDesktopLinks">
-                    <a href="/home.html" class="mentivio-nav-link ${currentPage === 'home' ? 'active' : ''}">${t.home}</a>
-                    <a href="/prediction.html" class="mentivio-nav-link ${currentPage === 'prediction' ? 'active' : ''}">${t.assessment}</a>
-                    <a href="/analogy.html" class="mentivio-nav-link ${currentPage === 'analogy' ? 'active' : ''}">${t.visualizer}</a>
-                    <a href="/map.html" class="mentivio-nav-link ${currentPage === 'map' ? 'active' : ''}">${t.map}</a>
-                    <a href="/resources.html" class="mentivio-nav-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
-                    <a href="/about.html" class="mentivio-nav-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
-                    <a href="/crisis-support.html" class="mentivio-nav-link crisis">${t.crisis}</a>
+                    <a href="/home.html" id="nav-home" class="mentivio-nav-link ${currentPage === 'home' ? 'active' : ''}">${t.home}</a>
+                    <a href="/prediction.html" id="nav-assessment" class="mentivio-nav-link ${currentPage === 'prediction' ? 'active' : ''}">${t.assessment}</a>
+                    <a href="/analogy.html" id="nav-visualizer" class="mentivio-nav-link ${currentPage === 'analogy' ? 'active' : ''}">${t.visualizer}</a>
+                    <a href="/map.html" id="nav-map" class="mentivio-nav-link ${currentPage === 'map' ? 'active' : ''}">${t.map}</a>
+                    <a href="/resources.html" id="nav-resources" class="mentivio-nav-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
+                    <a href="/about.html" id="nav-about" class="mentivio-nav-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
+                    <a href="/crisis-support.html" id="nav-crisis" class="mentivio-nav-link crisis">${t.crisis}</a>
 
                     <!-- Desktop Language Dropdown -->
                     <div class="mentivio-language-wrapper">
@@ -384,13 +377,13 @@
         
         <!-- Mobile Menu (hidden by default) -->
         <div class="mentivio-mobile-menu" id="mentivioMobileMenu">
-            <a href="/home.html" class="mentivio-mobile-link ${currentPage === 'home' ? 'active' : ''}">${t.home}</a>
-            <a href="/prediction.html" class="mentivio-mobile-link ${currentPage === 'prediction' ? 'active' : ''}">${t.assessment}</a>
-            <a href="/analogy.html" class="mentivio-mobile-link ${currentPage === 'analogy' ? 'active' : ''}">${t.visualizer}</a>
-            <a href="/map.html" class="mentivio-mobile-link ${currentPage === 'map' ? 'active' : ''}">${t.map}</a>
-            <a href="/resources.html" class="mentivio-mobile-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
-            <a href="/about.html" class="mentivio-mobile-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
-            <a href="/crisis-support.html" class="mentivio-mobile-link crisis">${t.crisis}</a>
+            <a href="/home.html" id="mobile-nav-home" class="mentivio-mobile-link ${currentPage === 'home' ? 'active' : ''}">${t.home}</a>
+            <a href="/prediction.html" id="mobile-nav-assessment" class="mentivio-mobile-link ${currentPage === 'prediction' ? 'active' : ''}">${t.assessment}</a>
+            <a href="/analogy.html" id="mobile-nav-visualizer" class="mentivio-mobile-link ${currentPage === 'analogy' ? 'active' : ''}">${t.visualizer}</a>
+            <a href="/map.html" id="mobile-nav-map" class="mentivio-mobile-link ${currentPage === 'map' ? 'active' : ''}">${t.map}</a>
+            <a href="/resources.html" id="mobile-nav-resources" class="mentivio-mobile-link ${currentPage.includes('resource') || currentPage === 'resources' ? 'active' : ''}">${t.resources}</a>
+            <a href="/about.html" id="mobile-nav-about" class="mentivio-mobile-link ${currentPage === 'about' ? 'active' : ''}">${t.about}</a>
+            <a href="/crisis-support.html" id="mobile-nav-crisis" class="mentivio-mobile-link crisis">${t.crisis}</a>
         </div>
     `;
     
@@ -449,7 +442,7 @@
         };
     });
 
-    // Language change event listener
+    // Language change event listener – update by ID
     document.addEventListener('langChanged', (e) => {
         const newLang = e.detail.lang;
         const t = translations[newLang] || translations.en;
@@ -460,21 +453,38 @@
             display.textContent = langCodes[newLang] || 'EN';
         });
 
-        // Update desktop links
-        const desktopLinks = document.querySelectorAll('.mentivio-nav-link');
-        const keys = ['home', 'assessment', 'visualizer', 'map', 'resources', 'about', 'crisis'];
-        desktopLinks.forEach((link, index) => {
-            if (keys[index]) link.textContent = t[keys[index]];
+        // Update desktop links by ID
+        const desktopMap = {
+            'nav-home': t.home,
+            'nav-assessment': t.assessment,
+            'nav-visualizer': t.visualizer,
+            'nav-map': t.map,
+            'nav-resources': t.resources,
+            'nav-about': t.about,
+            'nav-crisis': t.crisis
+        };
+        Object.keys(desktopMap).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = desktopMap[id];
         });
 
-        // Update mobile links
-        const mobileLinks = document.querySelectorAll('.mentivio-mobile-link');
-        mobileLinks.forEach((link, index) => {
-            if (keys[index]) link.textContent = t[keys[index]];
+        // Update mobile links by ID
+        const mobileMap = {
+            'mobile-nav-home': t.home,
+            'mobile-nav-assessment': t.assessment,
+            'mobile-nav-visualizer': t.visualizer,
+            'mobile-nav-map': t.map,
+            'mobile-nav-resources': t.resources,
+            'mobile-nav-about': t.about,
+            'mobile-nav-crisis': t.crisis
+        };
+        Object.keys(mobileMap).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = mobileMap[id];
         });
 
         // Update logo text
-        const logoText = document.querySelector('.mentivio-logo div:last-child');
+        const logoText = document.getElementById('nav-logo-text');
         if (logoText) logoText.textContent = t.logo;
     });
 

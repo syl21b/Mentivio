@@ -19,7 +19,7 @@
     </script>
 
     <style>
-        /* ── Root (matches site theme) ── */
+        /* ── same as before (unchanged) ── */
         :root {
             --primary: #4a6fa5;
             --primary-light: #88a4c7;
@@ -40,686 +40,258 @@
             --radius-sm: 8px;
             --transition: all 0.3s ease;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-            text-size-adjust: 100%;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { scroll-behavior:smooth; text-size-adjust:100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            background-color: var(--white);
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
+            line-height:1.6; color:var(--dark); background-color:var(--white);
+            overflow-x:hidden; -webkit-font-smoothing:antialiased;
         }
-
         .hero {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: clamp(3rem, 8vw, 5rem) clamp(1rem, 4vw, 2.5rem);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);
+            padding:clamp(3rem,8vw,5rem) clamp(1rem,4vw,2.5rem);
+            text-align:center; position:relative; overflow:hidden;
         }
         .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.02"><path fill="%234a6fa5" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
-            background-size: cover;
-            pointer-events: none;
+            content:''; position:absolute; inset:0;
+            background:url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" opacity="0.02"><path fill="%234a6fa5" d="M0,0V800H1200V0ZM600,400C600,267,709.5,160,850,160S1100,267,1100,400,990.5,640,850,640,600,533,600,400ZM100,400c0-133,109.5-240,250-240S600,267,600,400,490.5,640,350,640,100,533,100,400Z"/></svg>');
+            background-size:cover; pointer-events:none;
         }
-        .hero-content {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
+        .hero-content { max-width:800px; margin:0 auto; position:relative; z-index:1; }
         .hero h1 {
-            font-size: clamp(2rem, 5vw, 2.8rem);
-            color: var(--dark);
-            margin-bottom: 1rem;
-            font-weight: 300;
-            line-height: 1.2;
+            font-size:clamp(2rem,5vw,2.8rem); color:var(--dark); margin-bottom:1rem;
+            font-weight:300; line-height:1.2;
         }
-        .hero h1 strong {
-            font-weight: 600;
-            color: var(--primary);
-        }
+        .hero h1 strong { font-weight:600; color:var(--primary); }
         .hero p {
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
-            color: var(--gray);
-            max-width: 700px;
-            margin: 0 auto 1.5rem;
-            line-height: 1.6;
+            font-size:clamp(1rem,2.5vw,1.2rem); color:var(--gray);
+            max-width:700px; margin:0 auto 1.5rem; line-height:1.6;
         }
         .hero-stats {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 1.5rem;
+            display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;
         }
         .hero-stats .stat {
-            background: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 50px;
-            box-shadow: var(--shadow);
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid var(--gray-light);
+            background:white; padding:0.75rem 1.5rem; border-radius:50px;
+            box-shadow:var(--shadow); font-size:0.95rem; display:flex; align-items:center;
+            gap:0.5rem; border:1px solid var(--gray-light);
         }
-        .hero-stats .stat i {
-            color: var(--primary);
-        }
-        .hero-stats .stat strong {
-            font-weight: 600;
-            color: var(--dark);
-        }
+        .hero-stats .stat i { color:var(--primary); }
+        .hero-stats .stat strong { font-weight:600; color:var(--dark); }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 clamp(1rem, 3vw, 2rem);
-        }
-
+        .container { max-width:1400px; margin:0 auto; padding:0 clamp(1rem,3vw,2rem); }
         .map-wrapper {
-            position: relative;
-            margin: 1.5rem 0 2.5rem;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--gray-light);
-            background: #e8ecf0;
+            position:relative; margin:1.5rem 0 2.5rem; border-radius:var(--radius);
+            overflow:hidden; box-shadow:var(--shadow-lg); border:1px solid var(--gray-light);
+            background:#e8ecf0;
         }
-        #world-map {
-            width: 100%;
-            height: clamp(400px, 60vh, 600px);
-            background: #e8ecf0;
-        }
-
+        #world-map { width:100%; height:clamp(400px,60vh,600px); background:#e8ecf0; }
         .map-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            z-index: 500;
-            pointer-events: none;
+            position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+            display:flex; gap:0.75rem; flex-wrap:wrap; justify-content:center;
+            z-index:500; pointer-events:none;
         }
-        .map-controls>* {
-            pointer-events: auto;
-        }
-
+        .map-controls>* { pointer-events:auto; }
         .map-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.7rem 1.4rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 500;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: var(--shadow-lg);
-            font-family: inherit;
-            background: white;
-            color: var(--dark);
-            min-height: 44px;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
+            display:inline-flex; align-items:center; gap:0.5rem;
+            padding:0.7rem 1.4rem; border:none; border-radius:50px;
+            font-weight:500; font-size:0.9rem; cursor:pointer; transition:var(--transition);
+            box-shadow:var(--shadow-lg); font-family:inherit; background:white; color:var(--dark);
+            min-height:44px; -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none;
         }
-        .map-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        }
-        .map-btn:active {
-            transform: translateY(0);
-        }
-        .map-btn.primary {
-            background: var(--primary);
-            color: white;
-        }
-        .map-btn.primary:hover {
-            background: var(--primary-dark);
-        }
-        .map-btn.success {
-            background: var(--secondary);
-            color: white;
-        }
-        .map-btn.success:hover {
-            background: #6a8f4e;
-        }
-        .map-btn i {
-            font-size: 1rem;
-        }
+        .map-btn:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.15); }
+        .map-btn:active { transform:translateY(0); }
+        .map-btn.primary { background:var(--primary); color:white; }
+        .map-btn.primary:hover { background:var(--primary-dark); }
+        .map-btn.success { background:var(--secondary); color:white; }
+        .map-btn.success:hover { background:#6a8f4e; }
+        .map-btn i { font-size:1rem; }
 
         .map-legend {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 500;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            padding: 0.9rem 1.2rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--gray-light);
-            pointer-events: none;
-            min-width: 130px;
+            position:absolute; top:15px; right:15px; z-index:500;
+            background:rgba(255,255,255,0.92); backdrop-filter:blur(8px);
+            -webkit-backdrop-filter:blur(8px); padding:0.9rem 1.2rem;
+            border-radius:var(--radius); box-shadow:var(--shadow-lg);
+            border:1px solid var(--gray-light); pointer-events:none; min-width:130px;
         }
-        .map-legend>* {
-            pointer-events: auto;
-        }
+        .map-legend>* { pointer-events:auto; }
         .map-legend h4 {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
+            font-size:0.8rem; font-weight:600; color:var(--gray);
+            text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.5rem;
         }
         .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.85rem;
-            padding: 0.2rem 0;
-            color: var(--dark);
+            display:flex; align-items:center; gap:0.5rem; font-size:0.85rem;
+            padding:0.2rem 0; color:var(--dark);
         }
-        .legend-item .emoji {
-            font-size: 1.2rem;
-            width: 28px;
-            text-align: center;
-        }
+        .legend-item .emoji { font-size:1.2rem; width:28px; text-align:center; }
 
-        .message-list-section {
-            margin: 2rem 0 3rem;
-        }
-        .message-list-section .section-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
+        .message-list-section { margin:2rem 0 3rem; }
+        .message-list-section .section-header { text-align:center; margin-bottom:1.5rem; }
         .message-list-section .section-header h2 {
-            font-size: clamp(1.4rem, 3vw, 1.8rem);
-            font-weight: 300;
-            color: var(--dark);
+            font-size:clamp(1.4rem,3vw,1.8rem); font-weight:300; color:var(--dark);
         }
-        .message-list-section .section-header h2 strong {
-            font-weight: 600;
-            color: var(--primary);
-        }
+        .message-list-section .section-header h2 strong { font-weight:600; color:var(--primary); }
 
         .message-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 1rem;
+            display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem;
         }
-
         .message-card {
-            background: var(--white);
-            border-radius: var(--radius);
-            padding: 1rem 1.25rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--gray-light);
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            transition: var(--transition);
-            animation: fadeInUp 0.4s ease;
+            background:var(--white); border-radius:var(--radius); padding:1rem 1.25rem;
+            box-shadow:var(--shadow); border:1px solid var(--gray-light);
+            display:flex; align-items:flex-start; gap:0.75rem; transition:var(--transition);
+            animation:fadeInUp 0.4s ease;
         }
-        .message-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        .message-card .mood-emoji {
-            font-size: 1.6rem;
-            flex-shrink: 0;
-            width: 44px;
-            text-align: center;
-            line-height: 1;
-        }
-        .message-card .msg-body {
-            flex: 1;
-            min-width: 0;
-        }
-        .message-card .msg-body .text {
-            font-size: 0.95rem;
-            color: var(--dark);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-        }
-        .message-card .msg-body .user-info {
-            font-size: 0.8rem;
-            color: var(--primary);
-            font-weight: 500;
-            margin-top: 0.2rem;
-        }
+        .message-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-lg); }
+        .message-card .mood-emoji { font-size:1.6rem; flex-shrink:0; width:44px; text-align:center; line-height:1; }
+        .message-card .msg-body { flex:1; min-width:0; }
+        .message-card .msg-body .text { font-size:0.95rem; color:var(--dark); word-wrap:break-word; overflow-wrap:break-word; }
+        .message-card .msg-body .user-info { font-size:0.8rem; color:var(--primary); font-weight:500; margin-top:0.2rem; }
         .message-card .msg-body .meta {
-            font-size: 0.75rem;
-            color: var(--gray);
-            margin-top: 0.3rem;
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
+            font-size:0.75rem; color:var(--gray); margin-top:0.3rem;
+            display:flex; gap:0.75rem; flex-wrap:wrap;
         }
-        .message-card .msg-body .meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        .message-card .msg-body .meta i {
-            font-size: 0.65rem;
-        }
+        .message-card .msg-body .meta span { display:inline-flex; align-items:center; gap:0.25rem; }
+        .message-card .msg-body .meta i { font-size:0.65rem; }
 
         .empty-messages {
-            text-align: center;
-            padding: 3rem 1rem;
-            color: var(--gray);
+            text-align:center; padding:3rem 1rem; color:var(--gray);
         }
-        .empty-messages i {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            display: block;
-            opacity: 0.3;
-        }
+        .empty-messages i { font-size:2.5rem; margin-bottom:1rem; display:block; opacity:0.3; }
 
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            animation: fadeIn 0.25s ease;
+            position:fixed; inset:0; background:rgba(0,0,0,0.45);
+            backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+            z-index:2000; display:none; align-items:center; justify-content:center;
+            padding:1rem; animation:fadeIn 0.25s ease;
         }
-        .modal-overlay.open {
-            display: flex;
-        }
-
+        .modal-overlay.open { display:flex; }
         .modal-box {
-            background: white;
-            border-radius: var(--radius);
-            max-width: 480px;
-            width: 100%;
-            padding: 2rem 1.5rem 1.8rem;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-            animation: modalSlideIn 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
+            background:white; border-radius:var(--radius); max-width:480px;
+            width:100%; padding:2rem 1.5rem 1.8rem;
+            box-shadow:0 20px 60px rgba(0,0,0,0.25); animation:modalSlideIn 0.3s ease;
+            max-height:90vh; overflow-y:auto;
         }
         .modal-box .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
+            display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem;
         }
-        .modal-box .modal-header h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--dark);
-        }
+        .modal-box .modal-header h3 { font-size:1.25rem; font-weight:600; color:var(--dark); }
         .modal-box .modal-header .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.6rem;
-            cursor: pointer;
-            color: var(--gray);
-            transition: var(--transition);
-            padding: 0 0.25rem;
-            line-height: 1;
-            -webkit-tap-highlight-color: transparent;
+            background:none; border:none; font-size:1.6rem; cursor:pointer;
+            color:var(--gray); transition:var(--transition); padding:0 0.25rem; line-height:1;
+            -webkit-tap-highlight-color:transparent;
         }
-        .modal-box .modal-header .close-modal:hover {
-            color: var(--dark);
-        }
-
-        .modal-box .form-group {
-            margin-bottom: 1rem;
-        }
+        .modal-box .modal-header .close-modal:hover { color:var(--dark); }
+        .modal-box .form-group { margin-bottom:1rem; }
         .modal-box .form-group label {
-            display: block;
-            font-weight: 500;
-            font-size: 0.9rem;
-            color: var(--dark);
-            margin-bottom: 0.3rem;
+            display:block; font-weight:500; font-size:0.9rem; color:var(--dark); margin-bottom:0.3rem;
         }
         .modal-box .form-group input,
         .modal-box .form-group textarea {
-            width: 100%;
-            padding: 0.6rem 0.8rem;
-            border: 2px solid var(--gray-light);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: border-color 0.3s;
+            width:100%; padding:0.6rem 0.8rem; border:2px solid var(--gray-light);
+            border-radius:var(--radius-sm); font-size:0.95rem; font-family:inherit;
+            transition:border-color 0.3s;
         }
         .modal-box .form-group input:focus,
-        .modal-box .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .modal-box .form-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
-        .modal-box .location-hint {
-            font-size: 0.8rem;
-            color: var(--gray);
-            margin-top: 0.2rem;
-        }
+        .modal-box .form-group textarea:focus { outline:none; border-color:var(--primary); }
+        .modal-box .form-group textarea { resize:vertical; min-height:60px; }
+        .modal-box .location-hint { font-size:0.8rem; color:var(--gray); margin-top:0.2rem; }
         .modal-box .selected-coords {
-            background: var(--light);
-            padding: 0.3rem 0.6rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            color: var(--primary);
-            display: inline-block;
-            margin-top: 0.2rem;
-            width: 100%;
-            text-align: center;
+            background:var(--light); padding:0.3rem 0.6rem; border-radius:var(--radius-sm);
+            font-size:0.8rem; color:var(--primary); display:inline-block; margin-top:0.2rem;
+            width:100%; text-align:center;
         }
-
         .modal-box .mood-selector {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 1.2rem;
+            display:flex; gap:0.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.2rem;
         }
         .modal-box .mood-selector .mood-option {
-            font-size: 1.8rem;
-            padding: 0.4rem 0.6rem;
-            border: 2px solid transparent;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--light);
-            line-height: 1;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
-            min-width: 48px;
-            min-height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size:1.8rem; padding:0.4rem 0.6rem; border:2px solid transparent;
+            border-radius:var(--radius-sm); cursor:pointer; transition:var(--transition);
+            background:var(--light); line-height:1; -webkit-tap-highlight-color:transparent;
+            touch-action:manipulation; user-select:none; min-width:48px; min-height:48px;
+            display:flex; align-items:center; justify-content:center;
         }
-        .modal-box .mood-selector .mood-option:hover {
-            background: var(--gray-light);
-            transform: scale(1.05);
-        }
+        .modal-box .mood-selector .mood-option:hover { background:var(--gray-light); transform:scale(1.05); }
         .modal-box .mood-selector .mood-option.active {
-            border-color: var(--primary);
-            background: rgba(74, 111, 165, 0.1);
-            transform: scale(1.08);
+            border-color:var(--primary); background:rgba(74,111,165,0.1); transform:scale(1.08);
         }
-
         .modal-box .form-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.2rem;
-            justify-content: flex-end;
+            display:flex; gap:0.75rem; margin-top:1.2rem; justify-content:flex-end;
         }
         .modal-box .form-actions .btn {
-            padding: 0.7rem 1.6rem;
-            border: none;
-            border-radius: 50px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: inherit;
-            font-size: 0.95rem;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            user-select: none;
-            min-height: 44px;
+            padding:0.7rem 1.6rem; border:none; border-radius:50px; font-weight:500;
+            cursor:pointer; transition:var(--transition); font-family:inherit; font-size:0.95rem;
+            -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none;
+            min-height:44px;
         }
-        .modal-box .form-actions .btn-secondary {
-            background: var(--gray-light);
-            color: var(--dark);
-        }
-        .modal-box .form-actions .btn-secondary:hover {
-            background: #d5dce3;
-        }
-        .modal-box .form-actions .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-        .modal-box .form-actions .btn-primary:hover {
-            background: var(--primary-dark);
-        }
-        .modal-box .form-actions .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .modal-box .form-actions .btn-secondary { background:var(--gray-light); color:var(--dark); }
+        .modal-box .form-actions .btn-secondary:hover { background:#d5dce3; }
+        .modal-box .form-actions .btn-primary { background:var(--primary); color:white; }
+        .modal-box .form-actions .btn-primary:hover { background:var(--primary-dark); }
+        .modal-box .form-actions .btn:disabled { opacity:0.5; cursor:not-allowed; }
 
         .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--dark);
-            color: white;
-            padding: 0.8rem 1.8rem;
-            border-radius: 50px;
-            font-size: 0.95rem;
-            box-shadow: var(--shadow-lg);
-            z-index: 3000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
-            transform: translateX(-50%) translateY(10px);
-            white-space: nowrap;
-            max-width: 90%;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            position:fixed; bottom:30px; left:50%; transform:translateX(-50%);
+            background:var(--dark); color:white; padding:0.8rem 1.8rem;
+            border-radius:50px; font-size:0.95rem; box-shadow:var(--shadow-lg);
+            z-index:3000; opacity:0; visibility:hidden; transition:opacity 0.3s, visibility 0.3s, transform 0.3s;
+            transform:translateX(-50%) translateY(10px); white-space:nowrap; max-width:90%;
+            overflow:hidden; text-overflow:ellipsis;
         }
-        .toast.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-        }
-        .toast.success {
-            background: var(--secondary);
-        }
-        .toast.error {
-            background: var(--danger);
-        }
+        .toast.show { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); }
+        .toast.success { background:var(--secondary); }
+        .toast.error { background:var(--danger); }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
         @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity:0; transform:translateY(-30px) scale(0.96); }
+            to { opacity:1; transform:translateY(0) scale(1); }
         }
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity:0; transform:translateY(12px); }
+            to { opacity:1; transform:translateY(0); }
         }
-
-        .leaflet-popup-content-wrapper {
-            border-radius: var(--radius-sm) !important;
-            box-shadow: var(--shadow-lg) !important;
-        }
+        .leaflet-popup-content-wrapper { border-radius:var(--radius-sm)!important; box-shadow:var(--shadow-lg)!important; }
         .leaflet-popup-content {
-            font-family: inherit !important;
-            font-size: 0.9rem !important;
-            line-height: 1.5 !important;
-            min-width: 140px;
-            padding: 0.4rem 0.2rem !important;
+            font-family:inherit!important; font-size:0.9rem!important; line-height:1.5!important;
+            min-width:140px; padding:0.4rem 0.2rem!important;
         }
-        .leaflet-popup-content .popup-emoji {
-            font-size: 1.8rem;
-            display: block;
-            text-align: center;
-            margin-bottom: 0.2rem;
-        }
-        .leaflet-popup-content .popup-msg {
-            text-align: center;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        .leaflet-popup-content .popup-user {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--primary);
-            margin-top: 0.3rem;
-        }
-        .leaflet-popup-content .popup-meta {
-            font-size: 0.7rem;
-            color: var(--gray);
-            text-align: center;
-            margin-top: 0.2rem;
-        }
-
+        .leaflet-popup-content .popup-emoji { font-size:1.8rem; display:block; text-align:center; margin-bottom:0.2rem; }
+        .leaflet-popup-content .popup-msg { text-align:center; font-weight:500; color:var(--dark); }
+        .leaflet-popup-content .popup-user { text-align:center; font-size:0.75rem; color:var(--primary); margin-top:0.3rem; }
+        .leaflet-popup-content .popup-meta { font-size:0.7rem; color:var(--gray); text-align:center; margin-top:0.2rem; }
         .custom-marker {
-            background: transparent;
-            border: none;
-            font-size: 2rem;
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-            cursor: pointer;
-            transition: transform 0.2s;
-            line-height: 1;
-            -webkit-tap-highlight-color: transparent;
+            background:transparent; border:none; font-size:2rem;
+            text-shadow:0 2px 8px rgba(0,0,0,0.25); cursor:pointer; transition:transform 0.2s;
+            line-height:1; -webkit-tap-highlight-color:transparent;
         }
-        .custom-marker:hover {
-            transform: scale(1.2);
-        }
+        .custom-marker:hover { transform:scale(1.2); }
 
-        @media (max-width: 768px) {
-            .map-controls {
-                bottom: 12px;
-                gap: 0.5rem;
-            }
-            .map-controls .map-btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.8rem;
-                min-height: 40px;
-            }
-            .map-legend {
-                top: 10px;
-                right: 10px;
-                padding: 0.6rem 0.9rem;
-                min-width: 100px;
-            }
-            .map-legend h4 {
-                font-size: 0.7rem;
-            }
-            .legend-item {
-                font-size: 0.75rem;
-            }
-            .legend-item .emoji {
-                font-size: 1rem;
-                width: 24px;
-            }
-            .hero-stats {
-                gap: 0.75rem;
-            }
-            .hero-stats .stat {
-                padding: 0.5rem 1rem;
-                font-size: 0.8rem;
-            }
-            .message-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal-box {
-                padding: 1.5rem 1rem 1.4rem;
-            }
-            .modal-box .mood-selector .mood-option {
-                font-size: 1.5rem;
-                min-width: 42px;
-                min-height: 42px;
-                padding: 0.3rem 0.4rem;
-            }
+        @media (max-width:768px) {
+            .map-controls { bottom:12px; gap:0.5rem; }
+            .map-controls .map-btn { padding:0.5rem 1rem; font-size:0.8rem; min-height:40px; }
+            .map-legend { top:10px; right:10px; padding:0.6rem 0.9rem; min-width:100px; }
+            .map-legend h4 { font-size:0.7rem; }
+            .legend-item { font-size:0.75rem; }
+            .legend-item .emoji { font-size:1rem; width:24px; }
+            .hero-stats { gap:0.75rem; }
+            .hero-stats .stat { padding:0.5rem 1rem; font-size:0.8rem; }
+            .message-grid { grid-template-columns:1fr; }
+            .modal-box { padding:1.5rem 1rem 1.4rem; }
+            .modal-box .mood-selector .mood-option { font-size:1.5rem; min-width:42px; min-height:42px; padding:0.3rem 0.4rem; }
         }
-
-        @media (max-width: 480px) {
-            #world-map {
-                height: 300px;
-            }
-            .map-legend {
-                display: none;
-            }
-            .modal-box .form-actions {
-                flex-direction: column;
-            }
-            .modal-box .form-actions .btn {
-                width: 100%;
-                justify-content: center;
-            }
+        @media (max-width:480px) {
+            #world-map { height:300px; }
+            .map-legend { display:none; }
+            .modal-box .form-actions { flex-direction:column; }
+            .modal-box .form-actions .btn { width:100%; justify-content:center; }
         }
-
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                transition-duration: 0.01ms !important;
-            }
+        @media (prefers-reduced-motion:reduce) {
+            * { animation-duration:0.01ms!important; transition-duration:0.01ms!important; }
         }
-        button:focus,
-        input:focus,
-        textarea:focus {
-            outline: 2px solid var(--primary);
-            outline-offset: 2px;
-        }
-
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--light);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--primary-light);
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
-        }
+        button:focus, input:focus, textarea:focus { outline:2px solid var(--primary); outline-offset:2px; }
+        ::-webkit-scrollbar { width:6px; height:6px; }
+        ::-webkit-scrollbar-track { background:var(--light); }
+        ::-webkit-scrollbar-thumb { background:var(--primary-light); border-radius:3px; }
+        ::-webkit-scrollbar-thumb:hover { background:var(--primary); }
     </style>
 </head>
 <body>
@@ -727,8 +299,8 @@
     <!-- ─── HERO ─── -->
     <section class="hero">
         <div class="hero-content">
-            <h1 id="map.hero.title">🌍 <strong>Global Mood Map</strong></h1>
-            <p id="map.hero.subtitle">Share how you're feeling right now, and see messages from people around the world. Every pin is a real voice — let's support each other.</p>
+            <h1 id="hero.title">🌍 <strong>Global Mood Map</strong></h1>
+            <p id="hero.subtitle">Share how you're feeling right now, and see messages from people around the world. Every pin is a real voice — let's support each other.</p>
             <div class="hero-stats">
                 <div class="stat"><i class="fas fa-map-pin"></i> <strong id="stat.messages">0</strong> <span id="stat.messages.label">messages</span></div>
                 <div class="stat"><i class="fas fa-smile"></i> <strong id="stat.moods">0</strong> <span id="stat.moods.label">moods shared</span></div>
@@ -744,28 +316,28 @@
 
             <!-- Legend -->
             <div class="map-legend">
-                <h4 id="map.legend.title">Mood key</h4>
-                <div class="legend-item"><span class="emoji">😊</span> <span id="map.legend.happy">Happy</span></div>
-                <div class="legend-item"><span class="emoji">😌</span> <span id="map.legend.calm">Calm</span></div>
-                <div class="legend-item"><span class="emoji">😔</span> <span id="map.legend.sad">Sad</span></div>
-                <div class="legend-item"><span class="emoji">😢</span> <span id="map.legend.distressed">Distressed</span></div>
-                <div class="legend-item"><span class="emoji">😤</span> <span id="map.legend.frustrated">Frustrated</span></div>
-                <div class="legend-item"><span class="emoji">😰</span> <span id="map.legend.anxious">Anxious</span></div>
-                <div class="legend-item"><span class="emoji">🧠</span> <span id="map.legend.reflective">Reflective</span></div>
-                <div class="legend-item"><span class="emoji">💪</span> <span id="map.legend.strong">Strong</span></div>
-                <div class="legend-item"><span class="emoji">🕊️</span> <span id="map.legend.peaceful">Peaceful</span></div>
+                <h4 id="legend.title">Mood key</h4>
+                <div class="legend-item"><span class="emoji">😊</span> <span id="legend.happy">Happy</span></div>
+                <div class="legend-item"><span class="emoji">😌</span> <span id="legend.calm">Calm</span></div>
+                <div class="legend-item"><span class="emoji">😔</span> <span id="legend.sad">Sad</span></div>
+                <div class="legend-item"><span class="emoji">😢</span> <span id="legend.distressed">Distressed</span></div>
+                <div class="legend-item"><span class="emoji">😤</span> <span id="legend.frustrated">Frustrated</span></div>
+                <div class="legend-item"><span class="emoji">😰</span> <span id="legend.anxious">Anxious</span></div>
+                <div class="legend-item"><span class="emoji">🧠</span> <span id="legend.reflective">Reflective</span></div>
+                <div class="legend-item"><span class="emoji">💪</span> <span id="legend.strong">Strong</span></div>
+                <div class="legend-item"><span class="emoji">🕊️</span> <span id="legend.peaceful">Peaceful</span></div>
             </div>
 
             <!-- Controls -->
             <div class="map-controls">
                 <button class="map-btn primary" id="addMessageBtn">
-                    <i class="fas fa-plus-circle"></i> <span id="map.button.add">Add your message</span>
+                    <i class="fas fa-plus-circle"></i> <span id="button.add">Add your message</span>
                 </button>
                 <button class="map-btn success" id="locateMeBtn">
-                    <i class="fas fa-location-dot"></i> <span id="map.button.locate">Find me</span>
+                    <i class="fas fa-location-dot"></i> <span id="button.locate">Find me</span>
                 </button>
                 <button class="map-btn" id="refreshMapBtn">
-                    <i class="fas fa-rotate"></i> <span id="map.button.refresh">Refresh</span>
+                    <i class="fas fa-rotate"></i> <span id="button.refresh">Refresh</span>
                 </button>
             </div>
         </div>
@@ -773,12 +345,12 @@
         <!-- ─── MESSAGE LIST ─── -->
         <section class="message-list-section">
             <div class="section-header">
-                <h2 id="map.recent.title"><strong>Recent</strong> messages from around the world</h2>
+                <h2 id="recent.title"><strong>Recent</strong> messages from around the world</h2>
             </div>
             <div id="messageGrid" class="message-grid"></div>
             <div id="emptyState" class="empty-messages" style="display:none;">
                 <i class="fas fa-comment-slash"></i>
-                <p id="map.empty.message">No messages yet. Be the first to share your mood! 🌟</p>
+                <p id="empty.message">No messages yet. Be the first to share your mood! 🌟</p>
             </div>
         </section>
     </div>
@@ -787,23 +359,23 @@
     <div class="modal-overlay" id="messageModal">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 id="map.modal.title">💬 Share your mood</h3>
+                <h3 id="modal.title">💬 Share your mood</h3>
                 <button class="close-modal" id="closeModalBtn">&times;</button>
             </div>
 
             <!-- User info fields -->
             <div class="form-group">
-                <label id="map.modal.name.label" for="userName">Your name *</label>
+                <label id="modal.name.label" for="userName">Your name *</label>
                 <input type="text" id="userName" placeholder="e.g. Alex" required maxlength="50">
             </div>
             <div class="form-group">
-                <label id="map.modal.age.label" for="userAge">Your age *</label>
+                <label id="modal.age.label" for="userAge">Your age *</label>
                 <input type="number" id="userAge" placeholder="e.g. 28" min="1" max="120" required>
             </div>
             <div class="form-group">
-                <label id="map.modal.location.label" for="userLocation">Location (city/country)</label>
+                <label id="modal.location.label" for="userLocation">Location (city/country)</label>
                 <input type="text" id="userLocation" placeholder="e.g. London, UK" maxlength="100">
-                <div class="location-hint" id="map.modal.location.hint">Optional – helps others see where you are.</div>
+                <div class="location-hint" id="modal.location.hint">Optional – helps others see where you are.</div>
             </div>
 
             <!-- Mood selector -->
@@ -821,20 +393,20 @@
 
             <!-- Message text -->
             <div class="form-group">
-                <label id="map.modal.message.label" for="messageInput">Your message *</label>
+                <label id="modal.message.label" for="messageInput">Your message *</label>
                 <textarea id="messageInput" placeholder="What's on your mind?" maxlength="280" required></textarea>
             </div>
 
             <!-- Detected location (read-only) -->
             <div class="form-group">
-                <label id="map.modal.location.detected.label">Your detected location</label>
+                <label id="modal.location.detected.label">Your detected location</label>
                 <div id="selectedCoordsDisplay" class="selected-coords">Waiting for location…</div>
-                <div class="location-hint" id="map.modal.location.detected.hint">We use your device's GPS to place your pin accurately.</div>
+                <div class="location-hint" id="modal.location.detected.hint">We use your device's GPS to place your pin accurately.</div>
             </div>
 
             <div class="form-actions">
-                <button class="btn btn-secondary" id="cancelModalBtn"><span id="map.modal.cancel">Cancel</span></button>
-                <button class="btn btn-primary" id="submitMessageBtn"><span id="map.modal.share">Share</span> <i class="fas fa-paper-plane"></i></button>
+                <button class="btn btn-secondary" id="cancelModalBtn"><span id="modal.cancel">Cancel</span></button>
+                <button class="btn btn-primary" id="submitMessageBtn"><span id="modal.share">Share</span> <i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -846,25 +418,16 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // ── Helper: flat translation lookup (same as home.html) ──
+            // ── Translation helper for dynamic content only ──
             function t(key, fallback) {
-                if (window.globalLangManager) {
-                    const trans = window.globalLangManager.translations;
-                    if (trans && trans[key] !== undefined) {
-                        return trans[key];
-                    }
-                    // Also try without 'map.' prefix for backward compatibility
-                    if (key.startsWith('map.')) {
-                        const shortKey = key.replace(/^map\./, '');
-                        if (trans && trans[shortKey] !== undefined) {
-                            return trans[shortKey];
-                        }
-                    }
+                const g = window.globalLangManager;
+                if (g && g.translations && g.translations[key] !== undefined) {
+                    return g.translations[key];
                 }
                 return fallback || key;
             }
 
-            // ── state ──
+            // ── State ──
             let messages = [];
             let map = null;
             let markers = {};
@@ -873,7 +436,7 @@
             let isSubmitting = false;
             let pendingLatLng = null;
 
-            // ── DOM refs ──
+            // ── DOM refs for dynamic manipulation ──
             const messageGrid = document.getElementById('messageGrid');
             const emptyState = document.getElementById('emptyState');
             const modal = document.getElementById('messageModal');
@@ -893,11 +456,9 @@
             const statMessages = document.getElementById('stat.messages');
             const statMoods = document.getElementById('stat.moods');
             const statCountries = document.getElementById('stat.countries');
-            const statMessagesLabel = document.getElementById('stat.messages.label');
-            const statMoodsLabel = document.getElementById('stat.moods.label');
-            const statCountriesLabel = document.getElementById('stat.countries.label');
+            // Static labels (stat.messages.label, etc.) are handled by components.js – we do NOT touch them.
 
-            // ── API functions ──
+            // ── API ──
 
             async function fetchMessages() {
                 try {
@@ -933,10 +494,10 @@
                 }
             }
 
-            // ── update UI ──
+            // ── Dynamic UI updates ──
+
             function updateStats() {
-                const total = messages.length;
-                statMessages.textContent = total;
+                statMessages.textContent = messages.length;
                 const moodSet = new Set(messages.map(m => m.emoji));
                 statMoods.textContent = moodSet.size;
                 const countrySet = new Set();
@@ -945,22 +506,18 @@
                     countrySet.add(key);
                 });
                 statCountries.textContent = countrySet.size || 0;
-                // Update stat labels from translations
-                if (statMessagesLabel) statMessagesLabel.textContent = t('map.stat.messages.label', 'messages');
-                if (statMoodsLabel) statMoodsLabel.textContent = t('map.stat.moods.label', 'moods shared');
-                if (statCountriesLabel) statCountriesLabel.textContent = t('map.stat.countries.label', 'countries');
             }
 
             function renderMessageList() {
                 if (messages.length === 0) {
                     messageGrid.innerHTML = '';
                     emptyState.style.display = 'block';
-                    const emptyMsg = document.getElementById('map.empty.message');
-                    if (emptyMsg) emptyMsg.textContent = t('map.empty.message', 'No messages yet. Be the first to share your mood! 🌟');
+                    // The empty state message is static (id="empty.message") – components.js updates it.
                     return;
                 }
                 emptyState.style.display = 'none';
                 const sorted = [...messages].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                // Dynamic translations for card content
                 const anonymous = t('map.anonymous', 'Anonymous');
                 const recently = t('map.recently', 'recently');
                 const html = sorted.slice(0, 20).map(m => {
@@ -993,107 +550,16 @@
                 return div.innerHTML;
             }
 
-            // ── Apply translations to all elements with data-i18n or id matching map.* ──
-            function applyMapTranslations() {
-                if (!window.globalLangManager) return;
-                const trans = window.globalLangManager.translations;
-                if (!trans) return;
-
-                // Find all elements with id starting with "map." and update textContent
-                document.querySelectorAll('[id]').forEach(el => {
-                    const key = el.id;
-                    // Only update if key starts with "map." and translation exists
-                    if (key.startsWith('map.') && trans[key] !== undefined) {
-                        // Don't update inputs, textareas, or elements with dynamic content
-                        const tag = el.tagName;
-                        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
-                            // For placeholders, we handle separately via updateDynamicElements
-                            return;
-                        }
-                        // Only update if the element's current content is still the key or empty
-                        const current = el.textContent.trim();
-                        // For buttons/spans inside buttons, we might want to update the inner span
-                        if (tag === 'SPAN' && el.parentElement && el.parentElement.tagName === 'BUTTON') {
-                            // Update button text via the span
-                            const keyWithoutMap = key.replace(/^map\./, '');
-                            if (trans[key] !== undefined) {
-                                el.textContent = trans[key];
-                            }
-                        } else if (tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'H4' ||
-                            tag === 'P' || tag === 'SPAN' || tag === 'DIV' || tag === 'LABEL' ||
-                            tag === 'BUTTON' || tag === 'A' || tag === 'LI') {
-                            // Only update if content is the key itself (like "map.hero.title") or empty
-                            if (current === key || current === '' || current === '---' || current.startsWith('🌍') ||
-                                current.startsWith('💬')) {
-                                el.textContent = trans[key];
-                            }
-                        }
-                    }
-                });
-
-                // Update stat labels
-                updateStats();
-
-                // Update placeholders
-                const placeholderMap = {
-                    'userName': 'map.modal.name.placeholder',
-                    'userAge': 'map.modal.age.placeholder',
-                    'userLocation': 'map.modal.location.placeholder',
-                    'messageInput': 'map.modal.message.placeholder'
-                };
-                Object.entries(placeholderMap).forEach(([elId, key]) => {
-                    const el = document.getElementById(elId);
-                    if (el && trans[key] !== undefined) {
-                        el.placeholder = trans[key];
-                    }
-                });
-
-                // Update detected location label & hint
-                const detectedLabel = document.getElementById('map.modal.location.detected.label');
-                if (detectedLabel && trans['map.modal.location.detected.label'] !== undefined) {
-                    detectedLabel.textContent = trans['map.modal.location.detected.label'];
+            function updateCoordsDisplay(latlng) {
+                if (latlng) {
+                    selectedCoordsDisplay.textContent = `📍 ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
+                } else {
+                    selectedCoordsDisplay.textContent = t('map.modal.location.detected.waiting', 'Waiting for location…');
                 }
-                const detectedHint = document.getElementById('map.modal.location.detected.hint');
-                if (detectedHint && trans['map.modal.location.detected.hint'] !== undefined) {
-                    detectedHint.textContent = trans['map.modal.location.detected.hint'];
-                }
-
-                // Update the "recent" title
-                const recentTitle = document.getElementById('map.recent.title');
-                if (recentTitle && trans['map.recent.title'] !== undefined) {
-                    // Keep the <strong> wrapper
-                    const strong = recentTitle.querySelector('strong');
-                    if (strong) {
-                        const txt = trans['map.recent.title'];
-                        const parts = txt.split(/\*\*(.*?)\*\*/);
-                        if (parts.length >= 3) {
-                            strong.textContent = parts[1];
-                            const before = document.createTextNode(parts[0]);
-                            const after = document.createTextNode(parts[2] || '');
-                            recentTitle.innerHTML = '';
-                            recentTitle.appendChild(before);
-                            recentTitle.appendChild(strong);
-                            recentTitle.appendChild(after);
-                        } else {
-                            // Fallback: just set the whole text
-                            recentTitle.textContent = txt;
-                        }
-                    } else {
-                        recentTitle.textContent = trans['map.recent.title'];
-                    }
-                }
-
-                // Update empty message
-                const emptyMsg = document.getElementById('map.empty.message');
-                if (emptyMsg && trans['map.empty.message'] !== undefined) {
-                    emptyMsg.textContent = trans['map.empty.message'];
-                }
-
-                // Update toast messages in cache (they'll be used next time toast is shown)
-                // We handle toast messages via the t() function directly
             }
 
-            // ── map functions ──
+            // ── Map ──
+
             function initMap() {
                 map = L.map('world-map', {
                     center: [20, 0],
@@ -1103,23 +569,14 @@
                     attributionControl: true,
                 });
 
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; CartoDB',
-                    subdomains: 'abcd',
+                // ── FREE map tiles (OpenStreetMap) – no API key required ──
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19,
                 }).addTo(map);
 
                 setTimeout(() => map.invalidateSize(), 300);
                 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
-            }
-
-            function updateCoordsDisplay(latlng) {
-                if (latlng) {
-                    const label = t('map.modal.location.detected.label', 'Your detected location');
-                    selectedCoordsDisplay.textContent = `📍 ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}`;
-                } else {
-                    selectedCoordsDisplay.textContent = t('map.modal.location.detected.waiting', 'Waiting for location…');
-                }
             }
 
             function createMarker(data) {
@@ -1168,7 +625,8 @@
                 });
             }
 
-            // ── refresh data ──
+            // ── Refresh ──
+
             async function refreshData() {
                 try {
                     const msgs = await fetchMessages();
@@ -1182,7 +640,8 @@
                 }
             }
 
-            // ── geolocation helper ──
+            // ── Geolocation ──
+
             function getCurrentLocation() {
                 return new Promise((resolve, reject) => {
                     if (!navigator.geolocation) {
@@ -1206,44 +665,6 @@
                 });
             }
 
-            // ── modal ──
-            function openModal() {
-                messageInput.value = '';
-                userNameInput.value = '';
-                userAgeInput.value = '';
-                userLocationInput.value = '';
-                selectedMood = '😊';
-                moodOptions.forEach(el => el.classList.remove('active'));
-                document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
-                modal.classList.add('open');
-                document.body.style.overflow = 'hidden';
-                setTimeout(() => userNameInput.focus(), 100);
-            }
-
-            function closeModal() {
-                modal.classList.remove('open');
-                document.body.style.overflow = '';
-                pendingLatLng = null;
-                isSubmitting = false;
-                submitBtn.disabled = false;
-                updateCoordsDisplay(null);
-            }
-
-            // ── toast ──
-            let toastTimer = null;
-
-            function showToast(msg, type) {
-                toast.textContent = msg;
-                toast.className = 'toast';
-                if (type) toast.classList.add(type);
-                toast.classList.add('show');
-                clearTimeout(toastTimer);
-                toastTimer = setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3500);
-            }
-
-            // ── geolocation (centering) ──
             function locateUser() {
                 if (!navigator.geolocation) {
                     showToast(t('map.toast.geolocation_not_supported', 'Geolocation is not supported.'), 'error');
@@ -1278,7 +699,46 @@
                 );
             }
 
-            // ── event listeners ──
+            // ── Modal ──
+
+            function openModal() {
+                messageInput.value = '';
+                userNameInput.value = '';
+                userAgeInput.value = '';
+                userLocationInput.value = '';
+                selectedMood = '😊';
+                moodOptions.forEach(el => el.classList.remove('active'));
+                document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => userNameInput.focus(), 100);
+            }
+
+            function closeModal() {
+                modal.classList.remove('open');
+                document.body.style.overflow = '';
+                pendingLatLng = null;
+                isSubmitting = false;
+                submitBtn.disabled = false;
+                updateCoordsDisplay(null);
+            }
+
+            // ── Toast ──
+
+            let toastTimer = null;
+
+            function showToast(msg, type) {
+                toast.textContent = msg;
+                toast.className = 'toast';
+                if (type) toast.classList.add(type);
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3500);
+            }
+
+            // ── Event listeners ──
 
             moodOptions.forEach(el => {
                 el.addEventListener('click', function() {
@@ -1326,7 +786,7 @@
                     await refreshData();
                     showToast(t('map.toast.message_shared', '✨ Your message has been shared!'), 'success');
                 } catch (e) {
-                    // error already shown in sendMessage
+                    // error already shown
                 } finally {
                     isSubmitting = false;
                     submitBtn.disabled = false;
@@ -1360,34 +820,25 @@
             locateMeBtn.addEventListener('click', locateUser);
             refreshBtn.addEventListener('click', refreshData);
 
-            // ── language change listener ──
-            document.addEventListener('langChanged', function(e) {
-                applyMapTranslations();
+            // ── Language change handler ──
+            function onLanguageChanged() {
+                // Re‑render dynamic content that depends on translations
                 renderMessageList();
-                if (pendingLatLng) {
-                    updateCoordsDisplay(pendingLatLng);
-                } else {
-                    updateCoordsDisplay(null);
-                }
-                updateStats();
-            });
+                // Update coords display (if no location, the waiting text changes)
+                updateCoordsDisplay(pendingLatLng);
+                // Stats numbers are unchanged, but if we had labels they would be updated by components.js
+            }
 
-            // ── init ──
+            document.addEventListener('langChanged', onLanguageChanged);
+            document.addEventListener('languageChanged', onLanguageChanged);
+
+            // ── Init ──
             async function init() {
-                // Ensure translations are applied
-                if (window.globalLangManager) {
-                    // First, apply the language to all elements with id matching translations
-                    if (window.globalLangManager.applyLanguage) {
-                        window.globalLangManager.applyLanguage(window.globalLangManager.currentLang);
-                    }
-                    // Then apply our map-specific translations
-                    applyMapTranslations();
-                }
-
+                // All static translations are applied by components.js automatically.
                 initMap();
                 await refreshData();
 
-                // Set default mood active
+                // Set default mood
                 document.querySelector('.mood-option[data-emoji="😊"]').classList.add('active');
 
                 // Keyboard shortcut
@@ -1398,24 +849,11 @@
                     }
                 });
 
-                // Also listen for global language changes via the language manager
-                if (window.globalLangManager) {
-                    // Some language managers trigger a 'languageChanged' event
-                    document.addEventListener('languageChanged', function() {
-                        applyMapTranslations();
-                        renderMessageList();
-                        updateStats();
-                        if (pendingLatLng) updateCoordsDisplay(pendingLatLng);
-                        else updateCoordsDisplay(null);
-                    });
-                }
-
                 console.log('🌍 Global Mood Map loaded. Messages:', messages.length);
             }
 
             init();
         });
     </script>
-
 </body>
 </html>
