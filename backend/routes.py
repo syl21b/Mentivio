@@ -1636,27 +1636,43 @@ def save_mood_message():
         except:
             return jsonify({'error': 'Invalid age (must be 1–120)'}), 400
 
+        # Limit text length to avoid abuse
+        if len(text) > 500:
+            text = text[:500]
+
         import uuid
         msg_id = str(uuid.uuid4())
 
         conn = get_postgres_connection()
-        with conn.cursor() as cur:
-            cur.execute('''
-                INSERT INTO mood_messages (id, lat, lng, emoji, text, name, age, location_name, created_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
-            ''', (msg_id, lat, lng, emoji, text, name, age, location_name))
-        conn.commit()
+        try:
+            with conn.cursor() as cur:
+                cur.execute('''
+                    INSERT INTO mood_messages (id, lat, lng, emoji, text, name, age, location_name, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                ''', (msg_id, lat, lng, emoji, text, name, age, location_name))
+            conn.commit()
+        except Exception as db_err:
+            logger.error(f"DB insert failed: {db_err}")
+            # Try to rollback only if the connection is still alive
+            try:
+                if conn and not conn.closed:
+                    conn.rollback()
+            except Exception as rb_err:
+                logger.warning(f"Rollback failed (connection likely dead): {rb_err}")
+            return jsonify({'error': 'Database write failed, please try again'}), 503
 
         return jsonify({
             'success': True,
             'id': msg_id,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }), 201
+
     except Exception as e:
         logger.error(f"Error saving mood message: {e}")
-        if conn:
-            conn.rollback()
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Could not save message'}), 500
     finally:
         if conn:
-            close_connection(conn)
+            try:
+                close_connection(conn)
+            except Exception as close_err:
+                logger.warning(f"Error closing connection: {close_err}")
