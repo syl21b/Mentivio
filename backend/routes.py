@@ -1555,15 +1555,12 @@ def too_many_requests(error):
 # ================================
 # Mood Message endpoints (fixed)
 # ================================
-
 @app.route('/api/mood-messages', methods=['GET'])
 def get_mood_messages():
     """Retrieve all mood messages (limit 200)."""
     conn = None
     try:
         conn = get_postgres_connection()
-        # Ensure autocommit to avoid idle transactions
-        conn.autocommit = True
         with conn.cursor() as cur:
             cur.execute('''
                 SELECT id, lat, lng, emoji, text, name, age, location_name, created_at
@@ -1588,10 +1585,11 @@ def get_mood_messages():
         return jsonify(messages)
     except Exception as e:
         logger.error(f"Error fetching mood messages: {e}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': 'Could not load messages, please retry'}), 503
     finally:
         if conn:
             close_connection(conn)
+
 
 @app.route('/api/mood-messages', methods=['POST'])
 def save_mood_message():
@@ -1619,26 +1617,25 @@ def save_mood_message():
         if age is None:
             return jsonify({'error': 'Age is required'}), 400
 
-        # Validate coordinates
         try:
             lat = float(lat)
             lng = float(lng)
             if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
                 raise ValueError
-        except:
+        except Exception:
             return jsonify({'error': 'Invalid coordinates'}), 400
 
-        # Validate age
         try:
             age = int(age)
             if age < 1 or age > 120:
                 raise ValueError
-        except:
+        except Exception:
             return jsonify({'error': 'Invalid age (must be 1–120)'}), 400
 
-        # Limit text length to avoid abuse
-        if len(text) > 500:
-            text = text[:500]
+        # Limit lengths
+        text = text[:500]
+        name = name[:50]
+        location_name = location_name[:100]
 
         import uuid
         msg_id = str(uuid.uuid4())
@@ -1653,12 +1650,11 @@ def save_mood_message():
             conn.commit()
         except Exception as db_err:
             logger.error(f"DB insert failed: {db_err}")
-            # Try to rollback only if the connection is still alive
             try:
                 if conn and not conn.closed:
                     conn.rollback()
             except Exception as rb_err:
-                logger.warning(f"Rollback failed (connection likely dead): {rb_err}")
+                logger.warning(f"Rollback failed: {rb_err}")
             return jsonify({'error': 'Database write failed, please try again'}), 503
 
         return jsonify({
@@ -1666,13 +1662,9 @@ def save_mood_message():
             'id': msg_id,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }), 201
-
     except Exception as e:
         logger.error(f"Error saving mood message: {e}")
         return jsonify({'error': 'Could not save message'}), 500
     finally:
         if conn:
-            try:
-                close_connection(conn)
-            except Exception as close_err:
-                logger.warning(f"Error closing connection: {close_err}")
+            close_connection(conn)

@@ -15,37 +15,186 @@ logger = logging.getLogger(__name__)
 # Global connection pool
 connection_pool = None
 
+# Track which connections came from the pool (by id())
+_pooled_connection_ids = set()
+
+
 def init_connection_pool():
     """Initialize PostgreSQL connection pool."""
     global connection_pool
     try:
         from dotenv import load_dotenv
         load_dotenv()
-        
+
         database_url = os.environ.get('DATABASE_URL')
         if not database_url:
             logger.warning("DATABASE_URL not set, connection pool disabled")
             return
-        
+
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
-        
-        # Tuned pool: min 1, max 5 – adjust based on your concurrency needs
+
+        # Tuned pool: shorter timeout, health check on borrow
         connection_pool = psycopg_pool.ConnectionPool(
             database_url,
             min_size=1,
             max_size=5,
-            max_idle=300,          # 5 minutes idle timeout
-            max_lifetime=3600,      # 1 hour max connection lifetime
+            max_idle=120,           # 2 min idle timeout (Neon kills faster)
+            max_lifetime=600,        # 10 min max lifetime
+            timeout=5.0,             # only wait 5s for a connection, not 30
             open=False,
-            kwargs={"row_factory": dict_row}
+            kwargs={"row_factory": dict_row},
         )
-        connection_pool.open()
+        connection_pool.open(wait=True, timeout=10)
         logger.info("Database connection pool initialized")
     except Exception as e:
         logger.error(f"Failed to initialize connection pool: {e}")
         connection_pool = None
 
+
+def get_postgres_connection():
+    """Get a database connection from the pool, or fallback to direct connection."""
+    global connection_pool
+    if connection_pool:
+        try:
+            conn = connection_pool.getconn(timeout=5.0)
+            # Mark it as pooled
+            _pooled_connection_ids.add(id(conn))
+            return conn
+        except Exception as e:
+            logger.error(f"Failed to get connection from pool: {e}")
+            # fall through to direct connection
+    return get_postgres_connection_direct()
+
+
+def get_postgres_connection_direct():
+    """Direct connection (fallback if pool not available)."""
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
+            raise ValueError("DATABASE_URL environment variable is not set")
+
+        if database_url.startswith('postgres://'):
+            database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+        conn = psycopg.connect(database_url, row_factory=dict_row, connect_timeout=5)
+        return conn
+    except Exception as e:
+        logger.error(f"Direct PostgreSQL connection failed: {e}")
+        # SQLite fallback
+        try:
+            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+            conn = sqlite3.connect(sqlite_path)
+            conn.row_factory = sqlite3.Row
+            logger.info("SQLite fallback connection successful")
+            return conn
+        except Exception as sqlite_error:
+            logger.error(f"SQLite fallback also failed: {sqlite_error}")
+            raise e
+
+
+def close_connection(conn):
+    """Return connection to pool or close it. Safe to call on dead connections."""
+    global connection_pool
+
+    if conn is None:
+        return
+
+    try:
+        # Only return to the pool if THIS connection actually came from the pool
+        if connection_pool and id(conn) in _pooled_connection_ids:
+            _pooled_connection_ids.discard(id(conn))
+            try:
+                # Check if connection is still usable before returning
+                if conn.closed:
+                    logger.warning("Pooled connection was already closed; discarding")
+                    return
+                connection_pool.putconn(conn)
+                return
+            except Exception as e:
+                logger.warning(f"Failed to return connection to pool: {e}")
+                # Don't crash — just try to close it
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+                return
+
+        # Direct connection (not from pool) — just close it
+        try:
+            conn.close()
+        except Exception as e:
+            logger.warning(f"Error closing direct connection: {e}")
+    except Exception as e:
+        logger.warning(f"Unexpected error in close_connection: {e}")
+
+
+def init_database():
+    """Initialize database with required tables and indexes."""
+    conn = None
+    try:
+        conn = get_postgres_connection()
+        with conn.cursor() as cur:
+            # ------------------------------------------------------------
+            # MOOD MESSAGES TABLE
+            # ------------------------------------------------------------
+            cur.execute('''
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'mood_messages'
+                );
+            ''')
+            mood_table_exists = cur.fetchone()['exists']
+
+            if not mood_table_exists:
+                cur.execute('''
+                    CREATE TABLE mood_messages (
+                        id TEXT PRIMARY KEY,
+                        lat REAL NOT NULL,
+                        lng REAL NOT NULL,
+                        emoji TEXT NOT NULL,
+                        text TEXT NOT NULL,
+                        name TEXT,
+                        age INT,
+                        location_name TEXT,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                ''')
+                cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
+                logger.info("Created mood_messages table with name, age, location_name")
+            else:
+                for col in ['name', 'age', 'location_name']:
+                    cur.execute(f'''
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name = 'mood_messages' AND column_name = '{col}';
+                    ''')
+                    if not cur.fetchone():
+                        if col == 'age':
+                            cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} INT;')
+                        else:
+                            cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} TEXT;')
+                        logger.info(f"Added column {col} to mood_messages")
+
+                cur.execute('''
+                    SELECT 1 FROM pg_indexes 
+                    WHERE tablename = 'mood_messages' AND indexname = 'idx_mood_created';
+                ''')
+                if not cur.fetchone():
+                    cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
+                    logger.info("Added index idx_mood_created to mood_messages")
+
+        conn.commit()
+        logger.info("Database initialization completed successfully")
+    except Exception as e:
+        logger.warning(f"Database initialization warning: {e}")
+    finally:
+        if conn:
+            close_connection(conn)
+            
+            
 def get_postgres_connection():
     """Get a database connection from the pool, or fallback to direct connection."""
     global connection_pool
