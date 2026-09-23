@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 # Global connection pool
 connection_pool = None
 
-# Track which connections came from the pool (by id())
+# Track which connections came from the pool (by id()) so we only
+# return those back to the pool, and close direct connections normally.
 _pooled_connection_ids = set()
 
 
@@ -34,14 +35,17 @@ def init_connection_pool():
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-        # Tuned pool: shorter timeout, health check on borrow
+        # Tuned pool:
+        #  - short max_idle so Neon doesn't kill connections under us
+        #  - short max_lifetime to force periodic reconnects
+        #  - timeout=5 so getconn() fails fast instead of hanging 30s
         connection_pool = psycopg_pool.ConnectionPool(
             database_url,
             min_size=1,
             max_size=5,
-            max_idle=120,           # 2 min idle timeout (Neon kills faster)
-            max_lifetime=600,        # 10 min max lifetime
-            timeout=5.0,             # only wait 5s for a connection, not 30
+            max_idle=120,          # 2 min idle timeout
+            max_lifetime=600,      # 10 min max connection lifetime
+            timeout=5.0,           # wait max 5s for a connection
             open=False,
             kwargs={"row_factory": dict_row},
         )
@@ -55,15 +59,17 @@ def init_connection_pool():
 def get_postgres_connection():
     """Get a database connection from the pool, or fallback to direct connection."""
     global connection_pool
+
     if connection_pool:
         try:
             conn = connection_pool.getconn(timeout=5.0)
-            # Mark it as pooled
+            # Remember that THIS connection came from the pool
             _pooled_connection_ids.add(id(conn))
             return conn
         except Exception as e:
             logger.error(f"Failed to get connection from pool: {e}")
             # fall through to direct connection
+
     return get_postgres_connection_direct()
 
 
@@ -80,13 +86,20 @@ def get_postgres_connection_direct():
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-        conn = psycopg.connect(database_url, row_factory=dict_row, connect_timeout=5)
+        conn = psycopg.connect(
+            database_url,
+            row_factory=dict_row,
+            connect_timeout=5
+        )
         return conn
     except Exception as e:
         logger.error(f"Direct PostgreSQL connection failed: {e}")
         # SQLite fallback
         try:
-            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
+            sqlite_path = os.path.join(
+                os.path.dirname(os.path.abspath(__file__)),
+                'mental_health_assessments.db'
+            )
             conn = sqlite3.connect(sqlite_path)
             conn.row_factory = sqlite3.Row
             logger.info("SQLite fallback connection successful")
@@ -97,7 +110,12 @@ def get_postgres_connection_direct():
 
 
 def close_connection(conn):
-    """Return connection to pool or close it. Safe to call on dead connections."""
+    """
+    Return a pooled connection to the pool, or close a direct connection.
+
+    Safe to call on dead connections or on connections that didn't come
+    from the pool. Never raises.
+    """
     global connection_pool
 
     if conn is None:
@@ -107,16 +125,18 @@ def close_connection(conn):
         # Only return to the pool if THIS connection actually came from the pool
         if connection_pool and id(conn) in _pooled_connection_ids:
             _pooled_connection_ids.discard(id(conn))
+
             try:
-                # Check if connection is still usable before returning
-                if conn.closed:
+                # If connection is already closed, don't try to return it
+                if getattr(conn, 'closed', False):
                     logger.warning("Pooled connection was already closed; discarding")
                     return
+
                 connection_pool.putconn(conn)
                 return
             except Exception as e:
                 logger.warning(f"Failed to return connection to pool: {e}")
-                # Don't crash — just try to close it
+                # Try to close it so we don't leak
                 try:
                     conn.close()
                 except Exception:
@@ -128,6 +148,7 @@ def close_connection(conn):
             conn.close()
         except Exception as e:
             logger.warning(f"Error closing direct connection: {e}")
+
     except Exception as e:
         logger.warning(f"Unexpected error in close_connection: {e}")
 
@@ -139,7 +160,43 @@ def init_database():
         conn = get_postgres_connection()
         with conn.cursor() as cur:
             # ------------------------------------------------------------
-            # MOOD MESSAGES TABLE
+            # 1. ASSESSMENTS TABLE (unchanged — assumed to exist already)
+            # ------------------------------------------------------------
+            cur.execute('''
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables 
+                    WHERE table_name = 'assessments'
+                );
+            ''')
+            assessments_table_exists = cur.fetchone()['exists']
+
+            if not assessments_table_exists:
+                cur.execute('''
+                    CREATE TABLE assessments (
+                        id TEXT PRIMARY KEY,
+                        assessment_timestamp TEXT,
+                        report_timestamp TEXT,
+                        timezone TEXT,
+                        patient_name TEXT,
+                        patient_number TEXT,
+                        patient_age TEXT,
+                        patient_gender TEXT,
+                        primary_diagnosis TEXT,
+                        confidence REAL,
+                        confidence_percentage REAL,
+                        all_diagnoses_json JSONB,
+                        coded_responses_json JSONB,
+                        processing_details_json JSONB,
+                        technical_details_json JSONB,
+                        clinical_insights_json JSONB
+                    )
+                ''')
+                cur.execute('CREATE INDEX idx_assessments_patient ON assessments(patient_number)')
+                cur.execute('CREATE INDEX idx_assessments_report ON assessments(report_timestamp DESC)')
+                logger.info("Created assessments table")
+
+            # ------------------------------------------------------------
+            # 2. MOOD MESSAGES TABLE
             # ------------------------------------------------------------
             cur.execute('''
                 SELECT EXISTS (
@@ -166,6 +223,7 @@ def init_database():
                 cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
                 logger.info("Created mood_messages table with name, age, location_name")
             else:
+                # Add new columns if they don't exist (migrations)
                 for col in ['name', 'age', 'location_name']:
                     cur.execute(f'''
                         SELECT 1 FROM information_schema.columns 
@@ -178,119 +236,6 @@ def init_database():
                             cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} TEXT;')
                         logger.info(f"Added column {col} to mood_messages")
 
-                cur.execute('''
-                    SELECT 1 FROM pg_indexes 
-                    WHERE tablename = 'mood_messages' AND indexname = 'idx_mood_created';
-                ''')
-                if not cur.fetchone():
-                    cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
-                    logger.info("Added index idx_mood_created to mood_messages")
-
-        conn.commit()
-        logger.info("Database initialization completed successfully")
-    except Exception as e:
-        logger.warning(f"Database initialization warning: {e}")
-    finally:
-        if conn:
-            close_connection(conn)
-            
-            
-def get_postgres_connection():
-    """Get a database connection from the pool, or fallback to direct connection."""
-    global connection_pool
-    if connection_pool:
-        try:
-            return connection_pool.getconn()
-        except Exception as e:
-            logger.error(f"Failed to get connection from pool: {e}")
-            # fall through to direct connection
-    return get_postgres_connection_direct()
-
-def get_postgres_connection_direct():
-    """Direct connection (fallback if pool not available)."""
-    try:
-        from dotenv import load_dotenv
-        load_dotenv()
-        
-        database_url = os.environ.get('DATABASE_URL')
-        if not database_url:
-            raise ValueError("DATABASE_URL environment variable is not set")
-        
-        if database_url.startswith('postgres://'):
-            database_url = database_url.replace('postgres://', 'postgresql://', 1)
-        
-        conn = psycopg.connect(database_url, row_factory=dict_row)
-        return conn
-    except Exception as e:
-        logger.error(f"Direct PostgreSQL connection failed: {e}")
-        # SQLite fallback
-        try:
-            sqlite_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mental_health_assessments.db')
-            conn = sqlite3.connect(sqlite_path)
-            conn.row_factory = sqlite3.Row
-            logger.info("SQLite fallback connection successful")
-            return conn
-        except Exception as sqlite_error:
-            logger.error(f"SQLite fallback also failed: {sqlite_error}")
-            raise e
-
-def close_connection(conn):
-    """Return connection to pool or close it."""
-    global connection_pool
-    if connection_pool and hasattr(conn, 'pgconn'):  # it's a psycopg connection from pool
-        connection_pool.putconn(conn)
-    elif conn:
-        conn.close()
-
-def init_database():
-    """Initialize database with required tables and indexes."""
-    conn = None
-    try:
-        conn = get_postgres_connection()
-        with conn.cursor() as cur:
-            # ... (assessments table remains unchanged) ...
-
-            # ------------------------------------------------------------
-            # 2. MOOD MESSAGES TABLE (with name, age, location_name)
-            # ------------------------------------------------------------
-            cur.execute('''
-                SELECT EXISTS (
-                    SELECT FROM information_schema.tables 
-                    WHERE table_name = 'mood_messages'
-                );
-            ''')
-            mood_table_exists = cur.fetchone()['exists']
-            
-            if not mood_table_exists:
-                cur.execute('''
-                    CREATE TABLE mood_messages (
-                        id TEXT PRIMARY KEY,
-                        lat REAL NOT NULL,
-                        lng REAL NOT NULL,
-                        emoji TEXT NOT NULL,
-                        text TEXT NOT NULL,
-                        name TEXT,
-                        age INT,
-                        location_name TEXT,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                ''')
-                cur.execute('CREATE INDEX idx_mood_created ON mood_messages(created_at DESC)')
-                logger.info("Created mood_messages table with name, age, location_name")
-            else:
-                # Add new columns if they don't exist
-                for col in ['name', 'age', 'location_name']:
-                    cur.execute(f'''
-                        SELECT 1 FROM information_schema.columns 
-                        WHERE table_name = 'mood_messages' AND column_name = '{col}';
-                    ''')
-                    if not cur.fetchone():
-                        if col == 'age':
-                            cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} INT;')
-                        else:
-                            cur.execute(f'ALTER TABLE mood_messages ADD COLUMN {col} TEXT;')
-                        logger.info(f"Added column {col} to mood_messages")
-                
                 # Ensure index exists
                 cur.execute('''
                     SELECT 1 FROM pg_indexes 
@@ -304,10 +249,13 @@ def init_database():
         logger.info("Database initialization completed successfully")
     except Exception as e:
         logger.warning(f"Database initialization warning: {e}")
+        # Don't crash app startup on DB issues — Render will show a warning,
+        # and the first request will still try to connect.
     finally:
         if conn:
             close_connection(conn)
-            
+
+
 @lru_cache(maxsize=128)
 def convert_to_canonical_key(diagnosis_text: str) -> str:
     """Convert any diagnosis text back to its canonical key (cached)."""
@@ -327,8 +275,9 @@ def convert_to_canonical_key(diagnosis_text: str) -> str:
 
     return diagnosis_text
 
+
 def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
-    """Save assessment data to database"""
+    """Save assessment data to database."""
     conn = None
     try:
         logger.info(f"SAVING ASSESSMENT - ID: {assessment_data.get('id')}")
@@ -429,8 +378,6 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
             ))
 
         conn.commit()
-        close_connection(conn)
-
         logger.info(f"Successfully saved assessment {sanitized_data.get('id')}")
         return True
 
@@ -438,15 +385,19 @@ def save_assessment_to_db(assessment_data: Dict[str, Any]) -> bool:
         logger.error(f"Error saving to database: {e}")
         if conn:
             try:
-                conn.rollback()
-                close_connection(conn)
-            except:
+                if not getattr(conn, 'closed', False):
+                    conn.rollback()
+            except Exception:
                 pass
         return False
+    finally:
+        if conn:
+            close_connection(conn)
 
 
 def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[str, Any]]]:
     """Load assessments from database (explicit columns)."""
+    conn = None
     try:
         conn = get_postgres_connection()
 
@@ -474,8 +425,6 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
                 ''')
 
             rows = cur.fetchall()
-
-        close_connection(conn)
 
         assessments_by_patient: Dict[str, List[Dict[str, Any]]] = {}
 
@@ -544,10 +493,18 @@ def load_assessments_from_db(patient_number: str = None) -> Dict[str, List[Dict[
     except Exception as e:
         logger.error(f"Error loading from database: {e}")
         return {}
+    finally:
+        if conn:
+            close_connection(conn)
 
 
-def load_single_assessment_from_db(patient_name: str, patient_number: str, assessment_id: str) -> Optional[Dict[str, Any]]:
+def load_single_assessment_from_db(
+    patient_name: str,
+    patient_number: str,
+    assessment_id: str
+) -> Optional[Dict[str, Any]]:
     """Load a single specific assessment from database (explicit columns)."""
+    conn = None
     try:
         conn = get_postgres_connection()
 
@@ -565,11 +522,9 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
             row = cur.fetchone()
 
             if not row:
-                close_connection(conn)
                 return None
 
         row_dict = dict(row)
-        close_connection(conn)
 
         if not row_dict:
             return None
@@ -627,15 +582,15 @@ def load_single_assessment_from_db(patient_name: str, patient_number: str, asses
 
     except Exception as e:
         logger.error(f"Error loading single assessment from database: {e}")
-        try:
-            close_connection(conn)
-        except:
-            pass
         return None
+    finally:
+        if conn:
+            close_connection(conn)
 
 
 def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
-    """Delete assessment from database"""
+    """Delete assessment from database."""
+    conn = None
     try:
         conn = get_postgres_connection()
 
@@ -646,13 +601,21 @@ def delete_assessment_from_db(patient_number: str, assessment_id: str) -> bool:
             ''', (patient_number, assessment_id))
 
         conn.commit()
-        close_connection(conn)
-
         return True
 
     except Exception as e:
         logger.error(f"Error deleting from database: {e}")
+        if conn:
+            try:
+                if not getattr(conn, 'closed', False):
+                    conn.rollback()
+            except Exception:
+                pass
         return False
+    finally:
+        if conn:
+            close_connection(conn)
+
 
 def close_connection_pool():
     """Close the global connection pool (used at shutdown)."""
@@ -665,4 +628,4 @@ def close_connection_pool():
             logger.error(f"Error closing connection pool: {e}")
         finally:
             connection_pool = None
-
+            _pooled_connection_ids.clear()
