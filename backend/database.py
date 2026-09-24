@@ -20,6 +20,18 @@ connection_pool = None
 _pooled_connection_ids = set()
 
 
+def _check_connection(conn):
+    """Return True if the connection is still alive."""
+    try:
+        if getattr(conn, 'closed', False):
+            return False
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+        return True
+    except Exception:
+        return False
+
+
 def init_connection_pool():
     """Initialize PostgreSQL connection pool."""
     global connection_pool
@@ -35,21 +47,24 @@ def init_connection_pool():
         if database_url.startswith('postgres://'):
             database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
-        # Tuned pool:
-        #  - short max_idle so Neon doesn't kill connections under us
-        #  - short max_lifetime to force periodic reconnects
-        #  - timeout=5 so getconn() fails fast instead of hanging 30s
+        # Tuned pool for Render + Neon:
+        #  - min_size=0 so we don't hold idle connections that Neon will kill
+        #  - max_idle small so any idle connections get recycled
+        #  - check=... so the pool tests connections before handing them out
+        #  - timeout=10 so first request after cold start has time to reconnect
         connection_pool = psycopg_pool.ConnectionPool(
             database_url,
-            min_size=1,
+            min_size=0,
             max_size=5,
-            max_idle=120,          # 2 min idle timeout
-            max_lifetime=600,      # 10 min max connection lifetime
-            timeout=5.0,           # wait max 5s for a connection
+            max_idle=60,             # recycle idle connections after 1 min
+            max_lifetime=300,        # recycle any connection after 5 min
+            timeout=10.0,            # wait up to 10s for a connection
+            reconnect_timeout=30.0,  # retry reconnect for up to 30s
+            check=_check_connection,
             open=False,
             kwargs={"row_factory": dict_row},
         )
-        connection_pool.open(wait=True, timeout=10)
+        connection_pool.open(wait=False, timeout=5)
         logger.info("Database connection pool initialized")
     except Exception as e:
         logger.error(f"Failed to initialize connection pool: {e}")
@@ -62,7 +77,7 @@ def get_postgres_connection():
 
     if connection_pool:
         try:
-            conn = connection_pool.getconn(timeout=5.0)
+            conn = connection_pool.getconn(timeout=10.0)
             # Remember that THIS connection came from the pool
             _pooled_connection_ids.add(id(conn))
             return conn
@@ -89,7 +104,7 @@ def get_postgres_connection_direct():
         conn = psycopg.connect(
             database_url,
             row_factory=dict_row,
-            connect_timeout=5
+            connect_timeout=10
         )
         return conn
     except Exception as e:

@@ -57,7 +57,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ─── SVG ICON BASE ─── */
         .icon {
             width: 1em;
             height: 1em;
@@ -67,7 +66,6 @@
             flex-shrink: 0;
         }
 
-        /* ─── APP LAYOUT ─── */
         .app-container {
             display: flex;
             height: calc(100dvh - var(--navbar-height));
@@ -81,7 +79,6 @@
             }
         }
 
-        /* ─── SIDEBAR ─── */
         .sidebar {
             width: 380px;
             min-width: 380px;
@@ -195,7 +192,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* ─── CHAT LIST ─── */
         .chat-list {
             flex: 1;
             overflow-y: auto;
@@ -369,7 +365,6 @@
             height: 0.75em;
         }
 
-        /* ─── SIDEBAR FOOTER ─── */
         .sidebar-footer {
             padding: 1rem 1.5rem;
             padding-bottom: max(1rem, env(safe-area-inset-bottom));
@@ -446,7 +441,6 @@
             height: 1.1em;
         }
 
-        /* ─── MAIN MAP AREA ─── */
         .map-area {
             flex: 1;
             position: relative;
@@ -511,7 +505,6 @@
             box-shadow: 0 0 20px var(--emergency-glow);
         }
 
-        /* ─── LIVE BADGE ─── */
         .live-badge {
             position: absolute;
             top: max(2rem, env(safe-area-inset-top));
@@ -548,7 +541,6 @@
             z-index: 1;
         }
 
-        /* ─── MAP LEGEND (floating) ─── */
         .map-legend {
             position: absolute;
             bottom: 1rem;
@@ -607,7 +599,6 @@
             color: #ffb3ba;
         }
 
-        /* ─── MODAL ─── */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -779,7 +770,6 @@
             color: var(--accent);
         }
 
-        /* ─── MOOD SELECTOR ─── */
         .mood-selector {
             display: flex;
             gap: 0.5rem;
@@ -824,7 +814,6 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* ─── EMERGENCY BANNER ─── */
         .emergency-banner {
             background: linear-gradient(135deg, rgba(255, 71, 87, 0.15) 0%, rgba(255, 107, 129, 0.15) 100%);
             border: 1px solid rgba(255, 71, 87, 0.3);
@@ -874,7 +863,6 @@
             border-bottom: 1px solid var(--emergency);
         }
 
-        /* ─── MODAL ACTIONS ─── */
         .modal-actions {
             display: flex;
             gap: 0.75rem;
@@ -948,7 +936,6 @@
             transform: none;
         }
 
-        /* ─── TOAST ─── */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -1003,7 +990,6 @@
             color: var(--emergency);
         }
 
-        /* ─── EMPTY STATE ─── */
         .empty-state {
             display: flex;
             flex-direction: column;
@@ -1026,7 +1012,6 @@
             line-height: 1.5;
         }
 
-        /* ─── ANIMATIONS ─── */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -1046,7 +1031,6 @@
             animation: slideIn 0.3s ease forwards;
         }
 
-        /* ─── LEAFLET CUSTOM STYLES ─── */
         .leaflet-popup-content-wrapper {
             border-radius: var(--radius-sm) !important;
             box-shadow: var(--shadow-lg) !important;
@@ -1145,7 +1129,6 @@
             color: var(--text-primary) !important;
         }
 
-        /* ─── CUSTOM MARKERS ─── */
         .custom-marker-wrapper {
             background: transparent;
             border: none;
@@ -1228,7 +1211,12 @@
             border-top-color: var(--emergency);
         }
 
-        /* ─── LEAFLET ZOOM CONTROL ─── */
+        /* ─── MAP TILE DARK MODE (for OSM tiles) ─── */
+        /* If you use Esri dark tiles instead, remove this block. */
+        .leaflet-tile-pane {
+            filter: brightness(0.65) invert(1) contrast(2.5) hue-rotate(200deg) saturate(0.4) brightness(0.85);
+        }
+
         .leaflet-top.leaflet-left {
             top: max(1rem, env(safe-area-inset-top));
             left: 1rem;
@@ -1276,9 +1264,6 @@
             color: var(--accent-light) !important;
         }
 
-        /* ─── RESPONSIVE ─── */
-
-        /* Tablet / small laptop */
         @media (max-width: 900px) {
             .app-container {
                 flex-direction: column;
@@ -1286,7 +1271,6 @@
                 min-height: 0;
             }
 
-            /* Map takes most of the screen */
             .map-area {
                 flex: 1 1 auto;
                 min-height: 0;
@@ -1294,7 +1278,6 @@
                 order: 1;
             }
 
-            /* Sidebar becomes a bottom sheet */
             .sidebar {
                 position: relative;
                 width: 100%;
@@ -1377,7 +1360,6 @@
             }
         }
 
-        /* Phones */
         @media (max-width: 480px) {
             :root {
                 --navbar-height: 60px;
@@ -1464,7 +1446,6 @@
             outline-offset: 2px;
         }
 
-        /* ─── CUSTOM SCROLLBAR ─── */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -1483,7 +1464,6 @@
             background: var(--accent);
         }
 
-        /* ─── USER AVATAR COLORS ─── */
         .avatar-color-0 { background: linear-gradient(135deg, #6c5ce7, #a29bfe); }
         .avatar-color-1 { background: linear-gradient(135deg, #00b894, #55efc4); }
         .avatar-color-2 { background: linear-gradient(135deg, #e17055, #fab1a0); }
@@ -1562,10 +1542,8 @@
         </defs>
     </svg>
 
-    <!-- ─── APP LAYOUT ─── -->
     <div class="app-container">
 
-        <!-- ─── SIDEBAR ─── -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="app-brand">
@@ -1594,9 +1572,7 @@
                 </div>
             </div>
 
-            <div class="chat-list" id="chatList">
-                <!-- Chat items rendered here -->
-            </div>
+            <div class="chat-list" id="chatList"></div>
 
             <div class="sidebar-footer">
                 <button class="btn-compose" id="addMessageBtn">
@@ -1610,7 +1586,6 @@
             </div>
         </aside>
 
-        <!-- ─── MAP AREA ─── -->
         <main class="map-area">
             <div class="map-toolbar">
                 <button class="toolbar-btn emergency" id="emergencyMapBtn" title="Emergency Alert">
@@ -1651,7 +1626,7 @@
         </main>
     </div>
 
-    <!-- ─── MODAL (normal message) ─── -->
+    <!-- Normal Modal -->
     <div class="modal-overlay" id="messageModal">
         <div class="modal-box">
             <div class="modal-header">
@@ -1719,7 +1694,7 @@
         </div>
     </div>
 
-    <!-- ─── EMERGENCY MODAL ─── -->
+    <!-- Emergency Modal -->
     <div class="modal-overlay" id="emergencyModal">
         <div class="modal-box">
             <div class="modal-header emergency-header">
@@ -1786,14 +1761,11 @@
         </div>
     </div>
 
-    <!-- ─── TOAST ─── -->
     <div class="toast" id="toast"></div>
 
-    <!-- ─── SCRIPTS ─── -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // ── Translation helper ──
             function t(key, fallback) {
                 const g = window.globalLangManager;
                 if (g && g.translations && g.translations[key] !== undefined) {
@@ -1802,7 +1774,6 @@
                 return fallback || key;
             }
 
-            // ── State ──
             let messages = [];
             let map = null;
             let markers = {};
@@ -1815,9 +1786,8 @@
             let emergencyLatLng = null;
             let lastFetch = 0;
             let lastChatSignature = '';
-            const FETCH_TTL = 15000; // ms
+            const FETCH_TTL = 15000;
 
-            // ── DOM refs (normal modal) ──
             const chatList = document.getElementById('chatList');
             const modal = document.getElementById('messageModal');
             const moodOptions = document.querySelectorAll('.mood-option');
@@ -1838,7 +1808,6 @@
             const statCountries = document.getElementById('stat.countries');
             const onlineCount = document.getElementById('onlineCount');
 
-            // ── DOM refs (emergency modal) ──
             const emergencyBtn = document.getElementById('emergencyBtn');
             const emergencyMapBtn = document.getElementById('emergencyMapBtn');
             const emergencyModal = document.getElementById('emergencyModal');
@@ -1851,7 +1820,6 @@
             const cancelEmergencyBtn = document.getElementById('cancelEmergencyBtn');
             const closeEmergencyBtn = document.getElementById('closeEmergencyBtn');
 
-            // ── API ──
             async function fetchMessages(force = false) {
                 const now = Date.now();
                 if (!force && messages.length && (now - lastFetch) < FETCH_TTL) {
@@ -1894,7 +1862,6 @@
                 }
             }
 
-            // ── Dynamic UI updates ──
             function updateStats() {
                 statMessages.textContent = messages.length;
                 const moodSet = new Set(messages.map(m => m.emoji));
@@ -2023,7 +1990,6 @@
                 }
             }
 
-            // ── Map ──
             function initMap() {
                 map = L.map('world-map', {
                     center: [20, 0],
@@ -2035,17 +2001,17 @@
                     worldCopyJump: true,
                 });
 
-                // CARTO dark tiles – fast CDN, matches theme, no CSS filter needed
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
+                // OpenStreetMap standard tiles — free, no API key required.
+                // Dark-mode filter is applied via CSS on .leaflet-tile-pane.
+                L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     maxZoom: 19,
                     updateWhenIdle: true,
                     updateWhenZooming: false,
                     keepBuffer: 2,
+                    crossOrigin: true,
                 }).addTo(map);
 
-                // Ensure map sizes correctly on mobile (dynamic viewport / URL bar)
                 const invalidate = () => { if (map) map.invalidateSize(); };
                 requestAnimationFrame(invalidate);
                 setTimeout(invalidate, 200);
@@ -2119,7 +2085,6 @@
                         zIndexOffset: emerg ? 1000 : 0,
                     });
 
-                    // Lazy popup: build on click
                     marker._moodData = m;
                     marker.on('click', function() {
                         if (!this._popupBound) {
@@ -2135,7 +2100,6 @@
                 markersLayer.addTo(map);
             }
 
-            // ── Focus on message from chat list ──
             function focusOnMessage(id, lat, lng) {
                 activeChatId = id;
                 lastChatSignature = '';
@@ -2145,7 +2109,6 @@
                     map.flyTo([lat, lng], 8, { duration: 1 });
                     if (markers[id]) {
                         setTimeout(() => {
-                            // Ensure popup is bound before opening
                             const mk = markers[id];
                             if (mk && !mk._popupBound && mk._moodData) {
                                 mk.bindPopup(buildPopupContent(mk._moodData), { maxWidth: 260 });
@@ -2157,7 +2120,6 @@
                 }
             }
 
-            // ── Refresh ──
             async function refreshData(force = false) {
                 try {
                     await fetchMessages(force);
@@ -2172,7 +2134,6 @@
                 }
             }
 
-            // ── Geolocation ──
             function getCurrentLocation() {
                 return new Promise((resolve, reject) => {
                     if (!navigator.geolocation) {
@@ -2227,7 +2188,6 @@
                 );
             }
 
-            // ── Normal Modal ──
             function openModal() {
                 messageInput.value = '';
                 userNameInput.value = '';
@@ -2240,7 +2200,6 @@
                 document.body.style.overflow = 'hidden';
                 setTimeout(() => {
                     userNameInput.focus();
-                    // Force map invalidate since layout may shift
                     if (map) setTimeout(() => map.invalidateSize(), 150);
                 }, 100);
             }
@@ -2255,7 +2214,6 @@
                 if (map) setTimeout(() => map.invalidateSize(), 150);
             }
 
-            // ── Emergency Modal ──
             function openEmergencyModal() {
                 emergencyNameInput.value = '';
                 emergencyAgeInput.value = '';
@@ -2279,7 +2237,6 @@
                 if (map) setTimeout(() => map.invalidateSize(), 150);
             }
 
-            // ── Toast ──
             let toastTimer = null;
 
             function showToast(msg, type) {
@@ -2299,7 +2256,6 @@
                 }, 3500);
             }
 
-            // ── Event listeners ──
             moodOptions.forEach(el => {
                 el.addEventListener('click', function() {
                     moodOptions.forEach(o => o.classList.remove('active'));
@@ -2353,7 +2309,6 @@
                 }
             });
 
-            // ── Emergency submit ──
             submitEmergencyBtn.addEventListener('click', async function() {
                 if (isSubmitting) return;
 
@@ -2410,14 +2365,12 @@
                 }
             });
 
-            // ── Close handlers (normal) ──
             cancelModalBtn.addEventListener('click', closeModal);
             closeModalBtn.addEventListener('click', closeModal);
             modal.addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
 
-            // ── Close handlers (emergency) ──
             cancelEmergencyBtn.addEventListener('click', closeEmergencyModal);
             closeEmergencyBtn.addEventListener('click', closeEmergencyModal);
             emergencyModal.addEventListener('click', function(e) {
@@ -2431,7 +2384,6 @@
                 }
             });
 
-            // ── Open normal compose ──
             addMessageBtn.addEventListener('click', async function() {
                 try {
                     showToast(t('map.toast.location.finding', 'Detecting your location…'), '');
@@ -2446,7 +2398,6 @@
                 }
             });
 
-            // ── Open emergency modal (from sidebar) ──
             emergencyBtn.addEventListener('click', async function() {
                 openEmergencyModal();
                 try {
@@ -2464,7 +2415,6 @@
                 }
             });
 
-            // ── Open emergency modal (from map toolbar) ──
             emergencyMapBtn.addEventListener('click', function() {
                 emergencyBtn.click();
             });
@@ -2472,7 +2422,6 @@
             locateMeBtn.addEventListener('click', locateUser);
             refreshBtn.addEventListener('click', () => refreshData(true));
 
-            // ── Language change handler ──
             function onLanguageChanged() {
                 lastChatSignature = '';
                 renderChatList();
@@ -2483,10 +2432,8 @@
             document.addEventListener('langChanged', onLanguageChanged);
             document.addEventListener('languageChanged', onLanguageChanged);
 
-            // ── Init ──
             async function init() {
                 initMap();
-                // Fire and forget – don't block map render
                 refreshData().then(() => {
                     console.log('Mood map ready:', messages.length, 'messages');
                 });

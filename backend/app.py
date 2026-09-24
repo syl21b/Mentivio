@@ -8,6 +8,7 @@ import pandas as pd
 import pickle
 import joblib
 import time
+import threading
 from typing import Dict, List, Tuple, Optional, Any
 import atexit
 
@@ -576,6 +577,18 @@ def validate_api_input():
 # Initialize database and connection pool (but NOT models)
 init_database()
 init_connection_pool()
+
+# Warm up the DB pool in the background so the first real request is fast
+def _warm_pool():
+    try:
+        conn = get_postgres_connection()
+        if conn:
+            close_connection(conn)
+            logger.info("DB pool warmed up")
+    except Exception as e:
+        logger.warning(f"Pool warmup failed (non-fatal): {e}")
+
+threading.Thread(target=_warm_pool, daemon=True).start()
 
 # Register shutdown handler
 atexit.register(close_connection_pool)

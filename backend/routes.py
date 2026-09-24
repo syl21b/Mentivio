@@ -845,7 +845,7 @@ def predict():
                     'min_confidence': float(np.min(probabilities[0]) * 100),
                     'max_confidence': float(np.max(probabilities[0]) * 100),
                     'mean_confidence': float(np.mean(probabilities[0]) * 100),
-                    'confidence_range': float(np.max(probabilities[0]) * 100 - float(np.min(probabilities[0]) * 100))
+                    'confidence_range': float(np.max(probabilities[0]) * 100 - np.min(probabilities[0]) * 100)
                 }
             }
         }
@@ -1557,7 +1557,7 @@ def too_many_requests(error):
 
 
 # ================================
-# Mood Message endpoints (cached + fast)
+# Mood Message endpoints (cached + retry)
 # ================================
 @app.route('/api/mood-messages', methods=['GET'])
 def get_mood_messages():
@@ -1565,52 +1565,62 @@ def get_mood_messages():
     global _mood_cache
     now = time.time()
 
-    # Serve from cache if fresh
     if _mood_cache["data"] is not None and (now - _mood_cache["ts"]) < _MOOD_CACHE_TTL:
         resp = jsonify(_mood_cache["data"])
         resp.headers['Cache-Control'] = 'public, max-age=10'
         resp.headers['X-Cache'] = 'HIT'
         return resp
 
-    conn = None
-    try:
-        conn = get_postgres_connection()
-        with conn.cursor() as cur:
-            cur.execute('''
-                SELECT id, lat, lng, emoji, text, name, age, location_name, created_at
-                FROM mood_messages
-                ORDER BY created_at DESC
-                LIMIT 200
-            ''')
-            rows = cur.fetchall()
+    messages = None
+    last_error = None
 
-        messages = []
-        for row in rows:
-            messages.append({
-                'id': row['id'],
-                'lat': float(row['lat']),
-                'lng': float(row['lng']),
-                'emoji': row['emoji'],
-                'text': row['text'],
-                'name': row['name'],
-                'age': row['age'],
-                'location_name': row['location_name'],
-                'timestamp': row['created_at'].isoformat() if row['created_at'] else None
-            })
+    # Try up to 2 times (stale connection is the most common transient failure)
+    for attempt in range(2):
+        conn = None
+        try:
+            conn = get_postgres_connection()
+            with conn.cursor() as cur:
+                cur.execute('''
+                    SELECT id, lat, lng, emoji, text, name, age, location_name, created_at
+                    FROM mood_messages
+                    ORDER BY created_at DESC
+                    LIMIT 200
+                ''')
+                rows = cur.fetchall()
 
-        _mood_cache["data"] = messages
-        _mood_cache["ts"] = now
+            messages = []
+            for row in rows:
+                messages.append({
+                    'id': row['id'],
+                    'lat': float(row['lat']),
+                    'lng': float(row['lng']),
+                    'emoji': row['emoji'],
+                    'text': row['text'],
+                    'name': row['name'],
+                    'age': row['age'],
+                    'location_name': row['location_name'],
+                    'timestamp': row['created_at'].isoformat() if row['created_at'] else None
+                })
+            break  # success
+        except Exception as e:
+            last_error = e
+            logger.warning(f"Mood messages fetch attempt {attempt + 1} failed: {e}")
+            time.sleep(0.3)
+        finally:
+            if conn:
+                close_connection(conn)
 
-        resp = jsonify(messages)
-        resp.headers['Cache-Control'] = 'public, max-age=10'
-        resp.headers['X-Cache'] = 'MISS'
-        return resp
-    except Exception as e:
-        logger.error(f"Error fetching mood messages: {e}")
+    if messages is None:
+        logger.error(f"Error fetching mood messages after retry: {last_error}")
         return jsonify({'error': 'Could not load messages, please retry'}), 503
-    finally:
-        if conn:
-            close_connection(conn)
+
+    _mood_cache["data"] = messages
+    _mood_cache["ts"] = now
+
+    resp = jsonify(messages)
+    resp.headers['Cache-Control'] = 'public, max-age=10'
+    resp.headers['X-Cache'] = 'MISS'
+    return resp
 
 
 @app.route('/api/mood-messages', methods=['POST'])
