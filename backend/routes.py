@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import json
 import uuid
+import time
 from datetime import datetime, timezone, timedelta
 import pytz
 import re
@@ -27,6 +28,13 @@ from reportlab.pdfgen import canvas
 from typing import Dict, List, Tuple, Any, Optional
 
 logger = logging.getLogger(__name__)
+
+
+# ================================
+# Mood message in-memory cache
+# ================================
+_mood_cache = {"data": None, "ts": 0}
+_MOOD_CACHE_TTL = 10  # seconds
 
 
 # Helper functions
@@ -258,7 +266,7 @@ def enhance_assessment_data(assessment: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # ================================
-# NEW: AI Report helpers
+# AI Report helpers
 # ================================
 
 def format_responses_for_prompt(coded_responses):
@@ -329,17 +337,15 @@ def call_gemini_for_report(prompt):
         return "Unable to generate AI report at this time."
 
 # ================================
-# NEW: Warmup and readiness endpoints
+# Warmup and readiness endpoints
 # ================================
 
 @app.route('/api/warmup', methods=['GET'])
 def warmup():
     """Trigger model loading and DB connection to warm up the instance."""
     try:
-        # Force a DB connection
         conn = get_postgres_connection()
         close_connection(conn)
-        # Force model loading
         model_pkg = get_model_package()
         scaler = get_scaler()
         label_enc = get_label_encoder()
@@ -368,7 +374,7 @@ def ready():
         return jsonify({'status': 'loading models'}), 503
 
 # ================================
-# NEW: AI Report endpoint
+# AI Report endpoint
 # ================================
 
 @app.route('/api/ai-report', methods=['POST'])
@@ -385,12 +391,10 @@ def ai_report():
         if not coded_responses:
             return jsonify({'error': 'No responses provided'}), 400
 
-        # Validate the coded responses (same as in predict)
         coded_valid, coded_msg = SecurityUtils.validate_coded_responses(coded_responses)
         if not coded_valid:
             return jsonify({'error': f'Invalid response format: {coded_msg}'}), 400
 
-        # Generate the AI narrative
         human_readable = format_responses_for_prompt(coded_responses)
         prompt = create_ai_report_prompt(patient_info, human_readable, language)
         ai_text = call_gemini_for_report(prompt)
@@ -645,7 +649,6 @@ def predict():
         logger.info(f"Predict - Coded responses: {coded_responses}")
         logger.info(f"Predict - Converted to English: {user_responses}")
 
-        # Lazy-load model components
         model_pkg = get_model_package()
         scaler = get_scaler()
         label_enc = get_label_encoder()
@@ -842,7 +845,7 @@ def predict():
                     'min_confidence': float(np.min(probabilities[0]) * 100),
                     'max_confidence': float(np.max(probabilities[0]) * 100),
                     'mean_confidence': float(np.mean(probabilities[0]) * 100),
-                    'confidence_range': float(np.max(probabilities[0]) * 100 - np.min(probabilities[0]) * 100)
+                    'confidence_range': float(np.max(probabilities[0]) * 100 - float(np.min(probabilities[0]) * 100))
                 }
             }
         }
@@ -1552,12 +1555,23 @@ def too_many_requests(error):
         'retry_after': SecurityConfig.RATE_LIMIT_WINDOW
     }), 429
 
+
 # ================================
-# Mood Message endpoints (fixed)
+# Mood Message endpoints (cached + fast)
 # ================================
 @app.route('/api/mood-messages', methods=['GET'])
 def get_mood_messages():
-    """Retrieve all mood messages (limit 200)."""
+    """Retrieve all mood messages (limit 200) with a short server-side cache."""
+    global _mood_cache
+    now = time.time()
+
+    # Serve from cache if fresh
+    if _mood_cache["data"] is not None and (now - _mood_cache["ts"]) < _MOOD_CACHE_TTL:
+        resp = jsonify(_mood_cache["data"])
+        resp.headers['Cache-Control'] = 'public, max-age=10'
+        resp.headers['X-Cache'] = 'HIT'
+        return resp
+
     conn = None
     try:
         conn = get_postgres_connection()
@@ -1569,6 +1583,7 @@ def get_mood_messages():
                 LIMIT 200
             ''')
             rows = cur.fetchall()
+
         messages = []
         for row in rows:
             messages.append({
@@ -1582,7 +1597,14 @@ def get_mood_messages():
                 'location_name': row['location_name'],
                 'timestamp': row['created_at'].isoformat() if row['created_at'] else None
             })
-        return jsonify(messages)
+
+        _mood_cache["data"] = messages
+        _mood_cache["ts"] = now
+
+        resp = jsonify(messages)
+        resp.headers['Cache-Control'] = 'public, max-age=10'
+        resp.headers['X-Cache'] = 'MISS'
+        return resp
     except Exception as e:
         logger.error(f"Error fetching mood messages: {e}")
         return jsonify({'error': 'Could not load messages, please retry'}), 503
@@ -1594,6 +1616,7 @@ def get_mood_messages():
 @app.route('/api/mood-messages', methods=['POST'])
 def save_mood_message():
     """Save a new mood message with name, age, and location."""
+    global _mood_cache
     conn = None
     try:
         data = request.json
@@ -1632,7 +1655,6 @@ def save_mood_message():
         except Exception:
             return jsonify({'error': 'Invalid age (must be 1–120)'}), 400
 
-        # Limit lengths
         text = text[:500]
         name = name[:50]
         location_name = location_name[:100]
@@ -1656,6 +1678,10 @@ def save_mood_message():
             except Exception as rb_err:
                 logger.warning(f"Rollback failed: {rb_err}")
             return jsonify({'error': 'Database write failed, please try again'}), 503
+
+        # Invalidate cache so next GET sees the new message instantly
+        _mood_cache["data"] = None
+        _mood_cache["ts"] = 0
 
         return jsonify({
             'success': True,
